@@ -8,8 +8,8 @@ namespace HermesProxy.Crypto
 {
     public class ARC4
     {
-        private readonly byte[] state;
-        private byte x, y;
+        readonly byte[] state;
+        byte x, y;
 
         public ARC4(byte[] key)
         {

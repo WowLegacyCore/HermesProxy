@@ -11,11 +11,12 @@ namespace HermesProxy
 {
     public class AuthClient
     {
-        private Socket _clientSocket;
-        private bool? _isSuccessful = null;
-        private byte[] _passwordHash;
-        private BigInteger _key;
-        private byte[] _m2;
+        Socket _clientSocket;
+        bool? _isSuccessful = null;
+        byte[] _passwordHash;
+        BigInteger _key;
+        byte[] _m2;
+
         public List<RealmInfo> RealmList = null;
 
         public bool ConnectToAuthServer()

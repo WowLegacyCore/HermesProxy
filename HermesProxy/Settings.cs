@@ -8,7 +8,7 @@ namespace HermesProxy
 {
     public static class Settings
     {
-        private static readonly Configuration Conf = new Configuration();
+        static readonly Configuration Conf = new Configuration();
         public static readonly ClientVersionBuild ClientBuild = Conf.GetEnum("ClientBuild", ClientVersionBuild.V2_5_2_40892);
         public static readonly ClientVersionBuild ServerBuild = Conf.GetEnum("ServerBuild", ClientVersionBuild.V2_4_3_8606);
         public static byte GetServerExpansionVersion()
