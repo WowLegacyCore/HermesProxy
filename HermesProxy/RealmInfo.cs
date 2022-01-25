@@ -25,7 +25,7 @@ namespace HermesProxy
 
         public override string ToString()
         {
-            return String.Format("{0,-5} {1,-5} {2,-8} {3,-10} {4,-15} {5,-15} {6,-10} {7,-10}", ID, Type, IsLocked, Flags, Name, Address, Port, Build);
+            return $"{ID,-5} {Type,-5} {IsLocked,-8} {Flags,-10} {Name,-15} {Address,-15} {Port,-10} {Build,-10}";
         }
     }
 }
