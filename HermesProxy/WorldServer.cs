@@ -5,8 +5,8 @@ using System.Text;
 
 namespace HermesProxy
 {
-    public static class WorldServer
+    public class WorldServer
     {
-        public static void Run() { }
+        public void Run() { }
     }
 }

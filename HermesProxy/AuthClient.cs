@@ -9,16 +9,16 @@ using HermesProxy.Crypto;
 
 namespace HermesProxy
 {
-    public static class AuthClient
+    public class AuthClient
     {
-        private static Socket clientSocket;
-        private static bool? isSuccessful = null;
-        private static byte[] PasswordHash;
-        private static BigInteger Key { get; set; }
-        private static byte[] m2;
-        public static List<RealmInfo> RealmList = null;
+        private Socket clientSocket;
+        private bool? isSuccessful = null;
+        private byte[] PasswordHash;
+        private BigInteger Key { get; set; }
+        private byte[] m2;
+        public List<RealmInfo> RealmList = null;
 
-        public static bool ConnectToAuthServer()
+        public bool ConnectToAuthServer()
         {
             isSuccessful = null;
             string authstring = $"{Settings.ServerUsername.ToUpper()}:{Settings.ServerPassword}";
@@ -45,7 +45,7 @@ namespace HermesProxy
             return (bool)isSuccessful;
         }
 
-        private static void ConnectCallback(IAsyncResult AR)
+        private void ConnectCallback(IAsyncResult AR)
         {
             try
             {
@@ -63,7 +63,7 @@ namespace HermesProxy
             }
         }
 
-        private static void ReceiveCallback(IAsyncResult AR)
+        private void ReceiveCallback(IAsyncResult AR)
         {
             try
             {
@@ -96,7 +96,7 @@ namespace HermesProxy
             }
         }
 
-        private static void SendCallback(IAsyncResult AR)
+        private void SendCallback(IAsyncResult AR)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace HermesProxy
             }
         }
 
-        private static void SendPacket(ByteBuffer packet)
+        private void SendPacket(ByteBuffer packet)
         {
             try
             {
@@ -124,7 +124,7 @@ namespace HermesProxy
             }
         }
 
-        private static void HandlePacket(byte[] buffer, int size)
+        private void HandlePacket(byte[] buffer, int size)
         {
             ByteBuffer packet = new ByteBuffer(buffer);
             AuthCommand opcode = (AuthCommand)packet.ReadUInt8();
@@ -148,7 +148,7 @@ namespace HermesProxy
             }
         }
 
-        private static void SendLogonChallenge()
+        private void SendLogonChallenge()
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
@@ -172,7 +172,7 @@ namespace HermesProxy
             SendPacket(buffer);
         }
 
-        private static void HandleLogonChallenge(ByteBuffer packet)
+        private void HandleLogonChallenge(ByteBuffer packet)
         {
             byte unk2 = packet.ReadUInt8();
             AuthResult error = (AuthResult)packet.ReadUInt8();
@@ -329,7 +329,7 @@ namespace HermesProxy
             SendLogonProof(A.ToCleanByteArray(), m1Hash, new byte[20]);
         }
 
-        private static void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
+        private void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_PROOF);
@@ -341,7 +341,7 @@ namespace HermesProxy
             SendPacket(buffer);
         }
 
-        private static void HandleLogonProof(ByteBuffer packet)
+        private void HandleLogonProof(ByteBuffer packet)
         {
             AuthResult error = (AuthResult)packet.ReadUInt8();
             if (error != AuthResult.SUCCESS)
@@ -390,7 +390,7 @@ namespace HermesProxy
             }
         }
 
-        private static void SendRealmListRequest()
+        private void SendRealmListRequest()
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.REALM_LIST);
@@ -399,7 +399,7 @@ namespace HermesProxy
             SendPacket(buffer);
         }
 
-        private static void HandleRealmList(ByteBuffer packet)
+        private void HandleRealmList(ByteBuffer packet)
         {
             packet.ReadUInt16(); // packet size
             packet.ReadUInt32(); // unused
@@ -457,7 +457,7 @@ namespace HermesProxy
             isSuccessful = true;
         }
 
-        public static void PrintRealmList()
+        public void PrintRealmList()
         {
             if (RealmList == null || RealmList.Count == 0)
                 return;

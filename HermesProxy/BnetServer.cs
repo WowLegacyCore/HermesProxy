@@ -5,8 +5,8 @@ using System.Text;
 
 namespace HermesProxy
 {
-    public static class BnetServer
+    public class BnetServer
     {
-        public static void Run() { }
+        public void Run() { }
     }
 }

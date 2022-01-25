@@ -12,8 +12,8 @@ namespace HermesProxy
             // Disabled until we actually need it.
             //GameData.LoadEverything(Settings.DatabaseConnectionString);
 
-            BnetServer.Run();
-            WorldServer.Run();
+            new BnetServer().Run();
+            new WorldServer().Run();
         }
     }
 }
