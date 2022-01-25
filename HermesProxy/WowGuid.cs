@@ -153,13 +153,13 @@ namespace HermesProxy
             if (HasEntry())
             {
                 // ReSharper disable once UseStringInterpolation
-                return $"Full: 0x{High.ToString("X16")}{Low.ToString("X16")} {GetHighType()}/{GetSubType()} R{GetRealmId()}/S{GetServerId()} Map: {GetMapId()} Entry: {GetEntry()} Low: {GetLow()}";
+                return $"Full: 0x{High:X16}{Low:X16} {GetHighType()}/{GetSubType()} R{GetRealmId()}/S{GetServerId()} Map: {GetMapId()} Entry: {GetEntry()} Low: {GetLow()}";
             }
 
             // TODO: Implement extra format for battleground, see WowGuid64.ToString()
 
             // ReSharper disable once UseStringInterpolation
-            return $"Full: 0x{High.ToString("X16")}{Low.ToString("X16")} {GetHighType()}/{GetSubType()} R{GetRealmId()}/S{GetServerId()} Map: {GetMapId()} Low: {GetLow()}";
+            return $"Full: 0x{High:X16}{Low:X16} {GetHighType()}/{GetSubType()} R{GetRealmId()}/S{GetServerId()} Map: {GetMapId()} Low: {GetLow()}";
         }
     }
 
