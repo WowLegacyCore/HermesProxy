@@ -11,55 +11,55 @@ namespace HermesProxy
 {
     public class AuthClient
     {
-        private Socket clientSocket;
-        private bool? isSuccessful = null;
-        private byte[] PasswordHash;
-        private BigInteger Key { get; set; }
-        private byte[] m2;
+        private Socket _clientSocket;
+        private bool? _isSuccessful = null;
+        private byte[] _passwordHash;
+        private BigInteger _key;
+        private byte[] _m2;
         public List<RealmInfo> RealmList = null;
 
         public bool ConnectToAuthServer()
         {
-            isSuccessful = null;
+            _isSuccessful = null;
             string authstring = $"{Settings.ServerUsername.ToUpper()}:{Settings.ServerPassword}";
-            PasswordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
+            _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
 
             try
             {
                 Console.WriteLine("[AuthClient] Connecting to auth server...");
-                clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), 3724);
-                clientSocket.BeginConnect(endPoint, ConnectCallback, null);
+                _clientSocket.BeginConnect(endPoint, ConnectCallback, null);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("[AuthClient] Socket Error:");
                 Console.WriteLine(ex.Message);
-                isSuccessful = false;
+                _isSuccessful = false;
             }
 
-            while (isSuccessful == null)
+            while (_isSuccessful == null)
             { }
 
-            return (bool)isSuccessful;
+            return (bool)_isSuccessful;
         }
 
         private void ConnectCallback(IAsyncResult AR)
         {
             try
             {
-                clientSocket.EndConnect(AR);
-                clientSocket.ReceiveBufferSize = 65535;
-                byte[] buffer = new byte[clientSocket.ReceiveBufferSize];
-                clientSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveCallback, buffer);
+                _clientSocket.EndConnect(AR);
+                _clientSocket.ReceiveBufferSize = 65535;
+                byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
+                _clientSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveCallback, buffer);
                 SendLogonChallenge();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("[AuthClient] Connect Error:");
                 Console.WriteLine(ex.Message);
-                isSuccessful = false;
+                _isSuccessful = false;
             }
         }
 
@@ -67,12 +67,12 @@ namespace HermesProxy
         {
             try
             {
-                int received = clientSocket.EndReceive(AR);
+                int received = _clientSocket.EndReceive(AR);
 
                 if (received == 0)
                 {
-                    if (isSuccessful == null)
-                        isSuccessful = false;
+                    if (_isSuccessful == null)
+                        _isSuccessful = false;
                     Console.WriteLine("[AuthClient] Socket Closed By Server");
                     return;
                 }
@@ -81,10 +81,10 @@ namespace HermesProxy
 
                 HandlePacket(oldBuffer, received);
 
-                byte[] newBuffer = new byte[clientSocket.ReceiveBufferSize];
+                byte[] newBuffer = new byte[_clientSocket.ReceiveBufferSize];
 
                 // Start receiving data again.
-                clientSocket.BeginReceive(newBuffer, 0, newBuffer.Length, SocketFlags.None, ReceiveCallback, newBuffer);
+                _clientSocket.BeginReceive(newBuffer, 0, newBuffer.Length, SocketFlags.None, ReceiveCallback, newBuffer);
 
 
             }
@@ -92,7 +92,7 @@ namespace HermesProxy
             {
                 Console.WriteLine("[AuthClient] Packet Read Error:");
                 Console.WriteLine(ex.Message);
-                isSuccessful = false;
+                _isSuccessful = false;
             }
         }
 
@@ -100,13 +100,13 @@ namespace HermesProxy
         {
             try
             {
-                clientSocket.EndSend(AR);
+                _clientSocket.EndSend(AR);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("[AuthClient] Packet Send Error:");
                 Console.WriteLine(ex.Message);
-                isSuccessful = false;
+                _isSuccessful = false;
             }
         }
 
@@ -114,13 +114,13 @@ namespace HermesProxy
         {
             try
             {
-                clientSocket.BeginSend(packet.GetData(), 0, (int)packet.GetSize(), SocketFlags.None, SendCallback, null);
+                _clientSocket.BeginSend(packet.GetData(), 0, (int)packet.GetSize(), SocketFlags.None, SendCallback, null);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("[AuthClient] Packet Write Error:");
                 Console.WriteLine(ex.Message);
-                isSuccessful = false;
+                _isSuccessful = false;
             }
         }
 
@@ -143,7 +143,7 @@ namespace HermesProxy
                     break;
                 default:
                     Console.WriteLine("[AuthClient] Unsupported opcode!");
-                    isSuccessful = false;
+                    _isSuccessful = false;
                     break;
             }
         }
@@ -179,7 +179,7 @@ namespace HermesProxy
             if (error != AuthResult.SUCCESS)
             {
                 Console.WriteLine("[AuthSocket] Login failed. Reason: " + ((uint)error).ToString());
-                isSuccessful = false;
+                _isSuccessful = false;
                 return;
             }
 
@@ -214,7 +214,7 @@ namespace HermesProxy
 
             #region Hash password
 
-            x = HashAlgorithm.SHA1.Hash(challenge_salt, PasswordHash).ToBigInteger();
+            x = HashAlgorithm.SHA1.Hash(challenge_salt, _passwordHash).ToBigInteger();
 
             //Console.WriteLine("---====== shared password hash ======---");
             //Console.WriteLine($"g={g.ToCleanByteArray().ToHexString()}");
@@ -272,12 +272,12 @@ namespace HermesProxy
             for (int i = 0; i < 20; ++i)
                 keyData[i * 2 + 1] = keyHash[i];
 
-            Key = keyData.ToBigInteger();
+            _key = keyData.ToBigInteger();
 
             //Console.WriteLine("---====== Compute session key ======---");
             //Console.WriteLine($"u={u.ToCleanByteArray().ToHexString()}");
             //Console.WriteLine($"S={S.ToCleanByteArray().ToHexString()}");
-            //Console.WriteLine($"K={Key.ToCleanByteArray().ToHexString()}");
+            //Console.WriteLine($"K={_key.ToCleanByteArray().ToHexString()}");
 
             #endregion
 
@@ -307,7 +307,7 @@ namespace HermesProxy
                 challenge_salt,
                 A.ToCleanByteArray(),
                 B.ToCleanByteArray(),
-                Key.ToCleanByteArray()
+                _key.ToCleanByteArray()
             );
 
             //Console.WriteLine("---====== Client proof: ======---");
@@ -316,13 +316,13 @@ namespace HermesProxy
             //Console.WriteLine($"salt={challenge_salt.ToHexString()}");
             //Console.WriteLine($"A={A.ToCleanByteArray().ToHexString()}");
             //Console.WriteLine($"B={B.ToCleanByteArray().ToHexString()}");
-            //Console.WriteLine($"key={Key.ToCleanByteArray().ToHexString()}");
+            //Console.WriteLine($"key={_key.ToCleanByteArray().ToHexString()}");
 
             //Console.WriteLine("---====== Send proof to server: ======---");
             //Console.WriteLine($"M={m1Hash.ToHexString()}");
 
             // expected proof for server
-            m2 = HashAlgorithm.SHA1.Hash(A.ToCleanByteArray(), m1Hash, keyData);
+            _m2 = HashAlgorithm.SHA1.Hash(A.ToCleanByteArray(), m1Hash, keyData);
 
             #endregion
 
@@ -347,7 +347,7 @@ namespace HermesProxy
             if (error != AuthResult.SUCCESS)
             {
                 Console.WriteLine("[AuthSocket] Login failed. Reason: " + ((uint)error).ToString());
-                isSuccessful = false;
+                _isSuccessful = false;
                 return;
             }
 
@@ -372,15 +372,15 @@ namespace HermesProxy
                 loginFlags = packet.ReadUInt16();
             }
 
-            bool equal = m2 != null && m2.Length == 20;
-            for (int i = 0; equal && i < m2.Length; ++i)
-                if (!(equal = m2[i] == M2[i]))
+            bool equal = _m2 != null && _m2.Length == 20;
+            for (int i = 0; equal && i < _m2.Length; ++i)
+                if (!(equal = _m2[i] == M2[i]))
                     break;
 
             if (!equal)
             {
                 Console.WriteLine("[AuthClient] Server auth failed!");
-                isSuccessful = false;
+                _isSuccessful = false;
                 return;
             }
             else
@@ -454,7 +454,7 @@ namespace HermesProxy
             }
 
             //PrintRealmList();
-            isSuccessful = true;
+            _isSuccessful = true;
         }
 
         public void PrintRealmList()
