@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HermesProxy.Framework.Constants;
 
-namespace HermesProxy
+namespace HermesProxy.Network.Realm
 {
     public class RealmInfo
     {
-        public ushort ID;
+        public int ID;
         public byte Type;
         public byte IsLocked;
-        public Enums.RealmFlags Flags;
+        public RealmFlags Flags;
         public string Name;
         public string Address;
         public int Port;

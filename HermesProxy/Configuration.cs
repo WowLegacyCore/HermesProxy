@@ -38,11 +38,11 @@ namespace HermesProxy
                 switch (optname)
                 {
                     case "ConfigFile":
-                    configFile = args[i + 1];
-                    break;
+                        configFile = args[i + 1];
+                        break;
                     default:
-                    opts.Add(optname, args[i + 1]);
-                    break;
+                        opts.Add(optname, args[i + 1]);
+                        break;
                 }
                 ++i;
             }

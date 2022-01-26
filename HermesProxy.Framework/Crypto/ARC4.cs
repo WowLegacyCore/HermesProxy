@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.Crypto
+﻿namespace HermesProxy.Crypto
 {
     public class ARC4
     {
-        readonly byte[] state;
-        byte x, y;
+        readonly byte[] _state;
+        byte _x;
+        byte _y;
 
         public ARC4(byte[] key)
         {
-            state = new byte[256];
-            x = y = 0;
+            _state = new byte[256];
+            _x = _y = 0;
+
             KeySetup(key);
         }
 
@@ -30,17 +26,17 @@ namespace HermesProxy.Crypto
 
             for (int counter = 0; counter < 256; counter++)
             {
-                state[counter] = (byte)counter;
+                _state[counter] = (byte)counter;
             }
-            x = 0;
-            y = 0;
+            _x = 0;
+            _y = 0;
             for (int counter = 0; counter < 256; counter++)
             {
-                index2 = (byte)(key[index1] + state[counter] + index2);
+                index2 = (byte)(key[index1] + _state[counter] + index2);
                 // swap byte
-                byte tmp = state[counter];
-                state[counter] = state[index2];
-                state[index2] = tmp;
+                byte tmp = _state[counter];
+                _state[counter] = _state[index2];
+                _state[index2] = tmp;
                 index1 = (byte)((index1 + 1) % key.Length);
             }
         }
@@ -49,15 +45,15 @@ namespace HermesProxy.Crypto
         {
             for (var counter = 0; counter < inputCount; counter++)
             {
-                x = (byte)(x + 1);
-                y = (byte)(state[x] + y);
+                _x = (byte)(_x + 1);
+                _y = (byte)(_state[_x] + _y);
                 // swap byte
-                var tmp = state[x];
-                state[x] = state[y];
-                state[y] = tmp;
+                var tmp = _state[_x];
+                _state[_x] = _state[_y];
+                _state[_y] = tmp;
 
-                var xorIndex = (byte)(state[x] + state[y]);
-                outputBuffer[outputOffset + counter] = (byte)(inputBuffer[inputOffset + counter] ^ state[xorIndex]);
+                var xorIndex = (byte)(_state[_x] + _state[_y]);
+                outputBuffer[outputOffset + counter] = (byte)(inputBuffer[inputOffset + counter] ^ _state[xorIndex]);
             }
             return inputCount;
         }

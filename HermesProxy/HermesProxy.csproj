@@ -3,13 +3,22 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <ApplicationIcon />
-    <StartupObject />
   </PropertyGroup>
+	
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.15.0" />
-    <PackageReference Include="MySql.Data" Version="8.0.23" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.7" />
   </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\HermesProxy.Framework\HermesProxy.Framework.csproj" />
+    <ProjectReference Include="..\HermesProxy.Proto\HermesProxy.Proto.csproj" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <None Update="bnetserver.cert.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+	
 </Project>
