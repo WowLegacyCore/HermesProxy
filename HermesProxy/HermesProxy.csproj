@@ -1,24 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <StartupObject>HermesProxy.Server</StartupObject>
+    <ApplicationIcon>Red.ico</ApplicationIcon>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
-	
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.15.0" />
+    <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
-	
   <ItemGroup>
-    <ProjectReference Include="..\HermesProxy.Framework\HermesProxy.Framework.csproj" />
-    <ProjectReference Include="..\HermesProxy.Proto\HermesProxy.Proto.csproj" />
+    <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>
-	
+
   <ItemGroup>
-    <None Update="bnetserver.cert.pfx">
+    <None Update="BNetServer.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-	
 </Project>

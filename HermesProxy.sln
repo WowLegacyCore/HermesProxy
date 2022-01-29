@@ -1,32 +1,34 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32112.339
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HermesProxy", "HermesProxy\HermesProxy.csproj", "{2922D5E8-A903-4CD0-903D-F5CB7DC0648C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HermesProxy", "HermesProxy\HermesProxy.csproj", "{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HermesProxy.Framework", "HermesProxy.Framework\HermesProxy.Framework.csproj", "{1F4F194A-0696-4EC3-8AE9-2DA1725C129C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HermesProxy.Proto", "HermesProxy.Proto\HermesProxy.Proto.csproj", "{4B165864-816A-4680-A8BF-28F7C88FBA6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework", "Framework\Framework.csproj", "{2F7515AD-18E3-4ACA-A14B-1929F76299E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2922D5E8-A903-4CD0-903D-F5CB7DC0648C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2922D5E8-A903-4CD0-903D-F5CB7DC0648C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2922D5E8-A903-4CD0-903D-F5CB7DC0648C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2922D5E8-A903-4CD0-903D-F5CB7DC0648C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F4F194A-0696-4EC3-8AE9-2DA1725C129C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F4F194A-0696-4EC3-8AE9-2DA1725C129C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F4F194A-0696-4EC3-8AE9-2DA1725C129C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F4F194A-0696-4EC3-8AE9-2DA1725C129C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4B165864-816A-4680-A8BF-28F7C88FBA6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4B165864-816A-4680-A8BF-28F7C88FBA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4B165864-816A-4680-A8BF-28F7C88FBA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4B165864-816A-4680-A8BF-28F7C88FBA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|Any CPU.ActiveCfg = Release|win-x64
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|Any CPU.Build.0 = Release|win-x64
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|x64.ActiveCfg = Debug|x64
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|x64.Build.0 = Debug|x64
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|x64.ActiveCfg = Release|x64
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|x64.Build.0 = Release|x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|Any CPU.ActiveCfg = Release|x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|x64.ActiveCfg = Debug|x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|x64.Build.0 = Debug|x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|Any CPU.ActiveCfg = Release|x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|x64.ActiveCfg = Release|x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
