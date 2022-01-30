@@ -235,7 +235,7 @@ namespace HermesProxy.Network.BattleNet.Session
             }
 
             // Character realmlist count
-            compressed = JSON.Deflate("JSONRealmCharacterCointList", realmCharCount);
+            compressed = JSON.Deflate("JSONRealmCharacterCountList", realmCharCount);
             response.Attribute.Add(new Bgs.Protocol.Attribute
             {
                 Name = "Param_CharacterCountList",
