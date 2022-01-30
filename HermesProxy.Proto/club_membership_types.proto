@@ -1,0 +1,51 @@
+syntax = "proto2";
+
+import "club_core.proto";
+import "club_member.proto";
+import "club_invitation.proto";
+import "event_view_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.club.v1;
+
+message ClubMembershipFilter {
+	optional .bgs.protocol.club.v1.MemberId member_id = 1;
+	optional .bgs.protocol.club.v1.UniqueClubType type = 2;
+}
+
+message ClubMembershipSubscribeOptions {
+	repeated .bgs.protocol.club.v1.ClubMembershipFilter filter = 1 [(valid).repeated.size.min = 0, (valid).repeated.size.max = 25];
+}
+
+message ClubMembershipGetStateOptions {
+	repeated .bgs.protocol.club.v1.ClubMembershipFilter filter = 1 [(valid).repeated.size.min = 0, (valid).repeated.size.max = 25];
+}
+
+message ClubMembershipDescription {
+	optional .bgs.protocol.club.v1.MemberId member_id = 1;
+	optional .bgs.protocol.club.v1.ClubDescription club = 2;
+}
+
+message ClubMembershipState {
+	repeated .bgs.protocol.club.v1.ClubMembershipDescription description = 1;
+	repeated .bgs.protocol.club.v1.ClubInvitation invitation = 2;
+	optional .bgs.protocol.club.v1.ClubSharedSettings setting = 3;
+	optional .bgs.protocol.ViewMarker mention_view = 4;
+}
+
+message ClubPosition {
+	repeated uint64 club_id = 1 [packed = true];
+}
+
+message ClubSharedSettings {
+	optional .bgs.protocol.club.v1.ClubPosition club_position = 1;
+}
+
+message ClubSharedSettingsOptions {
+	optional .bgs.protocol.club.v1.ClubPosition club_position = 1;
+}
+
+message ClubSharedSettingsAssignment {
+	optional .bgs.protocol.club.v1.ClubPosition club_position = 1;
+}
+

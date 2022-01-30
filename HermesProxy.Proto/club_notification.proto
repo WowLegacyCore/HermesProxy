@@ -1,0 +1,161 @@
+syntax = "proto2";
+
+import public "club_types.proto";
+import public "rpc_types.proto";
+
+package bgs.protocol.club.v1;
+
+message SubscribeNotification {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.Club club = 4;
+	optional .bgs.protocol.club.v1.ClubView view = 5;
+	optional .bgs.protocol.club.v1.ClubSettings settings = 10;
+	optional .bgs.protocol.club.v1.Member member = 11;
+}
+
+message UnsubscribeNotification {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+}
+
+message StateChangedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.ClubStateAssignment assignment = 5;
+}
+
+message SettingsChangedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.ClubSettingsAssignment assignment = 4;
+}
+
+message MemberAddedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	repeated .bgs.protocol.club.v1.Member member = 4;
+}
+
+message MemberRemovedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	repeated .bgs.protocol.club.v1.MemberRemovedAssignment member = 4;
+}
+
+message MemberStateChangedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	repeated .bgs.protocol.club.v1.MemberStateAssignment assignment = 4;
+}
+
+message SubscriberStateChangedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	repeated .bgs.protocol.club.v1.SubscriberStateAssignment assignment = 4;
+}
+
+message MemberRoleChangedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	repeated .bgs.protocol.club.v1.RoleAssignment assignment = 4;
+}
+
+message InvitationAddedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.ClubInvitation invitation = 4;
+}
+
+message InvitationRemovedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional fixed64 invitation_id = 4;
+	optional .bgs.protocol.InvitationRemovedReason reason = 5 [default = INVITATION_REMOVED_REASON_ACCEPTED];
+}
+
+message SuggestionAddedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.ClubSuggestion suggestion = 4;
+}
+
+message SuggestionRemovedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional fixed64 suggestion_id = 4;
+	optional .bgs.protocol.SuggestionRemovedReason reason = 5 [default = SUGGESTION_REMOVED_REASON_APPROVED];
+}
+
+message StreamAddedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.Stream stream = 4;
+}
+
+message StreamRemovedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional uint64 stream_id = 4;
+}
+
+message StreamStateChangedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional uint64 stream_id = 4;
+	optional .bgs.protocol.club.v1.StreamStateAssignment assignment = 5;
+}
+
+message StreamMessageAddedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional uint64 stream_id = 4;
+	optional .bgs.protocol.club.v1.StreamMessage message = 5;
+}
+
+message StreamMessageUpdatedNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional uint64 stream_id = 4;
+	optional .bgs.protocol.club.v1.StreamMessage message = 5;
+}
+
+message StreamTypingIndicatorNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional uint64 stream_id = 4;
+	repeated .bgs.protocol.club.v1.StreamTypingIndicator indicator = 5;
+}
+
+message StreamUnreadIndicatorNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	optional .bgs.protocol.club.v1.StreamEventTime event = 4;
+	optional .bgs.protocol.club.v1.StreamMessage message = 5;
+}
+
+message StreamAdvanceViewTimeNotification {
+	option (message_options).client_id_fanout = true;
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 3;
+	repeated .bgs.protocol.club.v1.StreamAdvanceViewTime view = 4;
+}
+

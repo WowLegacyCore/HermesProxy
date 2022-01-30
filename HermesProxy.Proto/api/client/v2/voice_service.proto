@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+import "voice_types.proto";
+import "account_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.voice.v2.client;
+
+message CreateLoginCredentialsRequest {
+	option (message_options).custom_select_shard = true;
+	optional .bgs.protocol.account.v1.AccountId account_id = 1 [(valid).message.needed = true];
+}
+
+message CreateLoginCredentialsResponse {
+	optional .bgs.protocol.VoiceCredentials credentials = 1;
+}
+
+service VoiceService {
+	option (service_options).descriptor_name = "bnet.protocol.voice.v2.client.VoiceService";
+	option (service_options).shard_name = "voice";
+	option (sdk_service_options).outbound = true;
+	rpc CreateLoginCredentials (.bgs.protocol.voice.v2.client.CreateLoginCredentialsRequest) returns (.bgs.protocol.voice.v2.client.CreateLoginCredentialsResponse) {
+		option (method_options).id = 1;
+	}
+}
+

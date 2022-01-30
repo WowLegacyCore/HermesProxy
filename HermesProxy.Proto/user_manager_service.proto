@@ -1,0 +1,114 @@
+syntax = "proto2";
+
+import "user_manager_types.proto";
+import "entity_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.user_manager.v1;
+
+option cc_generic_services = false;
+
+message SubscribeRequest {
+	optional .bgs.protocol.EntityId agent_id = 1 [(field_options).client_instance_key = true];
+	required uint64 object_id = 2;
+}
+
+message SubscribeResponse {
+	repeated .bgs.protocol.user_manager.v1.BlockedPlayer blocked_players = 1;
+	repeated .bgs.protocol.user_manager.v1.RecentPlayer recent_players = 2;
+}
+
+message UnsubscribeRequest {
+	optional .bgs.protocol.EntityId agent_id = 1 [(field_options).client_instance_key = true];
+	optional uint64 object_id = 2;
+}
+
+message AddRecentPlayersRequest {
+	option (message_options).custom_validator = true;
+	repeated .bgs.protocol.user_manager.v1.RecentPlayer players = 1;
+	optional .bgs.protocol.EntityId agent_id = 2 [(field_options).client_instance_key = true];
+	optional uint32 program = 3;
+}
+
+message ClearRecentPlayersRequest {
+	optional .bgs.protocol.EntityId agent_id = 1 [(field_options).client_instance_key = true];
+	optional uint32 program = 2;
+}
+
+message BlockPlayerRequest {
+	option (message_options).custom_validator = true;
+	optional .bgs.protocol.EntityId agent_id = 1 [(field_options).client_instance_key = true];
+	required .bgs.protocol.EntityId target_id = 2;
+}
+
+message UnblockPlayerRequest {
+	option (message_options).custom_validator = true;
+	optional .bgs.protocol.EntityId agent_id = 1 [(field_options).client_instance_key = true];
+	required .bgs.protocol.EntityId target_id = 2;
+}
+
+message BlockedPlayerAddedNotification {
+	required .bgs.protocol.user_manager.v1.BlockedPlayer player = 1;
+	optional .bgs.protocol.EntityId game_account_id = 2;
+	optional .bgs.protocol.EntityId account_id = 3;
+}
+
+message BlockedPlayerRemovedNotification {
+	required .bgs.protocol.user_manager.v1.BlockedPlayer player = 1;
+	optional .bgs.protocol.EntityId game_account_id = 2;
+	optional .bgs.protocol.EntityId account_id = 3;
+}
+
+message RecentPlayersAddedNotification {
+	repeated .bgs.protocol.user_manager.v1.RecentPlayer player = 1;
+}
+
+message RecentPlayersRemovedNotification {
+	repeated .bgs.protocol.user_manager.v1.RecentPlayer player = 1;
+}
+
+service UserManagerService {
+	option (service_options).descriptor_name = "bnet.protocol.user_manager.UserManagerService";
+	option (service_options).shard_name = "user_manager";
+	option (service_options).resolve_client_instance = true;
+	option (sdk_service_options).outbound = true;
+	rpc Subscribe (.bgs.protocol.user_manager.v1.SubscribeRequest) returns (.bgs.protocol.user_manager.v1.SubscribeResponse) {
+		option (method_options).id = 1;
+	}
+	rpc AddRecentPlayers (.bgs.protocol.user_manager.v1.AddRecentPlayersRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 10;
+	}
+	rpc ClearRecentPlayers (.bgs.protocol.user_manager.v1.ClearRecentPlayersRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 11;
+	}
+	rpc BlockPlayer (.bgs.protocol.user_manager.v1.BlockPlayerRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 20;
+	}
+	rpc UnblockPlayer (.bgs.protocol.user_manager.v1.UnblockPlayerRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 21;
+	}
+	rpc BlockPlayerForSession (.bgs.protocol.user_manager.v1.BlockPlayerRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 40;
+	}
+	rpc Unsubscribe (.bgs.protocol.user_manager.v1.UnsubscribeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 51;
+	}
+}
+
+service UserManagerListener {
+	option (service_options).descriptor_name = "bnet.protocol.user_manager.UserManagerNotify";
+	option (sdk_service_options).inbound = true;
+	rpc OnBlockedPlayerAdded (.bgs.protocol.user_manager.v1.BlockedPlayerAddedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 1;
+	}
+	rpc OnBlockedPlayerRemoved (.bgs.protocol.user_manager.v1.BlockedPlayerRemovedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 2;
+	}
+	rpc OnRecentPlayersAdded (.bgs.protocol.user_manager.v1.RecentPlayersAddedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 11;
+	}
+	rpc OnRecentPlayersRemoved (.bgs.protocol.user_manager.v1.RecentPlayersRemovedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 12;
+	}
+}
+

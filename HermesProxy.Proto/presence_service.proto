@@ -1,0 +1,103 @@
+syntax = "proto2";
+
+import "entity_types.proto";
+import "presence_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.presence.v1;
+
+option cc_generic_services = false;
+
+message SubscribeRequest {
+	optional .bgs.protocol.EntityId agent_id = 1;
+	required .bgs.protocol.EntityId entity_id = 2;
+	required uint64 object_id = 3;
+	repeated fixed32 program = 4 [(valid).repeated.size.min = 1, (valid).repeated.size.max = 100];
+	repeated .bgs.protocol.presence.v1.FieldKey key = 6 [(valid).repeated.size.min = 1, (valid).repeated.size.max = 500];
+}
+
+message SubscribeNotificationRequest {
+	required .bgs.protocol.EntityId entity_id = 1;
+}
+
+message UnsubscribeRequest {
+	optional .bgs.protocol.EntityId agent_id = 1;
+	required .bgs.protocol.EntityId entity_id = 2;
+	optional uint64 object_id = 3;
+}
+
+message UpdateRequest {
+	required .bgs.protocol.EntityId entity_id = 1;
+	repeated .bgs.protocol.presence.v1.FieldOperation field_operation = 2;
+	optional bool no_create = 3;
+	optional .bgs.protocol.EntityId agent_id = 4;
+}
+
+message QueryRequest {
+	required .bgs.protocol.EntityId entity_id = 1;
+	repeated .bgs.protocol.presence.v1.FieldKey key = 2;
+	optional .bgs.protocol.EntityId agent_id = 3;
+}
+
+message QueryResponse {
+	repeated .bgs.protocol.presence.v1.Field field = 2;
+}
+
+message OwnershipRequest {
+	required .bgs.protocol.EntityId entity_id = 1;
+	optional bool release_ownership = 2;
+}
+
+message BatchSubscribeRequest {
+	optional .bgs.protocol.EntityId agent_id = 1;
+	repeated .bgs.protocol.EntityId entity_id = 2 [(valid).repeated.size.min = 1, (valid).repeated.size.max = 250];
+	repeated fixed32 program = 3 [(valid).repeated.size.min = 1, (valid).repeated.size.max = 100];
+	repeated .bgs.protocol.presence.v1.FieldKey key = 4 [(valid).repeated.size.min = 1, (valid).repeated.size.max = 500];
+	optional uint64 object_id = 5;
+}
+
+message SubscribeResult {
+	optional .bgs.protocol.EntityId entity_id = 1;
+	optional uint32 result = 2;
+}
+
+message BatchSubscribeResponse {
+	repeated .bgs.protocol.presence.v1.SubscribeResult subscribe_failed = 1;
+}
+
+message BatchUnsubscribeRequest {
+	optional .bgs.protocol.EntityId agent_id = 1;
+	repeated .bgs.protocol.EntityId entity_id = 2 [(valid).repeated.size.min = 1, (valid).repeated.size.max = 250];
+	optional uint64 object_id = 3;
+}
+
+service PresenceService {
+	option (service_options).descriptor_name = "bnet.protocol.presence.PresenceService";
+	option (service_options).shard_name = "presence";
+	option (sdk_service_options).outbound = true;
+	rpc Subscribe (.bgs.protocol.presence.v1.SubscribeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 1;
+	}
+	rpc Unsubscribe (.bgs.protocol.presence.v1.UnsubscribeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 2;
+	}
+	rpc Update (.bgs.protocol.presence.v1.UpdateRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 3;
+	}
+	rpc Query (.bgs.protocol.presence.v1.QueryRequest) returns (.bgs.protocol.presence.v1.QueryResponse) {
+		option (method_options).id = 4;
+	}
+	rpc Ownership (.bgs.protocol.presence.v1.OwnershipRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 5;
+	}
+	rpc SubscribeNotification (.bgs.protocol.presence.v1.SubscribeNotificationRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 7;
+	}
+	rpc BatchSubscribe (.bgs.protocol.presence.v1.BatchSubscribeRequest) returns (.bgs.protocol.presence.v1.BatchSubscribeResponse) {
+		option (method_options).id = 8;
+	}
+	rpc BatchUnsubscribe (.bgs.protocol.presence.v1.BatchUnsubscribeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 9;
+	}
+}
+

@@ -126,7 +126,7 @@ namespace HermesProxy.Network.Auth.Handler
                 gNHash[i] ^= gHash[i];
 
             // hash username
-            var userHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(Settings.ServerUsername.ToUpper()));
+            var userHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(session.Username.ToUpper()));
 
             // our proof
             var m1Hash = HashAlgorithm.SHA1.Hash
@@ -200,10 +200,13 @@ namespace HermesProxy.Network.Auth.Handler
             {
                 Log.Print(LogType.Error, "Server Auth Failed!");
                 session.RequestDisconnect = true;
+                session.HasSucceededLogin = false;
+
                 return;
             }
 
-            Log.Print(LogType.Server, "Server Auth Succeeded!");
+            Log.Print(LogType.Debug, "Server Auth Succeeded!");
+            session.HasSucceededLogin = true;
 
             using (var writer = new PacketWriter())
             {
@@ -267,6 +270,8 @@ namespace HermesProxy.Network.Auth.Handler
 
                 RealmManager.AddRealm(realm);
             }
+
+            // RealmManager.PrintRealmList();
         }
     }
 }

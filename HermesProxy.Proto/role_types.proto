@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+package bgs.protocol;
+
+message Role {
+	required uint32 id = 1;
+	required string name = 2;
+	repeated string privilege = 3;
+	repeated uint32 assignable_role = 4 [packed = true];
+	optional bool required = 5;
+	optional bool unique = 6;
+	optional uint32 relegation_role = 7;
+	repeated uint32 kickable_role = 9 [packed = true];
+	repeated uint32 removable_role = 10 [packed = true];
+}
+
+message RoleState {
+	optional string name = 2;
+	repeated uint32 assignable_role = 4 [packed = true];
+	optional bool required = 5;
+	optional bool unique = 6;
+	optional uint32 relegation_role = 7;
+	repeated uint32 kickable_role = 9 [packed = true];
+	repeated uint32 removable_role = 10 [packed = true];
+	repeated uint32 mentionable_role = 11 [packed = true];
+}
+

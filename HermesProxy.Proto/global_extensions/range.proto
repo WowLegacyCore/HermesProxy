@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+package bgs.protocol;
+
+message UnsignedIntRange {
+	optional uint64 min = 1;
+	optional uint64 max = 2;
+}
+
+message SignedIntRange {
+	optional int64 min = 1;
+	optional int64 max = 2;
+}
+
+message FloatRange {
+	optional float min = 1;
+	optional float max = 2;
+}
+

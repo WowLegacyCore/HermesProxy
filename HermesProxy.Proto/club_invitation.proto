@@ -1,0 +1,67 @@
+syntax = "proto2";
+
+import "club_core.proto";
+import "club_member.proto";
+import "api/client/v2/attribute_types.proto";
+
+package bgs.protocol.club.v1;
+
+message ClubSlot {
+	optional uint32 role = 1;
+	optional uint64 default_stream_id = 2;
+}
+
+message SendInvitationOptions {
+	optional .bgs.protocol.club.v1.MemberId target_id = 1;
+	optional .bgs.protocol.club.v1.ClubSlot slot = 2;
+	repeated .bgs.protocol.v2.Attribute attribute = 3;
+}
+
+message ClubInvitation {
+	optional fixed64 id = 1;
+	optional .bgs.protocol.club.v1.MemberDescription inviter = 2;
+	optional .bgs.protocol.club.v1.MemberDescription invitee = 3;
+	optional .bgs.protocol.club.v1.ClubDescription club = 4;
+	optional .bgs.protocol.club.v1.ClubSlot slot = 5;
+	repeated .bgs.protocol.v2.Attribute attribute = 6;
+	optional uint64 creation_time = 7;
+	optional uint64 expiration_time = 8;
+	optional .bgs.protocol.club.v1.MemberDescription suggester = 9;
+}
+
+message SendSuggestionOptions {
+	optional .bgs.protocol.club.v1.MemberId target_id = 1;
+	optional .bgs.protocol.club.v1.ClubSlot slot = 2;
+	repeated .bgs.protocol.v2.Attribute attribute = 3;
+}
+
+message ClubSuggestion {
+	optional fixed64 id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.MemberDescription suggester = 3;
+	optional .bgs.protocol.club.v1.MemberDescription suggestee = 4;
+	optional .bgs.protocol.club.v1.ClubSlot slot = 5;
+	repeated .bgs.protocol.v2.Attribute attribute = 6;
+	optional uint64 creation_time = 7;
+	optional uint64 expiration_time = 8;
+}
+
+message CreateTicketOptions {
+	optional .bgs.protocol.club.v1.ClubSlot slot = 1;
+	repeated .bgs.protocol.v2.Attribute attribute = 2;
+	optional uint32 allowed_redeem_count = 3;
+	optional uint64 expiration_time = 4;
+}
+
+message ClubTicket {
+	optional string id = 1;
+	optional .bgs.protocol.club.v1.MemberDescription creator = 2;
+	optional .bgs.protocol.club.v1.ClubDescription club = 3;
+	optional .bgs.protocol.club.v1.ClubSlot slot = 4;
+	repeated .bgs.protocol.v2.Attribute attribute = 5;
+	optional uint32 current_redeem_count = 6;
+	optional uint32 allowed_redeem_count = 7;
+	optional uint64 creation_time = 8;
+	optional uint64 expiration_time = 9;
+}
+

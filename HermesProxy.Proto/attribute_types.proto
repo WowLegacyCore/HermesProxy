@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+import "entity_types.proto";
+
+package bgs.protocol;
+
+option java_package = "bnet.protocol";
+option java_outer_classname = "AttributeProto";
+
+message Variant {
+	optional bool bool_value = 2;
+	optional int64 int_value = 3;
+	optional double float_value = 4;
+	optional string string_value = 5;
+	optional bytes blob_value = 6;
+	optional bytes message_value = 7;
+	optional string fourcc_value = 8;
+	optional uint64 uint_value = 9;
+	optional .bgs.protocol.EntityId entity_id_value = 10;
+}
+
+message Attribute {
+	required string name = 1;
+	required .bgs.protocol.Variant value = 2;
+}
+
+message AttributeFilter {
+	enum Operation {
+		MATCH_NONE = 0;
+		MATCH_ANY = 1;
+		MATCH_ALL = 2;
+		MATCH_ALL_MOST_SPECIFIC = 3;
+	}
+
+	required .bgs.protocol.AttributeFilter.Operation op = 1 [default = MATCH_NONE];
+	repeated .bgs.protocol.Attribute attribute = 2;
+}
+

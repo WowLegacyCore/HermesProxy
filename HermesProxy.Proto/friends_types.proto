@@ -1,0 +1,79 @@
+syntax = "proto2";
+
+import "attribute_types.proto";
+import "entity_types.proto";
+import "invitation_types.proto";
+import "role_types.proto";
+
+package bgs.protocol.friends.v1;
+
+option java_package = "bnet.protocol.friends.v1";
+option java_outer_classname = "FriendsTypesProto";
+
+message Friend {
+	required .bgs.protocol.EntityId account_id = 1;
+	repeated .bgs.protocol.Attribute attribute = 2;
+	repeated uint32 role = 3 [packed = true];
+	optional uint64 privileges = 4;
+	optional uint64 attributes_epoch = 5 [deprecated = true];
+	optional uint64 creation_time = 6;
+}
+
+message FriendOfFriend {
+	optional .bgs.protocol.EntityId account_id = 1;
+	repeated uint32 role = 3 [packed = true];
+	optional uint64 privileges = 4;
+	optional string full_name = 6;
+	optional string battle_tag = 7;
+}
+
+message ReceivedInvitation {
+	required fixed64 id = 1;
+	required .bgs.protocol.Identity inviter_identity = 2;
+	required .bgs.protocol.Identity invitee_identity = 3;
+	optional string inviter_name = 4;
+	optional string invitee_name = 5;
+	optional uint64 creation_time = 7;
+	optional fixed32 program = 9;
+
+	extensions 100 to 10000;
+}
+
+message FriendInvitation {
+	repeated uint32 role = 2 [packed = true];
+	repeated .bgs.protocol.Attribute attribute = 3;
+}
+
+message SentInvitation {
+	optional fixed64 id = 1;
+	optional string target_name = 2;
+	optional uint32 role = 3;
+	repeated .bgs.protocol.Attribute attribute = 4;
+	optional uint64 creation_time = 5;
+	optional fixed32 program = 6;
+}
+
+message FriendInvitationParams {
+	optional string target_email = 1;
+	optional string target_battle_tag = 2;
+	repeated uint32 role = 6 [packed = true];
+	repeated .bgs.protocol.Attribute attribute = 8;
+	optional string target_name = 9;
+	optional fixed32 program = 10 [deprecated = true];
+}
+
+message SubscribeResponse {
+	optional uint32 max_friends = 1 [deprecated = true];
+	optional uint32 max_received_invitations = 2 [deprecated = true];
+	optional uint32 max_sent_invitations = 3 [deprecated = true];
+	repeated .bgs.protocol.Role role = 4;
+	repeated .bgs.protocol.friends.v1.Friend friends = 5;
+	repeated .bgs.protocol.friends.v1.ReceivedInvitation received_invitations = 7;
+	repeated .bgs.protocol.friends.v1.SentInvitation sent_invitations = 8;
+}
+
+message AcceptInvitationOptions {
+	optional uint32 role = 1;
+	optional fixed32 program = 2;
+}
+

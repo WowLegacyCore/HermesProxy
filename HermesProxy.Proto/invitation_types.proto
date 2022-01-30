@@ -1,0 +1,45 @@
+syntax = "proto2";
+
+import "entity_types.proto";
+
+package bgs.protocol;
+
+option java_package = "bnet.protocol";
+option java_outer_classname = "InvitationTypesProto";
+
+enum InvitationRemovedReason {
+	INVITATION_REMOVED_REASON_ACCEPTED = 0;
+	INVITATION_REMOVED_REASON_DECLINED = 1;
+	INVITATION_REMOVED_REASON_REVOKED = 2;
+	INVITATION_REMOVED_REASON_IGNORED = 3;
+	INVITATION_REMOVED_REASON_EXPIRED = 4;
+	INVITATION_REMOVED_REASON_CANCELED = 5;
+}
+
+enum SuggestionRemovedReason {
+	SUGGESTION_REMOVED_REASON_APPROVED = 0;
+	SUGGESTION_REMOVED_REASON_DECLINED = 1;
+	SUGGESTION_REMOVED_REASON_EXPIRED = 2;
+	SUGGESTION_REMOVED_REASON_CANCELED = 3;
+}
+
+message Invitation {
+	required fixed64 id = 1;
+	required .bgs.protocol.Identity inviter_identity = 2;
+	required .bgs.protocol.Identity invitee_identity = 3;
+	optional string inviter_name = 4;
+	optional string invitee_name = 5;
+	optional string invitation_message = 6;
+	optional uint64 creation_time = 7;
+	optional uint64 expiration_time = 8;
+
+	extensions 100 to 10000;
+}
+
+message InvitationParams {
+	optional string invitation_message = 1 [deprecated = true];
+	optional uint64 expiration_time = 2;
+
+	extensions 100 to 10000;
+}
+

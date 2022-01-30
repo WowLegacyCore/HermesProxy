@@ -1,0 +1,31 @@
+syntax = "proto2";
+
+import "account_types.proto";
+import "embed_types.proto";
+import "rpc_types.proto";
+import "event_view_types.proto";
+import "message_types.proto";
+
+package bgs.protocol.whisper.v1;
+
+message Whisper {
+	optional .bgs.protocol.account.v1.AccountId sender_id = 1;
+	optional .bgs.protocol.account.v1.AccountId recipient_id = 2;
+	optional string content = 3;
+	repeated .bgs.protocol.EmbedInfo embed = 4;
+	optional uint64 creation_time = 6;
+	optional fixed32 program = 7;
+	optional .bgs.protocol.MessageId message_id = 8;
+}
+
+message WhisperView {
+	optional .bgs.protocol.account.v1.AccountId sender_id = 1;
+	optional .bgs.protocol.ViewMarker view_marker = 2;
+	optional string sender_battle_tag = 3;
+}
+
+message SendOptions {
+	optional .bgs.protocol.account.v1.AccountId target_id = 1;
+	optional string content = 2;
+}
+

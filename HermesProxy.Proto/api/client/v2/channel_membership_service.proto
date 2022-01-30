@@ -1,0 +1,88 @@
+syntax = "proto2";
+
+import "api/client/v2/channel_types.proto";
+import "rpc_types.proto";
+import "invitation_types.proto";
+
+package bgs.protocol.channel.v2.membership;
+
+option cc_generic_services = false;
+
+message SubscribeRequest {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+}
+
+message SubscribeResponse {
+	optional .bgs.protocol.channel.v2.ChannelMembershipState state = 1;
+}
+
+message UnsubscribeRequest {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+}
+
+message GetStateRequest {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+}
+
+message GetStateResponse {
+	optional .bgs.protocol.channel.v2.ChannelMembershipState state = 1;
+}
+
+message ChannelAddedNotification {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle subscriber_id = 2;
+	optional .bgs.protocol.channel.v2.ChannelDescription membership = 3;
+}
+
+message ChannelRemovedNotification {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle subscriber_id = 2;
+	optional .bgs.protocol.channel.v2.ChannelId channel_id = 4;
+	optional .bgs.protocol.channel.v2.ChannelRemovedReason reason = 5 [default = CHANNEL_REMOVED_REASON_MEMBER_LEFT];
+}
+
+message ReceivedInvitationAddedNotification {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle subscriber_id = 2;
+	optional .bgs.protocol.channel.v2.ChannelInvitation invitation = 3;
+}
+
+message ReceivedInvitationRemovedNotification {
+	optional .bgs.protocol.account.v1.GameAccountHandle agent_id = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle subscriber_id = 2;
+	optional fixed64 invitation_id = 3;
+	optional .bgs.protocol.InvitationRemovedReason reason = 4 [default = INVITATION_REMOVED_REASON_ACCEPTED];
+}
+
+service ChannelMembershipService {
+	option (service_options).descriptor_name = "bnet.protocol.channel.v2.membership.ChannelMembershipService";
+	option (service_options).shard_name = "channel";
+	option (sdk_service_options).outbound = true;
+	rpc Subscribe (.bgs.protocol.channel.v2.membership.SubscribeRequest) returns (.bgs.protocol.channel.v2.membership.SubscribeResponse) {
+		option (method_options).id = 1;
+	}
+	rpc Unsubscribe (.bgs.protocol.channel.v2.membership.UnsubscribeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 2;
+	}
+	rpc GetState (.bgs.protocol.channel.v2.membership.GetStateRequest) returns (.bgs.protocol.channel.v2.membership.GetStateResponse) {
+		option (method_options).id = 3;
+	}
+}
+
+service ChannelMembershipListener {
+	option (service_options).descriptor_name = "bnet.protocol.channel.v2.membership.ChannelMembershipListener";
+	option (sdk_service_options).inbound = true;
+	rpc OnChannelAdded (.bgs.protocol.channel.v2.membership.ChannelAddedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 1;
+	}
+	rpc OnChannelRemoved (.bgs.protocol.channel.v2.membership.ChannelRemovedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 2;
+	}
+	rpc OnReceivedInvitationAdded (.bgs.protocol.channel.v2.membership.ReceivedInvitationAddedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 3;
+	}
+	rpc OnReceivedInvitationRemoved (.bgs.protocol.channel.v2.membership.ReceivedInvitationRemovedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 4;
+	}
+}
+

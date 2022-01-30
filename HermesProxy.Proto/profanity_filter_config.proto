@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package bgs.protocol.profanity.v1;
+
+message WordFilter {
+	required string type = 1;
+	required string regex = 2;
+}
+
+message WordFilters {
+	repeated .bgs.protocol.profanity.v1.WordFilter filters = 1;
+}
+

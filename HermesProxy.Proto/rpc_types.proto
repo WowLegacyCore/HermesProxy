@@ -1,0 +1,76 @@
+syntax = "proto2";
+
+import public "global_extensions/field_options.proto";
+import public "global_extensions/method_options.proto";
+import public "global_extensions/message_options.proto";
+import public "global_extensions/service_options.proto";
+
+package bgs.protocol;
+
+option java_package = "bnet.protocol";
+option java_outer_classname = "RpcProto";
+
+message NO_RESPONSE {
+}
+
+message Address {
+	required string address = 1;
+	optional uint32 port = 2;
+}
+
+message ProcessId {
+	required uint32 label = 1 [(valid).unsigned.exclude = 0];
+	required uint32 epoch = 2;
+}
+
+message ObjectAddress {
+	required .bgs.protocol.ProcessId host = 1;
+	optional uint64 object_id = 2 [default = 0];
+}
+
+message NoData {
+}
+
+message ErrorInfo {
+	required .bgs.protocol.ObjectAddress object_address = 1;
+	required uint32 status = 2;
+	required uint32 service_hash = 3;
+	required uint32 method_id = 4;
+}
+
+message FanoutTarget {
+	optional string client_id = 1;
+	optional bytes key = 2;
+}
+
+message Header {
+	required uint32 service_id = 1;
+	optional uint32 method_id = 2;
+	required uint32 token = 3;
+	optional uint64 object_id = 4 [default = 0];
+	optional uint32 size = 5 [default = 0];
+	optional uint32 status = 6 [default = 0];
+	repeated .bgs.protocol.ErrorInfo error = 7;
+	optional uint64 timeout = 8;
+	optional bool is_response = 9;
+	repeated .bgs.protocol.ProcessId forward_targets = 10;
+	optional fixed32 service_hash = 11;
+	optional string client_id = 13;
+	repeated .bgs.protocol.FanoutTarget fanout_target = 14;
+	repeated string client_id_fanout_target = 15;
+	optional bytes client_record = 16;
+}
+
+message KafkaHeader {
+	optional fixed32 service_hash = 1;
+	optional uint32 method_id = 2;
+	optional uint32 token = 3;
+	optional uint64 object_id = 4 [default = 0];
+	optional uint32 size = 5 [default = 0];
+	optional uint32 status = 6 [default = 0];
+	optional uint64 timeout = 7;
+	optional .bgs.protocol.ProcessId forward_target = 8;
+	optional string return_topic = 9;
+	optional string client_id = 11;
+}
+

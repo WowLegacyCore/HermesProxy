@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+package bgs.protocol;
+
+enum EventOrder {
+	EVENT_DESCENDING = 0;
+	EVENT_ASCENDING = 1;
+}
+
+message GetEventOptions {
+	optional uint64 fetch_from = 1;
+	optional uint64 fetch_until = 2;
+	optional uint32 max_events = 3;
+	optional .bgs.protocol.EventOrder order = 4 [default = EVENT_DESCENDING];
+}
+
+message ViewMarker {
+	optional uint64 last_read_time = 1;
+	optional uint64 last_message_time = 2;
+}
+

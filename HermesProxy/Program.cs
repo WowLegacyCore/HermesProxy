@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 
 using HermesProxy.Framework.Logging;
-using HermesProxy.Network.Auth;
 using HermesProxy.Network.BattleNet;
 
 namespace HermesProxy
@@ -10,22 +9,16 @@ namespace HermesProxy
     {
         static void Main(string[] args)
         {
+            // Start the Logger
             Log.Start();
 
-            Log.Print(LogType.Server, $"ClientVersion: {Settings.ClientBuild}");
-            Log.Print(LogType.Server, $"ServerVersion: {Settings.ServerBuild}");
+            Log.Print(LogType.Debug, $"Client Version: {Settings.ClientBuild}");
+            Log.Print(LogType.Debug, $"Server Version: {Settings.ServerBuild}");
 
             // Disabled until we actually need it.
             //GameData.LoadEverything();
 
-            var authThread = new Thread(() =>
-            {
-                var authClient = new AuthClient();
-                authClient.ConnectToAuthServer();
-            });
-            authThread.Start();
-
-            // BattlenetServer.Start(Settings.ServerAddress);
+            BattlenetServer.Start(Settings.ServerAddress);
 
             while (true)
             {

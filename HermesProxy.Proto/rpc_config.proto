@@ -1,0 +1,39 @@
+syntax = "proto2";
+
+package bgs.protocol.config;
+
+message RPCMethodConfig {
+	optional string service_name = 1 [deprecated = true];
+	optional string method_name = 2 [deprecated = true];
+	optional uint32 fixed_call_cost = 3 [default = 1];
+	optional uint32 fixed_packet_size = 4 [default = 0];
+	optional float variable_multiplier = 5 [default = 0];
+	optional float multiplier = 6 [default = 1];
+	optional uint32 rate_limit_count = 7;
+	optional uint32 rate_limit_seconds = 8;
+	optional uint32 max_packet_size = 9;
+	optional uint32 max_encoded_size = 10;
+	optional float timeout = 11;
+	optional uint32 cap_balance = 12;
+	optional float income_per_second = 13 [default = 0];
+	optional uint32 service_hash = 14;
+	optional uint32 method_id = 15;
+}
+
+message RPCMeterConfig {
+	repeated .bgs.protocol.config.RPCMethodConfig method = 1;
+	optional uint32 income_per_second = 2 [default = 1];
+	optional uint32 initial_balance = 3;
+	optional uint32 cap_balance = 4;
+	optional float startup_period = 5 [default = 0];
+}
+
+message ProtocolAlias {
+	required string server_service_name = 1;
+	required string client_service_name = 2;
+}
+
+message ServiceAliases {
+	repeated .bgs.protocol.config.ProtocolAlias protocol_alias = 1;
+}
+

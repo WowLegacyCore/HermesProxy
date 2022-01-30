@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+import "account_types.proto";
+import "attribute_types.proto";
+import "entity_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.notification.v1;
+
+message Target {
+	optional .bgs.protocol.account.v1.Identity identity = 1;
+	optional string type = 2;
+}
+
+message Subscription {
+	repeated .bgs.protocol.notification.v1.Target target = 1;
+	optional .bgs.protocol.account.v1.Identity subscriber = 2;
+	optional bool delivery_required = 3 [default = false];
+}
+
+message Notification {
+	optional .bgs.protocol.EntityId sender_id = 1;
+	required .bgs.protocol.EntityId target_id = 2;
+	required string type = 3;
+	repeated .bgs.protocol.Attribute attribute = 4;
+	optional .bgs.protocol.EntityId sender_account_id = 5;
+	optional .bgs.protocol.EntityId target_account_id = 6;
+	optional string sender_battle_tag = 7;
+	optional string target_battle_tag = 8;
+	optional .bgs.protocol.ProcessId peer = 9;
+	optional .bgs.protocol.account.v1.Identity forwarding_identity = 10;
+}
+

@@ -1,0 +1,158 @@
+syntax = "proto2";
+
+import public "api/client/v2/attribute_types.proto";
+import public "api/client/v2/channel_enum.proto";
+import public "account_types.proto";
+import "channel_role_set.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.channel.v2;
+
+message ChannelId {
+	optional .bgs.protocol.ProcessId host = 2;
+	optional fixed32 id = 3;
+}
+
+message UniqueChannelType {
+	optional fixed32 program = 2;
+	optional string channel_type = 3;
+}
+
+message RoleAssignment {
+	optional .bgs.protocol.account.v1.GameAccountHandle member_id = 1;
+	repeated uint32 role = 2 [packed = true];
+}
+
+message AttributeAssignment {
+	optional .bgs.protocol.account.v1.GameAccountHandle member_id = 1;
+	repeated .bgs.protocol.v2.Attribute attribute = 2;
+}
+
+message CreateMemberOptions {
+	optional .bgs.protocol.account.v1.GameAccountHandle member_id = 1;
+	repeated .bgs.protocol.v2.Attribute attribute = 3;
+}
+
+message Member {
+	optional .bgs.protocol.account.v1.GameAccountHandle id = 1;
+	optional string battle_tag = 2;
+	optional string voice_id = 3;
+	repeated uint32 role = 4 [packed = true];
+	repeated .bgs.protocol.v2.Attribute attribute = 5;
+}
+
+message CreateChannelOptions {
+	optional .bgs.protocol.channel.v2.UniqueChannelType type = 1;
+	optional string name = 2;
+	optional .bgs.protocol.channel.v2.PrivacyLevel privacy_level = 3 [default = PRIVACY_LEVEL_OPEN];
+	repeated .bgs.protocol.v2.Attribute attribute = 4;
+	optional .bgs.protocol.channel.v2.CreateMemberOptions member = 5;
+}
+
+message PublicChannelType {
+	optional .bgs.protocol.channel.v2.UniqueChannelType type = 1;
+	optional string name = 2;
+	optional string identity = 3;
+}
+
+message GetPublicChannelTypesOptions {
+	optional .bgs.protocol.channel.v2.UniqueChannelType type = 1;
+}
+
+message FindChannelOptions {
+	optional .bgs.protocol.channel.v2.UniqueChannelType type = 1;
+	optional string identity = 2;
+	optional fixed32 locale = 3;
+	repeated .bgs.protocol.v2.Attribute search_attribute = 4 [(valid).repeated.size.min = 0, (valid).repeated.size.max = 64];
+	repeated .bgs.protocol.account.v1.AccountId reservation = 6 [(valid).repeated.size.min = 0, (valid).repeated.size.max = 20, (valid).repeated.unique = true];
+}
+
+message SendMessageOptions {
+	optional string content = 4;
+	repeated .bgs.protocol.v2.Attribute attribute = 5;
+}
+
+message ChannelMessage {
+	optional .bgs.protocol.account.v1.GameAccountHandle author_id = 1;
+	optional string content = 3;
+	repeated .bgs.protocol.v2.Attribute attribute = 4;
+	optional uint64 creation_time = 5;
+}
+
+message PublicChannelState {
+	optional string identity = 1;
+	optional fixed32 locale = 2;
+	repeated .bgs.protocol.v2.Attribute search_attribute = 3;
+	repeated .bgs.protocol.account.v1.AccountId reservation = 6;
+}
+
+message Channel {
+	optional .bgs.protocol.channel.v2.ChannelId id = 1;
+	optional .bgs.protocol.channel.v2.UniqueChannelType type = 2;
+	optional string name = 3;
+	optional .bgs.protocol.channel.v2.PrivacyLevel privacy_level = 4 [default = PRIVACY_LEVEL_OPEN];
+	repeated .bgs.protocol.v2.Attribute attribute = 5;
+	repeated .bgs.protocol.channel.v2.Member member = 6;
+	repeated .bgs.protocol.channel.v2.ChannelInvitation invitation = 7;
+	optional .bgs.protocol.channel.ChannelRoleSet role_set = 8;
+	oneof state_type {
+		.bgs.protocol.channel.v2.PublicChannelState public_channel_state = 110;
+	}
+}
+
+message ChannelDescription {
+	optional .bgs.protocol.channel.v2.ChannelId id = 1;
+	optional .bgs.protocol.channel.v2.UniqueChannelType type = 2;
+	optional string name = 3;
+	optional .bgs.protocol.channel.v2.PrivacyLevel privacy_level = 4 [default = PRIVACY_LEVEL_OPEN];
+	repeated .bgs.protocol.v2.Attribute attribute = 5;
+	optional uint32 member_count = 6;
+	oneof state_type {
+		.bgs.protocol.channel.v2.PublicChannelState public_channel_state = 110;
+	}
+}
+
+message ChannelMembershipState {
+	repeated .bgs.protocol.channel.v2.ChannelDescription description = 1;
+	repeated .bgs.protocol.channel.v2.ChannelInvitation invitation = 2;
+}
+
+message ChannelSlot {
+	optional bool reserved = 1;
+	optional bool rejoin = 2;
+}
+
+message SendInvitationOptions {
+	optional .bgs.protocol.channel.v2.ChannelId channel_id = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle target_id = 2;
+	optional .bgs.protocol.channel.v2.ChannelSlot slot = 3;
+}
+
+message MemberDescription {
+	optional .bgs.protocol.account.v1.GameAccountHandle id = 1;
+	optional string battle_tag = 2;
+}
+
+message ChannelInvitation {
+	optional fixed64 id = 1;
+	optional .bgs.protocol.channel.v2.MemberDescription inviter = 2;
+	optional .bgs.protocol.channel.v2.MemberDescription invitee = 3;
+	optional .bgs.protocol.channel.v2.ChannelDescription channel = 4;
+	optional .bgs.protocol.channel.v2.ChannelSlot slot = 5;
+	optional uint64 creation_time = 7;
+	optional uint64 expiration_time = 8;
+}
+
+message SendSuggestionOptions {
+	optional .bgs.protocol.channel.v2.ChannelId channel_id = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle target_id = 2;
+	optional .bgs.protocol.account.v1.GameAccountHandle approval_id = 3;
+}
+
+message Suggestion {
+	optional .bgs.protocol.channel.v2.ChannelId channel_id = 2;
+	optional .bgs.protocol.channel.v2.MemberDescription suggester = 3;
+	optional .bgs.protocol.channel.v2.MemberDescription suggestee = 4;
+	optional uint64 creation_time = 7;
+}
+

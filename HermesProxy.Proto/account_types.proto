@@ -1,0 +1,270 @@
+syntax = "proto2";
+
+import "entity_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.account.v1;
+
+enum IdentityVerificationStatus {
+	IDENT_NO_DATA = 0;
+	IDENT_PENDING = 1;
+	IDENT_OVER_18 = 2;
+	IDENT_UNDER_18 = 3;
+	IDENT_FAILED = 4;
+	IDENT_SUCCESS = 5;
+	IDENT_SUCC_MNL = 6;
+	IDENT_UNKNOWN = 7;
+}
+
+message AccountId {
+	option (message_options).custom_select_shard = true;
+	required fixed32 id = 1 [(valid).unsigned.exclude = 0];
+}
+
+message AccountLicense {
+	required uint32 id = 1;
+	optional uint64 expires = 2;
+}
+
+message GameAccountHandle {
+	option (message_options).custom_select_shard = true;
+	required fixed32 id = 1 [(valid).unsigned.exclude = 0];
+	required fixed32 program = 2 [(valid).unsigned.exclude = 0];
+	required uint32 region = 3 [(valid).unsigned.limits.min = 1, (valid).unsigned.limits.max = 255];
+}
+
+message AccountReference {
+	optional fixed32 id = 1;
+	optional string email = 2;
+	optional .bgs.protocol.account.v1.GameAccountHandle handle = 3;
+	optional string battle_tag = 4;
+	optional uint32 region = 10 [default = 0];
+}
+
+message Identity {
+	option (message_options).custom_validator = true;
+	optional .bgs.protocol.account.v1.AccountId account = 1;
+	optional .bgs.protocol.account.v1.GameAccountHandle game_account = 2;
+}
+
+message ProgramTag {
+	optional fixed32 program = 1;
+	optional fixed32 tag = 2;
+}
+
+message RegionTag {
+	optional fixed32 region = 1;
+	optional fixed32 tag = 2;
+}
+
+message AccountFieldTags {
+	optional fixed32 account_level_info_tag = 2;
+	optional fixed32 privacy_info_tag = 3;
+	optional fixed32 parental_control_info_tag = 4;
+	repeated .bgs.protocol.account.v1.ProgramTag game_level_info_tags = 7;
+	repeated .bgs.protocol.account.v1.ProgramTag game_status_tags = 9;
+	repeated .bgs.protocol.account.v1.RegionTag game_account_tags = 11;
+	optional fixed32 security_status_tag = 12;
+}
+
+message GameAccountFieldTags {
+	optional fixed32 game_level_info_tag = 2;
+	optional fixed32 game_time_info_tag = 3;
+	optional fixed32 game_status_tag = 4;
+	optional fixed32 raf_info_tag = 5;
+}
+
+message AccountFieldOptions {
+	optional bool all_fields = 1;
+	optional bool field_account_level_info = 2;
+	optional bool field_privacy_info = 3;
+	optional bool field_parental_control_info = 4;
+	optional bool field_game_level_info = 6;
+	optional bool field_game_status = 7;
+	optional bool field_game_accounts = 8;
+	optional bool field_security_status = 9;
+}
+
+message GameAccountFieldOptions {
+	optional bool all_fields = 1;
+	optional bool field_game_level_info = 2;
+	optional bool field_game_time_info = 3;
+	optional bool field_game_status = 4;
+	optional bool field_raf_info = 5;
+}
+
+message SubscriberReference {
+	optional uint64 object_id = 1 [default = 0];
+	optional .bgs.protocol.EntityId entity_id = 2;
+	optional .bgs.protocol.account.v1.AccountFieldOptions account_options = 3;
+	optional .bgs.protocol.account.v1.AccountFieldTags account_tags = 4;
+	optional .bgs.protocol.account.v1.GameAccountFieldOptions game_account_options = 5;
+	optional .bgs.protocol.account.v1.GameAccountFieldTags game_account_tags = 6;
+	optional uint64 subscriber_id = 7 [default = 0];
+}
+
+message AccountLevelInfo {
+	repeated .bgs.protocol.account.v1.AccountLicense licenses = 3;
+	optional fixed32 default_currency = 4;
+	optional string country = 5;
+	optional uint32 preferred_region = 6;
+	optional string full_name = 7;
+	optional string battle_tag = 8;
+	optional bool muted = 9;
+	optional bool manual_review = 10;
+	optional bool account_paid_any = 11;
+	optional .bgs.protocol.account.v1.IdentityVerificationStatus identity_check_status = 12 [default = IDENT_NO_DATA];
+	optional string email = 13;
+	optional bool headless_account = 14;
+	optional bool test_account = 15;
+	optional bool is_sms_protected = 17;
+	optional uint32 ratings_board_minimum_age = 18;
+}
+
+message PrivacyInfo {
+	enum GameInfoPrivacy {
+		PRIVACY_ME = 0;
+		PRIVACY_FRIENDS = 1;
+		PRIVACY_EVERYONE = 2;
+	}
+
+	optional bool is_using_rid = 3;
+	optional bool is_visible_for_view_friends = 4;
+	optional bool is_hidden_from_friend_finder = 5;
+	optional .bgs.protocol.account.v1.PrivacyInfo.GameInfoPrivacy game_info_privacy = 6 [default = PRIVACY_FRIENDS];
+	optional bool only_allow_friend_whispers = 7;
+}
+
+message ParentalControlInfo {
+	optional string timezone = 3;
+	optional uint32 minutes_per_day = 4;
+	optional uint32 minutes_per_week = 5;
+	optional bool can_receive_voice = 6;
+	optional bool can_send_voice = 7;
+	repeated bool play_schedule = 8;
+	optional bool can_join_group = 9;
+	optional bool can_use_profile = 10;
+}
+
+message GameLevelInfo {
+	optional bool is_trial = 4;
+	optional bool is_lifetime = 5;
+	optional bool is_restricted = 6;
+	optional bool is_beta = 7;
+	optional string name = 8;
+	optional fixed32 program = 9;
+	repeated .bgs.protocol.account.v1.AccountLicense licenses = 10;
+	optional uint32 realm_permissions = 11;
+	optional uint64 last_logout_time_ms = 12;
+}
+
+message GameTimeInfo {
+	optional bool is_unlimited_play_time = 3;
+	optional uint64 play_time_expires = 5;
+	optional bool is_subscription = 6;
+	optional bool is_recurring_subscription = 7;
+}
+
+message GameTimeRemainingInfo {
+	optional uint32 minutes_remaining = 1;
+	optional uint32 parental_daily_minutes_remaining = 2;
+	optional uint32 parental_weekly_minutes_remaining = 3;
+	optional uint32 seconds_remaining_until_kick = 4 [deprecated = true];
+}
+
+message GameStatus {
+	optional bool is_suspended = 4;
+	optional bool is_banned = 5;
+	optional uint64 suspension_expires = 6;
+	optional fixed32 program = 7;
+	optional bool is_locked = 8;
+	optional bool is_bam_unlockable = 9;
+}
+
+message RAFInfo {
+	optional bytes raf_info = 1;
+}
+
+message GameSessionInfo {
+	optional uint32 start_time = 3 [deprecated = true];
+	optional .bgs.protocol.account.v1.GameSessionLocation location = 4;
+	optional bool has_benefactor = 5;
+	optional bool is_using_igr = 6;
+	optional bool parental_controls_active = 7;
+	optional uint64 start_time_sec = 8;
+	optional .bgs.protocol.account.v1.IgrId igr_id = 9;
+}
+
+message GameSessionUpdateInfo {
+	optional .bgs.protocol.account.v1.CAIS cais = 8;
+}
+
+message GameSessionLocation {
+	optional string ip_address = 1;
+	optional uint32 country = 2;
+	optional string city = 3;
+}
+
+message CAIS {
+	optional uint32 played_minutes = 1;
+	optional uint32 rested_minutes = 2;
+	optional uint64 last_heard_time = 3;
+}
+
+message GameAccountList {
+	optional uint32 region = 3;
+	repeated .bgs.protocol.account.v1.GameAccountHandle handle = 4;
+}
+
+message SecurityStatus {
+	optional bool sms_protect_enabled = 1;
+	optional bool email_verified = 2;
+	optional bool authenticator_enabled = 3;
+	optional bool sqa_enabled = 4;
+	optional bool authenticator_required = 5;
+}
+
+message AccountState {
+	optional .bgs.protocol.account.v1.AccountLevelInfo account_level_info = 1;
+	optional .bgs.protocol.account.v1.PrivacyInfo privacy_info = 2;
+	optional .bgs.protocol.account.v1.ParentalControlInfo parental_control_info = 3;
+	repeated .bgs.protocol.account.v1.GameLevelInfo game_level_info = 5;
+	repeated .bgs.protocol.account.v1.GameStatus game_status = 6;
+	repeated .bgs.protocol.account.v1.GameAccountList game_accounts = 7;
+	optional .bgs.protocol.account.v1.SecurityStatus security_status = 8;
+}
+
+message AccountStateTagged {
+	optional .bgs.protocol.account.v1.AccountState account_state = 1;
+	optional .bgs.protocol.account.v1.AccountFieldTags account_tags = 2;
+}
+
+message GameAccountState {
+	optional .bgs.protocol.account.v1.GameLevelInfo game_level_info = 1;
+	optional .bgs.protocol.account.v1.GameTimeInfo game_time_info = 2;
+	optional .bgs.protocol.account.v1.GameStatus game_status = 3;
+	optional .bgs.protocol.account.v1.RAFInfo raf_info = 4;
+}
+
+message GameAccountStateTagged {
+	optional .bgs.protocol.account.v1.GameAccountState game_account_state = 1;
+	optional .bgs.protocol.account.v1.GameAccountFieldTags game_account_tags = 2;
+}
+
+message AuthorizedData {
+	optional string data = 1;
+	repeated uint32 license = 2;
+}
+
+message IgrId {
+	oneof type {
+		.bgs.protocol.account.v1.GameAccountHandle game_account = 1;
+		fixed32 external_id = 2;
+	}
+}
+
+message IgrAddress {
+	optional string client_address = 1;
+	optional uint32 region = 2;
+}
+

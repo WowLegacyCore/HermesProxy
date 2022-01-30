@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+import "global_extensions/field_options.proto";
+import "global_extensions/message_options.proto";
+
+package bgs.protocol;
+
+option java_package = "bnet.protocol";
+option java_outer_classname = "EntityProto";
+
+message EntityId {
+	option (message_options).custom_select_shard = true;
+	required fixed64 high = 1 [(field_options).log = HEX];
+	required fixed64 low = 2 [(field_options).log = HEX];
+}
+
+message Identity {
+	optional .bgs.protocol.EntityId account_id = 1 [(valid).entity_id.kind = ACCOUNT];
+	optional .bgs.protocol.EntityId game_account_id = 2 [(valid).entity_id.kind = GAME_ACCOUNT];
+}
+

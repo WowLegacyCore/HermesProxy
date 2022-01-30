@@ -1,0 +1,207 @@
+syntax = "proto2";
+
+import "account_types.proto";
+import "entity_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.account.v1;
+
+option cc_generic_services = false;
+
+message ResolveAccountRequest {
+	option (message_options).custom_select_shard = true;
+	optional .bgs.protocol.account.v1.AccountReference ref = 1;
+	optional bool fetch_id = 12;
+}
+
+message ResolveAccountResponse {
+	optional .bgs.protocol.account.v1.AccountId id = 12;
+}
+
+message GameAccountFlagUpdateRequest {
+	optional .bgs.protocol.account.v1.GameAccountHandle game_account = 1;
+	optional uint64 flag = 2;
+	optional bool active = 3;
+}
+
+message SubscriptionUpdateRequest {
+	repeated .bgs.protocol.account.v1.SubscriberReference ref = 2;
+}
+
+message SubscriptionUpdateResponse {
+	repeated .bgs.protocol.account.v1.SubscriberReference ref = 1;
+}
+
+message IsIgrAddressRequest {
+	optional string client_address = 1;
+	optional uint32 region = 2;
+}
+
+message GetAccountStateRequest {
+	optional .bgs.protocol.EntityId entity_id = 1 [(field_options).shard_key = true];
+	optional uint32 program = 2;
+	optional uint32 region = 3;
+	optional .bgs.protocol.account.v1.AccountFieldOptions options = 10;
+	optional .bgs.protocol.account.v1.AccountFieldTags tags = 11;
+}
+
+message GetAccountStateResponse {
+	optional .bgs.protocol.account.v1.AccountState state = 1;
+	optional .bgs.protocol.account.v1.AccountFieldTags tags = 2;
+}
+
+message GetSignedAccountStateRequest {
+	optional .bgs.protocol.account.v1.AccountId account = 1;
+}
+
+message GetSignedAccountStateResponse {
+	optional string token = 1;
+}
+
+message GetGameAccountStateRequest {
+	optional .bgs.protocol.EntityId account_id = 1 [deprecated = true];
+	optional .bgs.protocol.EntityId game_account_id = 2;
+	optional .bgs.protocol.account.v1.GameAccountFieldOptions options = 10;
+	optional .bgs.protocol.account.v1.GameAccountFieldTags tags = 11;
+}
+
+message GetGameAccountStateResponse {
+	optional .bgs.protocol.account.v1.GameAccountState state = 1;
+	optional .bgs.protocol.account.v1.GameAccountFieldTags tags = 2;
+}
+
+message GetLicensesRequest {
+	optional .bgs.protocol.EntityId target_id = 1 [(field_options).shard_key = true];
+	optional bool fetch_account_licenses = 2;
+	optional bool fetch_game_account_licenses = 3;
+	optional bool fetch_dynamic_account_licenses = 4;
+	optional fixed32 program = 5;
+	optional bool exclude_unknown_program = 6 [default = false];
+}
+
+message GetLicensesResponse {
+	repeated .bgs.protocol.account.v1.AccountLicense licenses = 1;
+}
+
+message GetGameSessionInfoRequest {
+	optional .bgs.protocol.EntityId entity_id = 1;
+}
+
+message GetGameSessionInfoResponse {
+	optional .bgs.protocol.account.v1.GameSessionInfo session_info = 2;
+}
+
+message GetGameTimeRemainingInfoRequest {
+	optional .bgs.protocol.EntityId game_account_id = 1;
+	optional .bgs.protocol.EntityId account_id = 2;
+}
+
+message GetGameTimeRemainingInfoResponse {
+	optional .bgs.protocol.account.v1.GameTimeRemainingInfo game_time_remaining_info = 1;
+}
+
+message GetCAISInfoRequest {
+	optional .bgs.protocol.EntityId entity_id = 1;
+}
+
+message GetCAISInfoResponse {
+	optional .bgs.protocol.account.v1.CAIS cais_info = 1;
+}
+
+message GetAuthorizedDataRequest {
+	optional .bgs.protocol.EntityId entity_id = 1;
+	repeated string tag = 2;
+	optional bool privileged_network = 3;
+}
+
+message GetAuthorizedDataResponse {
+	repeated .bgs.protocol.account.v1.AuthorizedData data = 1;
+}
+
+message AccountStateNotification {
+	optional .bgs.protocol.account.v1.AccountState account_state = 1;
+	optional uint64 subscriber_id = 2 [deprecated = true];
+	optional .bgs.protocol.account.v1.AccountFieldTags account_tags = 3;
+	optional bool subscription_completed = 4;
+}
+
+message GameAccountStateNotification {
+	optional .bgs.protocol.account.v1.GameAccountState game_account_state = 1;
+	optional uint64 subscriber_id = 2 [deprecated = true];
+	optional .bgs.protocol.account.v1.GameAccountFieldTags game_account_tags = 3;
+	optional bool subscription_completed = 4;
+}
+
+message GameAccountNotification {
+	repeated .bgs.protocol.account.v1.GameAccountList game_accounts = 1;
+	optional uint64 subscriber_id = 2;
+	optional .bgs.protocol.account.v1.AccountFieldTags account_tags = 3;
+}
+
+message GameAccountSessionNotification {
+	optional .bgs.protocol.account.v1.GameAccountHandle game_account = 1;
+	optional .bgs.protocol.account.v1.GameSessionUpdateInfo session_info = 2;
+}
+
+service AccountService {
+	option (service_options).descriptor_name = "bnet.protocol.account.AccountService";
+	option (service_options).shard_name = "account";
+	option (sdk_service_options).outbound = true;
+	rpc ResolveAccount (.bgs.protocol.account.v1.ResolveAccountRequest) returns (.bgs.protocol.account.v1.ResolveAccountResponse) {
+		option (method_options).id = 13;
+	}
+	rpc IsIgrAddress (.bgs.protocol.account.v1.IsIgrAddressRequest) returns (.bgs.protocol.NoData) {
+		option deprecated = true;
+		option (method_options).id = 15;
+	}
+	rpc Subscribe (.bgs.protocol.account.v1.SubscriptionUpdateRequest) returns (.bgs.protocol.account.v1.SubscriptionUpdateResponse) {
+		option (method_options).id = 25;
+	}
+	rpc Unsubscribe (.bgs.protocol.account.v1.SubscriptionUpdateRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 26;
+	}
+	rpc GetAccountState (.bgs.protocol.account.v1.GetAccountStateRequest) returns (.bgs.protocol.account.v1.GetAccountStateResponse) {
+		option (method_options).id = 30;
+	}
+	rpc GetGameAccountState (.bgs.protocol.account.v1.GetGameAccountStateRequest) returns (.bgs.protocol.account.v1.GetGameAccountStateResponse) {
+		option (method_options).id = 31;
+	}
+	rpc GetLicenses (.bgs.protocol.account.v1.GetLicensesRequest) returns (.bgs.protocol.account.v1.GetLicensesResponse) {
+		option (method_options).id = 32;
+	}
+	rpc GetGameTimeRemainingInfo (.bgs.protocol.account.v1.GetGameTimeRemainingInfoRequest) returns (.bgs.protocol.account.v1.GetGameTimeRemainingInfoResponse) {
+		option (method_options).id = 33;
+	}
+	rpc GetGameSessionInfo (.bgs.protocol.account.v1.GetGameSessionInfoRequest) returns (.bgs.protocol.account.v1.GetGameSessionInfoResponse) {
+		option (method_options).id = 34;
+	}
+	rpc GetCAISInfo (.bgs.protocol.account.v1.GetCAISInfoRequest) returns (.bgs.protocol.account.v1.GetCAISInfoResponse) {
+		option (method_options).id = 35;
+	}
+	rpc GetAuthorizedData (.bgs.protocol.account.v1.GetAuthorizedDataRequest) returns (.bgs.protocol.account.v1.GetAuthorizedDataResponse) {
+		option (method_options).id = 37;
+	}
+	rpc GetSignedAccountState (.bgs.protocol.account.v1.GetSignedAccountStateRequest) returns (.bgs.protocol.account.v1.GetSignedAccountStateResponse) {
+		option (method_options).id = 44;
+	}
+}
+
+service AccountListener {
+	option (service_options).descriptor_name = "bnet.protocol.account.AccountNotify";
+	option (sdk_service_options).inbound = true;
+	rpc OnAccountStateUpdated (.bgs.protocol.account.v1.AccountStateNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 1;
+	}
+	rpc OnGameAccountStateUpdated (.bgs.protocol.account.v1.GameAccountStateNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 2;
+	}
+	rpc OnGameAccountsUpdated (.bgs.protocol.account.v1.GameAccountNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option deprecated = true;
+		option (method_options).id = 3;
+	}
+	rpc OnGameSessionUpdated (.bgs.protocol.account.v1.GameAccountSessionNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option deprecated = true;
+		option (method_options).id = 4;
+	}
+}
+

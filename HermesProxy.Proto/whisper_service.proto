@@ -1,0 +1,89 @@
+syntax = "proto2";
+
+import "whisper_types.proto";
+import "rpc_types.proto";
+import "account_types.proto";
+import "event_view_types.proto";
+import "message_types.proto";
+
+package bgs.protocol.whisper.v1;
+
+option cc_generic_services = false;
+
+message SubscribeRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+}
+
+message SubscribeResponse {
+	repeated .bgs.protocol.whisper.v1.WhisperView view = 1;
+}
+
+message UnsubscribeRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+}
+
+message SendWhisperRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+	optional .bgs.protocol.whisper.v1.SendOptions whisper = 2;
+}
+
+message SendWhisperResponse {
+	optional .bgs.protocol.whisper.v1.Whisper whisper = 1;
+}
+
+message SetTypingIndicatorRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+	optional .bgs.protocol.account.v1.AccountId target_id = 2;
+	optional .bgs.protocol.TypingIndicator action = 3 [default = TYPING_START];
+}
+
+message AdvanceViewTimeRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+	optional .bgs.protocol.account.v1.AccountId target_id = 2;
+}
+
+message AdvanceClearTimeRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+	optional .bgs.protocol.account.v1.AccountId target_id = 2;
+}
+
+message GetWhisperMessagesRequest {
+	optional .bgs.protocol.account.v1.AccountId agent_id = 1 [(field_options).shard_key = true, (field_options).client_instance_key = true];
+	optional .bgs.protocol.account.v1.AccountId target_id = 2;
+	optional .bgs.protocol.GetEventOptions options = 3;
+}
+
+message GetWhisperMessagesResponse {
+	repeated .bgs.protocol.whisper.v1.Whisper whisper = 1;
+	optional uint64 continuation = 2;
+}
+
+service WhisperService {
+	option (service_options).descriptor_name = "bnet.protocol.whisper.WhisperService";
+	option (service_options).shard_name = "whisper";
+	option (service_options).resolve_client_instance = true;
+	option (sdk_service_options).outbound = true;
+	option (sdk_service_options).use_client_id = true;
+	rpc Subscribe (.bgs.protocol.whisper.v1.SubscribeRequest) returns (.bgs.protocol.whisper.v1.SubscribeResponse) {
+		option (method_options).id = 1;
+	}
+	rpc Unsubscribe (.bgs.protocol.whisper.v1.UnsubscribeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 2;
+	}
+	rpc SendWhisper (.bgs.protocol.whisper.v1.SendWhisperRequest) returns (.bgs.protocol.whisper.v1.SendWhisperResponse) {
+		option (method_options).id = 3;
+	}
+	rpc SetTypingIndicator (.bgs.protocol.whisper.v1.SetTypingIndicatorRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 4;
+	}
+	rpc AdvanceViewTime (.bgs.protocol.whisper.v1.AdvanceViewTimeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 5;
+	}
+	rpc GetWhisperMessages (.bgs.protocol.whisper.v1.GetWhisperMessagesRequest) returns (.bgs.protocol.whisper.v1.GetWhisperMessagesResponse) {
+		option (method_options).id = 6;
+	}
+	rpc AdvanceClearTime (.bgs.protocol.whisper.v1.AdvanceClearTimeRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 7;
+	}
+}
+

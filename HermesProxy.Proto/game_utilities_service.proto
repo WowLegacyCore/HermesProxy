@@ -1,0 +1,133 @@
+syntax = "proto2";
+
+import "attribute_types.proto";
+import "content_handle_types.proto";
+import "entity_types.proto";
+import "game_utilities_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.game_utilities.v1;
+
+option cc_generic_services = false;
+option java_package = "bnet.protocol.game_utilities.v1";
+option java_outer_classname = "GameUtilitiesServiceProto";
+option java_generic_services = true;
+
+message ClientRequest {
+	repeated .bgs.protocol.Attribute attribute = 1;
+	optional .bgs.protocol.ProcessId host = 2;
+	optional .bgs.protocol.EntityId account_id = 3;
+	optional .bgs.protocol.EntityId game_account_id = 4;
+	optional fixed32 program = 5;
+	optional .bgs.protocol.game_utilities.v1.ClientInfo client_info = 6;
+}
+
+message ClientResponse {
+	repeated .bgs.protocol.Attribute attribute = 1;
+}
+
+message ServerRequest {
+	repeated .bgs.protocol.Attribute attribute = 1;
+	required fixed32 program = 2;
+	optional .bgs.protocol.ProcessId host = 3;
+}
+
+message ServerResponse {
+	repeated .bgs.protocol.Attribute attribute = 1;
+}
+
+message PresenceChannelCreatedRequest {
+	required .bgs.protocol.EntityId id = 1;
+	optional .bgs.protocol.EntityId game_account_id = 3;
+	optional .bgs.protocol.EntityId account_id = 4;
+	optional .bgs.protocol.ProcessId host = 5;
+}
+
+message GetPlayerVariablesRequest {
+	repeated .bgs.protocol.game_utilities.v1.PlayerVariables player_variables = 1;
+	optional .bgs.protocol.ProcessId host = 2;
+}
+
+message GetPlayerVariablesResponse {
+	repeated .bgs.protocol.game_utilities.v1.PlayerVariables player_variables = 1;
+}
+
+message GameAccountOnlineNotification {
+	required .bgs.protocol.EntityId game_account_id = 1;
+	optional .bgs.protocol.ProcessId host = 2;
+	optional string session_id = 3;
+}
+
+message GameAccountOfflineNotification {
+	required .bgs.protocol.EntityId game_account_id = 1;
+	optional .bgs.protocol.ProcessId host = 2;
+	optional string session_id = 3;
+}
+
+message GetAchievementsFileRequest {
+	optional .bgs.protocol.ProcessId host = 1;
+}
+
+message GetAchievementsFileResponse {
+	optional .bgs.protocol.ContentHandle content_handle = 1;
+}
+
+message GetAllValuesForAttributeRequest {
+	optional string attribute_key = 1;
+	optional .bgs.protocol.EntityId agent_id = 2;
+	optional fixed32 program = 5;
+}
+
+message GetAllValuesForAttributeResponse {
+	repeated .bgs.protocol.Variant attribute_value = 1;
+}
+
+message RegisterUtilitiesRequest {
+	repeated .bgs.protocol.Attribute attribute = 1;
+	optional fixed32 program = 2;
+}
+
+message RegisterUtilitiesResponse {
+	optional string client_id = 1;
+}
+
+message UnregisterUtilitiesRequest {
+}
+
+service GameUtilitiesService {
+	option (service_options).descriptor_name = "bnet.protocol.game_utilities.GameUtilities";
+	option (service_options).shard_name = "game_utilities";
+	option (sdk_service_options).inbound = true;
+	option (sdk_service_options).outbound = true;
+	rpc ProcessClientRequest (.bgs.protocol.game_utilities.v1.ClientRequest) returns (.bgs.protocol.game_utilities.v1.ClientResponse) {
+		option (method_options).id = 1;
+	}
+	rpc PresenceChannelCreated (.bgs.protocol.game_utilities.v1.PresenceChannelCreatedRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 2;
+	}
+	rpc GetPlayerVariables (.bgs.protocol.game_utilities.v1.GetPlayerVariablesRequest) returns (.bgs.protocol.game_utilities.v1.GetPlayerVariablesResponse) {
+		option (method_options).id = 3;
+	}
+	rpc ProcessServerRequest (.bgs.protocol.game_utilities.v1.ServerRequest) returns (.bgs.protocol.game_utilities.v1.ServerResponse) {
+		option (method_options).id = 6;
+	}
+	rpc OnGameAccountOnline (.bgs.protocol.game_utilities.v1.GameAccountOnlineNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 7;
+	}
+	rpc OnGameAccountOffline (.bgs.protocol.game_utilities.v1.GameAccountOfflineNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 8;
+	}
+	rpc GetAchievementsFile (.bgs.protocol.game_utilities.v1.GetAchievementsFileRequest) returns (.bgs.protocol.game_utilities.v1.GetAchievementsFileResponse) {
+		option (method_options).id = 9;
+	}
+	rpc GetAllValuesForAttribute (.bgs.protocol.game_utilities.v1.GetAllValuesForAttributeRequest) returns (.bgs.protocol.game_utilities.v1.GetAllValuesForAttributeResponse) {
+		option (method_options).id = 10;
+	}
+	rpc RegisterUtilities (.bgs.protocol.game_utilities.v1.RegisterUtilitiesRequest) returns (.bgs.protocol.game_utilities.v1.RegisterUtilitiesResponse) {
+		option (method_options).id = 11;
+	}
+	rpc UnregisterUtilities (.bgs.protocol.game_utilities.v1.UnregisterUtilitiesRequest) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 12;
+	}
+}
+

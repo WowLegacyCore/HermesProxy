@@ -1,0 +1,89 @@
+syntax = "proto2";
+
+import "google/protobuf/descriptor.proto";
+import "global_extensions/range.proto";
+
+package bgs.protocol;
+
+option java_package = "bnet.protocol";
+option java_outer_classname = "FieldOptionsProto";
+
+extend .google.protobuf.FieldOptions {
+	optional .bgs.protocol.BGSFieldOptions field_options = 90000;
+	optional .bgs.protocol.FieldRestriction valid = 90001;
+}
+
+enum LogOption {
+	HIDDEN = 1;
+	HEX = 2;
+}
+
+message BGSFieldOptions {
+	optional .bgs.protocol.LogOption log = 1 [default = HIDDEN];
+	optional bool shard_key = 2;
+	optional bool fanout_key = 3;
+	optional bool client_instance_key = 4;
+}
+
+message FieldRestriction {
+	oneof type {
+		.bgs.protocol.SignedFieldRestriction signed = 1;
+		.bgs.protocol.UnsignedFieldRestriction unsigned = 2;
+		.bgs.protocol.FloatFieldRestriction float = 3;
+		.bgs.protocol.StringFieldRestriction string = 4;
+		.bgs.protocol.RepeatedFieldRestriction repeated = 5;
+		.bgs.protocol.MessageFieldRestriction message = 6;
+		.bgs.protocol.EntityIdRestriction entity_id = 7;
+	}
+}
+
+message RepeatedFieldRestriction {
+	optional .bgs.protocol.UnsignedIntRange size = 1;
+	optional bool unique = 2;
+	oneof type {
+		.bgs.protocol.SignedFieldRestriction signed = 3;
+		.bgs.protocol.UnsignedFieldRestriction unsigned = 4;
+		.bgs.protocol.FloatFieldRestriction float = 5;
+		.bgs.protocol.StringFieldRestriction string = 6;
+		.bgs.protocol.EntityIdRestriction entity_id = 7;
+	}
+}
+
+message SignedFieldRestriction {
+	optional .bgs.protocol.SignedIntRange limits = 1;
+	repeated sint64 exclude = 2;
+}
+
+message UnsignedFieldRestriction {
+	optional .bgs.protocol.UnsignedIntRange limits = 1;
+	repeated uint64 exclude = 2;
+}
+
+message FloatFieldRestriction {
+	optional .bgs.protocol.FloatRange limits = 1;
+	repeated float exclude = 2;
+}
+
+message StringFieldRestriction {
+	optional .bgs.protocol.UnsignedIntRange size = 1;
+	repeated string exclude = 2;
+}
+
+message EntityIdRestriction {
+	enum Kind {
+		ANY = 0;
+		ACCOUNT = 1;
+		GAME_ACCOUNT = 2;
+		ACCOUNT_OR_GAME_ACCOUNT = 3;
+		SERVICE = 4;
+		CHANNEL = 5;
+	}
+
+	optional bool needed = 1;
+	optional .bgs.protocol.EntityIdRestriction.Kind kind = 2 [default = ANY];
+}
+
+message MessageFieldRestriction {
+	optional bool needed = 1;
+}
+

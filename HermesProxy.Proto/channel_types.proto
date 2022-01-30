@@ -1,0 +1,84 @@
+syntax = "proto2";
+
+import public "api/client/v1/channel_id.proto";
+import "attribute_types.proto";
+import "entity_types.proto";
+import "account_types.proto";
+import "invitation_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.channel.v1;
+
+message Message {
+	repeated .bgs.protocol.Attribute attribute = 1;
+
+	extensions 100 to 10000;
+}
+
+message ListChannelsOptions {
+	optional uint32 start_index = 1 [default = 0];
+	optional uint32 max_results = 2 [default = 16];
+	optional string name = 3;
+	optional fixed32 program = 4;
+	optional fixed32 locale = 5;
+	optional uint32 capacity_full = 6;
+	required .bgs.protocol.AttributeFilter attribute_filter = 7;
+	optional string channel_type = 8;
+}
+
+message ChannelDescription {
+	required .bgs.protocol.EntityId channel_id = 1;
+	optional uint32 current_members = 2;
+	optional .bgs.protocol.channel.v1.ChannelState state = 3;
+}
+
+message ChannelInfo {
+	required .bgs.protocol.channel.v1.ChannelDescription description = 1;
+	repeated .bgs.protocol.channel.v1.Member member = 2;
+}
+
+message ChannelState {
+	enum PrivacyLevel {
+		PRIVACY_LEVEL_OPEN = 1;
+		PRIVACY_LEVEL_OPEN_INVITATION_AND_FRIEND = 2;
+		PRIVACY_LEVEL_OPEN_INVITATION = 3;
+		PRIVACY_LEVEL_CLOSED = 4;
+	}
+
+	optional uint32 max_members = 1;
+	optional uint32 min_members = 2;
+	repeated .bgs.protocol.Attribute attribute = 3;
+	repeated .bgs.protocol.Invitation invitation = 4;
+	optional uint32 reason = 6;
+	optional .bgs.protocol.channel.v1.ChannelState.PrivacyLevel privacy_level = 7 [default = PRIVACY_LEVEL_OPEN];
+	optional string name = 8;
+	optional string channel_type = 10 [default = "default"];
+	optional fixed32 program = 11;
+	optional bool subscribe_to_presence = 13 [default = true];
+
+	extensions 100 to 10000;
+}
+
+message MemberAccountInfo {
+	optional string battle_tag = 3;
+}
+
+message MemberState {
+	repeated .bgs.protocol.Attribute attribute = 1;
+	repeated uint32 role = 2 [packed = true];
+	optional uint64 privileges = 3 [default = 0];
+	optional .bgs.protocol.channel.v1.MemberAccountInfo info = 4;
+}
+
+message Member {
+	required .bgs.protocol.Identity identity = 1;
+	required .bgs.protocol.channel.v1.MemberState state = 2;
+}
+
+message SubscriberId {
+	option (message_options).custom_validator = true;
+	optional .bgs.protocol.account.v1.AccountId account = 1 [deprecated = true];
+	optional .bgs.protocol.account.v1.GameAccountHandle game_account = 2;
+	optional .bgs.protocol.ProcessId process = 3;
+}
+

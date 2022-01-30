@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+package bgs.protocol;
+
+enum VoiceJoinType {
+	VOICE_JOIN_NORMAL = 0;
+	VOICE_JOIN_MUTED = 1;
+}
+
+enum VoiceMuteReason {
+	VOICE_MUTE_REASON_NONE = 0;
+	VOICE_MUTE_REASON_PARENTAL_CONTROL_LISTEN_ONLY = 1;
+	VOICE_MUTE_REASON_REQUESTED = 2;
+	VOICE_MUTE_REASON_SQUELCHED = 3;
+}
+
+message VoiceCredentials {
+	optional string voice_id = 1;
+	optional string token = 2;
+	optional string url = 3;
+	optional .bgs.protocol.VoiceJoinType join_type = 4 [default = VOICE_JOIN_NORMAL];
+	optional .bgs.protocol.VoiceMuteReason mute_reason = 5 [default = VOICE_MUTE_REASON_NONE];
+}
+

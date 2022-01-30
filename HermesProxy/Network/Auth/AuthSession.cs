@@ -15,18 +15,24 @@ namespace HermesProxy.Network.Auth
     {
         readonly Socket _socket;
         readonly byte[] _buffer = new byte[4096];
+        readonly string _password;
 
+        public string Username { get; private set; }
         public byte[] PasswordHash { get; private set; }
         public byte[] Modulus2 { get; set; }
         public BigInteger Key { get; set; }
         public bool RequestDisconnect { get; set; }
+        public bool? HasSucceededLogin { get; set; } = null;
 
-        public AuthSession(Socket socket)
+        public AuthSession(Socket socket, string username, string password)
         {
             if (_socket != null)
-                throw new ArgumentException("There already is a AuthSession instance");
+                throw new InvalidOperationException("There already is a AuthSession instance");
 
-            var authstring = $"{Settings.ServerUsername.ToUpper()}:{Settings.ServerPassword}";
+            Username = username;
+            _password = password;
+
+            var authstring = $"{Username.ToUpper()}:{_password}";
             PasswordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
 
             _socket = socket;
@@ -78,6 +84,36 @@ namespace HermesProxy.Network.Auth
                         Log.Print(LogType.Error, $"Unknown Opcode: {command}");
                         break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sends the <see cref="AuthCommand.LOGON_CHALLENGE"/> to the <see cref="Socket"/>
+        /// </summary>
+        public void SendLogonChallenge()
+        {
+            using (var writer = new PacketWriter())
+            {
+                writer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
+                writer.WriteUInt8(6);
+                writer.WriteUInt16((ushort)(Username.Length + 30));
+                writer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
+                writer.WriteUInt8(0);
+                writer.WriteUInt8(Settings.GetServerExpansionVersion());
+                writer.WriteUInt8(Settings.GetServerMajorPatchVersion());
+                writer.WriteUInt8(Settings.GetServerMinorPatchVersion());
+                writer.WriteUInt16((ushort)Settings.ServerBuild);
+                writer.WriteBytes(Encoding.ASCII.GetBytes("68x"));
+                writer.WriteUInt8(0);
+                writer.WriteBytes(Encoding.ASCII.GetBytes("niW"));
+                writer.WriteUInt8(0);
+                writer.WriteBytes(Encoding.ASCII.GetBytes("SUne"));
+                writer.WriteUInt32(0x3C);
+                writer.WriteUInt32(0); // IP
+                writer.WriteUInt8((byte)Username.Length);
+                writer.WriteBytes(Encoding.ASCII.GetBytes(Username.ToUpper()));
+
+                SendPacket(writer.GetData());
             }
         }
 

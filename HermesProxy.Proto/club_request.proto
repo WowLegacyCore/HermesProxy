@@ -1,0 +1,464 @@
+syntax = "proto2";
+
+import public "club_types.proto";
+
+package bgs.protocol.club.v1;
+
+message SubscribeRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+}
+
+message UnsubscribeRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+}
+
+message CreateRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional .bgs.protocol.club.v1.ClubCreateOptions options = 2;
+}
+
+message CreateResponse {
+	optional uint64 club_id = 1;
+}
+
+message DestroyRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+}
+
+message GetDescriptionRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+}
+
+message GetDescriptionResponse {
+	optional .bgs.protocol.club.v1.ClubDescription club = 1;
+}
+
+message GetClubTypeRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional .bgs.protocol.club.v1.UniqueClubType type = 2;
+}
+
+message GetClubTypeResponse {
+	optional .bgs.protocol.club.v1.UniqueClubType type = 1;
+	optional .bgs.protocol.club.v1.ClubRoleSet role_set = 2;
+	optional .bgs.protocol.club.v1.ClubTypeRangeSet range_set = 3;
+}
+
+message UpdateClubStateRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.ClubStateOptions options = 3;
+}
+
+message UpdateClubSettingsRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.ClubSettingsOptions options = 3;
+}
+
+message JoinRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.CreateMemberOptions options = 3;
+}
+
+message LeaveRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+}
+
+message KickRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.MemberId target_id = 3;
+}
+
+message GetMemberRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.MemberId member_id = 3;
+}
+
+message GetMemberResponse {
+	optional .bgs.protocol.club.v1.Member member = 1;
+}
+
+message GetMembersRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 continuation = 4;
+}
+
+message GetMembersResponse {
+	repeated .bgs.protocol.club.v1.Member member = 1;
+	optional uint64 continuation = 2;
+}
+
+message UpdateMemberStateRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.MemberId member_id = 3;
+	optional .bgs.protocol.club.v1.MemberStateOptions options = 5;
+}
+
+message UpdateSubscriberStateRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.SubscriberStateOptions options = 3;
+}
+
+message AssignRoleRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.RoleOptions options = 3;
+}
+
+message UnassignRoleRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.RoleOptions options = 3;
+}
+
+message SendInvitationRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.SendInvitationOptions options = 3;
+}
+
+message AcceptInvitationRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 invitation_id = 3;
+}
+
+message DeclineInvitationRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 invitation_id = 3;
+}
+
+message RevokeInvitationRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 invitation_id = 3;
+}
+
+message GetInvitationRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 invitation_id = 3;
+}
+
+message GetInvitationResponse {
+	optional .bgs.protocol.club.v1.ClubInvitation invitation = 1;
+}
+
+message GetInvitationsRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 continuation = 3;
+}
+
+message GetInvitationsResponse {
+	repeated .bgs.protocol.club.v1.ClubInvitation invitation = 1;
+	optional uint64 continuation = 2;
+}
+
+message SendSuggestionRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.SendSuggestionOptions options = 3;
+}
+
+message AcceptSuggestionRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 suggestion_id = 3;
+}
+
+message DeclineSuggestionRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 suggestion_id = 3;
+}
+
+message GetSuggestionRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional fixed64 suggestion_id = 3;
+}
+
+message GetSuggestionResponse {
+	optional .bgs.protocol.club.v1.ClubSuggestion suggestion = 1;
+}
+
+message GetSuggestionsRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 continuation = 3;
+}
+
+message GetSuggestionsResponse {
+	repeated .bgs.protocol.club.v1.ClubSuggestion suggestion = 1;
+	optional uint64 continuation = 2;
+}
+
+message CreateTicketRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.CreateTicketOptions options = 3;
+}
+
+message CreateTicketResponse {
+	optional .bgs.protocol.club.v1.ClubTicket ticket = 1;
+}
+
+message DestroyTicketRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional string ticket_id = 3;
+}
+
+message RedeemTicketRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional string ticket_id = 3;
+}
+
+message GetTicketRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional string ticket_id = 3;
+}
+
+message GetTicketResponse {
+	optional .bgs.protocol.club.v1.ClubTicket ticket = 1;
+}
+
+message GetTicketsRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 continuation = 3;
+}
+
+message GetTicketsResponse {
+	repeated .bgs.protocol.club.v1.ClubTicket ticket = 1;
+	optional uint64 continuation = 2;
+}
+
+message AddBanRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.AddBanOptions options = 3;
+}
+
+message RemoveBanRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.MemberId target_id = 3;
+}
+
+message GetBanRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.MemberId target_id = 3;
+}
+
+message GetBanResponse {
+	optional .bgs.protocol.club.v1.ClubBan ban = 1;
+}
+
+message GetBansRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 continuation = 3;
+}
+
+message GetBansResponse {
+	repeated .bgs.protocol.club.v1.ClubBan ban = 1;
+	optional uint64 continuation = 2;
+}
+
+message SubscribeStreamRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	repeated uint64 stream_id = 3;
+}
+
+message UnsubscribeStreamRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	repeated uint64 stream_id = 3;
+}
+
+message CreateStreamRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.club.v1.CreateStreamOptions options = 3;
+}
+
+message CreateStreamResponse {
+	optional uint64 club_id = 1;
+	optional uint64 stream_id = 2;
+}
+
+message DestroyStreamRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+}
+
+message GetStreamRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+}
+
+message GetStreamResponse {
+	optional .bgs.protocol.club.v1.Stream stream = 1;
+}
+
+message GetStreamsRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 continuation = 3;
+}
+
+message GetStreamsResponse {
+	repeated .bgs.protocol.club.v1.Stream stream = 1;
+	repeated .bgs.protocol.club.v1.StreamView view = 2;
+	optional uint64 continuation = 3;
+}
+
+message UpdateStreamStateRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.club.v1.StreamStateOptions options = 5;
+}
+
+message SetStreamFocusRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional bool focus = 4;
+}
+
+message CreateMessageRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.club.v1.CreateMessageOptions options = 4;
+}
+
+message CreateMessageResponse {
+	optional .bgs.protocol.club.v1.StreamMessage message = 1;
+}
+
+message DestroyMessageRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.MessageId message_id = 4;
+}
+
+message DestroyMessageResponse {
+	optional .bgs.protocol.club.v1.StreamMessage message = 1;
+}
+
+message EditMessageRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.MessageId message_id = 4;
+	optional .bgs.protocol.club.v1.CreateMessageOptions options = 5;
+}
+
+message EditMessageResponse {
+	optional .bgs.protocol.club.v1.StreamMessage message = 1;
+}
+
+message SetMessagePinnedRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+}
+
+message SetTypingIndicatorRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.TypingIndicator indicator = 4 [default = TYPING_START];
+}
+
+message AdvanceStreamViewTimeRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id_deprecated = 3 [deprecated = true];
+	repeated uint64 stream_id = 4 [packed = true];
+}
+
+message AdvanceStreamMentionViewTimeRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+}
+
+message AdvanceActivityViewTimeRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+}
+
+message GetStreamHistoryRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.GetEventOptions options = 4;
+}
+
+message GetStreamHistoryResponse {
+	repeated .bgs.protocol.club.v1.StreamMessage message = 1;
+	optional uint64 continuation = 2;
+}
+
+message GetStreamMessageRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.MessageId message_id = 4;
+}
+
+message GetStreamMessageResponse {
+	optional .bgs.protocol.club.v1.StreamMessage message = 1;
+}
+
+message GetClubActivityRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional .bgs.protocol.GetEventOptions options = 3;
+}
+
+message GetClubActivityResponse {
+	optional uint64 continuation = 2;
+}
+
+message GetStreamVoiceTokenRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+}
+
+message GetStreamVoiceTokenResponse {
+	optional string channel_uri = 1;
+	optional .bgs.protocol.VoiceCredentials credentials = 2;
+}
+
+message KickFromStreamVoiceRequest {
+	optional .bgs.protocol.club.v1.MemberId agent_id = 1;
+	optional uint64 club_id = 2;
+	optional uint64 stream_id = 3;
+	optional .bgs.protocol.club.v1.MemberId target_id = 4;
+}
+

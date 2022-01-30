@@ -1,0 +1,200 @@
+syntax = "proto2";
+
+import "account_types.proto";
+import "content_handle_types.proto";
+import "entity_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.authentication.v1;
+
+option cc_generic_services = false;
+
+message ModuleLoadRequest {
+	required .bgs.protocol.ContentHandle module_handle = 1;
+	optional bytes message = 2;
+}
+
+message ModuleNotification {
+	optional int32 module_id = 2;
+	optional uint32 result = 3;
+}
+
+message ModuleMessageRequest {
+	required int32 module_id = 1;
+	optional bytes message = 2;
+}
+
+message LogonRequest {
+	optional string program = 1;
+	optional string platform = 2;
+	optional string locale = 3;
+	optional string email = 4;
+	optional string version = 5;
+	optional int32 application_version = 6;
+	optional bool public_computer = 7;
+	optional bool allow_logon_queue_notifications = 10 [default = false];
+	optional bytes cached_web_credentials = 12;
+	optional string user_agent = 14;
+	optional string device_id = 15;
+}
+
+message LogonResult {
+	required uint32 error_code = 1;
+	optional .bgs.protocol.EntityId account_id = 2;
+	repeated .bgs.protocol.EntityId game_account_id = 3;
+	optional string email = 4;
+	repeated uint32 available_region = 5;
+	optional uint32 connected_region = 6;
+	optional string battle_tag = 7;
+	optional string geoip_country = 8;
+	optional bytes session_key = 9;
+	optional bool restricted_mode = 10;
+	optional string client_id = 11;
+}
+
+message GenerateSSOTokenRequest {
+	optional fixed32 program = 1;
+}
+
+message GenerateSSOTokenResponse {
+	optional bytes sso_id = 1;
+	optional bytes sso_secret = 2;
+}
+
+message LogonUpdateRequest {
+	required uint32 error_code = 1;
+}
+
+message LogonQueueUpdateRequest {
+	required uint32 position = 1;
+	required uint64 estimated_time = 2;
+	required uint64 eta_deviation_in_sec = 3;
+}
+
+message AccountSettingsNotification {
+	repeated .bgs.protocol.account.v1.AccountLicense licenses = 1;
+	optional bool is_using_rid = 2;
+	optional bool is_playing_from_igr = 3;
+	optional bool can_receive_voice = 4;
+	optional bool can_send_voice = 5;
+}
+
+message ServerStateChangeRequest {
+	required uint32 state = 1;
+	required uint64 event_time = 2;
+}
+
+message VersionInfo {
+	optional uint32 number = 1;
+	optional string patch = 2;
+	optional bool is_optional = 3;
+	optional uint64 kick_time = 4;
+}
+
+message VersionInfoNotification {
+	optional .bgs.protocol.authentication.v1.VersionInfo version_info = 1;
+}
+
+message MemModuleLoadRequest {
+	required .bgs.protocol.ContentHandle handle = 1;
+	required bytes key = 2;
+	required bytes input = 3;
+}
+
+message MemModuleLoadResponse {
+	required bytes data = 1;
+}
+
+message SelectGameAccountRequest {
+	required .bgs.protocol.EntityId game_account_id = 1;
+}
+
+message GameAccountSelectedRequest {
+	required uint32 result = 1;
+	optional .bgs.protocol.EntityId game_account_id = 2;
+}
+
+message GenerateWebCredentialsRequest {
+	optional fixed32 program = 1;
+}
+
+message GenerateWebCredentialsResponse {
+	optional bytes web_credentials = 1;
+}
+
+message VerifyWebCredentialsRequest {
+	optional bytes web_credentials = 1;
+}
+
+service AuthenticationListener {
+	option (service_options).descriptor_name = "bnet.protocol.authentication.AuthenticationClient";
+	option (sdk_service_options).inbound = true;
+	rpc OnModuleLoad (.bgs.protocol.authentication.v1.ModuleLoadRequest) returns (.bgs.protocol.NO_RESPONSE) {
+		option deprecated = true;
+		option (method_options).id = 1;
+	}
+	rpc OnModuleMessage (.bgs.protocol.authentication.v1.ModuleMessageRequest) returns (.bgs.protocol.NoData) {
+		option deprecated = true;
+		option (method_options).id = 2;
+	}
+	rpc OnServerStateChange (.bgs.protocol.authentication.v1.ServerStateChangeRequest) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 4;
+	}
+	rpc OnLogonComplete (.bgs.protocol.authentication.v1.LogonResult) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 5;
+	}
+	rpc OnMemModuleLoad (.bgs.protocol.authentication.v1.MemModuleLoadRequest) returns (.bgs.protocol.authentication.v1.MemModuleLoadResponse) {
+		option (method_options).id = 6;
+	}
+	rpc OnLogonUpdate (.bgs.protocol.authentication.v1.LogonUpdateRequest) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 10;
+	}
+	rpc OnVersionInfoUpdated (.bgs.protocol.authentication.v1.VersionInfoNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 11;
+	}
+	rpc OnLogonQueueUpdate (.bgs.protocol.authentication.v1.LogonQueueUpdateRequest) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 12;
+	}
+	rpc OnLogonQueueEnd (.bgs.protocol.NoData) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 13;
+	}
+	rpc OnGameAccountSelected (.bgs.protocol.authentication.v1.GameAccountSelectedRequest) returns (.bgs.protocol.NO_RESPONSE) {
+		option deprecated = true;
+		option (method_options).id = 14;
+	}
+}
+
+service AuthenticationService {
+	option (service_options).descriptor_name = "bnet.protocol.authentication.AuthenticationServer";
+	option (service_options).shard_name = "authentication";
+	option (sdk_service_options).outbound = true;
+	rpc Logon (.bgs.protocol.authentication.v1.LogonRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 1;
+	}
+	rpc ModuleNotify (.bgs.protocol.authentication.v1.ModuleNotification) returns (.bgs.protocol.NoData) {
+		option deprecated = true;
+		option (method_options).id = 2;
+	}
+	rpc ModuleMessage (.bgs.protocol.authentication.v1.ModuleMessageRequest) returns (.bgs.protocol.NoData) {
+		option deprecated = true;
+		option (method_options).id = 3;
+	}
+	rpc SelectGameAccount_DEPRECATED (.bgs.protocol.EntityId) returns (.bgs.protocol.NoData) {
+		option deprecated = true;
+		option (method_options).id = 4;
+	}
+	rpc GenerateSSOToken (.bgs.protocol.authentication.v1.GenerateSSOTokenRequest) returns (.bgs.protocol.authentication.v1.GenerateSSOTokenResponse) {
+		option (method_options).id = 5;
+	}
+	rpc SelectGameAccount (.bgs.protocol.authentication.v1.SelectGameAccountRequest) returns (.bgs.protocol.NoData) {
+		option deprecated = true;
+		option (method_options).id = 6;
+	}
+	rpc VerifyWebCredentials (.bgs.protocol.authentication.v1.VerifyWebCredentialsRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 7;
+	}
+	rpc GenerateWebCredentials (.bgs.protocol.authentication.v1.GenerateWebCredentialsRequest) returns (.bgs.protocol.authentication.v1.GenerateWebCredentialsResponse) {
+		option (method_options).id = 8;
+	}
+}
+

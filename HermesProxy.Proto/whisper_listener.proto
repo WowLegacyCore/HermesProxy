@@ -1,0 +1,66 @@
+syntax = "proto2";
+
+import "whisper_types.proto";
+import "account_types.proto";
+import "rpc_types.proto";
+import "message_types.proto";
+
+package bgs.protocol.whisper.v1;
+
+message WhisperNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	optional .bgs.protocol.whisper.v1.Whisper whisper = 2;
+	optional string sender_battle_tag = 3;
+}
+
+message WhisperEchoNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	optional .bgs.protocol.whisper.v1.Whisper whisper = 2;
+}
+
+message TypingIndicatorNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	optional .bgs.protocol.account.v1.AccountId sender_id = 2;
+	optional .bgs.protocol.TypingIndicator action = 3 [default = TYPING_START];
+}
+
+message AdvanceViewTimeNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	optional .bgs.protocol.account.v1.AccountId sender_id = 2;
+	optional uint64 view_time = 3;
+}
+
+message WhisperUpdatedNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	optional .bgs.protocol.whisper.v1.Whisper whisper = 2;
+}
+
+message AdvanceClearTimeNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	optional .bgs.protocol.account.v1.AccountId sender_id = 2;
+	optional uint64 clear_time = 3;
+}
+
+service WhisperListener {
+	option (service_options).descriptor_name = "bnet.protocol.whisper.WhisperListener";
+	option (sdk_service_options).inbound = true;
+	rpc OnWhisper (.bgs.protocol.whisper.v1.WhisperNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 1;
+	}
+	rpc OnWhisperEcho (.bgs.protocol.whisper.v1.WhisperEchoNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 2;
+	}
+	rpc OnTypingIndicatorUpdate (.bgs.protocol.whisper.v1.TypingIndicatorNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 3;
+	}
+	rpc OnAdvanceViewTime (.bgs.protocol.whisper.v1.AdvanceViewTimeNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 4;
+	}
+	rpc OnWhisperUpdated (.bgs.protocol.whisper.v1.WhisperUpdatedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 5;
+	}
+	rpc OnAdvanceClearTime (.bgs.protocol.whisper.v1.AdvanceClearTimeNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 6;
+	}
+}
+

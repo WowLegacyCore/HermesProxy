@@ -82,28 +82,5 @@ namespace HermesProxy.Framework.Logging
 
             return location;
         }
-
-        private static string NameOfCallingClass()
-        {
-            Type declaringType;
-
-            var fullName = string.Empty;
-            var skipFrames = 2;
-
-            do
-            {
-                var method = new StackFrame(skipFrames, false).GetMethod();
-
-                declaringType = method.DeclaringType;
-                if (declaringType == null)
-                    return method.Name;
-
-                skipFrames++;
-                fullName = declaringType.Name;
-            }
-            while (declaringType.Module.Name.Equals("mscorlib.dll", StringComparison.OrdinalIgnoreCase));
-
-            return fullName;
-        }
     }
 }

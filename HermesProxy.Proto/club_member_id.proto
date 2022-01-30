@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "global_extensions/message_options.proto";
+import "account_types.proto";
+
+package bgs.protocol.club.v1;
+
+message MemberId {
+	option (message_options).custom_select_shard = true;
+	optional .bgs.protocol.account.v1.AccountId account_id = 1;
+	optional uint64 unique_id = 2;
+}
+

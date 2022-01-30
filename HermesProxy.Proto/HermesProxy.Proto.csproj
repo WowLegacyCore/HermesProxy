@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.19.3" />
+    <PackageReference Include="Grpc.Tools" Version="2.43.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Protobuf Include="$(MSBuildProjectDirectory)\*.proto" ProtoRoot="$(MSBuildProjectDirectory)" OutputDir="$(Protobuf_OutputPath)\proto" GrpcServices="None" />
+    <Protobuf Include="$(MSBuildProjectDirectory)\api\client\v1\*.proto" ProtoRoot="$(MSBuildProjectDirectory)" OutputDir="$(Protobuf_OutputPath)\proto\api\client\v1" GrpcServices="None" />
+    <Protobuf Include="$(MSBuildProjectDirectory)\api\client\v2\*.proto" ProtoRoot="$(MSBuildProjectDirectory)" OutputDir="$(Protobuf_OutputPath)\proto\api\client\v2" GrpcServices="None" />
+    <Protobuf Include="$(MSBuildProjectDirectory)\global_extensions\*.proto" ProtoRoot="$(MSBuildProjectDirectory)" OutputDir="$(Protobuf_OutputPath)\proto\global_extensions" GrpcServices="None" />
+  </ItemGroup>
+</Project>

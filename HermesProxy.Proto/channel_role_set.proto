@@ -1,0 +1,36 @@
+syntax = "proto2";
+
+import "role_types.proto";
+
+package bgs.protocol.channel;
+
+message ChannelPrivilegeSet {
+	optional bool can_invite = 1;
+	optional bool can_invite_with_reservation = 2;
+	optional bool can_revoke_other_invitation = 3;
+	optional bool can_revoke_own_invitation = 4;
+	optional bool can_kick = 5;
+	optional bool can_dissolve = 6;
+	optional bool can_set_privacy = 7;
+	optional bool can_send_message = 8;
+	optional bool can_receive_message = 9;
+	optional bool can_set_attribute = 10;
+	optional bool can_set_other_member_attribute = 11;
+	optional bool can_set_own_member_attribute = 12;
+	optional bool can_enter_game = 13;
+	optional bool can_suggest = 14;
+	optional bool can_approve = 15;
+}
+
+message ChannelRole {
+	optional uint32 id = 1;
+	optional .bgs.protocol.RoleState state = 2;
+	optional .bgs.protocol.channel.ChannelPrivilegeSet privilege = 3;
+}
+
+message ChannelRoleSet {
+	repeated .bgs.protocol.channel.ChannelRole role = 1;
+	repeated uint32 default_role = 2 [packed = true];
+	optional string name = 3;
+}
+

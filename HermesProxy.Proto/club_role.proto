@@ -1,0 +1,72 @@
+syntax = "proto2";
+
+import "role_types.proto";
+
+package bgs.protocol.club.v1;
+
+message ClubPrivilegeSet {
+	optional bool can_destroy = 1;
+	optional bool can_set_attribute = 10;
+	optional bool can_set_name = 11;
+	optional bool can_set_description = 12;
+	optional bool can_set_avatar = 13;
+	optional bool can_set_broadcast = 14;
+	optional bool can_set_privacy_level = 15;
+	optional bool can_kick_member = 30;
+	optional bool can_set_own_member_attribute = 31;
+	optional bool can_set_other_member_attribute = 32;
+	optional bool can_set_own_voice_state = 33;
+	optional bool can_set_own_presence_level = 34;
+	optional bool can_set_own_whisper_level = 35;
+	optional bool can_set_own_member_note = 36;
+	optional bool can_set_other_member_note = 37;
+	optional bool can_use_voice = 50;
+	optional bool can_voice_mute_member_for_all = 51;
+	optional bool can_get_invitation = 70;
+	optional bool can_send_invitation = 71;
+	optional bool can_send_guest_invitation = 72;
+	optional bool can_revoke_own_invitation = 73;
+	optional bool can_revoke_other_invitation = 74;
+	optional bool can_get_suggestion = 90;
+	optional bool can_suggest_member = 91;
+	optional bool can_approve_member = 92;
+	optional bool can_get_ticket = 110;
+	optional bool can_create_ticket = 111;
+	optional bool can_destroy_ticket = 112;
+	optional bool can_get_ban = 130;
+	optional bool can_add_ban = 131;
+	optional bool can_remove_ban = 132;
+	optional bool can_create_stream = 140;
+	optional bool can_destroy_stream = 141;
+	optional bool can_set_stream_position = 142;
+	optional bool can_set_stream_attribute = 143;
+	optional bool can_set_stream_name = 144;
+	optional bool can_set_stream_subject = 145;
+	optional bool can_set_stream_access = 146;
+	optional bool can_set_stream_voice_level = 147;
+	optional bool can_create_message = 180;
+	optional bool can_destroy_own_message = 181;
+	optional bool can_destroy_other_message = 182;
+	optional bool can_edit_own_message = 183;
+	optional bool can_pin_message = 184;
+	optional bool can_mention_all = 185;
+	optional bool can_mention_here = 186;
+	optional bool can_mention_member = 187;
+	optional bool can_mention_role = 188;
+}
+
+message ClubRole {
+	optional uint32 id = 1;
+	optional .bgs.protocol.RoleState state = 2;
+	optional .bgs.protocol.club.v1.ClubPrivilegeSet privilege = 3;
+	optional bool always_grant_stream_access = 4;
+	optional bool allow_in_club_slot = 5;
+}
+
+message ClubRoleSet {
+	repeated .bgs.protocol.club.v1.ClubRole role = 1;
+	repeated uint32 default_role = 5 [packed = true];
+	optional bool assignment_respects_relegation_chain = 6;
+	optional string subtype = 7;
+}
+

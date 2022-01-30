@@ -1,0 +1,29 @@
+syntax = "proto2";
+
+import "presence_types.proto";
+import "account_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.presence.v1;
+
+message SubscribeNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	repeated .bgs.protocol.presence.v1.PresenceState state = 2;
+}
+
+message StateChangedNotification {
+	optional .bgs.protocol.account.v1.AccountId subscriber_id = 1;
+	repeated .bgs.protocol.presence.v1.PresenceState state = 2;
+}
+
+service PresenceListener {
+	option (service_options).descriptor_name = "bnet.protocol.presence.v1.PresenceListener";
+	option (sdk_service_options).inbound = true;
+	rpc OnSubscribe (.bgs.protocol.presence.v1.SubscribeNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 1;
+	}
+	rpc OnStateChanged (.bgs.protocol.presence.v1.StateChangedNotification) returns (.bgs.protocol.NO_RESPONSE) {
+		option (method_options).id = 2;
+	}
+}
+

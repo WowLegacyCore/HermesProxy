@@ -34,7 +34,7 @@ namespace HermesProxy
                     break;
 
                 // analyze options
-                string optname = opt.Substring(2);
+                string optname = opt[2..];
                 switch (optname)
                 {
                     case "ConfigFile":

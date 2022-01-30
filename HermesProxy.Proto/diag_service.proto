@@ -1,0 +1,51 @@
+syntax = "proto2";
+
+import "rpc_types.proto";
+
+package bgs.protocol.diag.v1;
+
+option cc_generic_services = false;
+
+message GetVarRequest {
+	required string name = 1;
+}
+
+message GetVarResponse {
+	required string value = 1;
+}
+
+message SetVarRequest {
+	required string name = 1;
+	required string value = 2;
+}
+
+message QueryRequest {
+	required string name = 1;
+	repeated string args = 2;
+}
+
+message Row {
+	repeated string values = 1;
+}
+
+message QueryResponse {
+	required string name = 1;
+	repeated string columns = 2;
+	repeated .bgs.protocol.diag.v1.Row rows = 3;
+}
+
+service DiagService {
+	option (service_options).descriptor_name = "bnet.protocol.diag.DiagService";
+	option (service_options).shard_name = "diag";
+	option (sdk_service_options).inbound = true;
+	rpc GetVar (.bgs.protocol.diag.v1.GetVarRequest) returns (.bgs.protocol.diag.v1.GetVarResponse) {
+		option (method_options).id = 1;
+	}
+	rpc SetVar (.bgs.protocol.diag.v1.SetVarRequest) returns (.bgs.protocol.NoData) {
+		option (method_options).id = 2;
+	}
+	rpc Query (.bgs.protocol.diag.v1.QueryRequest) returns (.bgs.protocol.diag.v1.QueryResponse) {
+		option (method_options).id = 3;
+	}
+}
+

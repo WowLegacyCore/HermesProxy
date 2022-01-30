@@ -1,0 +1,123 @@
+syntax = "proto2";
+
+import "club_enum.proto";
+import "club_role.proto";
+import "club_member.proto";
+import "club_stream.proto";
+import "api/client/v2/attribute_types.proto";
+import "event_view_types.proto";
+
+package bgs.protocol.club.v1;
+
+message AvatarId {
+	optional uint32 id = 1;
+}
+
+message SetBroadcastOptions {
+	optional string content = 1;
+}
+
+message Broadcast {
+	optional string content = 1;
+	optional .bgs.protocol.club.v1.MemberDescription creator = 2;
+	optional uint64 creation_time = 3;
+}
+
+message UniqueClubType {
+	optional fixed32 program = 1;
+	optional string name = 2;
+}
+
+message ClubCreateOptions {
+	optional .bgs.protocol.club.v1.UniqueClubType type = 1;
+	repeated .bgs.protocol.v2.Attribute attribute = 2;
+	optional string name = 3;
+	optional string description = 4;
+	optional .bgs.protocol.club.v1.AvatarId avatar = 5;
+	optional .bgs.protocol.club.v1.PrivacyLevel privacy_level = 6 [default = PRIVACY_LEVEL_CLOSED];
+	optional string short_name = 7;
+	optional .bgs.protocol.club.v1.CreateMemberOptions member = 10;
+	optional .bgs.protocol.club.v1.CreateStreamOptions stream = 11;
+}
+
+message Club {
+	optional uint64 id = 1;
+	optional .bgs.protocol.club.v1.UniqueClubType type = 2;
+	repeated .bgs.protocol.v2.Attribute attribute = 3;
+	optional string name = 4;
+	optional string description = 5;
+	optional .bgs.protocol.club.v1.Broadcast broadcast = 6;
+	optional .bgs.protocol.club.v1.AvatarId avatar = 7;
+	optional .bgs.protocol.club.v1.PrivacyLevel privacy_level = 8 [default = PRIVACY_LEVEL_CLOSED];
+	optional .bgs.protocol.club.v1.VisibilityLevel visibility_level = 9 [default = VISIBILITY_LEVEL_PRIVATE];
+	optional uint32 member_count = 10;
+	optional uint64 creation_time = 11;
+	optional .bgs.protocol.club.v1.StreamPosition stream_position = 12;
+	optional .bgs.protocol.club.v1.ClubRoleSet role_set = 13;
+	repeated .bgs.protocol.club.v1.MemberDescription leader = 14;
+	optional string short_name = 15;
+}
+
+message ClubDescription {
+	optional uint64 id = 1;
+	optional .bgs.protocol.club.v1.UniqueClubType type = 2;
+	optional string name = 3;
+	optional string description = 4;
+	optional .bgs.protocol.club.v1.AvatarId avatar = 5;
+	optional .bgs.protocol.club.v1.PrivacyLevel privacy_level = 6 [default = PRIVACY_LEVEL_CLOSED];
+	optional .bgs.protocol.club.v1.VisibilityLevel visibility_level = 7 [default = VISIBILITY_LEVEL_PRIVATE];
+	optional uint32 member_count = 8;
+	repeated .bgs.protocol.club.v1.MemberDescription leader = 9;
+	optional uint64 creation_time = 10;
+}
+
+message ClubView {
+	optional uint64 club_id = 1;
+	optional .bgs.protocol.ViewMarker marker = 2;
+}
+
+message ClubStateOptions {
+	repeated .bgs.protocol.v2.Attribute attribute = 1;
+	optional string name = 2;
+	optional string description = 3;
+	optional .bgs.protocol.club.v1.SetBroadcastOptions broadcast = 4;
+	optional .bgs.protocol.club.v1.AvatarId avatar = 5;
+	optional .bgs.protocol.club.v1.PrivacyLevel privacy_level = 6 [default = PRIVACY_LEVEL_CLOSED];
+	optional .bgs.protocol.club.v1.StreamPosition stream_position = 7;
+	optional string short_name = 8;
+}
+
+message ClubStateAssignment {
+	optional uint64 club_id = 1;
+	repeated .bgs.protocol.v2.Attribute attribute = 2;
+	optional string name = 3;
+	optional string description = 4;
+	optional .bgs.protocol.club.v1.Broadcast broadcast = 5;
+	optional .bgs.protocol.club.v1.AvatarId avatar = 6;
+	optional .bgs.protocol.club.v1.PrivacyLevel privacy_level = 7 [default = PRIVACY_LEVEL_CLOSED];
+	optional .bgs.protocol.club.v1.StreamPosition stream_position = 8;
+	optional string short_name = 9;
+}
+
+message StreamSettings {
+	optional uint64 stream_id = 1;
+	optional .bgs.protocol.club.v1.StreamNotificationFilter filter = 2 [default = STREAM_NOTIFICATION_FILTER_NONE];
+}
+
+message ClubSettings {
+	repeated .bgs.protocol.club.v1.StreamSettings stream = 1;
+	optional bool stream_notification_filter_all = 2;
+	repeated .bgs.protocol.v2.Attribute attribute = 3;
+}
+
+message ClubSettingsOptions {
+	repeated .bgs.protocol.club.v1.StreamSettings stream = 1 [deprecated = true];
+	optional .bgs.protocol.club.v1.ClubSettings settings = 2;
+	optional uint32 version = 3;
+}
+
+message ClubSettingsAssignment {
+	repeated .bgs.protocol.club.v1.StreamSettings stream = 1 [deprecated = true];
+	optional .bgs.protocol.club.v1.ClubSettings settings = 2;
+}
+

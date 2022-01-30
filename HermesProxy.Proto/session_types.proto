@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+import "account_types.proto";
+
+package bgs.protocol.session.v1;
+
+message SessionOptions {
+	optional bool billing = 1 [default = true];
+	optional bool presence = 2 [default = true];
+}
+
+message SessionState {
+	optional .bgs.protocol.account.v1.GameAccountHandle handle = 1;
+	optional string client_address = 2 [deprecated = true];
+	optional uint64 last_tick_time = 3;
+	optional uint64 create_time = 4;
+	optional bool parental_controls_active = 5;
+	optional .bgs.protocol.account.v1.GameSessionLocation location = 6;
+	optional bool using_igr_address = 7;
+	optional bool has_benefactor = 8;
+	optional .bgs.protocol.account.v1.IgrId igr_id = 9;
+}
+
+message SessionIdentifier {
+	optional .bgs.protocol.account.v1.GameAccountHandle game_account = 1;
+	optional string session_id = 2;
+}
+

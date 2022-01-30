@@ -1,0 +1,41 @@
+syntax = "proto2";
+
+import "channel_types.proto";
+import "account_types.proto";
+import "voice_types.proto";
+import "rpc_types.proto";
+
+package bgs.protocol.channel.v1;
+
+option cc_generic_services = false;
+
+message GetLoginTokenRequest {
+	optional .bgs.protocol.account.v1.GameAccountHandle member_id = 3;
+}
+
+message GetLoginTokenResponse {
+	optional .bgs.protocol.VoiceCredentials credentials = 1;
+}
+
+message GetJoinTokenRequest {
+	optional .bgs.protocol.channel.v1.ChannelId channel_id = 2;
+	optional .bgs.protocol.account.v1.GameAccountHandle member_id = 4;
+}
+
+message GetJoinTokenResponse {
+	optional string channel_uri = 1;
+	optional .bgs.protocol.VoiceCredentials credentials = 2;
+}
+
+service ChannelVoiceService {
+	option (service_options).descriptor_name = "bnet.protocol.channel.v1.ChannelVoiceService";
+	option (service_options).shard_name = "channel";
+	option (sdk_service_options).outbound = true;
+	rpc GetLoginToken (.bgs.protocol.channel.v1.GetLoginTokenRequest) returns (.bgs.protocol.channel.v1.GetLoginTokenResponse) {
+		option (method_options).id = 1;
+	}
+	rpc GetJoinToken (.bgs.protocol.channel.v1.GetJoinTokenRequest) returns (.bgs.protocol.channel.v1.GetJoinTokenResponse) {
+		option (method_options).id = 2;
+	}
+}
+
