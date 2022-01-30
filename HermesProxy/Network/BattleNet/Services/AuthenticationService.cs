@@ -8,6 +8,7 @@ using Google.Protobuf;
 
 using HermesProxy.Framework.Constants;
 using HermesProxy.Framework.Logging;
+using HermesProxy.Framework.Util;
 using HermesProxy.Network.BattleNet.Services;
 
 namespace HermesProxy.Network.BattleNet.Session
@@ -63,7 +64,7 @@ namespace HermesProxy.Network.BattleNet.Session
             };
 
             logonResult.GameAccountId.Add(gameAccountId);
-            logonResult.SessionKey = ByteString.CopyFrom(RandomNumberGenerator.GetBytes(64));
+            logonResult.SessionKey = ByteString.CopyFrom(new byte[64].GenerateRandomKey(64));
 
             _authed = true;
 

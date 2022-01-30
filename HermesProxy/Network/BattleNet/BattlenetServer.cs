@@ -18,7 +18,7 @@ namespace HermesProxy.Network.BattleNet
         {
             ServiceHandler.Initialize();
 
-            var battlenetListener = new TcpListener(IPAddress.Parse(ip), 8000);
+            var battlenetListener = new TcpListener(IPAddress.Parse(ip), 1119);
             battlenetListener.Start();
             Log.Print(LogType.Server, $"Started Battlenet Server on {ip}:1119");
 

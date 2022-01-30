@@ -47,16 +47,7 @@ namespace HermesProxy.Framework.Logging
                 {
                     Thread.Sleep(1);
 
-                    if (!logQueue.TryTake(out var msg))
-                        continue;
-
-                    Console.Write($"{DateTime.Now:H:mm:ss} |");
-
-                    Console.ForegroundColor = LogToColorType[msg.Type].Color;
-                    Console.Write($"{LogToColorType[msg.Type].Type}");
-                    Console.ResetColor();
-
-                    Console.WriteLine($"| {msg.Message}");
+                    PrintMessageFromQueue();
                 }
             });
             logThread.IsBackground = true;
@@ -65,9 +56,24 @@ namespace HermesProxy.Framework.Logging
             IsLogging = logThread.ThreadState == ThreadingState.Running;
         }
 
+        public static void PrintMessageFromQueue()
+        {
+            if (!logQueue.TryTake(out var msg))
+                return;
+
+            Console.Write($"{DateTime.Now:H:mm:ss} |");
+
+            Console.ForegroundColor = LogToColorType[msg.Type].Color;
+            Console.Write($"{LogToColorType[msg.Type].Type}");
+            Console.ResetColor();
+
+            Console.WriteLine($"| {msg.Message}");
+        }
+
         public static void Print(LogType type, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
         {
             logQueue.Add((type, $"{SetCaller(method, path)} | {text}"));
+            PrintMessageFromQueue(); // TODO: its not printing anything if i dont call it immediatelly
         }
 
         private static string SetCaller(string method, string path)

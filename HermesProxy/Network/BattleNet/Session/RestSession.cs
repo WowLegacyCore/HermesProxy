@@ -107,7 +107,7 @@ namespace HermesProxy.Network.BattleNet.Session
             {
                 var response = new LogonResult()
                 {
-                    LoginTicket = $"Proxy-{RandomNumberGenerator.GetBytes(20).ToHexString()}",
+                    LoginTicket = "TC-" + Array.Empty<byte>().GenerateRandomKey(20).ToHexString(),
                     AuthenticationState = "DONE"
                 };
                 await SendResponse(HttpCode.Ok, response);
