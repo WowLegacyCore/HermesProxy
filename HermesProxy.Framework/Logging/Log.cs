@@ -50,10 +50,10 @@ namespace HermesProxy.Framework.Logging
                     PrintMessageFromQueue();
                 }
             });
+
+            IsLogging = logThread.ThreadState == ThreadingState.Background;
             logThread.IsBackground = true;
             logThread.Start();
-
-            IsLogging = logThread.ThreadState == ThreadingState.Running;
         }
 
         public static void PrintMessageFromQueue()
@@ -73,7 +73,6 @@ namespace HermesProxy.Framework.Logging
         public static void Print(LogType type, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
         {
             logQueue.Add((type, $"{SetCaller(method, path)} | {text}"));
-            PrintMessageFromQueue(); // TODO: its not printing anything if i dont call it immediatelly
         }
 
         private static string SetCaller(string method, string path)
