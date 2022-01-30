@@ -51,9 +51,10 @@ namespace HermesProxy.Framework.Logging
                 }
             });
 
-            IsLogging = logThread.ThreadState == ThreadingState.Background;
+            IsLogging = true;
             logThread.IsBackground = true;
             logThread.Start();
+            IsLogging = logThread.ThreadState == ThreadingState.Running;
         }
 
         public static void PrintMessageFromQueue()
