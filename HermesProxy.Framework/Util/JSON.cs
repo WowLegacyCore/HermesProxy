@@ -3,8 +3,6 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
-using HermesProxy.Framework.IO;
-
 namespace HermesProxy.Framework.Util
 {
     public class JSON

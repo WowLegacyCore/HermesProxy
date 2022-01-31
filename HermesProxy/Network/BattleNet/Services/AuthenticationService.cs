@@ -64,7 +64,7 @@ namespace HermesProxy.Network.BattleNet.Session
             };
 
             logonResult.GameAccountId.Add(gameAccountId);
-            logonResult.SessionKey = ByteString.CopyFrom(new byte[64].GenerateRandomKey(64));
+            logonResult.SessionKey = ByteString.CopyFrom(RandomNumberGenerator.GetBytes(64));
 
             _authed = true;
 
