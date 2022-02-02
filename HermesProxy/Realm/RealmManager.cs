@@ -25,7 +25,6 @@ using System.Net;
 using System.Timers;
 using System.Collections.Concurrent;
 using Framework.Realm;
-using HermesProxy.Auth;
 using Framework.Logging;
 
 public class RealmManager : Singleton<RealmManager>
@@ -36,7 +35,7 @@ public class RealmManager : Singleton<RealmManager>
     {
         LoadBuildInfo();
 
-        UpdateRealms(null);
+        AddRealm(1, "Sandbox", "127.0.0.1", "127.0.0.1", "255.255.255.0", 8085, RealmType.PVP, RealmFlags.Recommended, 1, 1);
     }
 
     void LoadBuildInfo()
@@ -50,7 +49,7 @@ public class RealmManager : Singleton<RealmManager>
             build.HotfixVersion = hotfixVersion.ToCharArray();
 
         build.Build = (uint)Framework.Settings.ClientBuild;
-        string win64AuthSeedHexStr = "";
+        string win64AuthSeedHexStr = "179D3DC3235629D07113A9B3867F97A7";
         if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
             build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 
@@ -75,58 +74,47 @@ public class RealmManager : Singleton<RealmManager>
         _realms[realm.Id] = realm;
     }
 
-    public void UpdateRealms(List<RealmInfo> authRealmList)
+    public void AddRealm(uint id, string name, string externalAddress, string localAddress, string localSubnetmask, ushort port, RealmType type, RealmFlags flags, byte timezone, float populationLevel)
     {
         Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
-        _realms.Clear();
+        var realm = new Realm();
+        realm.Name = name;
+        realm.ExternalAddress = IPAddress.Parse(externalAddress);
+        realm.LocalAddress = IPAddress.Parse(localAddress);
+        realm.LocalSubnetMask = IPAddress.Parse(localSubnetmask);
 
-        // Circle through results and add them to the realm map
-        if (authRealmList != null)
-        {
-            foreach (var authRealmEntry in authRealmList)
-            {
-                var realm = new Realm();
-                uint realmId = (uint)authRealmEntry.ID;
-                realm.Name = authRealmEntry.Name;
-                realm.ExternalAddress = IPAddress.Parse("127.0.0.1");
-                realm.LocalAddress = IPAddress.Parse("127.0.0.1");
-                realm.LocalSubnetMask = IPAddress.Parse("255.255.255.0");
-                realm.Port = 8085;
-                RealmType realmType = (RealmType)authRealmEntry.Type;
-                if (realmType == RealmType.FFAPVP)
-                    realmType = RealmType.PVP;
-                if (realmType >= RealmType.MaxType)
-                    realmType = RealmType.Normal;
+        realm.Port = port;
+        RealmType realmType = type;
+        if (realmType == RealmType.FFAPVP)
+            realmType = RealmType.PVP;
+        if (realmType >= RealmType.MaxType)
+            realmType = RealmType.Normal;
 
-                realm.Type = (byte)realmType;
-                realm.Flags = authRealmEntry.Flags;
-                realm.Timezone = authRealmEntry.Timezone;
-                AccountTypes allowedSecurityLevel = AccountTypes.Player;
-                realm.AllowedSecurityLevel = (allowedSecurityLevel <= AccountTypes.Administrator ? allowedSecurityLevel : AccountTypes.Administrator);
-                realm.PopulationLevel = authRealmEntry.Population;
-                realm.Build = (uint)Framework.Settings.ClientBuild;
-                byte region = 1;
-                byte battlegroup = 1;
+        realm.Type = (byte)realmType;
+        realm.Flags = flags;
+        realm.Timezone = timezone;
+        realm.PopulationLevel = populationLevel;
+        realm.Build = (uint)Framework.Settings.ClientBuild;
+        byte region = 1;
+        byte battlegroup = 1;
 
-                realm.Id = new RealmId(region, battlegroup, realmId);
+        realm.Id = new RealmId(region, battlegroup, id);
 
-                UpdateRealm(realm);
+        UpdateRealm(realm);
 
-                var subRegion = new RealmId(region, battlegroup, 0).GetAddressString();
-                if (!_subRegions.Contains(subRegion))
-                    _subRegions.Add(subRegion);
+        var subRegion = new RealmId(region, battlegroup, 0).GetAddressString();
+        if (!_subRegions.Contains(subRegion))
+            _subRegions.Add(subRegion);
 
-                if (!existingRealms.ContainsKey(realm.Id))
-                    Log.Print(LogType.Server, $"Added realm \"{realm.Name}\" at {realm.ExternalAddress.ToString()}:{realm.Port}");
-                else
-                    Log.Print(LogType.Server, $"Updating realm \"{realm.Name}\" at { realm.ExternalAddress.ToString()}:{realm.Port}");
+        if (!existingRealms.ContainsKey(realm.Id))
+            Log.Print(LogType.Server, $"Added realm \"{realm.Name}\" at {realm.ExternalAddress.ToString()}:{realm.Port}");
+        else
+            Log.Print(LogType.Server, $"Updating realm \"{realm.Name}\" at { realm.ExternalAddress.ToString()}:{realm.Port}");
 
-                existingRealms.Remove(realm.Id);
-            }
-        }
+        existingRealms.Remove(realm.Id);
     }
     
     /// <summary>

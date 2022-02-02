@@ -46,15 +46,6 @@ namespace Framework.Constants
         Reset = 2
     }
 
-    public enum AccountTypes
-    {
-        Player = 0,
-        Moderator = 1,
-        GameMaster = 2,
-        Administrator = 3,
-        Console = 4
-    }
-
     public enum RBACPermissions
     {
         InstantLogout = 1,

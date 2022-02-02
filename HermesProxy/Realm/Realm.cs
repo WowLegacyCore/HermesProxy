@@ -86,13 +86,12 @@ public class Realm : IEquatable<Realm>
             && other.Type == Type
             && other.Flags == Flags
             && other.Timezone == Timezone
-            && other.AllowedSecurityLevel == AllowedSecurityLevel
             && other.PopulationLevel == PopulationLevel;
     }
 
     public override int GetHashCode()
     {
-        return new { ExternalAddress, LocalAddress, LocalSubnetMask, Port, Name, Type, Flags, Timezone, AllowedSecurityLevel, PopulationLevel }.GetHashCode();
+        return new { ExternalAddress, LocalAddress, LocalSubnetMask, Port, Name, Type, Flags, Timezone, PopulationLevel }.GetHashCode();
     }
 
     public RealmId Id;
@@ -106,7 +105,6 @@ public class Realm : IEquatable<Realm>
     public byte Type;
     public RealmFlags Flags;
     public byte Timezone;
-    public AccountTypes AllowedSecurityLevel;
     public float PopulationLevel;
 }
 

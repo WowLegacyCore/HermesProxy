@@ -8,9 +8,6 @@ using Framework.Logging;
 using Framework.Networking;
 using Framework.Realm;
 using Google.Protobuf;
-using HermesProxy;
-using HermesProxy.Auth;
-using HermesProxy.Network.Auth;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -21,8 +18,6 @@ namespace BNetServer.Networking
     {
         AccountInfo accountInfo;
         GameAccountInfo gameAccountInfo;
-        AuthClient authClient;
-        AuthResult authResult;
 
         string locale;
         string os;
@@ -33,48 +28,25 @@ namespace BNetServer.Networking
         bool authed;
         uint requestToken;
 
-        List<Action> queryProcessor;
         Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
 
         public Session(Socket socket) : base(socket)
         {
             clientSecret = new byte[32];
-            queryProcessor = new List<Action>();
             responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         }
 
         public override void Accept()
         {
             string ipAddress = GetRemoteIpEndPoint().ToString();
-            Log.Print(LogType.Network, $"{GetClientInfo()} Connection Accepted.");
-
-            authClient = new AuthClient();
-            authResult =  authClient.ConnectToAuthServer();
-            System.Threading.Thread.Sleep(5000); // TODO: MAX fix this, enough time to get realmlist
-
-            queryProcessor.Add(async () =>            
-            {
-                if (authResult != AuthResult.SUCCESS)
-                {
-                    Log.Print(LogType.Network, $"{GetClientInfo()} failed to login!");
-                    CloseSocket();
-                    return;
-                }
-
-                await AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
-            });
+            Console.WriteLine($"{GetClientInfo()} Connection Accepted.");
+            AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
         }
 
         public override bool Update()
         {
             if (!base.Update())
                 return false;
-
-            foreach (var u in queryProcessor)
-            {
-                u();
-            }
-            queryProcessor.Clear();
 
             return true;
         }
@@ -239,7 +211,6 @@ namespace BNetServer.Networking
         public uint UnbanDate;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
-        public AccountTypes SecurityLevel;
 
         public Dictionary<uint, byte> CharacterCounts;
         public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
@@ -251,7 +222,6 @@ namespace BNetServer.Networking
             UnbanDate = 0;
             IsPermanenetlyBanned = false;
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
-            SecurityLevel = AccountTypes.Player;
 
             int hashPos = Name.IndexOf('#');
             if (hashPos != -1)
