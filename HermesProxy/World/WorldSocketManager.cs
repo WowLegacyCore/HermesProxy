@@ -30,7 +30,7 @@ namespace World
         {
             _tcpNoDelay = true;
 
-            Console.WriteLine("Max allowed socket connections {0}", ushort.MaxValue);
+            Log.Print(LogType.Server, $"Max allowed socket connections {ushort.MaxValue}");
 
             // -1 means use default
             _socketSendBufferSize = -1;
@@ -41,7 +41,7 @@ namespace World
             _instanceAcceptor = new AsyncAcceptor();
             if (!_instanceAcceptor.Start(bindIp, 8086))
             {
-                Console.WriteLine("StartNetwork failed to start instance AsyncAcceptor");
+                Log.Print(LogType.Error, "StartNetwork failed to start instance AsyncAcceptor");
                 return false;
             }
 
@@ -73,7 +73,7 @@ namespace World
             }
             catch (SocketException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Log.Print(LogType.Error, ex.ToString());
                 return;
             }
 

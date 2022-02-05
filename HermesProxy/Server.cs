@@ -19,7 +19,7 @@ namespace HermesProxy
             //Set Culture
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Console.WriteLine("Hello from Hermes Proxy!");
+            Log.Print(LogType.Server, "Hello from Hermes Proxy!");
             Log.Start();
 
             string bindIp = "0.0.0.0";
@@ -32,17 +32,17 @@ namespace HermesProxy
                 restPort = 8081;
             }
 
-            Console.WriteLine("Starting REST service...");
+            Log.Print(LogType.Server, "Starting REST service...");
             if (!restSocketServer.StartNetwork(bindIp, restPort))
             {
                 Log.Print(LogType.Server, "Failed to initialize Rest Socket Server");
                 ExitNow();
             }
 
-            Console.WriteLine("Starting Realm manager...");
+            Log.Print(LogType.Server, "Starting Realm manager...");
             Global.RealmMgr.Initialize();
 
-            Console.WriteLine("Starting Login service...");
+            Log.Print(LogType.Server, "Starting Login service...");
             Global.LoginServiceMgr.Initialize();
 
             var sessionSocketServer = new SocketManager<Session>();
@@ -54,7 +54,7 @@ namespace HermesProxy
                 ExitNow();
             }
 
-            Console.WriteLine($"BNet Listening on {bindIp}:{bnPort}...");
+            Log.Print(LogType.Server, $"BNet Listening on {bindIp}:{bnPort}...");
             if (!sessionSocketServer.StartNetwork(bindIp, bnPort))
             {
                 Log.Print(LogType.Network, "Failed to start BnetServer Network");
@@ -73,7 +73,7 @@ namespace HermesProxy
                 return;
             }
 
-            Console.WriteLine($"World Listening on {worldListener}:{worldPort}...");
+            Log.Print(LogType.Server, $"World Listening on {worldListener}:{worldPort}...");
             var WorldSocketMgr = new WorldSocketManager();
             if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
             {

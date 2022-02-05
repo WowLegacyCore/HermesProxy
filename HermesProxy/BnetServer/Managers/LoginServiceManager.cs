@@ -164,7 +164,7 @@ namespace BNetServer
             {
                 var response = (IMessage)Activator.CreateInstance(responseType);
                 status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response);
-                Log.Print(LogType.Network, $"{session.GetClientInfo()} Client called server Method: {request}) Returned: {response} Status: {status}.");
+
                 if (status == 0)
                     session.SendResponse(token, response);
                 else
@@ -173,7 +173,7 @@ namespace BNetServer
             else
             {
                 status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request);
-                Log.Print(LogType.Network, "${session.GetClientInfo()} Client called server Method: {request}) Status: {status}.");
+
                 if (status != 0)
                     session.SendResponse(token, status);
             }

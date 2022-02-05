@@ -17,8 +17,6 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AuthenticationService, 1)]
         BattlenetRpcErrorCode HandleLogon(LogonRequest logonRequest, NoData response)
         {
-            Console.WriteLine("Entering HandleLogon");
-
             if (logonRequest.Program != "WoW")
             {
                 Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with game other than WoW (using {logonRequest.Program})!");
@@ -47,7 +45,6 @@ namespace BNetServer.Networking
             externalChallenge.PayloadType = "web_auth_url";            
             externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
 
-            Console.WriteLine("HandleLogon returns Ok");
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
         }
@@ -55,20 +52,11 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AuthenticationService, 7)]
         BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
-            Console.WriteLine("Entering HandleVerifyWebCredentials");
-
-            if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
-            {
-                Console.WriteLine("HandleVerifyWebCredentials returns Denied");
-                //return BattlenetRpcErrorCode.Denied;
-            }
-
             accountInfo = new AccountInfo();
             LastSessionData.AccountInfo = accountInfo;
 
             if (accountInfo.LoginTicketExpiry < Time.UnixTime)
             {
-                Console.WriteLine("HandleVerifyWebCredentials returns TimedOut");
                 return BattlenetRpcErrorCode.TimedOut;
             }
 
@@ -132,7 +120,6 @@ namespace BNetServer.Networking
 
             authed = true;
 
-            Console.WriteLine("HandleVerifyWebCredentials returns Ok");
             SendRequest((uint)OriginalHash.AuthenticationListener, 5, logonResult);
             return BattlenetRpcErrorCode.Ok;
         }

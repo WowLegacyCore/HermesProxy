@@ -294,7 +294,7 @@ namespace World
             if (!IsOpen())
                 return;
 
-            packet.LogPacket();
+            //packet.LogPacket();
             packet.WritePacketData();
 
             var data = packet.GetData();

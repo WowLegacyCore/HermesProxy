@@ -50,7 +50,7 @@ namespace BNetServer.Networking
         public override void Accept()
         {
             string ipAddress = GetRemoteIpEndPoint().ToString();
-            Console.WriteLine($"{GetClientInfo()} Connection Accepted.");
+            Log.Print(LogType.Server, $"{GetClientInfo()} Connection Accepted.");
             AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
         }
 
@@ -67,8 +67,6 @@ namespace BNetServer.Networking
             if (!IsOpen())
                 return;
 
-            Console.WriteLine($"ReadHandler size {receivedLength}");
-
             var stream = new CodedInputStream(data, 0, receivedLength);
             while (!stream.IsAtEnd)
             {
@@ -80,12 +78,12 @@ namespace BNetServer.Networking
                     var handler = Global.LoginServiceMgr.GetHandler(header.ServiceHash, header.MethodId);
                     if (handler != null)
                     {
-                        Console.WriteLine($"Service {header.ServiceHash} Method {header.MethodId} Token {header.Token}");
+                        Log.Print(LogType.Debug, $"Service {header.ServiceHash} Method {header.MethodId} Token {header.Token}");
                         handler.Invoke(this, header.Token, stream);
                     }
                     else
                     {
-                        Console.WriteLine($"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {header.ServiceHash}");
+                        Log.Print(LogType.Error, $"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {header.ServiceHash}");
                         SendResponse(header.Token, BattlenetRpcErrorCode.RpcNotImplemented);
                     }
                 }
@@ -94,12 +92,9 @@ namespace BNetServer.Networking
                     var handler = responseCallbacks.LookupByKey(header.Token);
                     if (handler != null)
                     {
-                        Console.WriteLine($"Handling {header.Token}");
                         handler(stream);
                         responseCallbacks.Remove(header.Token);
                     }
-                    else
-                        Console.WriteLine($"Ho handler for token {header.Token}");
                 }
             }
 
