@@ -49,7 +49,7 @@ public class RealmManager : Singleton<RealmManager>
             build.HotfixVersion = hotfixVersion.ToCharArray();
 
         build.Build = (uint)Framework.Settings.ClientBuild;
-        string win64AuthSeedHexStr = "179D3DC3235629D07113A9B3867F97A7";
+        string win64AuthSeedHexStr = "1278EB34F243ED7898D614C0E278EAC0";
         if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
             build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 
@@ -289,6 +289,8 @@ public class RealmManager : Singleton<RealmManager>
             stmt.AddValue(4, accountName);
             DB.Login.DirectExecute(stmt);
             */
+            BNetServer.Networking.Session.LastSessionData.SessionKey = keyData;
+            BNetServer.Networking.Session.LastSessionData.OS = os;
 
             Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmJoinTicket";

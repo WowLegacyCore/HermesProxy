@@ -16,6 +16,17 @@ namespace BNetServer.Networking
 {
     partial class Session : SSLSocket
     {
+        public struct LoginSessionData
+        {
+            public AccountInfo AccountInfo;
+            public GameAccountInfo GameAccountInfo;
+            public string LoginTicket;
+            public byte[] SessionKey;
+            public string Locale;
+            public string OS;
+            public uint Build;
+        }
+        public static LoginSessionData LastSessionData;
         AccountInfo accountInfo;
         GameAccountInfo gameAccountInfo;
 
@@ -179,8 +190,6 @@ namespace BNetServer.Networking
         public uint LoginTicketExpiry;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
-        public string PasswordVerifier;
-        public string Salt;
 
         public Dictionary<uint, GameAccountInfo> GameAccounts;
 
@@ -194,8 +203,6 @@ namespace BNetServer.Networking
             LoginTicketExpiry = (uint)(Time.UnixTime + 10000);
             IsBanned = false;
             IsPermanenetlyBanned = false;
-            PasswordVerifier = "";
-            Salt = "";
 
             GameAccounts = new Dictionary<uint, GameAccountInfo>();
             var account = new GameAccountInfo();

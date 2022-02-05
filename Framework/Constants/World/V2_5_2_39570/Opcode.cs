@@ -1595,5 +1595,6 @@ namespace Framework.Constants.World.V2_5_2_39570
         SMSG_CONNECT_TO = 0x304D,
         SMSG_PONG = 0x304E,
         SMSG_RESET_COMPRESSION_CONTEXT = 0x304F,
+        SMSG_COMPRESSED_PACKET = 0x3052,
     }
 }

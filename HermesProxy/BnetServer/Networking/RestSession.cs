@@ -78,31 +78,16 @@ namespace BNetServer.Networking
 
             if (login == Framework.Settings.ServerUsername && password == Framework.Settings.ServerPassword)
             {
-                uint accountId = 1;
-                string pass_hash = "";
-                uint failedLogins = 0;
                 string loginTicket = "";
                 uint loginTicketExpiry = (uint)(Time.UnixTime + 3600);
-                bool isBanned = false;
 
-                if (CalculateShaPassHash(login.ToUpper(), password.ToUpper()) == pass_hash)
+                if (loginTicket.IsEmpty() || loginTicketExpiry < Time.UnixTime)
                 {
-                    if (loginTicket.IsEmpty() || loginTicketExpiry < Time.UnixTime)
-                    {
-                        byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
-                        loginTicket = "TC-" + ticket.ToHexString();
-                    }
-
-                    /*
-                    stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetAuthentication);
-                    stmt.AddValue(0, loginTicket);
-                    stmt.AddValue(1, Time.UnixTime + 3600);
-                    stmt.AddValue(2, accountId);
-
-                    DB.Login.Execute(stmt);
-                    */
-                    loginResult.LoginTicket = loginTicket;
+                    byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
+                    loginTicket = "TC-" + ticket.ToHexString();
                 }
+                BNetServer.Networking.Session.LastSessionData.LoginTicket = loginTicket;
+                loginResult.LoginTicket = loginTicket;
 
                 loginResult.AuthenticationState = "DONE";
                 SendResponse(HttpCode.Ok, loginResult);

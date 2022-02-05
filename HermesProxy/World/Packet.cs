@@ -16,21 +16,16 @@
  */
 
 using Framework.IO;
+using Framework.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HermesProxy;
 
-namespace HermesProxy
+namespace World
 {
-    public enum ConnectionType
-    {
-        Realm = 0,
-        Instance = 1,
-        Max
-    }
-
     public abstract class ClientPacket : IDisposable
     {
         protected ClientPacket(WorldPacket worldPacket)

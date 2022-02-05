@@ -8,6 +8,7 @@ using Framework.Networking;
 using System;
 using System.Globalization;
 using System.Timers;
+using World;
 
 namespace HermesProxy
 {
@@ -19,6 +20,7 @@ namespace HermesProxy
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Console.WriteLine("Hello from Hermes Proxy!");
+            Log.Start();
 
             string bindIp = "0.0.0.0";
 
@@ -52,10 +54,30 @@ namespace HermesProxy
                 ExitNow();
             }
 
-            Console.WriteLine($"Listening on {bindIp}:{bnPort}...");
+            Console.WriteLine($"BNet Listening on {bindIp}:{bnPort}...");
             if (!sessionSocketServer.StartNetwork(bindIp, bnPort))
             {
                 Log.Print(LogType.Network, "Failed to start BnetServer Network");
+                ExitNow();
+            }
+
+            // Launch the worldserver listener socket
+            int worldPort = 8085;
+            string worldListener = "0.0.0.0";
+
+            int networkThreads = 1;
+            if (networkThreads <= 0)
+            {
+                Log.Print(LogType.Server, "Network.Threads must be greater than 0");
+                ExitNow();
+                return;
+            }
+
+            Console.WriteLine($"World Listening on {worldListener}:{worldPort}...");
+            var WorldSocketMgr = new WorldSocketManager();
+            if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
+            {
+                Log.Print(LogType.Network, "Failed to start Realm Network");
                 ExitNow();
             }
         }

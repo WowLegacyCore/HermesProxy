@@ -37,9 +37,9 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadLocale;
             }
 
-            locale = logonRequest.Locale;
-            os = logonRequest.Platform;
-            build = (uint)logonRequest.ApplicationVersion;
+            LastSessionData.Locale = locale = logonRequest.Locale;
+            LastSessionData.OS = os = logonRequest.Platform;
+            LastSessionData.Build = build = (uint)logonRequest.ApplicationVersion;
 
             var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
@@ -64,6 +64,7 @@ namespace BNetServer.Networking
             }
 
             accountInfo = new AccountInfo();
+            LastSessionData.AccountInfo = accountInfo;
 
             if (accountInfo.LoginTicketExpiry < Time.UnixTime)
             {
@@ -126,7 +127,8 @@ namespace BNetServer.Networking
             if (!ipCountry.IsEmpty())
                 logonResult.GeoipCountry = ipCountry;
 
-            logonResult.SessionKey = ByteString.CopyFrom(new byte[64].GenerateRandomKey(64));
+            LastSessionData.SessionKey = new byte[64].GenerateRandomKey(64);
+            logonResult.SessionKey = ByteString.CopyFrom(LastSessionData.SessionKey);
 
             authed = true;
 
