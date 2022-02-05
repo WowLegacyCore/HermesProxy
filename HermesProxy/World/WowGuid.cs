@@ -105,6 +105,17 @@ namespace HermesProxy
 
     public class WowGuid128 : WowGuid
     {
+        public WowGuid128()
+        {
+            Low = 0;
+            High = 0;
+            if (Settings.ClientBuild >= ClientVersionBuild.V7_0_3_22248)
+                HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
+            else if (Settings.ClientBuild >= ClientVersionBuild.V6_2_4_21315)
+                HighGuid = new HighGuid624((byte)((High >> 58) & 0x3F));
+            else
+                HighGuid = new HighGuid623((byte)((High >> 58) & 0x3F));
+        }
         public WowGuid128(ulong low, ulong high)
         {
             Low = low;
@@ -115,6 +126,13 @@ namespace HermesProxy
                 HighGuid = new HighGuid624((byte)((High >> 58) & 0x3F));
             else
                 HighGuid = new HighGuid623((byte)((High >> 58) & 0x3F));
+        }
+
+        public WowGuid128(HighGuidType703 type, ulong counter)
+        {
+            Low = counter;
+            High = (ulong)type << 58;
+            HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
         }
 
         public byte GetSubType() // move to base?

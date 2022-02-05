@@ -29,6 +29,7 @@ using Framework.Logging;
 using Framework.Realm;
 using static World.Packets.AuthResponse;
 using System.Collections.Generic;
+using HermesProxy.World.Objects;
 
 namespace World
 {
@@ -835,24 +836,204 @@ namespace World
             SendPacket(bnetConnected);
         }
 
-        public class EnumCharactersResult : ServerPacket
-        {
-            public EnumCharactersResult() : base((uint)Opcode.SMSG_ENUM_CHARACTERS_RESULT)
-            {
-
-            }
-
-            public override void Write()
-            {
-                byte[] rawData = new byte[] { 136, 9, 0, 0, 0, 57, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 7, 224, 143, 215, 2, 232, 81, 8, 143, 215, 2, 0, 0, 0, 192, 152, 20, 7, 1, 0, 5, 0, 0, 0, 21, 148, 0, 0, 0, 1, 0, 0, 0, 75, 159, 200, 69, 213, 112, 0, 68, 17, 117, 10, 65, 0, 0, 2, 12, 0, 16, 4, 128, 0, 24, 0, 196, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 186, 0, 0, 0, 77, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 152, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 74, 20, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 21, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 57, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 121, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 136, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 102, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 75, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 86, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 113, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 209, 228, 88, 97, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 136, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 72, 69, 0, 0, 81, 0, 0, 0, 77, 69, 0, 0, 82, 0, 0, 0, 87, 69, 0, 0, 83, 0, 0, 0, 94, 69, 0, 0, 84, 0, 0, 0, 100, 69, 0, 0, 24, 2, 79, 114, 111, 122, 120, 121, 7, 224, 208, 149, 5, 232, 81, 8, 208, 149, 5, 0, 0, 0, 192, 152, 30, 7, 1, 1, 5, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 63, 162, 157, 197, 80, 205, 71, 196, 39, 144, 247, 67, 0, 0, 0, 0, 0, 16, 4, 128, 0, 24, 0, 196, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 237, 217, 95, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 42, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 85, 0, 0, 0, 110, 69, 0, 0, 86, 0, 0, 0, 116, 69, 0, 0, 87, 0, 0, 0, 122, 69, 0, 0, 88, 0, 0, 0, 135, 69, 0, 0, 89, 0, 0, 0, 142, 69, 0, 0, 16, 0, 83, 116, 103, 108, 7, 224, 157, 246, 9, 232, 81, 8, 157, 246, 9, 0, 0, 0, 192, 152, 40, 4, 3, 1, 5, 0, 0, 0, 3, 141, 0, 0, 0, 1, 0, 0, 0, 236, 117, 33, 70, 82, 99, 80, 68, 82, 196, 165, 68, 0, 0, 0, 0, 0, 16, 4, 128, 0, 24, 0, 196, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 217, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 1, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 118, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 144, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 168, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 219, 117, 215, 95, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 42, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 120, 68, 0, 0, 50, 0, 0, 0, 130, 68, 0, 0, 51, 0, 0, 0, 135, 68, 0, 0, 52, 0, 0, 0, 143, 68, 0, 0, 53, 0, 0, 0, 156, 68, 0, 0, 28, 0, 79, 114, 111, 122, 120, 121, 121, 7, 224, 23, 172, 10, 232, 81, 8, 23, 172, 10, 0, 0, 0, 192, 152, 50, 1, 1, 1, 5, 0, 0, 0, 1, 12, 0, 0, 0, 0, 0, 0, 0, 178, 116, 11, 198, 52, 66, 238, 194, 94, 88, 164, 66, 0, 0, 0, 0, 0, 16, 4, 128, 0, 24, 0, 196, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 162, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 163, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 42, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 19, 218, 95, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 42, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 65, 67, 0, 0, 15, 0, 0, 0, 82, 67, 0, 0, 16, 0, 0, 0, 90, 67, 0, 0, 17, 0, 0, 0, 112, 67, 0, 0, 18, 0, 0, 0, 125, 67, 0, 0, 24, 0, 79, 114, 111, 110, 115, 109, 15, 224, 50, 157, 44, 1, 232, 81, 8, 50, 157, 44, 1, 0, 0, 192, 152, 10, 5, 9, 1, 5, 0, 0, 0, 57, 51, 0, 0, 0, 0, 0, 0, 0, 250, 198, 205, 197, 179, 248, 135, 196, 86, 156, 156, 67, 3, 224, 51, 4, 232, 81, 112, 0, 0, 0, 16, 4, 128, 0, 24, 0, 196, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 182, 0, 0, 0, 186, 0, 0, 0, 151, 108, 0, 0, 0, 0, 0, 0, 48, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160, 109, 254, 238, 2, 127, 193, 39, 0, 0, 0, 0, 0, 0, 163, 127, 231, 8, 3, 0, 225, 20, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 4, 0, 174, 16, 0, 0, 0, 0, 0, 0, 208, 109, 254, 238, 5, 127, 123, 42, 0, 0, 0, 0, 0, 0, 208, 109, 254, 238, 6, 0, 192, 98, 0, 0, 0, 0, 0, 0, 163, 127, 231, 8, 7, 0, 192, 9, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 8, 0, 2, 57, 0, 0, 0, 0, 0, 0, 16, 110, 254, 238, 9, 127, 249, 64, 0, 0, 0, 0, 0, 0, 16, 110, 254, 238, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 163, 127, 231, 8, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80, 110, 254, 238, 12, 127, 0, 0, 0, 0, 0, 0, 0, 0, 144, 110, 254, 238, 12, 0, 144, 123, 0, 0, 0, 0, 0, 0, 80, 110, 254, 238, 16, 127, 145, 79, 0, 0, 0, 0, 0, 0, 16, 111, 254, 238, 21, 127, 108, 108, 0, 0, 0, 0, 0, 0, 112, 110, 254, 238, 23, 127, 140, 123, 0, 0, 0, 0, 0, 0, 144, 110, 254, 238, 26, 127, 0, 0, 0, 0, 0, 0, 0, 0, 144, 110, 254, 238, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 160, 110, 254, 238, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 208, 110, 254, 238, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 208, 110, 254, 238, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 208, 110, 254, 238, 0, 127, 170, 127, 137, 97, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 136, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 211, 68, 0, 0, 64, 0, 0, 0, 222, 68, 0, 0, 65, 0, 0, 0, 231, 68, 0, 0, 66, 0, 0, 0, 237, 68, 0, 0, 67, 0, 0, 0, 250, 68, 0, 0, 36, 2, 83, 117, 107, 97, 98, 108, 121, 97, 116, 15, 224, 95, 157, 44, 1, 232, 81, 8, 95, 157, 44, 1, 0, 0, 192, 152, 60, 5, 9, 0, 5, 0, 0, 0, 4, 85, 0, 0, 0, 0, 0, 0, 0, 148, 172, 232, 68, 101, 53, 199, 68, 191, 180, 185, 66, 0, 0, 0, 0, 0, 16, 4, 128, 0, 24, 0, 196, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 89, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 153, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 189, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 144, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 104, 142, 79, 97, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 43, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 0, 0, 157, 68, 0, 0, 59, 0, 0, 0, 172, 68, 0, 0, 60, 0, 0, 0, 173, 68, 0, 0, 61, 0, 0, 0, 192, 68, 0, 0, 62, 0, 0, 0, 203, 68, 0, 0, 20, 2, 76, 101, 116, 115, 111, 15, 224, 107, 43, 46, 1, 232, 81, 8, 107, 43, 46, 1, 0, 0, 192, 152, 0, 5, 9, 1, 5, 0, 0, 0, 1, 85, 0, 0, 0, 0, 0, 0, 0, 148, 13, 12, 69, 245, 147, 124, 67, 213, 249, 8, 66, 0, 0, 2, 0, 0, 16, 4, 128, 0, 24, 0, 196, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 124, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 163, 127, 231, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 89, 39, 0, 0, 0, 0, 0, 0, 48, 124, 254, 44, 20, 127, 0, 0, 0, 0, 0, 0, 0, 0, 48, 124, 254, 44, 0, 0, 153, 8, 0, 0, 0, 0, 0, 0, 163, 127, 231, 8, 7, 0, 189, 12, 0, 0, 0, 0, 0, 0, 80, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 112, 124, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 112, 124, 254, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 163, 127, 231, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 176, 124, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 240, 124, 254, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 176, 124, 254, 44, 0, 127, 144, 10, 0, 0, 0, 0, 0, 0, 112, 125, 254, 44, 13, 127, 0, 0, 0, 0, 0, 0, 0, 0, 208, 124, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 240, 124, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 240, 124, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 125, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 48, 125, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 48, 125, 254, 44, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 48, 125, 254, 44, 0, 127, 3, 255, 130, 97, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 136, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 214, 68, 0, 0, 64, 0, 0, 0, 219, 68, 0, 0, 65, 0, 0, 0, 229, 68, 0, 0, 66, 0, 0, 0, 237, 68, 0, 0, 67, 0, 0, 0, 246, 68, 0, 0, 32, 2, 83, 117, 107, 97, 98, 97, 110, 107, 15, 224, 109, 43, 46, 1, 232, 81, 8, 109, 43, 46, 1, 0, 0, 192, 152, 0, 5, 9, 1, 5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 51, 139, 209, 68, 102, 174, 209, 68, 10, 87, 243, 66, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 89, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 153, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 189, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 144, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 211, 68, 0, 0, 64, 0, 0, 0, 218, 68, 0, 0, 65, 0, 0, 0, 233, 68, 0, 0, 66, 0, 0, 0, 245, 68, 0, 0, 67, 0, 0, 0, 248, 68, 0, 0, 46, 2, 83, 117, 107, 97, 98, 97, 110, 107, 111, 110, 101, 15, 224, 110, 43, 46, 1, 232, 81, 8, 110, 43, 46, 1, 0, 0, 192, 152, 0, 5, 9, 0, 5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 51, 139, 209, 68, 102, 174, 209, 68, 10, 87, 243, 66, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 89, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 153, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 189, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 144, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 0, 0, 159, 68, 0, 0, 59, 0, 0, 0, 163, 68, 0, 0, 60, 0, 0, 0, 176, 68, 0, 0, 61, 0, 0, 0, 188, 68, 0, 0, 62, 0, 0, 0, 207, 68, 0, 0, 38, 2, 83, 117, 107, 97, 97, 98, 97, 110, 107, 1, 0, 0, 0, 128, 2, 0, 0, 0, 128, 3, 0, 0, 0, 128, 4, 0, 0, 0, 128, 5, 0, 0, 0, 128, 6, 0, 0, 0, 128, 7, 0, 0, 0, 128, 8, 0, 0, 0, 128 };
-
-                _worldPacket.WriteBytes(rawData);
-            }
-        }
-
         public void SendCharEnum()
         {
             EnumCharactersResult charEnum = new();
+            charEnum.Success = true;
+            charEnum.IsDeletedCharacters = false;
+            charEnum.IsNewPlayerRestrictionSkipped = false;
+            charEnum.IsNewPlayerRestricted = false;
+            charEnum.IsNewPlayer = true;
+            charEnum.IsAlliedRacesCreationAllowed = false;
+
+            EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
+            char1.Guid = new HermesProxy.WowGuid128(Framework.Constants.World.HighGuidType703.Player, 1);
+            Console.WriteLine("Guid is " + char1.Guid.ToString());
+            char1.RaceId = 7;
+            char1.ClassId = 1;
+            char1.SexId = 0;
+            char1.ExperienceLevel = 255;
+            char1.ZoneId = 148;
+            char1.MapId = 1;
+            char1.PreloadPos = new Framework.GameMath.Vector3(6419.912f, 513.763f, 8.653581f);
+            char1.GuildGuid = new HermesProxy.WowGuid128();
+            char1.Flags = CharacterFlags.Unk2 | CharacterFlags.HideHelm | CharacterFlags.HideCloak | CharacterFlags.Unk29;
+            char1.Flags2 = 402685956;
+            char1.Flags3 = 855688192;
+            char1.PetCreatureDisplayId = 0;
+            char1.PetExperienceLevel = 0;
+            char1.PetCreatureFamilyId = 0;
+            char1.ProfessionIds[0] = 186; // mining
+            char1.ProfessionIds[1] = 333; // enchanting
+
+            char1.VisualItems[EquipmentSlot.Head].DisplayId = 34216;
+            char1.VisualItems[EquipmentSlot.Head].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Head].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Head].InvType = 1;
+            char1.VisualItems[EquipmentSlot.Head].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Neck].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Neck].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Neck].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Neck].InvType = 0;
+            char1.VisualItems[EquipmentSlot.Neck].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Shoulders].DisplayId = 34258;
+            char1.VisualItems[EquipmentSlot.Shoulders].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Shoulders].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Shoulders].InvType = 3;
+            char1.VisualItems[EquipmentSlot.Shoulders].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Shirt].DisplayId = 9880;
+            char1.VisualItems[EquipmentSlot.Shirt].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Shirt].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Shirt].InvType = 4;
+            char1.VisualItems[EquipmentSlot.Shirt].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Chest].DisplayId = 33635;
+            char1.VisualItems[EquipmentSlot.Chest].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Chest].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Chest].InvType = 5;
+            char1.VisualItems[EquipmentSlot.Chest].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Waist].DisplayId = 33633;
+            char1.VisualItems[EquipmentSlot.Waist].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Waist].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Waist].InvType = 6;
+            char1.VisualItems[EquipmentSlot.Waist].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Legs].DisplayId = 33637;
+            char1.VisualItems[EquipmentSlot.Legs].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Legs].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Legs].InvType = 7;
+            char1.VisualItems[EquipmentSlot.Legs].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Feet].DisplayId = 33639;
+            char1.VisualItems[EquipmentSlot.Feet].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Feet].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Feet].InvType = 8;
+            char1.VisualItems[EquipmentSlot.Feet].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Wrist].DisplayId = 33634;
+            char1.VisualItems[EquipmentSlot.Wrist].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Wrist].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Wrist].InvType = 9;
+            char1.VisualItems[EquipmentSlot.Wrist].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Hands].DisplayId = 33636;
+            char1.VisualItems[EquipmentSlot.Hands].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Hands].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Hands].InvType = 10;
+            char1.VisualItems[EquipmentSlot.Hands].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Finger1].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Finger1].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Finger1].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Finger1].InvType = 0;
+            char1.VisualItems[EquipmentSlot.Finger1].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Finger2].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Finger2].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Finger2].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Finger2].InvType = 0;
+            char1.VisualItems[EquipmentSlot.Finger2].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Trinket1].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Trinket1].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Trinket1].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Trinket1].InvType = 0;
+            char1.VisualItems[EquipmentSlot.Trinket1].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Trinket2].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Trinket2].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Trinket2].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Trinket2].InvType = 0;
+            char1.VisualItems[EquipmentSlot.Trinket2].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Cloak].DisplayId = 23115;
+            char1.VisualItems[EquipmentSlot.Cloak].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Cloak].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Cloak].InvType = 16;
+            char1.VisualItems[EquipmentSlot.Cloak].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.MainHand].DisplayId = 23875;
+            char1.VisualItems[EquipmentSlot.MainHand].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.MainHand].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.MainHand].InvType = 17;
+            char1.VisualItems[EquipmentSlot.MainHand].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.OffHand].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.OffHand].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.OffHand].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.OffHand].InvType = 0;
+            char1.VisualItems[EquipmentSlot.OffHand].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Ranged].DisplayId = 1137;
+            char1.VisualItems[EquipmentSlot.Ranged].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Ranged].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Ranged].InvType = 26;
+            char1.VisualItems[EquipmentSlot.Ranged].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Tabard].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Tabard].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Tabard].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Tabard].InvType = 0;
+            char1.VisualItems[EquipmentSlot.Tabard].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Bag1].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Bag1].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Bag1].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Bag1].InvType = 18;
+            char1.VisualItems[EquipmentSlot.Bag1].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Bag2].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Bag2].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Bag2].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Bag2].InvType = 18;
+            char1.VisualItems[EquipmentSlot.Bag2].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Bag3].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Bag3].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Bag3].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Bag3].InvType = 18;
+            char1.VisualItems[EquipmentSlot.Bag3].Subclass = 0;
+
+            char1.VisualItems[EquipmentSlot.Bag4].DisplayId = 0;
+            char1.VisualItems[EquipmentSlot.Bag4].DisplayEnchantId = 0;
+            char1.VisualItems[EquipmentSlot.Bag4].SecondaryItemModifiedAppearanceID = 0;
+            char1.VisualItems[EquipmentSlot.Bag4].InvType = 18;
+            char1.VisualItems[EquipmentSlot.Bag4].Subclass = 0;
+
+            char1.LastPlayedTime = Time.UnixTime;
+            char1.SpecID = 0;
+            char1.Unknown703 = 55;
+            char1.LastLoginVersion = 11400;
+            char1.Flags4 = 0;
+            char1.OverrideSelectScreenFileDataID = 0;
+
+            char1.Customizations = new Array<ChrCustomizationChoice>(5);
+            char1.Customizations[0] = new ChrCustomizationChoice(80, 17736);
+            char1.Customizations[1] = new ChrCustomizationChoice(81, 17741);
+            char1.Customizations[2] = new ChrCustomizationChoice(82, 17751);
+            char1.Customizations[3] = new ChrCustomizationChoice(83, 17758);
+            char1.Customizations[4] = new ChrCustomizationChoice(84, 17764);
+
+            char1.FirstLogin = false;
+            char1.BoostInProgress = false;
+            char1.unkWod61x = 0;
+            char1.Name = "Oroxzy";
+            charEnum.Characters.Add(char1);
+
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(1, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(2, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(3, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(4, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(5, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(6, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(7, true, false, true));
+            charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(8, true, false, true));
+
+
             SendPacket(charEnum);
         }
 
