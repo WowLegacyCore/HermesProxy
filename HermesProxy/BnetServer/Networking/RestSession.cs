@@ -76,7 +76,10 @@ namespace BNetServer.Networking
                 }
             }
 
-            if (login == Framework.Settings.ServerUsername && password == Framework.Settings.ServerPassword)
+            BNetServer.Networking.Session.LastSessionData.Username = login;
+            BNetServer.Networking.Session.LastSessionData.Password = password;
+
+            if (HermesProxy.Auth.AuthClient.ConnectToAuthServer(login, password))
             {
                 string loginTicket = "";
                 uint loginTicketExpiry = (uint)(Time.UnixTime + 3600);

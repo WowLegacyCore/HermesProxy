@@ -56,7 +56,5 @@ namespace Framework
             return (byte)UInt32.Parse(str);
         }
         public static readonly string ServerAddress = Conf.GetString("ServerAddress", "127.0.0.1");
-        public static readonly string ServerUsername = Conf.GetString("ServerUsername", "admin");
-        public static readonly string ServerPassword = Conf.GetString("ServerPassword", "admin");
     }
 }

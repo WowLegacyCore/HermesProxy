@@ -20,6 +20,8 @@ namespace BNetServer.Networking
         {
             public AccountInfo AccountInfo;
             public GameAccountInfo GameAccountInfo;
+            public string Username;
+            public string Password ;
             public string LoginTicket;
             public byte[] SessionKey;
             public string Locale;
@@ -191,7 +193,7 @@ namespace BNetServer.Networking
         public AccountInfo()
         {
             Id = 1;
-            Login = Framework.Settings.ServerUsername;
+            Login = Session.LastSessionData.Username;
             IsLockedToIP = false;
             LockCountry = "";
             LastIP = "127.0.0.1";
@@ -220,7 +222,7 @@ namespace BNetServer.Networking
         public GameAccountInfo()
         {
             Id = 1;
-            Name = Framework.Settings.ServerUsername;
+            Name = Session.LastSessionData.Username;
             UnbanDate = 0;
             IsPermanenetlyBanned = false;
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;

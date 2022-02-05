@@ -56,6 +56,7 @@ namespace World
         byte[] _sessionKey;
         byte[] _encryptKey;
         ConnectToKey _instanceConnectKey;
+        RealmId _realmId;
 
         long _LastPingTime;
 
@@ -494,6 +495,8 @@ namespace World
             //stmt.AddValue(1, authSession.RealmJoinTicket);
             //DB.Login.Execute(stmt);
 
+            _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
+
             SendPacket(new EnterEncryptedMode(_encryptKey, true));
             AsyncRead();
         }
@@ -673,15 +676,13 @@ namespace World
             {
                 response.SuccessInfo.HasValue = true;
 
-                var realmAddress = new RealmId(1, 1, 1);
-
                 response.SuccessInfo.Value = new AuthResponse.AuthSuccessInfo();
                 response.SuccessInfo.Value.ActiveExpansionLevel = (byte)0;
                 response.SuccessInfo.Value.AccountExpansionLevel = (byte)0;
-                response.SuccessInfo.Value.VirtualRealmAddress = realmAddress.GetAddress();
+                response.SuccessInfo.Value.VirtualRealmAddress = _realmId.GetAddress();
                 response.SuccessInfo.Value.Time = (uint)Time.UnixTime;
 
-                var realm = RealmManager.Instance.GetRealm(realmAddress);
+                var realm = RealmManager.Instance.GetRealm(_realmId);
 
                 // Send current home realm. Also there is no need to send it later in realm queries.
                 response.SuccessInfo.Value.VirtualRealms.Add(new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName));

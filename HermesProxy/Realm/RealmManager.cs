@@ -116,7 +116,21 @@ public class RealmManager : Singleton<RealmManager>
 
         existingRealms.Remove(realm.Id);
     }
-    
+
+    public void UpdateRealms(List<HermesProxy.Auth.RealmInfo> authRealmList)
+    {
+        _realms.Clear();
+
+        // Circle through results and add them to the realm map
+        if (authRealmList != null)
+        {
+            foreach (var authRealmEntry in authRealmList)
+            {
+                AddRealm(authRealmEntry.ID, authRealmEntry.Name, "127.0.0.1", "127.0.0.1", "255.255.255.0", 8085, authRealmEntry.Type, authRealmEntry.Flags, authRealmEntry.Timezone, authRealmEntry.Population);
+            }
+        }
+    }
+
     /// <summary>
     /// Prints the <see cref="RealmInfo"/> from the <see cref="Realms"/> instance.
     /// </summary>

@@ -174,6 +174,11 @@ namespace BNetServer.Networking
             if (gameAccountInfo == null)
                 return BattlenetRpcErrorCode.UserServerBadWowAccount;
 
+            if (!HermesProxy.Auth.AuthClient.IsConnected())
+                return BattlenetRpcErrorCode.UtilServerMissingRealmList;
+
+            HermesProxy.Auth.AuthClient.RequestRealmListAndWait();
+
             string subRegionId = "";
             Variant subRegion = Params.LookupByKey($"Command_RealmListRequest_v1_{GetCommandEndingForVersion()}");
             if (subRegion != null)
