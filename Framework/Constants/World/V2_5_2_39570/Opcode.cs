@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Framework.Constants.World.V2_5_2_39570
 {
-    public enum Opcode
+    public enum Opcode : uint
     {
         MSG_NULL_ACTION = 0x000,
         CMSG_ACCEPT_GUILD_INVITE = 0x35FD,

@@ -15,7 +15,7 @@ namespace HermesProxy.Auth
         public RealmFlags Flags;
         public string Name;
         public string Address;
-        public int Port;
+        public ushort Port;
         public float Population;
         public byte CharacterCount;
         public byte Timezone;

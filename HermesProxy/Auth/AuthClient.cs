@@ -69,6 +69,11 @@ namespace HermesProxy.Auth
             return _clientSocket != null && _clientSocket.Connected;
         }
 
+        public static byte[] GetSessionKey()
+        {
+            return _key.ToCleanByteArray();
+        }
+
         private static void ConnectCallback(IAsyncResult AR)
         {
             try
@@ -465,7 +470,7 @@ namespace HermesProxy.Auth
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
                 realmInfo.Address = strArr[0];
-                realmInfo.Port = Int32.Parse(strArr[1]);
+                realmInfo.Port = UInt16.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();
                 realmInfo.Timezone = packet.ReadUInt8();

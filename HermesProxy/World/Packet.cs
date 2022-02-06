@@ -112,6 +112,12 @@ namespace World
             this.opcode = (uint)opcode;
         }
 
+        public WorldPacket(Framework.Constants.World.Opcode opcode)
+        {
+            this.opcode = Framework.Constants.World.Opcodes.GetOpcodeValueForVersion(opcode, Framework.Settings.ServerBuild);
+            System.Diagnostics.Trace.Assert(this.opcode != 0);
+        }
+
         public WorldPacket(byte[] data) : base(data)
         {
             opcode = ReadUInt16();
@@ -236,4 +242,38 @@ namespace World
 
         public bool IsValidSize() { return Size < 0x40000; }
     }
+
+    public class LegacyServerPacketHeader
+    {
+        public const int StructSize = sizeof(ushort) + sizeof(ushort);
+        public ushort Size;
+        public ushort Opcode;
+        public void Read(byte[] buffer)
+        {
+            Size = Framework.Util.NetworkUtility.EndianConvert(BitConverter.ToUInt16(buffer, 0));
+            Opcode = BitConverter.ToUInt16(buffer, sizeof(ushort));
+        }
+        public void Write(ByteBuffer byteBuffer)
+        {
+            byteBuffer.WriteUInt16(Size);
+            byteBuffer.WriteUInt16(Opcode);
+        }
+    };
+
+    public class LegacyClientPacketHeader
+    {
+        public const int StructSize = sizeof(ushort) + sizeof(uint);
+        public ushort Size;
+        public uint Opcode;
+        public void Read(byte[] buffer)
+        {
+            Size = BitConverter.ToUInt16(buffer, 0);
+            Opcode = BitConverter.ToUInt32(buffer, sizeof(ushort));
+        }
+        public void Write(ByteBuffer byteBuffer)
+        {
+            byteBuffer.WriteUInt16(Framework.Util.NetworkUtility.EndianConvert(Size));
+            byteBuffer.WriteUInt32(Opcode);
+        }
+    };
 }

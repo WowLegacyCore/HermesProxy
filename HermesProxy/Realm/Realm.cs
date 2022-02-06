@@ -32,30 +32,8 @@ public class Realm : IEquatable<Realm>
 
     public IPEndPoint GetAddressForClient(IPAddress clientAddr)
     {
-        IPAddress realmIp;
-
-        // Attempt to send best address for client
-        if (IPAddress.IsLoopback(clientAddr))
-        {
-            // Try guessing if realm is also connected locally
-            if (IPAddress.IsLoopback(LocalAddress) || IPAddress.IsLoopback(ExternalAddress))
-                realmIp = clientAddr;
-            else
-            {
-                // Assume that user connecting from the machine that authserver is located on
-                // has all realms available in his local network
-                realmIp = LocalAddress;
-            }
-        }
-        else
-        {
-            if (clientAddr.AddressFamily == AddressFamily.InterNetwork && clientAddr.GetNetworkAddress(LocalSubnetMask).Equals(LocalAddress.GetNetworkAddress(LocalSubnetMask)))
-                realmIp = LocalAddress;
-            else
-                realmIp = ExternalAddress;
-        }
-
-        IPEndPoint endpoint = new IPEndPoint(realmIp, Port);
+        IPAddress realmIp = IPAddress.Parse("127.0.0.1");
+        IPEndPoint endpoint = new IPEndPoint(realmIp, 8085);
 
         // Return external IP
         return endpoint;
@@ -79,8 +57,6 @@ public class Realm : IEquatable<Realm>
     public bool Equals(Realm other)
     {
         return other.ExternalAddress.Equals(ExternalAddress)
-            && other.LocalAddress.Equals(LocalAddress)
-            && other.LocalSubnetMask.Equals(LocalSubnetMask)
             && other.Port == Port
             && other.Name == Name
             && other.Type == Type
@@ -91,14 +67,12 @@ public class Realm : IEquatable<Realm>
 
     public override int GetHashCode()
     {
-        return new { ExternalAddress, LocalAddress, LocalSubnetMask, Port, Name, Type, Flags, Timezone, PopulationLevel }.GetHashCode();
+        return new { ExternalAddress, Port, Name, Type, Flags, Timezone, PopulationLevel }.GetHashCode();
     }
 
     public RealmId Id;
     public uint Build;
     public IPAddress ExternalAddress;
-    public IPAddress LocalAddress;
-    public IPAddress LocalSubnetMask;
     public ushort Port;
     public string Name;
     public string NormalizedName;

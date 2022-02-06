@@ -496,6 +496,13 @@ namespace World
             //DB.Login.Execute(stmt);
 
             _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
+            if (!HermesProxy.World.Client.WorldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId)))
+            {
+                SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
+                Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
+                CloseSocket();
+                return;
+            }
 
             SendPacket(new EnterEncryptedMode(_encryptKey, true));
             AsyncRead();

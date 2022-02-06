@@ -35,7 +35,7 @@ public class RealmManager : Singleton<RealmManager>
     {
         LoadBuildInfo();
 
-        AddRealm(1, "Sandbox", "127.0.0.1", "127.0.0.1", "255.255.255.0", 8085, RealmType.PVP, RealmFlags.Recommended, 1, 1);
+        AddRealm(1, "Sandbox", "127.0.0.1", 8085, RealmType.PVP, RealmFlags.Recommended, 1, 1);
     }
 
     void LoadBuildInfo()
@@ -74,7 +74,7 @@ public class RealmManager : Singleton<RealmManager>
         _realms[realm.Id] = realm;
     }
 
-    public void AddRealm(uint id, string name, string externalAddress, string localAddress, string localSubnetmask, ushort port, RealmType type, RealmFlags flags, byte timezone, float populationLevel)
+    public void AddRealm(uint id, string name,string externalAddress, ushort port, RealmType type, RealmFlags flags, byte timezone, float populationLevel)
     {
         Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
         foreach (var p in _realms)
@@ -83,8 +83,6 @@ public class RealmManager : Singleton<RealmManager>
         var realm = new Realm();
         realm.Name = name;
         realm.ExternalAddress = IPAddress.Parse(externalAddress);
-        realm.LocalAddress = IPAddress.Parse(localAddress);
-        realm.LocalSubnetMask = IPAddress.Parse(localSubnetmask);
 
         realm.Port = port;
         RealmType realmType = type;
@@ -126,7 +124,7 @@ public class RealmManager : Singleton<RealmManager>
         {
             foreach (var authRealmEntry in authRealmList)
             {
-                AddRealm(authRealmEntry.ID, authRealmEntry.Name, "127.0.0.1", "127.0.0.1", "255.255.255.0", 8085, authRealmEntry.Type, authRealmEntry.Flags, authRealmEntry.Timezone, authRealmEntry.Population);
+                AddRealm(authRealmEntry.ID, authRealmEntry.Name, authRealmEntry.Address, authRealmEntry.Port, authRealmEntry.Type, authRealmEntry.Flags, authRealmEntry.Timezone, authRealmEntry.Population);
             }
         }
     }
@@ -285,7 +283,7 @@ public class RealmManager : Singleton<RealmManager>
 
             var address = new Address();
             address.Ip = realm.GetAddressForClient(clientAddress).Address.ToString();
-            address.Port = realm.Port;
+            address.Port = 8085;
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);
 
