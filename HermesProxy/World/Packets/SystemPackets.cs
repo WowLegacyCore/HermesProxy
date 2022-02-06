@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World.V2_5_2_39570;
+using Framework.Constants.World;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -31,7 +31,7 @@ namespace World.Packets
 {
     public class FeatureSystemStatus : ServerPacket
     {
-        public FeatureSystemStatus() : base((uint)Opcode.SMSG_FEATURE_SYSTEM_STATUS)
+        public FeatureSystemStatus() : base(Opcode.SMSG_FEATURE_SYSTEM_STATUS)
         {
             SessionAlert = new Optional<SessionAlertConfig>();
             EuropaTicketSystemStatus = new Optional<EuropaTicketConfig>();
@@ -249,7 +249,7 @@ namespace World.Packets
 
     public class FeatureSystemStatusGlueScreen : ServerPacket
     {
-        public FeatureSystemStatusGlueScreen() : base((uint)Opcode.SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN) { }
+        public FeatureSystemStatusGlueScreen() : base(Opcode.SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN) { }
 
         public override void Write()
         {
@@ -324,7 +324,7 @@ namespace World.Packets
 
     public class MOTD : ServerPacket
     {
-        public MOTD() : base((uint)Opcode.SMSG_MOTD) { }
+        public MOTD() : base(Opcode.SMSG_MOTD) { }
 
         public override void Write()
         {
@@ -344,7 +344,7 @@ namespace World.Packets
 
     public class SetTimeZoneInformation : ServerPacket
     {
-        public SetTimeZoneInformation() : base((uint)Opcode.SMSG_SET_TIME_ZONE_INFORMATION) { }
+        public SetTimeZoneInformation() : base(Opcode.SMSG_SET_TIME_ZONE_INFORMATION) { }
 
         public override void Write()
         {

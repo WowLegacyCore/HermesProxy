@@ -23,6 +23,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HermesProxy;
+using Framework.Constants.World;
 
 namespace World
 {
@@ -41,6 +42,10 @@ namespace World
         }
 
         public uint GetOpcode() { return _worldPacket.GetOpcode(); }
+        public Opcode GetUniversalOpcode()
+        {
+            return Opcodes.GetUniversalOpcode(GetOpcode(), Framework.Settings.ClientBuild);
+        }
 
         public void LogPacket()
         {
@@ -52,15 +57,21 @@ namespace World
 
     public abstract class ServerPacket
     {
-        protected ServerPacket(uint opcode)
+        protected ServerPacket(Opcode universalOpcode)
         {
             connectionType = ConnectionType.Realm;
+
+            uint opcode = Opcodes.GetOpcodeValueForVersion(universalOpcode, Framework.Settings.ClientBuild);
+            System.Diagnostics.Trace.Assert(opcode != 0);
             _worldPacket = new WorldPacket(opcode);
         }
 
-        protected ServerPacket(uint opcode, ConnectionType type = ConnectionType.Realm)
+        protected ServerPacket(Opcode universalOpcode, ConnectionType type = ConnectionType.Realm)
         {
             connectionType = type;
+
+            uint opcode = Opcodes.GetOpcodeValueForVersion(universalOpcode, Framework.Settings.ClientBuild);
+            System.Diagnostics.Trace.Assert(opcode != 0);
             _worldPacket = new WorldPacket(opcode);
         }
 
@@ -73,6 +84,10 @@ namespace World
         public uint GetOpcode()
         {
             return _worldPacket.GetOpcode();
+        }
+        public Opcode GetUniversalOpcode()
+        {
+            return Opcodes.GetUniversalOpcode(GetOpcode(), Framework.Settings.ClientBuild);
         }
 
         public byte[] GetData()
@@ -215,6 +230,10 @@ namespace World
         }
 
         public uint GetOpcode() { return opcode; }
+        public Opcode GetUniversalOpcode(bool fromClient)
+        {
+            return Opcodes.GetUniversalOpcode(GetOpcode(), fromClient ? Framework.Settings.ClientBuild : Framework.Settings.ServerBuild);
+        }
 
         public DateTime GetReceivedTime() { return m_receivedTime; }
         public void SetReceiveTime(DateTime receivedTime) { m_receivedTime = receivedTime; }

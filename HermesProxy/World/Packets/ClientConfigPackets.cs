@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World.V2_5_2_39570;
+using Framework.Constants.World;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -31,7 +31,7 @@ namespace World.Packets
 {
     public class AccountDataTimes : ServerPacket
     {
-        public AccountDataTimes() : base((uint)Opcode.SMSG_ACCOUNT_DATA_TIMES) { }
+        public AccountDataTimes() : base(Opcode.SMSG_ACCOUNT_DATA_TIMES) { }
 
         public override void Write()
         {
@@ -48,7 +48,7 @@ namespace World.Packets
 
     public class ClientCacheVersion : ServerPacket
     {
-        public ClientCacheVersion() : base((uint)Opcode.SMSG_CACHE_VERSION) { }
+        public ClientCacheVersion() : base(Opcode.SMSG_CACHE_VERSION) { }
 
         public override void Write()
         {
@@ -74,7 +74,7 @@ namespace World.Packets
 
     public class UpdateAccountData : ServerPacket
     {
-        public UpdateAccountData() : base((uint)Opcode.SMSG_UPDATE_ACCOUNT_DATA) { }
+        public UpdateAccountData() : base(Opcode.SMSG_UPDATE_ACCOUNT_DATA) { }
 
         public override void Write()
         {

@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World.V2_5_2_39570;
+using Framework.Constants.World;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -30,7 +30,7 @@ namespace World.Packets
 {
     class Notification : ServerPacket
     {
-        public Notification() : base((uint)Opcode.SMSG_BATTLENET_NOTIFICATION) { }
+        public Notification() : base(Opcode.SMSG_BATTLENET_NOTIFICATION) { }
 
         public override void Write()
         {
@@ -45,7 +45,7 @@ namespace World.Packets
 
     class Response : ServerPacket
     {
-        public Response() : base((uint)Opcode.SMSG_BATTLENET_RESPONSE) { }
+        public Response() : base(Opcode.SMSG_BATTLENET_RESPONSE) { }
 
         public override void Write()
         {
@@ -62,7 +62,7 @@ namespace World.Packets
 
     class ConnectionStatus : ServerPacket
     {
-        public ConnectionStatus() : base((uint)Opcode.SMSG_BATTLE_NET_CONNECTION_STATUS) { }
+        public ConnectionStatus() : base(Opcode.SMSG_BATTLE_NET_CONNECTION_STATUS) { }
 
         public override void Write()
         {
@@ -77,7 +77,7 @@ namespace World.Packets
 
     class ChangeRealmTicketResponse : ServerPacket
     {
-        public ChangeRealmTicketResponse() : base((uint)Opcode.SMSG_CHANGE_REALM_TICKET_RESPONSE) { }
+        public ChangeRealmTicketResponse() : base(Opcode.SMSG_CHANGE_REALM_TICKET_RESPONSE) { }
 
         public override void Write()
         {

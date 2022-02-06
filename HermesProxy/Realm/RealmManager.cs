@@ -49,7 +49,7 @@ public class RealmManager : Singleton<RealmManager>
             build.HotfixVersion = hotfixVersion.ToCharArray();
 
         build.Build = (uint)Framework.Settings.ClientBuild;
-        string win64AuthSeedHexStr = "1278EB34F243ED7898D614C0E278EAC0";
+        string win64AuthSeedHexStr = "179D3DC3235629D07113A9B3867F97A7";
         if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
             build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 

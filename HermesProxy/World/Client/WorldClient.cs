@@ -12,24 +12,33 @@ using Framework.IO;
 using Framework.Logging;
 using World;
 using Framework.Constants.World;
+using System.Reflection;
 
 namespace HermesProxy.World.Client
 {
-    public static class WorldClient
+    public partial class WorldClient
     {
-        static Socket _clientSocket;
-        static bool? _isSuccessful = null;
-        static string _username;
-        static Realm _realm;
-        static LegacyWorldCrypt _worldCrypt;
+        Socket _clientSocket;
+        bool? _isSuccessful;
+        string _username;
+        Realm _realm;
+        LegacyWorldCrypt _worldCrypt;
+        Dictionary<Opcode, Action<WorldPacket, List<ServerPacket>>> _packetHandlers;
+        WorldSocket _modernSocket;
 
-        public static bool ConnectToWorldServer(Realm realm)
+        public WorldClient()
+        {
+            InitializePacketHandlers();
+        }
+
+        public bool ConnectToWorldServer(Realm realm, WorldSocket modernSocket)
         {
             _worldCrypt = null;
             _realm = realm;
+            _modernSocket = modernSocket;
             _username = BNetServer.Networking.Session.LastSessionData.Username;
-
             _isSuccessful = null;
+
             try
             {
                 Log.Print(LogType.Server, "Connecting to world server...");
@@ -50,7 +59,7 @@ namespace HermesProxy.World.Client
             return (bool)_isSuccessful;
         }
 
-        private static void InitializeEncryption(byte[] sessionKey)
+        private void InitializeEncryption(byte[] sessionKey)
         {
             switch (Settings.ServerBuild)
             {
@@ -66,7 +75,7 @@ namespace HermesProxy.World.Client
                 _worldCrypt.Initialize(sessionKey);
         }
 
-        public static void Disconnect()
+        public void Disconnect()
         {
             if (!IsConnected())
                 return;
@@ -75,12 +84,12 @@ namespace HermesProxy.World.Client
             _clientSocket.Disconnect(false);
         }
 
-        public static bool IsConnected()
+        public bool IsConnected()
         {
             return _clientSocket != null && _clientSocket.Connected;
         }
 
-        private static void ConnectCallback(IAsyncResult AR)
+        private void ConnectCallback(IAsyncResult AR)
         {
             try
             {
@@ -98,7 +107,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private static void ReceiveCallback(IAsyncResult AR)
+        private void ReceiveCallback(IAsyncResult AR)
         {
             try
             {
@@ -173,7 +182,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private static void SendCallback(IAsyncResult AR)
+        private void SendCallback(IAsyncResult AR)
         {
             try
             {
@@ -186,7 +195,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private static void SendPacket(WorldPacket packet)
+        private void SendPacket(WorldPacket packet)
         {
             try
             {
@@ -217,12 +226,12 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private static void HandlePacket(byte[] buffer, ushort opcode, ushort size)
+        private void HandlePacket(byte[] buffer, ushort opcode, ushort size)
         {
             WorldPacket packet = new WorldPacket(buffer);
             System.Diagnostics.Trace.Assert(opcode == packet.GetOpcode());
 
-            Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcode, Settings.ServerBuild);
+            Opcode universalOpcode = packet.GetUniversalOpcode(false);
             Log.Print(LogType.Debug, $"Received opcode {universalOpcode.ToString()} ({opcode}).");
 
             switch (universalOpcode)
@@ -233,14 +242,27 @@ namespace HermesProxy.World.Client
                 case Opcode.SMSG_AUTH_RESPONSE:
                     HandleAuthResponse(packet);
                     break;
+                case Opcode.SMSG_PONG:
+                    break; // don't need to handle
                 default:
-                    Log.Print(LogType.Error, "Unsupported opcode!");
-                    _isSuccessful = false;
+                    if (_packetHandlers.ContainsKey(universalOpcode))
+                    {
+                        List<ServerPacket> packetsForModernGame = new List<ServerPacket>();
+                        _packetHandlers[universalOpcode](packet, packetsForModernGame);
+                        foreach (ServerPacket pkt in packetsForModernGame)
+                            _modernSocket.SendPacket(pkt);
+                    }
+                    else
+                    {
+                        Log.Print(LogType.Error, "Unsupported opcode!");
+                        if (_isSuccessful == null)
+                            _isSuccessful = false;
+                    }
                     break;
             }
         }
 
-        private static void HandleAuthChallenge(WorldPacket packet)
+        private void HandleAuthChallenge(WorldPacket packet)
         {
             if (Settings.ServerBuild >= ClientVersionBuild.V3_3_5a_12340)
             {
@@ -263,7 +285,7 @@ namespace HermesProxy.World.Client
             SendAuthResponse((uint)ourSeed, seed);
         }
 
-        public static void SendAuthResponse(uint clientSeed, uint serverSeed)
+        public void SendAuthResponse(uint clientSeed, uint serverSeed)
         {
             uint zero = 0;
 
@@ -304,7 +326,7 @@ namespace HermesProxy.World.Client
             InitializeEncryption(Auth.AuthClient.GetSessionKey());
         }
 
-        private static void HandleAuthResponse(WorldPacket packet)
+        private void HandleAuthResponse(WorldPacket packet)
         {
             AuthResult result = (AuthResult)packet.ReadUInt8();
 
@@ -318,8 +340,8 @@ namespace HermesProxy.World.Client
             }
 
             // uncomment to test encryption
-            //WorldPacket charEnum = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
-            //SendPacket(charEnum);
+            WorldPacket charEnum = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
+            SendPacket(charEnum);
 
             if (result == AuthResult.AUTH_OK)
             {
@@ -330,6 +352,57 @@ namespace HermesProxy.World.Client
             {
                 Log.Print(LogType.Server, "Authentication failed!");
                 _isSuccessful = false;
+            }
+        }
+
+        public void SendPing(uint ping, uint latency)
+        {
+            if (!IsConnected() || _isSuccessful == false)
+                return;
+
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PING);
+            packet.WriteUInt32(ping);
+            packet.WriteUInt32(latency);
+            SendPacket(packet);
+        }
+
+        public void InitializePacketHandlers()
+        {
+            _packetHandlers = new();
+
+            foreach (var methodInfo in typeof(WorldClient).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+            {
+                foreach (var msgAttr in methodInfo.GetCustomAttributes<PacketHandlerAttribute>())
+                {
+                    if (msgAttr == null)
+                        continue;
+
+                    if (msgAttr.Opcode == Opcode.MSG_NULL_ACTION)
+                        continue;
+
+                    if (_packetHandlers.ContainsKey(msgAttr.Opcode))
+                    {
+                        Log.Print(LogType.Error, $"Tried to override OpcodeHandler of {_packetHandlers[msgAttr.Opcode].ToString()} with {methodInfo.Name} (Opcode {msgAttr.Opcode})");
+                        continue;
+                    }
+
+                    var parameters = methodInfo.GetParameters();
+                    if (parameters.Length == 0)
+                    {
+                        Log.Print(LogType.Error, $"Method: {methodInfo.Name} Has no paramters");
+                        continue;
+                    }
+
+                    if (parameters[0].ParameterType != typeof(WorldPacket))
+                    {
+                        Log.Print(LogType.Error, $"Method: {methodInfo.Name} has wrong BaseType");
+                        continue;
+                    }
+
+                    var del = (Action<WorldPacket, List<ServerPacket>>)Delegate.CreateDelegate(typeof(Action<WorldPacket, List<ServerPacket>>), this, methodInfo);
+
+                    _packetHandlers[msgAttr.Opcode] = del;
+                }
             }
         }
     }

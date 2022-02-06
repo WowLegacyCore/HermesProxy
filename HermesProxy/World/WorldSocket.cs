@@ -18,7 +18,7 @@
 using World;
 using World.Packets;
 using Framework.Constants;
-using Framework.Constants.World.V2_5_2_39570;
+using Framework.Constants.World;
 using Framework.Cryptography;
 using Framework.IO;
 using Framework.Networking;
@@ -30,10 +30,13 @@ using Framework.Realm;
 using static World.Packets.AuthResponse;
 using System.Collections.Generic;
 using HermesProxy.World.Objects;
+using System.Reflection;
+using System.Collections.Concurrent;
+using HermesProxy.World;
 
 namespace World
 {
-    public class WorldSocket : SocketBase
+    public partial class WorldSocket : SocketBase
     {
         static readonly string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
         static readonly string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
@@ -61,6 +64,8 @@ namespace World
         long _LastPingTime;
 
         ZLib.z_stream _compressionStream;
+        HermesProxy.World.Client.WorldClient _worldClient;
+        ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -72,6 +77,8 @@ namespace World
 
             _headerBuffer = new SocketBuffer(HeaderSize);
             _packetBuffer = new SocketBuffer(0);
+
+            InitializePacketHandlers();
         }
 
         public override void Dispose()
@@ -232,9 +239,9 @@ namespace World
             WorldPacket packet = new(_packetBuffer.GetData());
             _packetBuffer.Reset();
 
-            Opcode opcode = (Opcode)packet.GetOpcode();
+            Opcode opcode = packet.GetUniversalOpcode(true);
 
-            Log.Print(LogType.Network, $"Received opcode {opcode.ToString()} ({(uint)opcode}).");
+            Log.Print(LogType.Network, $"Received opcode {opcode.ToString()} ({packet.GetOpcode()}).");
 
             if (opcode != Opcode.CMSG_HOTFIX_REQUEST && !header.IsValidSize())
             {
@@ -247,8 +254,9 @@ namespace World
                 case Opcode.CMSG_PING:
                     Ping ping = new(packet);
                     ping.Read();
-                    if (!HandlePing(ping))
-                        return ReadDataHandlerResult.Error;
+                    if (_worldClient != null)
+                        _worldClient.SendPing(ping.Serial, ping.Latency);
+                    HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
                     AuthSession authSession = new(packet);
@@ -263,6 +271,8 @@ namespace World
                 case Opcode.CMSG_KEEP_ALIVE:
                     break;
                 case Opcode.CMSG_LOG_DISCONNECT:
+                    if (_worldClient != null)
+                        _worldClient.Disconnect();
                     break;
                 case Opcode.CMSG_ENABLE_NAGLE:
                     SetNoDelay(false);
@@ -275,9 +285,6 @@ namespace World
                 case Opcode.CMSG_ENTER_ENCRYPTED_MODE_ACK:
                     HandleEnterEncryptedModeAck();
                     break;
-                case Opcode.CMSG_ENUM_CHARACTERS:
-                    SendCharEnum();
-                    break;
                 default:
                     HandlePacket(packet);
                     break;
@@ -288,7 +295,14 @@ namespace World
 
         public void HandlePacket(WorldPacket packet)
         {
+            var handler = GetHandler(packet.GetUniversalOpcode(true));
+            if (handler != null)
+                handler.Invoke(this, packet);
+        }
 
+        public PacketHandler GetHandler(Opcode opcode)
+        {
+            return _clientPacketTable.LookupByKey(opcode);
         }
 
         public void SendPacket(ServerPacket packet)
@@ -300,8 +314,10 @@ namespace World
             packet.WritePacketData();
 
             var data = packet.GetData();
-            Opcode opcode = (Opcode)packet.GetOpcode();
-            Log.Print(LogType.Network, $"Sending opcode {opcode.ToString()} ({(uint)opcode}).");
+            Opcode universalOpcode = packet.GetUniversalOpcode();
+            ushort opcode = (ushort)packet.GetOpcode();
+
+            Log.Print(LogType.Network, $"Sending opcode {universalOpcode.ToString()} ({(uint)opcode}).");
 
             ByteBuffer buffer = new();
 
@@ -309,7 +325,7 @@ namespace World
             if (packetSize > 0x400 && _worldCrypt.IsInitialized)
             {
                 buffer.WriteInt32(packetSize + 2);
-                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
+                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes(opcode), 2), data, (uint)packetSize));
 
                 byte[] compressedData;
                 uint compressedSize = CompressPacket(data, opcode, out compressedData);
@@ -317,13 +333,13 @@ namespace World
                 buffer.WriteBytes(compressedData, compressedSize);
 
                 packetSize = (int)(compressedSize + 12);
-                opcode = Opcode.SMSG_COMPRESSED_PACKET;
+                opcode = (ushort)Opcodes.GetOpcodeValueForVersion(Opcode.SMSG_COMPRESSED_PACKET, Framework.Settings.ClientBuild);
 
                 data = buffer.GetData();
             }
 
             buffer = new ByteBuffer();
-            buffer.WriteUInt16((ushort)opcode);
+            buffer.WriteUInt16(opcode);
             buffer.WriteBytes(data);
             packetSize += 2 /*opcode*/;
 
@@ -340,9 +356,9 @@ namespace World
             AsyncWrite(byteBuffer.GetData());
         }
 
-        public uint CompressPacket(byte[] data, Opcode opcode, out byte[] outData)
+        public uint CompressPacket(byte[] data, ushort opcode, out byte[] outData)
         {
-            byte[] uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
+            byte[] uncompressedData = BitConverter.GetBytes(opcode).Combine(data);
 
             uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
             outData = new byte[bufferSize];
@@ -496,7 +512,8 @@ namespace World
             //DB.Login.Execute(stmt);
 
             _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
-            if (!HermesProxy.World.Client.WorldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId)))
+            _worldClient = new HermesProxy.World.Client.WorldClient();
+            if (!_worldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId), this))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
                 Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
@@ -605,7 +622,7 @@ namespace World
         }
         public class CharacterLoginFailed : ServerPacket
         {
-            public CharacterLoginFailed(LoginFailureReason code) : base((uint)Opcode.SMSG_CHARACTER_LOGIN_FAILED)
+            public CharacterLoginFailed(LoginFailureReason code) : base(Opcode.SMSG_CHARACTER_LOGIN_FAILED)
             {
                 Code = code;
             }
@@ -1045,7 +1062,7 @@ namespace World
             SendPacket(charEnum);
         }
 
-        bool HandlePing(Ping ping)
+        void HandlePing(Ping ping)
         {
             if (_LastPingTime == 0)
                 _LastPingTime = Time.UnixTime; // for 1st ping
@@ -1057,7 +1074,77 @@ namespace World
             }
 
             SendPacket(new Pong(ping.Serial));
-            return true;
+        }
+
+        public void InitializePacketHandlers()
+        {
+            foreach (var methodInfo in typeof(WorldSocket).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
+            {
+                foreach (var msgAttr in methodInfo.GetCustomAttributes<PacketHandlerAttribute>())
+                {
+                    if (msgAttr == null)
+                        continue;
+
+                    if (msgAttr.Opcode == Opcode.MSG_NULL_ACTION)
+                    {
+                        Log.Print(LogType.Error, $"Opcode {msgAttr.Opcode} does not have a value");
+                        continue;
+                    }
+
+                    if (_clientPacketTable.ContainsKey(msgAttr.Opcode))
+                    {
+                        Log.Print(LogType.Error, $"Tried to override OpcodeHandler of {_clientPacketTable[msgAttr.Opcode].ToString()} with {methodInfo.Name} (Opcode {msgAttr.Opcode})");
+                        continue;
+                    }
+
+                    var parameters = methodInfo.GetParameters();
+                    if (parameters.Length == 0)
+                    {
+                        Log.Print(LogType.Error, $"Method: {methodInfo.Name} Has no paramters");
+                        continue;
+                    }
+
+                    if (parameters[0].ParameterType.BaseType != typeof(ClientPacket))
+                    {
+                        Log.Print(LogType.Error, $"Method: {methodInfo.Name} has wrong BaseType");
+                        continue;
+                    }
+
+                    _clientPacketTable[msgAttr.Opcode] = new PacketHandler(methodInfo, parameters[0].ParameterType);
+                }
+            }
+        }
+
+        public class PacketHandler
+        {
+            public PacketHandler(MethodInfo info, Type type)
+            {
+                methodCaller = (Action<WorldSocket, ClientPacket>)GetType().GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(type).Invoke(null, new object[] { info });
+                packetType = type;
+            }
+
+            public void Invoke(WorldSocket session, WorldPacket packet)
+            {
+                if (packetType == null)
+                    return;
+
+                using var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet);
+                clientPacket.Read();
+                methodCaller(session, clientPacket);
+            }
+
+            static Action<WorldSocket, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
+            {
+                // create first delegate. It is not fine because its 
+                // signature contains unknown types T and P1
+                Action<WorldSocket, P1> d = (Action<WorldSocket, P1>)method.CreateDelegate(typeof(Action<WorldSocket, P1>));
+                // create another delegate having necessary signature. 
+                // It encapsulates first delegate with a closure
+                return delegate (WorldSocket target, ClientPacket p) { d(target, (P1)p); };
+            }
+
+            Action<WorldSocket, ClientPacket> methodCaller;
+            Type packetType;
         }
     }
 

@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World.V2_5_2_39570;
+using Framework.Constants.World;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -44,7 +44,7 @@ namespace World.Packets
 
     class Pong : ServerPacket
     {
-        public Pong(uint serial) : base((uint)Opcode.SMSG_PONG)
+        public Pong(uint serial) : base(Opcode.SMSG_PONG)
         {
             Serial = serial;
         }
@@ -59,7 +59,7 @@ namespace World.Packets
 
     class AuthChallenge : ServerPacket
     {
-        public AuthChallenge() : base((uint)Opcode.SMSG_AUTH_CHALLENGE) { }
+        public AuthChallenge() : base(Opcode.SMSG_AUTH_CHALLENGE) { }
 
         public override void Write()
         {
@@ -107,7 +107,7 @@ namespace World.Packets
 
     class AuthResponse : ServerPacket
     {
-        public AuthResponse() : base((uint)Opcode.SMSG_AUTH_RESPONSE)
+        public AuthResponse() : base(Opcode.SMSG_AUTH_RESPONSE)
         {
             WaitInfo = new Optional<AuthWaitInfo>();
             SuccessInfo = new Optional<AuthSuccessInfo>();
@@ -290,7 +290,7 @@ namespace World.Packets
 
     class WaitQueueUpdate : ServerPacket
     {
-        public WaitQueueUpdate() : base((uint)Opcode.SMSG_WAIT_QUEUE_UPDATE) { }
+        public WaitQueueUpdate() : base(Opcode.SMSG_WAIT_QUEUE_UPDATE) { }
 
         public override void Write()
         {
@@ -302,14 +302,14 @@ namespace World.Packets
 
     class WaitQueueFinish : ServerPacket
     {
-        public WaitQueueFinish() : base((uint)Opcode.SMSG_WAIT_QUEUE_FINISH) { }
+        public WaitQueueFinish() : base(Opcode.SMSG_WAIT_QUEUE_FINISH) { }
 
         public override void Write() { }
     }
 
     class ConnectTo : ServerPacket
     {
-        public ConnectTo() : base((uint)Opcode.SMSG_CONNECT_TO)
+        public ConnectTo() : base(Opcode.SMSG_CONNECT_TO)
         {
             Payload = new ConnectPayload();
         }
@@ -398,7 +398,7 @@ namespace World.Packets
 
     class ResumeComms : ServerPacket
     {
-        public ResumeComms(ConnectionType connection) : base((uint)Opcode.SMSG_RESUME_COMMS, connection) { }
+        public ResumeComms(ConnectionType connection) : base(Opcode.SMSG_RESUME_COMMS, connection) { }
 
         public override void Write() { }
     }
@@ -424,7 +424,7 @@ namespace World.Packets
 
         static byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
 
-        public EnterEncryptedMode(byte[] encryptionKey, bool enabled) : base((uint)Opcode.SMSG_ENTER_ENCRYPTED_MODE)
+        public EnterEncryptedMode(byte[] encryptionKey, bool enabled) : base(Opcode.SMSG_ENTER_ENCRYPTED_MODE)
         {
             EncryptionKey = encryptionKey;
             Enabled = enabled;

@@ -17,6 +17,7 @@ namespace Framework.Constants.World
                     return FindOpcodeValueInEnum<V1_12_1_5875.Opcode>(opcode.ToString());
                 case ClientVersionBuild.V2_4_3_8606:
                     return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode.ToString());
+                case ClientVersionBuild.V1_14_0_40618:
                 case ClientVersionBuild.V2_5_2_40892:
                     return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode.ToString());
                 case ClientVersionBuild.V3_3_5a_12340:
@@ -33,6 +34,7 @@ namespace Framework.Constants.World
                     return FindOpcodeNameInEnum<V1_12_1_5875.Opcode>(opcode);
                 case ClientVersionBuild.V2_4_3_8606:
                     return FindOpcodeNameInEnum<V2_4_3_8606.Opcode>(opcode);
+                case ClientVersionBuild.V1_14_0_40618:
                 case ClientVersionBuild.V2_5_2_40892:
                     return FindOpcodeNameInEnum<V2_5_2_39570.Opcode>(opcode);
                 case ClientVersionBuild.V3_3_5a_12340:

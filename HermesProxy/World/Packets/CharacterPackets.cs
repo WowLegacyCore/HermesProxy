@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World.V2_5_2_39570;
+using Framework.Constants.World;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -31,9 +31,16 @@ using HermesProxy.World.Objects;
 
 namespace World.Packets
 {
+    public class EnumCharacters : ClientPacket
+    {
+        public EnumCharacters(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
     public class EnumCharactersResult : ServerPacket
     {
-        public EnumCharactersResult() : base((uint)Opcode.SMSG_ENUM_CHARACTERS_RESULT) { }
+        public EnumCharactersResult() : base(Opcode.SMSG_ENUM_CHARACTERS_RESULT) { }
 
         public override void Write()
         {
