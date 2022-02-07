@@ -25,18 +25,21 @@ namespace World
             packet.WriteUInt8((byte)charCreate.CreateInfo.ClassId);
             packet.WriteUInt8((byte)charCreate.CreateInfo.Sex);
 
-            byte skin;
-            byte face;
-            byte hairStyle;
-            byte hairColor;
-            byte facialhair;
-            CharacterCustomizations.ConvertModernCustomizationsToLegacy(charCreate.CreateInfo.Customizations, out skin, out face, out hairStyle, out hairColor, out facialhair);
+            CharacterCustomizations.ConvertModernCustomizationsToLegacy(charCreate.CreateInfo.Customizations, out byte skin, out byte face, out byte hairStyle, out byte hairColor, out byte facialhair);
             packet.WriteUInt8(skin);
             packet.WriteUInt8(face);
             packet.WriteUInt8(hairStyle);
             packet.WriteUInt8(hairColor);
             packet.WriteUInt8(facialhair);
             packet.WriteUInt8(0); // outfit
+            _worldClient.SendPacket(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAR_DELETE)]
+        void HandleCharDelete(CharDelete charDelete)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAR_DELETE);
+            packet.WriteGuid(charDelete.Guid.To64());
             _worldClient.SendPacket(packet);
         }
     }

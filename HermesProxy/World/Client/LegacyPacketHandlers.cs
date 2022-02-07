@@ -127,5 +127,24 @@ namespace HermesProxy.World.Client
             }
             responses.Add(createChar);
         }
+
+        [PacketHandler(Opcode.SMSG_DELETE_CHAR)]
+        void HandleDeleteChar(WorldPacket packet, List<ServerPacket> responses)
+        {
+            byte result = packet.ReadUInt8();
+
+            DeleteChar deleteChar = new DeleteChar();
+            if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+            {
+                Objects.TBC.ResponseCodes legacyCode = (Objects.TBC.ResponseCodes)result;
+                deleteChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
+            }
+            else
+            {
+                Objects.Vanilla.ResponseCodes legacyCode = (Objects.Vanilla.ResponseCodes)result;
+                deleteChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
+            }
+            responses.Add(deleteChar);
+        }
     }
 }

@@ -337,4 +337,28 @@ namespace World.Packets
         public HermesProxy.World.Objects.Classic.ResponseCodes Code;
         public WowGuid128 Guid;
     }
+
+    public class CharDelete : ClientPacket
+    {
+        public CharDelete(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Guid; // Guid of the character to delete
+    }
+
+    public class DeleteChar : ServerPacket
+    {
+        public DeleteChar() : base(Opcode.SMSG_DELETE_CHAR) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Code);
+        }
+
+        public HermesProxy.World.Objects.Classic.ResponseCodes Code;
+    }
 }

@@ -138,13 +138,13 @@ namespace World
             opcode = ReadUInt16();
         }
 
-        public WowGuid ReadGuid()
+        public WowGuid64 ReadGuid()
         {
             var guid = new WowGuid64(ReadUInt64());
             return guid;
         }
 
-        public WowGuid ReadPackedGuid()
+        public WowGuid64 ReadPackedGuid()
         {
             var guid = new WowGuid64(ReadPackedUInt64(ReadUInt8()));
             return guid;
@@ -170,6 +170,11 @@ namespace World
                     guid |= (ulong)ReadUInt8() << (i * 8);
 
             return guid;
+        }
+
+        public void WriteGuid(WowGuid64 guid)
+        {
+            WriteUInt64(guid.GetLowValue());
         }
 
         public void WritePackedGuid128(WowGuid128 guid)
