@@ -411,11 +411,11 @@ namespace World
 
         void HandleAuthSessionCallback(AuthSession authSession)
         {
-            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(BNetServer.Networking.Session.LastSessionData.Build);
+            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(Global.CurrentSessionData.Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
-                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {BNetServer.Networking.Session.LastSessionData.Build} ({GetRemoteIpAddress()}).");
+                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.CurrentSessionData.Build} ({GetRemoteIpAddress()}).");
                 CloseSocket();
                 return;
             }
@@ -565,8 +565,8 @@ namespace World
             _key = key.Raw = authSession.Key;
 
             uint accountId = key.AccountId;
-            string login = BNetServer.Networking.Session.LastSessionData.AccountInfo.Login;
-            _sessionKey = BNetServer.Networking.Session.LastSessionData.SessionKey;
+            string login = Global.CurrentSessionData.AccountInfo.Login;
+            _sessionKey = Global.CurrentSessionData.SessionKey;
 
             HmacSha256 hmac = new(_sessionKey);
             hmac.Process(BitConverter.GetBytes(authSession.Key), 8);
@@ -597,7 +597,7 @@ namespace World
         {
             var instanceAddress = GetRemoteIpAddress();
 
-            _instanceConnectKey.AccountId = BNetServer.Networking.Session.LastSessionData.AccountInfo.Id;
+            _instanceConnectKey.AccountId = Global.CurrentSessionData.AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
 
@@ -951,19 +951,19 @@ namespace World
     {
         public AccountInfo()
         {
-            game.Id = BNetServer.Networking.Session.LastSessionData.GameAccountInfo.Id;
-            game.SessionKey = BNetServer.Networking.Session.LastSessionData.SessionKey;
-            battleNet.LastIP = BNetServer.Networking.Session.LastSessionData.AccountInfo.LastIP;
-            battleNet.IsLockedToIP = BNetServer.Networking.Session.LastSessionData.AccountInfo.IsLockedToIP;
-            battleNet.LockCountry = BNetServer.Networking.Session.LastSessionData.AccountInfo.LockCountry;
+            game.Id = Global.CurrentSessionData.GameAccountInfo.Id;
+            game.SessionKey = Global.CurrentSessionData.SessionKey;
+            battleNet.LastIP = Global.CurrentSessionData.AccountInfo.LastIP;
+            battleNet.IsLockedToIP = Global.CurrentSessionData.AccountInfo.IsLockedToIP;
+            battleNet.LockCountry = Global.CurrentSessionData.AccountInfo.LockCountry;
             game.Expansion = 9;
             game.MuteTime = 0;
-            battleNet.Locale = BNetServer.Networking.Session.LastSessionData.Locale.ToEnum<Locale>();
+            battleNet.Locale = Global.CurrentSessionData.Locale.ToEnum<Locale>();
             game.Recruiter = 0;
-            game.OS = BNetServer.Networking.Session.LastSessionData.OS;
-            battleNet.Id = BNetServer.Networking.Session.LastSessionData.AccountInfo.Id;
-            battleNet.IsBanned = BNetServer.Networking.Session.LastSessionData.AccountInfo.IsBanned;
-            game.IsBanned = BNetServer.Networking.Session.LastSessionData.GameAccountInfo.IsBanned;
+            game.OS = Global.CurrentSessionData.OS;
+            battleNet.Id = Global.CurrentSessionData.AccountInfo.Id;
+            battleNet.IsBanned = Global.CurrentSessionData.AccountInfo.IsBanned;
+            game.IsBanned = Global.CurrentSessionData.GameAccountInfo.IsBanned;
             game.IsRectuiter = false;
 
             if (battleNet.Locale >= Locale.Total)

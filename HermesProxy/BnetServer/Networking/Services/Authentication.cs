@@ -35,9 +35,9 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadLocale;
             }
 
-            LastSessionData.Locale = locale = logonRequest.Locale;
-            LastSessionData.OS = os = logonRequest.Platform;
-            LastSessionData.Build = build = (uint)logonRequest.ApplicationVersion;
+            Global.CurrentSessionData.Locale = locale = logonRequest.Locale;
+            Global.CurrentSessionData.OS = os = logonRequest.Platform;
+            Global.CurrentSessionData.Build = build = (uint)logonRequest.ApplicationVersion;
 
             var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
@@ -53,7 +53,7 @@ namespace BNetServer.Networking
         BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
             accountInfo = new AccountInfo();
-            LastSessionData.AccountInfo = accountInfo;
+            Global.CurrentSessionData.AccountInfo = accountInfo;
 
             if (accountInfo.LoginTicketExpiry < Time.UnixTime)
             {
@@ -115,8 +115,8 @@ namespace BNetServer.Networking
             if (!ipCountry.IsEmpty())
                 logonResult.GeoipCountry = ipCountry;
 
-            LastSessionData.SessionKey = new byte[64].GenerateRandomKey(64);
-            logonResult.SessionKey = ByteString.CopyFrom(LastSessionData.SessionKey);
+            Global.CurrentSessionData.SessionKey = new byte[64].GenerateRandomKey(64);
+            logonResult.SessionKey = ByteString.CopyFrom(Global.CurrentSessionData.SessionKey);
 
             authed = true;
 

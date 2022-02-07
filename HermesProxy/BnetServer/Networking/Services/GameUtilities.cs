@@ -82,7 +82,7 @@ namespace BNetServer.Networking
                 var realmListTicketIdentity = Json.CreateObject<RealmListTicketIdentity>(identity.BlobValue.ToStringUtf8(), true);
                 var gameAccount = accountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
                 if (gameAccount != null)
-                    LastSessionData.GameAccountInfo = gameAccountInfo = gameAccount;
+                    Global.CurrentSessionData.GameAccountInfo = gameAccountInfo = gameAccount;
             }
 
             if (gameAccountInfo == null)

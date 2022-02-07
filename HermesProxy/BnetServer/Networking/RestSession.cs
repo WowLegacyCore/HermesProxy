@@ -76,8 +76,8 @@ namespace BNetServer.Networking
                 }
             }
 
-            BNetServer.Networking.Session.LastSessionData.Username = login;
-            BNetServer.Networking.Session.LastSessionData.Password = password;
+            Global.CurrentSessionData.Username = login;
+            Global.CurrentSessionData.Password = password;
 
             if (HermesProxy.Auth.AuthClient.ConnectToAuthServer(login, password))
             {
@@ -89,7 +89,7 @@ namespace BNetServer.Networking
                     byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
                     loginTicket = "TC-" + ticket.ToHexString();
                 }
-                BNetServer.Networking.Session.LastSessionData.LoginTicket = loginTicket;
+                Global.CurrentSessionData.LoginTicket = loginTicket;
                 loginResult.LoginTicket = loginTicket;
 
                 loginResult.AuthenticationState = "DONE";

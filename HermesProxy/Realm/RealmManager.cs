@@ -271,7 +271,8 @@ public class RealmManager : Singleton<RealmManager>
 
     public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
-        Realm realm = GetRealm(new RealmId(realmAddress));
+        Global.CurrentSessionData.RealmId = new RealmId(realmAddress);
+        Realm realm = GetRealm(Global.CurrentSessionData.RealmId);
         if (realm != null)
         {
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
@@ -301,8 +302,8 @@ public class RealmManager : Singleton<RealmManager>
             stmt.AddValue(4, accountName);
             DB.Login.DirectExecute(stmt);
             */
-            BNetServer.Networking.Session.LastSessionData.SessionKey = keyData;
-            BNetServer.Networking.Session.LastSessionData.OS = os;
+            Global.CurrentSessionData.SessionKey = keyData;
+            Global.CurrentSessionData.OS = os;
 
             Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmJoinTicket";

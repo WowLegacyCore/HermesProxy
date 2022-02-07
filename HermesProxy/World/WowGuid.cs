@@ -1,5 +1,6 @@
 ﻿using Framework;
 using Framework.Constants.World;
+using Framework.Logging;
 using HermesProxy.Enums;
 using System;
 using System.Collections.Generic;
@@ -15,20 +16,7 @@ namespace HermesProxy
         public HighGuid HighGuid { get; protected set; }
         public ulong High { get; protected set; }
 
-        public bool HasEntry()
-        {
-            switch (GetHighType())
-            {
-                case HighGuidType.Creature:
-                case HighGuidType.GameObject:
-                case HighGuidType.Pet:
-                case HighGuidType.Vehicle:
-                case HighGuidType.AreaTrigger:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+        public abstract bool HasEntry();
 
         public abstract ulong GetLow();
         public ulong GetLowValue() => Low;
@@ -108,34 +96,119 @@ namespace HermesProxy
 
     public class WowGuid128 : WowGuid
     {
+        public static WowGuid128 Empty = new WowGuid128();
+
         public WowGuid128()
         {
             Low = 0;
             High = 0;
-            if (Settings.ClientBuild >= ClientVersionBuild.V7_0_3_22248)
-                HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
-            else if (Settings.ClientBuild >= ClientVersionBuild.V6_2_4_21315)
-                HighGuid = new HighGuid624((byte)((High >> 58) & 0x3F));
-            else
-                HighGuid = new HighGuid623((byte)((High >> 58) & 0x3F));
+            HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
         }
-        public WowGuid128(ulong low, ulong high)
+        public WowGuid128(ulong high, ulong low)
         {
             Low = low;
             High = high;
-            if (Settings.ClientBuild >= ClientVersionBuild.V7_0_3_22248)
-                HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
-            else if (Settings.ClientBuild >= ClientVersionBuild.V6_2_4_21315)
-                HighGuid = new HighGuid624((byte)((High >> 58) & 0x3F));
-            else
-                HighGuid = new HighGuid623((byte)((High >> 58) & 0x3F));
+            HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
         }
 
-        public WowGuid128(HighGuidType703 type, ulong counter)
+        public static WowGuid128 Create(WowGuid64 guid)
         {
-            Low = counter;
-            High = (ulong)type << 58;
-            HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
+            switch (guid.GetHighType())
+            {
+                case HighGuidType.Player:
+                    return Create(HighGuidType703.Player, guid.GetLow());
+                case HighGuidType.Item:
+                    return Create(HighGuidType703.Item, guid.GetLow());
+                case HighGuidType.Transport:
+                case HighGuidType.MOTransport:
+                    return Create(HighGuidType703.Transport, guid.GetLow());
+                case HighGuidType.RaidGroup:
+                    return Create(HighGuidType703.RaidGroup, guid.GetLow());
+                case HighGuidType.GameObject:
+                    return Create(HighGuidType703.GameObject, 0, guid.GetEntry(), guid.GetLow());
+                case HighGuidType.Creature:
+                    return Create(HighGuidType703.Creature, 0, guid.GetEntry(), guid.GetLow());
+                case HighGuidType.Pet:
+                    return Create(HighGuidType703.Pet, 0, guid.GetEntry(), guid.GetLow());
+                case HighGuidType.Vehicle:
+                    return Create(HighGuidType703.Vehicle, 0, guid.GetEntry(), guid.GetLow());
+                case HighGuidType.DynamicObject:
+                    return Create(HighGuidType703.DynamicObject, 0, guid.GetEntry(), guid.GetLow());
+                case HighGuidType.Corpse:
+                    return Create(HighGuidType703.Corpse, 0, guid.GetEntry(), guid.GetLow());
+            }
+            return WowGuid128.Empty;
+        }
+        public static WowGuid128 Create(HighGuidType703 type, ulong counter)
+        {
+            switch (type)
+            {
+                case HighGuidType703.Uniq:
+                case HighGuidType703.Party:
+                case HighGuidType703.WowAccount:
+                case HighGuidType703.BNetAccount:
+                case HighGuidType703.GMTask:
+                case HighGuidType703.RaidGroup:
+                case HighGuidType703.Spell:
+                case HighGuidType703.Mail:
+                case HighGuidType703.UserRouter:
+                case HighGuidType703.PVPQueueGroup:
+                case HighGuidType703.UserClient:
+                case HighGuidType703.UniqUserClient:
+                case HighGuidType703.BattlePet:
+                case HighGuidType703.CommerceObj:
+                case HighGuidType703.ClientSession:
+                    return GlobalCreate(type, counter);
+                case HighGuidType703.Player:
+                case HighGuidType703.Item:   // This is not exactly correct, there are 2 more unknown parts in highguid: (high >> 10 & 0xFF), (high >> 18 & 0xFFFFFF)
+                case HighGuidType703.Guild:
+                case HighGuidType703.Transport:
+                    return RealmSpecificCreate(type, counter);
+                default:
+                    Log.Print(LogType.Error, $"This guid type cannot be constructed using Create(HighGuid: {type} ulong counter).");
+                    break;
+            }
+            return WowGuid128.Empty;
+        }
+        public static WowGuid128 Create(HighGuidType703 type, uint mapId, uint entry, ulong counter)
+        {
+            return MapSpecificCreate(type, 0, (ushort)mapId, 0, entry, counter);
+        }
+        public static WowGuid128 Create(HighGuidType703 type, World.Objects.SpellCastSource subType, uint mapId, uint entry, ulong counter)
+        {
+            return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter);
+        }
+
+        static WowGuid128 GlobalCreate(HighGuidType703 type, ulong counter)
+        {
+            return new WowGuid128((ulong)type << 58, counter);
+        }
+        static WowGuid128 RealmSpecificCreate(HighGuidType703 type, ulong counter)
+        {
+            if (type == HighGuidType703.Transport)
+                return new WowGuid128((ulong)type << 58 | (counter << 38), 0);
+            else
+                return new WowGuid128((ulong)type << 58 | (ulong)Global.CurrentSessionData.RealmId.Index << 42, counter);
+        }
+        static WowGuid128 MapSpecificCreate(HighGuidType703 type, byte subType, ushort mapId, uint serverId, uint entry, ulong counter)
+        {
+            return new WowGuid128((((ulong)type << 58) | ((ulong)(Global.CurrentSessionData.RealmId.Index & 0x1FFF) << 42) | ((ulong)(mapId & 0x1FFF) << 29) | ((ulong)(entry & 0x7FFFFF) << 6) | ((ulong)subType & 0x3F)),
+                (((ulong)(serverId & 0xFFFFFF) << 40) | (counter & 0xFFFFFFFFFF)));
+        }
+
+        public override bool HasEntry()
+        {
+            switch (GetHighType())
+            {
+                case HighGuidType.Creature:
+                case HighGuidType.GameObject:
+                case HighGuidType.Pet:
+                case HighGuidType.Vehicle:
+                case HighGuidType.AreaTrigger:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public byte GetSubType() // move to base?
@@ -165,7 +238,10 @@ namespace HermesProxy
 
         public override ulong GetLow()
         {
-            return Low & 0xFFFFFFFFFF; // CreationBits
+            if (GetHighType() == HighGuidType.Transport)
+                return (High >> 38) & 0xFFFFF;
+            else
+                return Low & 0xFFFFFFFFFF; // CreationBits
         }
 
         public override string ToString()
@@ -187,7 +263,7 @@ namespace HermesProxy
 
         public override WowGuid64 To64()
         {
-            return new WowGuid64(0);
+            return WowGuid64.Create(this);
         }
         public override WowGuid128 To128()
         {
@@ -197,7 +273,7 @@ namespace HermesProxy
 
     public class WowGuid64 : WowGuid
     {
-        public static WowGuid Empty = new WowGuid64(0);
+        public static WowGuid64 Empty = new WowGuid64(0);
 
         public WowGuid64(ulong id)
         {
@@ -205,28 +281,72 @@ namespace HermesProxy
             HighGuid = new HighGuidLegacy(GetHighGuidTypeLegacy());
         }
 
-        public override ulong GetLow()
+        public WowGuid64(HighGuidTypeLegacy hi, uint counter)
+        {
+            Low = counter != 0 ? (ulong)counter | ((ulong)hi << 48) : 0;
+            HighGuid = new HighGuidLegacy(GetHighGuidTypeLegacy());
+        }
+
+        public WowGuid64(HighGuidTypeLegacy hi, uint entry, uint counter)
+        {
+            Low = counter != 0 ? (ulong)counter | ((ulong)entry << 24) | ((ulong)hi << 48) : 0;
+            HighGuid = new HighGuidLegacy(GetHighGuidTypeLegacy());
+        }
+
+        public static WowGuid64 Create(WowGuid128 guid)
+        {
+            switch (guid.GetHighType())
+            {
+                case HighGuidType.Player:
+                    return new WowGuid64(HighGuidTypeLegacy.Player, (uint)guid.GetLow());
+                case HighGuidType.Item:
+                    return new WowGuid64(HighGuidTypeLegacy.Item, (uint)guid.GetLow());
+                case HighGuidType.Transport:
+                case HighGuidType.MOTransport:
+                    return new WowGuid64(HighGuidTypeLegacy.Transport, (uint)guid.GetLow());
+                case HighGuidType.RaidGroup:
+                    return new WowGuid64(HighGuidTypeLegacy.Group, (uint)guid.GetLow());
+                case HighGuidType.GameObject:
+                    return new WowGuid64(HighGuidTypeLegacy.GameObject, guid.GetEntry(), (uint)guid.GetLow());
+                case HighGuidType.Creature:
+                    return new WowGuid64(HighGuidTypeLegacy.Creature, guid.GetEntry(), (uint)guid.GetLow());
+                case HighGuidType.Pet:
+                    return new WowGuid64(HighGuidTypeLegacy.Pet, guid.GetEntry(), (uint)guid.GetLow());
+                case HighGuidType.Vehicle:
+                    return new WowGuid64(HighGuidTypeLegacy.Vehicle, guid.GetEntry(), (uint)guid.GetLow());
+                case HighGuidType.DynamicObject:
+                    return new WowGuid64(HighGuidTypeLegacy.DynamicObject, guid.GetEntry(), (uint)guid.GetLow());
+                case HighGuidType.Corpse:
+                    return new WowGuid64(HighGuidTypeLegacy.Corpse, guid.GetEntry(), (uint)guid.GetLow());
+            }
+            return WowGuid64.Empty;
+        }
+
+        public override bool HasEntry()
         {
             switch (GetHighType())
             {
+                case HighGuidType.Item:
                 case HighGuidType.Player:
                 case HighGuidType.DynamicObject:
+                case HighGuidType.Corpse:
+                case HighGuidType.MOTransport:
                 case HighGuidType.RaidGroup:
-                case HighGuidType.Item:
-                    return Low & 0x000FFFFFFFFFFFFF;
+                    return false;
                 case HighGuidType.GameObject:
                 case HighGuidType.Transport:
-                //case HighGuidType.MOTransport: ??
-                case HighGuidType.Vehicle:
                 case HighGuidType.Creature:
                 case HighGuidType.Pet:
-                    if (Settings.ServerBuild >= ClientVersionBuild.V4_0_1_13164)
-                        return Low & 0x00000000FFFFFFFFul;
-                    return Low & 0x0000000000FFFFFFul;
+                default:
+                    return true;
             }
+        }
 
-            // TODO: check if entryless guids dont use now more bytes
-            return Low & 0x00000000FFFFFFFFul;
+        public override ulong GetLow()
+        {
+            return HasEntry()
+                ? (uint)(Low & 0x0000000000FFFFFFul)
+                : (uint)(Low & 0x00000000FFFFFFFFul);
         }
 
         public override uint GetEntry()
@@ -234,9 +354,7 @@ namespace HermesProxy
             if (!HasEntry())
                 return 0;
 
-            if (Settings.ServerBuild >= ClientVersionBuild.V4_0_1_13164)
-                return (uint)((Low & 0x000FFFFF00000000) >> 32);
-            return (uint)((Low & 0x000FFFFFFF000000) >> 24);
+            return (uint)((Low >> 24) & 0x0000000000FFFFFFul);
         }
 
         public HighGuidTypeLegacy GetHighGuidTypeLegacy()
@@ -244,16 +362,7 @@ namespace HermesProxy
             if (Low == 0)
                 return HighGuidTypeLegacy.None;
 
-            var highGUID = (HighGuidTypeLegacy)((Low & 0xF0F0000000000000) >> 52);
-            switch ((int)highGUID & 0xF00)
-            {
-                case 0x0:
-                    return HighGuidTypeLegacy.Player;
-                case 0x400:
-                    return HighGuidTypeLegacy.Item;
-                default:
-                    return highGUID;
-            }
+            return (HighGuidTypeLegacy)((Low >> 48) & 0x0000FFFF);
         }
 
         public override string ToString()
@@ -269,25 +378,6 @@ namespace HermesProxy
                     + " Entry: " + GetEntry() + " Low: " + GetLow();
             }
 
-            switch (GetHighGuidTypeLegacy())
-            {
-                case HighGuidTypeLegacy.BattleGround1:
-                    {
-                        var bgType = Low & 0x00000000000000FF;
-                        return "Full: 0x" + Low.ToString("X8") + " Type: " + GetHighType()
-                            + " BgType: " + bgType;
-                    }
-                case HighGuidTypeLegacy.BattleGround2:
-                    {
-                        var bgType = (Low & 0x00FF0000) >> 16;
-                        var unkId = (Low & 0x0000FF00) >> 8;
-                        var arenaType = (Low & 0x000000FF) >> 0;
-                        return "Full: 0x" + Low.ToString("X8") + " Type: " + GetHighType()
-                            + " BgType: " + bgType
-                            + " Unk: " + unkId + (arenaType > 0 ? (" ArenaType: " + arenaType) : String.Empty);
-                    }
-            }
-
             return "Full: 0x" + Low.ToString("X8") + " Type: " + GetHighType()
                 + " Low: " + GetLow();
         }
@@ -298,7 +388,7 @@ namespace HermesProxy
         }
         public override WowGuid128 To128()
         {
-            return new WowGuid128();
+            return WowGuid128.Create(this);
         }
     }
 }

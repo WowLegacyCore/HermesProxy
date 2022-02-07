@@ -29,8 +29,7 @@ namespace HermesProxy.World.Client
             for (byte i = 0; i < count; i++)
             {
                 EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
-                packet.ReadGuid().To128();
-                char1.Guid = new HermesProxy.WowGuid128(Framework.Constants.World.HighGuidType703.Player, (ulong)i+1);
+                char1.Guid = packet.ReadGuid().To128();
                 char1.Name = packet.ReadCString();
                 char1.RaceId = packet.ReadUInt8();
                 char1.ClassId = packet.ReadUInt8();

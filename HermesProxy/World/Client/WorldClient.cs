@@ -36,7 +36,7 @@ namespace HermesProxy.World.Client
             _worldCrypt = null;
             _realm = realm;
             _modernSocket = modernSocket;
-            _username = BNetServer.Networking.Session.LastSessionData.Username;
+            _username = Global.CurrentSessionData.Username;
             _isSuccessful = null;
 
             try

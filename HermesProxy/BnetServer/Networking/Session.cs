@@ -16,19 +16,6 @@ namespace BNetServer.Networking
 {
     partial class Session : SSLSocket
     {
-        public struct LoginSessionData
-        {
-            public AccountInfo AccountInfo;
-            public GameAccountInfo GameAccountInfo;
-            public string Username;
-            public string Password ;
-            public string LoginTicket;
-            public byte[] SessionKey;
-            public string Locale;
-            public string OS;
-            public uint Build;
-        }
-        public static LoginSessionData LastSessionData;
         AccountInfo accountInfo;
         GameAccountInfo gameAccountInfo;
 
@@ -193,7 +180,7 @@ namespace BNetServer.Networking
         public AccountInfo()
         {
             Id = 1;
-            Login = Session.LastSessionData.Username;
+            Login = Global.CurrentSessionData.Username;
             IsLockedToIP = false;
             LockCountry = "";
             LastIP = "127.0.0.1";
@@ -222,7 +209,7 @@ namespace BNetServer.Networking
         public GameAccountInfo()
         {
             Id = 1;
-            Name = Session.LastSessionData.Username;
+            Name = Global.CurrentSessionData.Username;
             UnbanDate = 0;
             IsPermanenetlyBanned = false;
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
