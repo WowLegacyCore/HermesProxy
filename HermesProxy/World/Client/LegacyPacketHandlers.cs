@@ -108,5 +108,25 @@ namespace HermesProxy.World.Client
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(8, true, false, false));
             responses.Add(charEnum);
         }
+
+        [PacketHandler(Opcode.SMSG_CREATE_CHAR)]
+        void HandleCreateChar(WorldPacket packet, List<ServerPacket> responses)
+        {
+            byte result = packet.ReadUInt8();
+
+            CreateChar createChar = new CreateChar();
+            createChar.Guid = new WowGuid128();
+            if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+            {
+                Objects.TBC.ResponseCodes legacyCode = (Objects.TBC.ResponseCodes)result;
+                createChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
+            }
+            else
+            {
+                Objects.Vanilla.ResponseCodes legacyCode = (Objects.Vanilla.ResponseCodes)result;
+                createChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
+            }
+            responses.Add(createChar);
+        }
     }
 }

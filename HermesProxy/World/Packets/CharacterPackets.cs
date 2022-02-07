@@ -275,4 +275,66 @@ namespace World.Packets
             return ChrCustomizationOptionID.CompareTo(other.ChrCustomizationOptionID);
         }
     }
+
+    public class CreateCharacter : ClientPacket
+    {
+        public CreateCharacter(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            CreateInfo = new CharacterCreateInfo();
+            uint nameLength = _worldPacket.ReadBits<uint>(6);
+            bool hasTemplateSet = _worldPacket.HasBit();
+            CreateInfo.IsTrialBoost = _worldPacket.HasBit();
+            CreateInfo.UseNPE = _worldPacket.HasBit();
+
+            CreateInfo.RaceId = (Race)_worldPacket.ReadUInt8();
+            CreateInfo.ClassId = (Class)_worldPacket.ReadUInt8();
+            CreateInfo.Sex = (Gender)_worldPacket.ReadUInt8();
+            var customizationCount = _worldPacket.ReadUInt32();
+
+            CreateInfo.Name = _worldPacket.ReadString(nameLength);
+            if (CreateInfo.TemplateSet.HasValue)
+                CreateInfo.TemplateSet.Set(_worldPacket.ReadUInt32());
+
+            for (var i = 0; i < customizationCount; ++i)
+            {
+                CreateInfo.Customizations[i] = new ChrCustomizationChoice(_worldPacket.ReadUInt32(), _worldPacket.ReadUInt32());
+            }
+
+            CreateInfo.Customizations.Sort();
+        }
+
+        public CharacterCreateInfo CreateInfo;
+    }
+
+    public class CharacterCreateInfo
+    {
+        // User specified variables
+        public Race RaceId = Race.None;
+        public Class ClassId = Class.None;
+        public Gender Sex = Gender.None;
+        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Optional<uint> TemplateSet = new();
+        public bool IsTrialBoost;
+        public bool UseNPE;
+        public string Name;
+
+        // Server side data
+        public byte CharCount = 0;
+    }
+
+    public class CreateChar : ServerPacket
+    {
+        public CreateChar() : base(Opcode.SMSG_CREATE_CHAR) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Code);
+            _worldPacket.WritePackedGuid128(Guid);
+        }
+
+        public HermesProxy.World.Objects.Classic.ResponseCodes Code;
+        public WowGuid128 Guid;
+    }
 }

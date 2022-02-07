@@ -829,4 +829,286 @@ namespace HermesProxy.World.Objects
         public const byte Bag3 = 21;
         public const byte Bag4 = 22;
     }
+
+    public enum CharacterUndeleteResult
+    {
+        Ok = 0,
+        Cooldown = 1,
+        CharCreate = 2,
+        Disabled = 3,
+        NameTakenByThisAccount = 4,
+        Unknown = 5
+    }
+
+    namespace Vanilla
+    {
+        public enum ResponseCodes
+        {
+            Success = 0,
+            Failure = 1,
+            Cancelled = 2,
+            Disconnected = 3,
+            FailedToConnect = 4,
+            Connected = 5,
+            VersionMismatch = 6,
+
+            CstatusConnecting = 7,
+            CstatusNegotiatingSecurity = 8,
+            CstatusNegotiationComplete = 9,
+            CstatusNegotiationFailed = 10,
+            CstatusAuthenticating = 11,
+
+            RealmListInProgress = 34,
+            RealmListSuccess = 35,
+            RealmListFailed = 36,
+            RealmListInvalid = 37,
+            RealmListRealmNotFound = 38,
+
+            AccountCreateInProgress = 39,
+            AccountCreateSuccess = 40,
+            AccountCreateFailed = 41,
+
+            CharListRetrieving = 42,
+            CharListRetrieved = 43,
+            CharListFailed = 44,
+
+            CharCreateInProgress = 45,
+            CharCreateSuccess = 46,
+            CharCreateError = 47,
+            CharCreateFailed = 48,
+            CharCreateNameInUse = 49,
+            CharCreateDisabled = 50,
+            CharCreatePvpTeamsViolation = 51,
+            CharCreateServerLimit = 52,
+            CharCreateAccountLimit = 53,
+            CharCreateServerQueue = 54,
+            CharCreateOnlyExisting = 55,
+
+            CharDeleteInProgress = 56,
+            CharDeleteSuccess = 57,
+            CharDeleteFailed = 58,
+            CharDeleteFailedLockedForTransfer = 59,
+
+            CharLoginInProgress = 60,
+            CharLoginSuccess = 61,
+            CharLoginNoWorld = 62,
+            CharLoginDuplicateCharacter = 63,
+            CharLoginNoInstances = 64,
+            CharLoginFailed = 65,
+            CharLoginDisabled = 66,
+            CharLoginNoCharacter = 67,
+            CharLoginLockedForTransfer = 68,
+
+            CharNameNoName = 69,
+            CharNameTooShort = 70,
+            CharNameTooLong = 71,
+            CharNameInvalidCharacter = 72,
+            CharNameMixedLanguages = 73,
+            CharNameProfane = 74,
+            CharNameReserved = 75,
+            CharNameInvalidApostrophe = 76,
+            CharNameMultipleApostrophes = 77,
+            CharNameThreeConsecutive = 78,
+            CharNameInvalidSpace = 79,
+            CharNameConsecutiveSpaces = 80,
+            CharNameFailure = 81,
+            CharNameSuccess = 82
+        }
+    }
+
+    namespace TBC
+    {
+        public enum ResponseCodes
+        {
+            Success = 0,
+            Failure = 1,
+            Cancelled = 2,
+            Disconnected = 3,
+            FailedToConnect = 4,
+            Connected = 5,
+            VersionMismatch = 6,
+
+            CstatusConnecting = 7,
+            CstatusNegotiatingSecurity = 8,
+            CstatusNegotiationComplete = 9,
+            CstatusNegotiationFailed = 10,
+            CstatusAuthenticating = 11,
+
+            RealmListInProgress = 0x23,
+            RealmListSuccess = 0x24,
+            RealmListFailed = 0x25,
+            RealmListInvalid = 0x26,
+            RealmListRealmNotFound = 0x27,
+
+            AccountCreateInProgress = 0x28,
+            AccountCreateSuccess = 0x29,
+            AccountCreateFailed = 0x2A,
+
+            CharListRetrieving = 0x2B,
+            CharListRetrieved = 0x2C,
+            CharListFailed = 0x2D,
+
+            CharCreateInProgress = 0x2E,
+            CharCreateSuccess = 0x2F,
+            CharCreateError = 0x30,
+            CharCreateFailed = 0x31,
+            CharCreateNameInUse = 0x32,
+            CharCreateDisabled = 0x33,
+            CharCreatePvpTeamsViolation = 0x34,
+            CharCreateServerLimit = 0x35,
+            CharCreateAccountLimit = 0x36,
+            CharCreateServerQueue = 0x37,
+            CharCreateOnlyExisting = 0x38,
+            CharCreateExpansion = 0x39,
+
+            CharDeleteInProgress = 0x3A,
+            CharDeleteSuccess = 0x3B,
+            CharDeleteFailed = 0x3C,
+            CharDeleteFailedLockedForTransfer = 0x3D,
+            CharDeleteFailedGuildLeader = 0x3E,
+            CharDeleteFailedArenaCaptain = 0x3F,
+
+            CharLoginInProgress = 0x40,
+            CharLoginSuccess = 0x41,
+            CharLoginNoWorld = 0x42,
+            CharLoginDuplicateCharacter = 0x43,
+            CharLoginNoInstances = 0x44,
+            CharLoginFailed = 0x45,
+            CharLoginDisabled = 0x46,
+            CharLoginNoCharacter = 0x47,
+            CharLoginLockedForTransfer = 0x48,
+            CharLoginLockedByBilling = 0x49,
+
+            CharNameSuccess = 0x4A,
+            CharNameFailure = 0x4B,
+            CharNameNoName = 0x4C,
+            CharNameTooShort = 0x4D,
+            CharNameTooLong = 0x4E,
+            CharNameInvalidCharacter = 0x4F,
+            CharNameMixedLanguages = 0x50,
+            CharNameProfane = 0x51,
+            CharNameReserved = 0x52,
+            CharNameInvalidApostrophe = 0x53,
+            CharNameMultipleApostrophes = 0x54,
+            CharNameThreeConsecutive = 0x55,
+            CharNameInvalidSpace = 0x56,
+            CharNameConsecutiveSpaces = 0x57,
+            CharNameRussianConsecutiveSilentCharacters = 0x58,
+            CharNameRussianSilentCharacterAtBeginningOrEnd = 0x59,
+            CharNameDeclensionDoesntMatchBaseName = 0x5A,
+        }
+    }
+
+    namespace Classic
+    {
+        public enum ResponseCodes
+        {
+            Success = 0,
+            Failure = 1,
+            Cancelled = 2,
+            Disconnected = 3,
+            FailedToConnect = 4,
+            Connected = 5,
+            VersionMismatch = 6,
+
+            CstatusConnecting = 7,
+            CstatusNegotiatingSecurity = 8,
+            CstatusNegotiationComplete = 9,
+            CstatusNegotiationFailed = 10,
+            CstatusAuthenticating = 11,
+
+            RealmListInProgress = 12,
+            RealmListSuccess = 13,
+            RealmListFailed = 14,
+            RealmListInvalid = 15,
+            RealmListRealmNotFound = 16,
+
+            AccountCreateInProgress = 17,
+            AccountCreateSuccess = 18,
+            AccountCreateFailed = 19,
+
+            CharListRetrieving = 20,
+            CharListRetrieved = 21,
+            CharListFailed = 22,
+
+            CharCreateInProgress = 23,
+            CharCreateSuccess = 24,
+            CharCreateError = 25,
+            CharCreateFailed = 26,
+            CharCreateNameInUse = 27,
+            CharCreateDisabled = 28,
+            CharCreatePvpTeamsViolation = 29,
+            CharCreateServerLimit = 30,
+            CharCreateAccountLimit = 31,
+            CharCreateServerQueue = 32,
+            CharCreateOnlyExisting = 33,
+            CharCreateExpansion = 34,
+            CharCreateExpansionClass = 35,
+            CharCreateCharacterInGuild = 36,
+            CharCreateRestrictedRaceclass = 37,
+            CharCreateCharacterChooseRace = 38,
+            CharCreateCharacterArenaLeader = 39,
+            CharCreateCharacterDeleteMail = 40,
+            CharCreateCharacterSwapFaction = 41,
+            CharCreateCharacterRaceOnly = 42,
+            CharCreateCharacterGoldLimit = 43,
+            CharCreateForceLogin = 44,
+            CharCreateTrial = 45,
+            CharCreateTimeout = 46,
+            CharCreateThrottle = 47,
+            CharCreateAlliedRaceAchievement = 48,
+            CharCreateCharacterInCommunity = 49,
+            CharCreateNewPlayer = 50,
+
+            CharDeleteInProgress = 51,
+            CharDeleteSuccess = 52,
+            CharDeleteFailed = 53,
+            CharDeleteFailedLockedForTransfer = 54,
+            CharDeleteFailedGuildLeader = 55,
+            CharDeleteFailedArenaCaptain = 56,
+            CharDeleteFailedHasHeirloomOrMail = 57,
+            CharDeleteFailedUpgradeInProgress = 58,
+            CharDeleteFailedHasWowToken = 59,
+            CharDeleteFailedVasTransactionInProgress = 60,
+            CharDeleteFailedCommunityOwner = 61,
+
+            CharLoginInProgress = 62,
+            CharLoginSuccess = 63,
+            CharLoginNoWorld = 64,
+            CharLoginDuplicateCharacter = 65,
+            CharLoginNoInstances = 66,
+            CharLoginFailed = 67,
+            CharLoginDisabled = 68,
+            CharLoginNoCharacter = 69,
+            CharLoginLockedForTransfer = 70,
+            CharLoginLockedByBilling = 71,
+            CharLoginLockedByMobileAh = 72,
+            CharLoginTemporaryGmLock = 73,
+            CharLoginLockedByCharacterUpgrade = 74,
+            CharLoginLockedByRevokedCharacterUpgrade = 75,
+            CharLoginLockedByRevokedVasTransaction = 76,
+            CharLoginLockedByRestriction = 77,
+
+            CharLoginLockedForRealmPlaytype = 78,
+
+            CharNameSuccess = 79,
+            CharNameFailure = 80,
+            CharNameNoName = 81,
+            CharNameTooShort = 82,
+            CharNameTooLong = 83,
+            CharNameInvalidCharacter = 84,
+            CharNameMixedLanguages = 85,
+            CharNameProfane = 86,
+            CharNameReserved = 87,
+            CharNameInvalidApostrophe = 88,
+            CharNameMultipleApostrophes = 89,
+            CharNameThreeConsecutive = 90,
+            CharNameInvalidSpace = 91,
+            CharNameConsecutiveSpaces = 92,
+            CharNameRussianConsecutiveSilentCharacters = 93,
+            CharNameRussianSilentCharacterAtBeginningOrEnd = 94,
+            CharNameDeclensionDoesntMatchBaseName = 95,
+            CharNameSpacesDisallowed = 96,
+        }
+    }
 }
