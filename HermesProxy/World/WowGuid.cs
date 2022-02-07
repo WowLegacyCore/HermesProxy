@@ -101,6 +101,9 @@ namespace HermesProxy
         {
             return High == 0 && Low == 0;
         }
+
+        public abstract WowGuid64 To64();
+        public abstract WowGuid128 To128();
     }
 
     public class WowGuid128 : WowGuid
@@ -180,6 +183,15 @@ namespace HermesProxy
 
             // ReSharper disable once UseStringInterpolation
             return $"Full: 0x{High:X16}{Low:X16} {GetHighType()}/{GetSubType()} R{GetRealmId()}/S{GetServerId()} Map: {GetMapId()} Low: {GetLow()}";
+        }
+
+        public override WowGuid64 To64()
+        {
+            return new WowGuid64(0);
+        }
+        public override WowGuid128 To128()
+        {
+            return this;
         }
     }
 
@@ -278,6 +290,15 @@ namespace HermesProxy
 
             return "Full: 0x" + Low.ToString("X8") + " Type: " + GetHighType()
                 + " Low: " + GetLow();
+        }
+
+        public override WowGuid64 To64()
+        {
+            return this;
+        }
+        public override WowGuid128 To128()
+        {
+            return new WowGuid128();
         }
     }
 }

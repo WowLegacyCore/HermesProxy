@@ -195,7 +195,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private void SendPacket(WorldPacket packet)
+        public void SendPacket(WorldPacket packet)
         {
             try
             {
@@ -340,8 +340,8 @@ namespace HermesProxy.World.Client
             }
 
             // uncomment to test encryption
-            WorldPacket charEnum = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
-            SendPacket(charEnum);
+            //WorldPacket charEnum = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
+            //SendPacket(charEnum);
 
             if (result == AuthResult.AUTH_OK)
             {

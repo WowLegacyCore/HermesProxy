@@ -11,9 +11,8 @@ namespace World
         [PacketHandler(Opcode.CMSG_ENUM_CHARACTERS)]
         void HandleCharEnum(EnumCharacters charEnum)
         {
-            Console.WriteLine("RECEIVED CHAR ENUM FROM CLIENT");
-            Console.WriteLine("!!!!!!!!");
-            Console.WriteLine("!!!!!!!!");
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
+            _worldClient.SendPacket(packet);
         }
     }
 }
