@@ -94,6 +94,7 @@ namespace HermesProxy.World.Client
                 char1.OverrideSelectScreenFileDataID = 0;
                 char1.BoostInProgress = false;
                 char1.unkWod61x = 0;
+                char1.ExpansionChosen = true;
                 charEnum.Characters.Add(char1);
             }
 

@@ -135,10 +135,12 @@ namespace World.Packets
                 data.WriteBit(FirstLogin);
                 data.WriteBit(BoostInProgress);
                 data.WriteBits(unkWod61x, 5);
+                data.WriteBit(false);
+                data.WriteBit(ExpansionChosen);
 
                 foreach (string str in MailSenders)
                     data.WriteBits(str.GetByteCount() + 1, 6);
-
+                
                 data.FlushBits();
 
                 foreach (string str in MailSenders)
@@ -167,6 +169,7 @@ namespace World.Packets
             public uint Flags4;
             public bool FirstLogin;
             public byte unkWod61x;
+            public bool ExpansionChosen;
             public long LastPlayedTime;
             public ushort SpecID;
             public uint Unknown703;
