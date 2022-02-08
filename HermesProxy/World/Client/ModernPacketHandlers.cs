@@ -14,7 +14,7 @@ namespace World
         void HandleEnumCharacters(EnumCharacters charEnum)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
-            _worldClient.SendPackets(packet);
+            SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_CREATE_CHARACTER)]
@@ -33,7 +33,7 @@ namespace World
             packet.WriteUInt8(hairColor);
             packet.WriteUInt8(facialhair);
             packet.WriteUInt8(0); // outfit
-            _worldClient.SendPackets(packet);
+            SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_CHAR_DELETE)]
@@ -41,7 +41,7 @@ namespace World
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAR_DELETE);
             packet.WriteGuid(charDelete.Guid.To64());
-            _worldClient.SendPackets(packet);
+            SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_LOADING_SCREEN_NOTIFY)]
@@ -59,7 +59,7 @@ namespace World
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
             packet.WriteGuid(queryPlayerName.Player.To64());
-            _worldClient.SendPackets(packet, Global.CurrentSessionData.GameData.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+            SendPacketToServer(packet, Global.CurrentSessionData.GameData.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
         }
 
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
@@ -67,8 +67,8 @@ namespace World
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());
-            _worldClient.SendPackets(packet);
-            //SendConnectToInstance(ConnectToSerial.WorldAttempt1);
+            SendPacketToServer(packet);
+            SendConnectToInstance(ConnectToSerial.WorldAttempt1);
         }
     }
 }

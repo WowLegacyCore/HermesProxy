@@ -64,7 +64,6 @@ namespace World
         long _LastPingTime;
 
         ZLib.z_stream _compressionStream;
-        HermesProxy.World.Client.WorldClient _worldClient;
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
 
         public WorldSocket(Socket socket) : base(socket)
@@ -254,8 +253,8 @@ namespace World
                 case Opcode.CMSG_PING:
                     Ping ping = new(packet);
                     ping.Read();
-                    if (_worldClient != null)
-                        _worldClient.SendPing(ping.Serial, ping.Latency);
+                    if (Global.CurrentSessionData.WorldClient != null)
+                        Global.CurrentSessionData.WorldClient.SendPing(ping.Serial, ping.Latency);
                     HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
@@ -271,8 +270,9 @@ namespace World
                 case Opcode.CMSG_KEEP_ALIVE:
                     break;
                 case Opcode.CMSG_LOG_DISCONNECT:
-                    if (_worldClient != null)
-                        _worldClient.Disconnect();
+                    if (_connectType == ConnectionType.Realm &&
+                        Global.CurrentSessionData.WorldClient != null)
+                        Global.CurrentSessionData.WorldClient.Disconnect();
                     break;
                 case Opcode.CMSG_ENABLE_NAGLE:
                     SetNoDelay(false);
@@ -301,6 +301,11 @@ namespace World
             var handler = GetHandler(packet.GetUniversalOpcode(true));
             if (handler != null)
                 handler.Invoke(this, packet);
+        }
+
+        private void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
+        {
+            Global.CurrentSessionData.WorldClient.SendPacketToServer(packet, delayUntilOpcode);
         }
 
         public PacketHandler GetHandler(Opcode opcode)
@@ -486,6 +491,8 @@ namespace World
             //stmt.AddValue(1, account.game.Id);
             //DB.Login.Execute(stmt);
 
+            Global.CurrentSessionData.SessionKey = _sessionKey;
+
             //Re-check ip locking (same check as in auth).
             if (account.battleNet.IsLockedToIP) // if ip is locked
             {
@@ -515,8 +522,8 @@ namespace World
             //DB.Login.Execute(stmt);
 
             _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
-            _worldClient = new HermesProxy.World.Client.WorldClient();
-            if (!_worldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId), this))
+            Global.CurrentSessionData.WorldClient = new HermesProxy.World.Client.WorldClient();
+            if (!Global.CurrentSessionData.WorldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId), this))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
                 Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
@@ -680,9 +687,14 @@ namespace World
                 SendFeatureSystemStatusGlueScreen();
                 SendClientCacheVersion(0);
                 SendBnetConnectionState(1);
+                Global.CurrentSessionData.RealmSocket = this;
             }
-            //else
-            //    Global.WorldMgr.AddInstanceSocket(this, _key);
+            else
+            {
+                Log.Print(LogType.Server, "Client has connected to the instance server.");
+                Global.CurrentSessionData.InstanceSocket = this;
+                SendPacket(new ResumeComms(ConnectionType.Instance));
+            }
         }
 
         public void SendAuthResponseError(BattlenetRpcErrorCode code)

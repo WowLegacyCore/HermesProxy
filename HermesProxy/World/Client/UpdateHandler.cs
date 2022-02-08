@@ -15,16 +15,16 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         [PacketHandler(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT)]
-        void HandleCompressedUpdateObject(WorldPacket packet, List<ServerPacket> responses)
+        void HandleCompressedUpdateObject(WorldPacket packet)
         {
             using (var packet2 = packet.Inflate(packet.ReadInt32()))
             {
-                HandleUpdateObject(packet2, responses);
+                HandleUpdateObject(packet2);
             }
         }
 
         [PacketHandler(Opcode.SMSG_UPDATE_OBJECT)]
-        void HandleUpdateObject(WorldPacket packet, List<ServerPacket> responses)
+        void HandleUpdateObject(WorldPacket packet)
         {
             var count = packet.ReadUInt32();
             PrintString($"Updates Count = {count}");
@@ -130,7 +130,7 @@ namespace HermesProxy.World.Client
                 });
         }
 
-        private const bool DebugUpdates = true;
+        private const bool DebugUpdates = false;
         private void PrintString(string txt, params object[] indexes)
         {
             if (DebugUpdates)

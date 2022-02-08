@@ -16,7 +16,7 @@ namespace HermesProxy.World.Client
     {
         // Handlers for SMSG opcodes coming the legacy world server
         [PacketHandler(Opcode.SMSG_ENUM_CHARACTERS_RESULT)]
-        void HandleEnumCharactersResult(WorldPacket packet, List<ServerPacket> responses)
+        void HandleEnumCharactersResult(WorldPacket packet)
         {
             EnumCharactersResult charEnum = new();
             charEnum.Success = true;
@@ -106,11 +106,11 @@ namespace HermesProxy.World.Client
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(6, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(7, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(8, true, false, false));
-            responses.Add(charEnum);
+            SendPacketToClient(charEnum);
         }
 
         [PacketHandler(Opcode.SMSG_CREATE_CHAR)]
-        void HandleCreateChar(WorldPacket packet, List<ServerPacket> responses)
+        void HandleCreateChar(WorldPacket packet)
         {
             byte result = packet.ReadUInt8();
 
@@ -126,11 +126,11 @@ namespace HermesProxy.World.Client
                 Objects.Vanilla.ResponseCodes legacyCode = (Objects.Vanilla.ResponseCodes)result;
                 createChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
             }
-            responses.Add(createChar);
+            SendPacketToClient(createChar);
         }
 
         [PacketHandler(Opcode.SMSG_DELETE_CHAR)]
-        void HandleDeleteChar(WorldPacket packet, List<ServerPacket> responses)
+        void HandleDeleteChar(WorldPacket packet)
         {
             byte result = packet.ReadUInt8();
 
@@ -145,11 +145,11 @@ namespace HermesProxy.World.Client
                 Objects.Vanilla.ResponseCodes legacyCode = (Objects.Vanilla.ResponseCodes)result;
                 deleteChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
             }
-            responses.Add(deleteChar);
+            SendPacketToClient(deleteChar);
         }
 
         [PacketHandler(Opcode.SMSG_QUERY_PLAYER_NAME_RESPONSE)]
-        void HandleQueryPlayerNameResponse(WorldPacket packet, List<ServerPacket> responses)
+        void HandleQueryPlayerNameResponse(WorldPacket packet)
         {
             QueryPlayerNameResponse response = new QueryPlayerNameResponse();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
@@ -159,7 +159,7 @@ namespace HermesProxy.World.Client
                 if (fail)
                 {
                     response.Result = Objects.Classic.ResponseCodes.Failure;
-                    responses.Add(response);
+                    SendPacketToClient(response);
                     return;
                 }
             }
@@ -199,7 +199,7 @@ namespace HermesProxy.World.Client
             response.Data.GuidActual = WowGuid128.Empty;
             response.Data.VirtualRealmAddress = Global.CurrentSessionData.RealmId.GetAddress();
             response.Data.Level = 1;
-            responses.Add(response);
+            SendPacketToClient(response);
         }
     }
 }

@@ -3,6 +3,8 @@
 
 using BNetServer;
 using HermesProxy;
+using HermesProxy.World.Client;
+using World;
 
 public static class Global
 {
@@ -25,6 +27,9 @@ public static class Global
         public uint Build;
         public Framework.Realm.RealmId RealmId;
         public GameSessionData GameData;
+        public WorldSocket RealmSocket;
+        public WorldSocket InstanceSocket;
+        public WorldClient WorldClient;
     }
     public static LoginSessionData CurrentSessionData;
 

@@ -23,9 +23,12 @@ namespace HermesProxy.World.Client
         string _username;
         Realm _realm;
         LegacyWorldCrypt _worldCrypt;
-        Dictionary<Opcode, Action<WorldPacket, List<ServerPacket>>> _packetHandlers;
+        Dictionary<Opcode, Action<WorldPacket>> _packetHandlers;
         WorldSocket _modernSocket;
-        Dictionary<Opcode, List<WorldPacket>> _delayedPackets; // packet order is not always the same as new client, sometimes we need to delay packet until another one
+
+        // packet order is not always the same as new client, sometimes we need to delay packet until another one
+        Dictionary<Opcode, List<WorldPacket>> _delayedPacketsToServer;
+        Dictionary<Opcode, List<ServerPacket>> _delayedPacketsToClient;
 
         public WorldClient()
         {
@@ -39,7 +42,8 @@ namespace HermesProxy.World.Client
             _modernSocket = modernSocket;
             _username = Global.CurrentSessionData.Username;
             _isSuccessful = null;
-            _delayedPackets = new Dictionary<Opcode, List<WorldPacket>>();
+            _delayedPacketsToServer = new Dictionary<Opcode, List<WorldPacket>>();
+            _delayedPacketsToClient = new Dictionary<Opcode, List<ServerPacket>>();
 
             try
             {
@@ -227,34 +231,82 @@ namespace HermesProxy.World.Client
             }
         }
 
-        public void SendPackets(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
+        private void SendPacketToClient(ServerPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
+        {
+            Opcode opcode = packet.GetUniversalOpcode();
+            if (delayUntilOpcode != Opcode.MSG_NULL_ACTION)
+            {
+                if (_delayedPacketsToClient.ContainsKey(delayUntilOpcode))
+                    _delayedPacketsToClient[delayUntilOpcode].Add(packet);
+                else
+                {
+                    List<ServerPacket> packets = new List<ServerPacket>();
+                    packets.Add(packet);
+                    _delayedPacketsToClient.Add(delayUntilOpcode, packets);
+                }
+                return;
+            }
+
+            SendPacketToClientDirect(packet);
+            SendDelayedPacketsToClientOnOpcode(opcode);
+        }
+
+        private void SendPacketToClientDirect(ServerPacket packet)
+        {
+            if (packet.GetConnection() == Framework.Constants.ConnectionType.Realm)
+            {
+                System.Diagnostics.Trace.Assert(Global.CurrentSessionData.RealmSocket != null);
+                Global.CurrentSessionData.RealmSocket.SendPacket(packet);
+            }
+            else
+            {
+                // block these packets until connected to instance
+                while (Global.CurrentSessionData.InstanceSocket == null) { };
+                Global.CurrentSessionData.InstanceSocket.SendPacket(packet);
+            }
+        }
+
+        public void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
         {
             Opcode opcode = packet.GetUniversalOpcode(false);
             if (delayUntilOpcode != Opcode.MSG_NULL_ACTION)
             {
-                if (_delayedPackets.ContainsKey(delayUntilOpcode))
-                    _delayedPackets[delayUntilOpcode].Add(packet);
+                if (_delayedPacketsToServer.ContainsKey(delayUntilOpcode))
+                    _delayedPacketsToServer[delayUntilOpcode].Add(packet);
                 else
                 {
                     List<WorldPacket> packets = new List<WorldPacket>();
                     packets.Add(packet);
-                    _delayedPackets.Add(delayUntilOpcode, packets);
+                    _delayedPacketsToServer.Add(delayUntilOpcode, packets);
                 }
                 return;
             }
 
             SendPacket(packet);
-            SendDelayedPacketsOnOpcode(opcode);
+            SendDelayedPacketsToServerOnOpcode(opcode);
         }
 
-        private void SendDelayedPacketsOnOpcode(Opcode opcode)
+        private void SendDelayedPacketsToServerOnOpcode(Opcode opcode)
         {
-            if (_delayedPackets.ContainsKey(opcode))
+            if (_delayedPacketsToServer.ContainsKey(opcode))
             {
-                List<WorldPacket> packets = _delayedPackets[opcode];
+                List<WorldPacket> packets = _delayedPacketsToServer[opcode];
                 for (int i = packets.Count - 1; i >= 0; i--)
                 {
                     SendPacket(packets[i]);
+                    packets.RemoveAt(i);
+                }
+            }
+        }
+
+        private void SendDelayedPacketsToClientOnOpcode(Opcode opcode)
+        {
+            if (_delayedPacketsToClient.ContainsKey(opcode))
+            {
+                List<ServerPacket> packets = _delayedPacketsToClient[opcode];
+                for (int i = packets.Count - 1; i >= 0; i--)
+                {
+                    SendPacketToClientDirect(packets[i]);
                     packets.RemoveAt(i);
                 }
             }
@@ -281,10 +333,7 @@ namespace HermesProxy.World.Client
                 default:
                     if (_packetHandlers.ContainsKey(universalOpcode))
                     {
-                        List<ServerPacket> packetsForModernGame = new List<ServerPacket>();
-                        _packetHandlers[universalOpcode](packet, packetsForModernGame);
-                        foreach (ServerPacket pkt in packetsForModernGame)
-                            _modernSocket.SendPacket(pkt);
+                        _packetHandlers[universalOpcode](packet);
                     }
                     else
                     {
@@ -295,7 +344,7 @@ namespace HermesProxy.World.Client
                     break;
             }
 
-            SendDelayedPacketsOnOpcode(universalOpcode);
+            SendDelayedPacketsToServerOnOpcode(universalOpcode);
         }
 
         private void HandleAuthChallenge(WorldPacket packet)
@@ -435,7 +484,7 @@ namespace HermesProxy.World.Client
                         continue;
                     }
 
-                    var del = (Action<WorldPacket, List<ServerPacket>>)Delegate.CreateDelegate(typeof(Action<WorldPacket, List<ServerPacket>>), this, methodInfo);
+                    var del = (Action<WorldPacket>)Delegate.CreateDelegate(typeof(Action<WorldPacket>), this, methodInfo);
 
                     _packetHandlers[msgAttr.Opcode] = del;
                 }
