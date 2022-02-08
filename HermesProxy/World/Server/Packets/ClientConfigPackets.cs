@@ -36,7 +36,7 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 PlayerGuid;
         public long ServerTime;
-        public Array<long> AccountTimes = new((int)AccountDataTypes.Max);
+        public long[] AccountTimes;
     }
 
     public class ClientCacheVersion : ServerPacket

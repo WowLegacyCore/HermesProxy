@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using Framework.GameMath;
 using HermesProxy.World.Objects;
+using Framework.Constants;
 
 namespace HermesProxy.World.Server.Packets
 {
@@ -383,5 +384,36 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 Guid;      // Guid of the player that is logging in
         public float FarClip;        // Visibility distance (for terrain)
         public bool UnkBit;
+    }
+
+    public class LoginVerifyWorld : ServerPacket
+    {
+        public LoginVerifyWorld() : base(Opcode.SMSG_LOGIN_VERIFY_WORLD, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteFloat(Pos.X);
+            _worldPacket.WriteFloat(Pos.Y);
+            _worldPacket.WriteFloat(Pos.Z);
+            _worldPacket.WriteFloat(Pos.Orientation);
+            _worldPacket.WriteUInt32(Reason);
+        }
+
+        public int MapID = -1;
+        public Position Pos;
+        public uint Reason = 0;
+    }
+
+    public class CharacterLoginFailed : ServerPacket
+    {
+        public CharacterLoginFailed() : base(Opcode.SMSG_CHARACTER_LOGIN_FAILED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Code);
+        }
+
+        public LoginFailureReason Code;
     }
 }

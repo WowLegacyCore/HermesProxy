@@ -11,7 +11,7 @@ public static class Global
     public struct GameSessionData
     {
         public bool IsInWorld;
-        public uint? CurrentMapId;
+        public int? CurrentMapId;
         public WowGuid128 CurrentPlayerGuid;
     }
     public struct LoginSessionData

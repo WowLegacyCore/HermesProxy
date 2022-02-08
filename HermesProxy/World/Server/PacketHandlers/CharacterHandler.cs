@@ -47,7 +47,7 @@ namespace HermesProxy.World.Server
         void HandleLoadScreen(LoadingScreenNotify loadingScreenNotify)
         {
             if (loadingScreenNotify.MapID >= 0)
-                Global.CurrentSessionData.GameData.CurrentMapId = (uint)loadingScreenNotify.MapID;
+                Global.CurrentSessionData.GameData.CurrentMapId = loadingScreenNotify.MapID;
         }
 
         [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAME)]

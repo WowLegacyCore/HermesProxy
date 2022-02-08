@@ -193,5 +193,26 @@ namespace HermesProxy.World.Client
             response.Data.Level = 1;
             SendPacketToClient(response);
         }
+
+        [PacketHandler(Opcode.SMSG_LOGIN_VERIFY_WORLD)]
+        void HandleLoginVerifyWorld(WorldPacket packet)
+        {
+            LoginVerifyWorld verify = new LoginVerifyWorld();
+            verify.MapID = packet.ReadInt32();
+            Global.CurrentSessionData.GameData.CurrentMapId = verify.MapID;
+            verify.Pos.X = packet.ReadFloat();
+            verify.Pos.Y = packet.ReadFloat();
+            verify.Pos.Z = packet.ReadFloat();
+            verify.Pos.Orientation = packet.ReadFloat();
+            SendPacketToClient(verify);
+        }
+
+        [PacketHandler(Opcode.SMSG_CHARACTER_LOGIN_FAILED)]
+        void HandleCharacterLoginFailed(WorldPacket packet)
+        {
+            CharacterLoginFailed failed = new CharacterLoginFailed();
+            failed.Code = (Framework.Constants.LoginFailureReason)packet.ReadUInt8();
+            SendPacketToClient(failed);
+        }
     }
 }
