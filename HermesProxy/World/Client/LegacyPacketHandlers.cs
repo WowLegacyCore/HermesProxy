@@ -1,4 +1,5 @@
-﻿using Framework.Constants.World;
+﻿using HermesProxy.Enums;
+using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace HermesProxy.World.Client
                 uint guildId = packet.ReadUInt32();
                 char1.Flags = (CharacterFlags)packet.ReadUInt32();
 
-                if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V3_0_2_9056))
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     char1.Flags2 = packet.ReadUInt32(); // Customization Flags
 
                 char1.FirstLogin = packet.ReadUInt8() != 0;
@@ -65,17 +66,17 @@ namespace HermesProxy.World.Client
                     char1.VisualItems[j].DisplayId = packet.ReadUInt32();
                     char1.VisualItems[j].InvType = packet.ReadUInt8();
 
-                    if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                         char1.VisualItems[j].DisplayEnchantId = packet.ReadUInt32();
                 }
 
-                int bagCount = LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V3_3_3_11685) ? 4 : 1;
+                int bagCount = LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_3_11685) ? 4 : 1;
                 for (int j = 0; j < bagCount; j++)
                 {
                     char1.VisualItems[EquipmentSlot.Bag1 + j].DisplayId = packet.ReadUInt32();
                     char1.VisualItems[EquipmentSlot.Bag1 + j].InvType = packet.ReadUInt8();
 
-                    if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                         char1.VisualItems[EquipmentSlot.Bag1 + j].DisplayEnchantId = packet.ReadUInt32();
                 }
 
@@ -115,7 +116,7 @@ namespace HermesProxy.World.Client
 
             CreateChar createChar = new CreateChar();
             createChar.Guid = new WowGuid128();
-            if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 Objects.TBC.ResponseCodes legacyCode = (Objects.TBC.ResponseCodes)result;
                 createChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
@@ -134,7 +135,7 @@ namespace HermesProxy.World.Client
             byte result = packet.ReadUInt8();
 
             DeleteChar deleteChar = new DeleteChar();
-            if (LegacyVersion.AddedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 Objects.TBC.ResponseCodes legacyCode = (Objects.TBC.ResponseCodes)result;
                 deleteChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
@@ -145,6 +146,60 @@ namespace HermesProxy.World.Client
                 deleteChar.Code = (Objects.Classic.ResponseCodes)Enum.Parse(typeof(Objects.Classic.ResponseCodes), legacyCode.ToString());
             }
             responses.Add(deleteChar);
+        }
+
+        [PacketHandler(Opcode.SMSG_QUERY_PLAYER_NAME_RESPONSE)]
+        void HandleQueryPlayerNameResponse(WorldPacket packet, List<ServerPacket> responses)
+        {
+            QueryPlayerNameResponse response = new QueryPlayerNameResponse();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+            {
+                response.Player = response.Data.GuidActual = packet.ReadPackedGuid().To128();
+                var fail = packet.ReadBool();
+                if (fail)
+                {
+                    response.Result = Objects.Classic.ResponseCodes.Failure;
+                    responses.Add(response);
+                    return;
+                }
+            }
+            else
+                response.Player = response.Data.GuidActual = packet.ReadGuid().To128();
+
+            response.Data.Name = packet.ReadCString();
+            packet.ReadCString(); // realm name
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+            {
+                response.Data.RaceID = (Race)packet.ReadUInt8();
+                response.Data.Sex = (Gender)packet.ReadUInt8();
+                response.Data.ClassID = (Class)packet.ReadUInt8();
+            }
+            else
+            {
+                response.Data.RaceID = (Race)packet.ReadUInt32();
+                response.Data.Sex = (Gender)packet.ReadUInt32();
+                response.Data.ClassID = (Class)packet.ReadInt32();
+            }
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                if (packet.ReadBool())
+                {
+                    for (var i = 0; i < 5; i++)
+                        response.Data.DeclinedNames.name[i] = packet.ReadCString();
+                }
+            }
+
+            Console.WriteLine("Queried name is " + response.Data.Name + " class " + response.Data.ClassID);
+
+            response.Data.IsDeleted = false;
+            response.Data.AccountID = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
+            response.Data.BnetAccountID = WowGuid128.Create(HighGuidType703.BNetAccount, Global.CurrentSessionData.AccountInfo.Id);
+            response.Data.GuidActual = WowGuid128.Empty;
+            response.Data.VirtualRealmAddress = Global.CurrentSessionData.RealmId.GetAddress();
+            response.Data.Level = 1;
+            responses.Add(response);
         }
     }
 }

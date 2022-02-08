@@ -2,9 +2,16 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using BNetServer;
+using HermesProxy;
 
 public static class Global
 {
+    public struct GameSessionData
+    {
+        public bool IsInWorld;
+        public uint? CurrentMapId;
+        public WowGuid128 CurrentPlayerGuid;
+    }
     public struct LoginSessionData
     {
         public BNetServer.Networking.AccountInfo AccountInfo;
@@ -17,6 +24,7 @@ public static class Global
         public string OS;
         public uint Build;
         public Framework.Realm.RealmId RealmId;
+        public GameSessionData GameData;
     }
     public static LoginSessionData CurrentSessionData;
 

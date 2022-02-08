@@ -1,5 +1,5 @@
 ﻿using Framework;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
 using Framework.Logging;
 using HermesProxy.Enums;
 using System;

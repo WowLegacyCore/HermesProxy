@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -360,5 +360,35 @@ namespace World.Packets
         }
 
         public HermesProxy.World.Objects.Classic.ResponseCodes Code;
+    }
+
+    public class LoadingScreenNotify : ClientPacket
+    {
+        public LoadingScreenNotify(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MapID = _worldPacket.ReadInt32();
+            Showing = _worldPacket.HasBit();
+        }
+
+        public int MapID = -1;
+        public bool Showing;
+    }
+
+    public class PlayerLogin : ClientPacket
+    {
+        public PlayerLogin(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+            FarClip = _worldPacket.ReadFloat();
+            UnkBit = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 Guid;      // Guid of the player that is logging in
+        public float FarClip;        // Visibility distance (for terrain)
+        public bool UnkBit;
     }
 }

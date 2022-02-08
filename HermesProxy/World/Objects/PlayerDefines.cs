@@ -16,6 +16,7 @@ namespace HermesProxy.World.Objects
         public const int MaxSpecializations = 5;
         public const int InitialSpecializationIndex = 4;
         public const int MaxMasterySpells = 2;
+        public const int MaxDeclinedNameCases = 5;
 
         public const int ReqPrimaryTreeTalents = 31;
         public const int ExploredZonesSize = 192;

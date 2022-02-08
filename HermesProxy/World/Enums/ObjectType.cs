@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Framework.Constants.World
+namespace HermesProxy.World.Enums
 {
     public enum ObjectType
     {

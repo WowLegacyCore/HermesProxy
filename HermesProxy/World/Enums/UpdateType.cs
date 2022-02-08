@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HermesProxy.World.Enums
+{
+    public enum UpdateType
+    {
+        Values        = 0,
+        Movement      = 1,
+        CreateObject1 = 2,
+        CreateObject2 = 3,
+        FarObjects    = 4,
+        NearObjects   = 5
+    }
+
+    public enum UpdateTypeCataclysm
+    {
+        Values         = 0,
+        CreateObject1  = 1,
+        CreateObject2  = 2,
+        DestroyObjects = 3
+    }
+
+    public enum ObjectCreateType
+    {
+        Create1 = 0,
+        Create2 = 1
+    }
+}

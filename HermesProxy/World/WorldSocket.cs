@@ -18,7 +18,7 @@
 using World;
 using World.Packets;
 using Framework.Constants;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
 using Framework.Cryptography;
 using Framework.IO;
 using Framework.Networking;
@@ -284,6 +284,9 @@ namespace World
                     break;
                 case Opcode.CMSG_ENTER_ENCRYPTED_MODE_ACK:
                     HandleEnterEncryptedModeAck();
+                    break;
+                case Opcode.CMSG_SERVER_TIME_OFFSET_REQUEST:
+                    SendServerTimeOffset();
                     break;
                 default:
                     HandlePacket(packet);
@@ -859,6 +862,13 @@ namespace World
             ConnectionStatus bnetConnected = new();
             bnetConnected.State = state;
             SendPacket(bnetConnected);
+        }
+
+        public void SendServerTimeOffset()
+        {
+            ServerTimeOffset response = new();
+            response.Time = Time.UnixTime;
+            SendPacket(response);
         }
 
         void HandlePing(Ping ping)

@@ -65,6 +65,19 @@ namespace Framework.GameMath
             _y = y;
             _z = z;
         }
+        public Quaternion(long packed)
+        {
+            _x = (packed >> 42) * (1.0f / 2097152.0f);
+            _y = (((packed << 22) >> 32) >> 11) * (1.0f / 1048576.0f);
+            _z = (packed << 43 >> 43) * (1.0f / 1048576.0f);
+
+            _w = _x * _x + _y * _y + _z * _z;
+            if (Math.Abs(_w - 1.0f) >= (1 / 1048576.0f))
+                _w = (float)Math.Sqrt(1.0f - _w);
+            else
+                _w = 0.0f;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Quaternion"/> class using coordinates from a given <see cref="Quaternion"/> instance.
         /// </summary>

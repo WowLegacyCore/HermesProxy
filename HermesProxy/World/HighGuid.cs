@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
 using HermesProxy.Enums;
 
 namespace HermesProxy

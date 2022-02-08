@@ -11,7 +11,7 @@ using Framework;
 using Framework.IO;
 using Framework.Logging;
 using World;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
 using System.Reflection;
 
 namespace HermesProxy.World.Client
@@ -25,6 +25,7 @@ namespace HermesProxy.World.Client
         LegacyWorldCrypt _worldCrypt;
         Dictionary<Opcode, Action<WorldPacket, List<ServerPacket>>> _packetHandlers;
         WorldSocket _modernSocket;
+        Dictionary<Opcode, List<WorldPacket>> _delayedPackets; // packet order is not always the same as new client, sometimes we need to delay packet until another one
 
         public WorldClient()
         {
@@ -38,6 +39,7 @@ namespace HermesProxy.World.Client
             _modernSocket = modernSocket;
             _username = Global.CurrentSessionData.Username;
             _isSuccessful = null;
+            _delayedPackets = new Dictionary<Opcode, List<WorldPacket>>();
 
             try
             {
@@ -195,14 +197,13 @@ namespace HermesProxy.World.Client
             }
         }
 
-        public void SendPacket(WorldPacket packet)
+        private void SendPacket(WorldPacket packet)
         {
             try
             {
                 ByteBuffer buffer = new ByteBuffer();
                 LegacyClientPacketHeader header = new LegacyClientPacketHeader();
 
-                // Endian Reverse
                 header.Size = (ushort)(packet.GetSize() + sizeof(uint)); // size includes the opcode
                 header.Opcode = packet.GetOpcode();
                 header.Write(buffer);
@@ -223,6 +224,39 @@ namespace HermesProxy.World.Client
             {
                 Log.Print(LogType.Error, $"Packet Write Error: {ex.Message}");
                 _isSuccessful = false;
+            }
+        }
+
+        public void SendPackets(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
+        {
+            Opcode opcode = packet.GetUniversalOpcode(false);
+            if (delayUntilOpcode != Opcode.MSG_NULL_ACTION)
+            {
+                if (_delayedPackets.ContainsKey(delayUntilOpcode))
+                    _delayedPackets[delayUntilOpcode].Add(packet);
+                else
+                {
+                    List<WorldPacket> packets = new List<WorldPacket>();
+                    packets.Add(packet);
+                    _delayedPackets.Add(delayUntilOpcode, packets);
+                }
+                return;
+            }
+
+            SendPacket(packet);
+            SendDelayedPacketsOnOpcode(opcode);
+        }
+
+        private void SendDelayedPacketsOnOpcode(Opcode opcode)
+        {
+            if (_delayedPackets.ContainsKey(opcode))
+            {
+                List<WorldPacket> packets = _delayedPackets[opcode];
+                for (int i = packets.Count - 1; i >= 0; i--)
+                {
+                    SendPacket(packets[i]);
+                    packets.RemoveAt(i);
+                }
             }
         }
 
@@ -260,6 +294,8 @@ namespace HermesProxy.World.Client
                     }
                     break;
             }
+
+            SendDelayedPacketsOnOpcode(universalOpcode);
         }
 
         private void HandleAuthChallenge(WorldPacket packet)

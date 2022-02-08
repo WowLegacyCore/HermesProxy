@@ -157,6 +157,22 @@ namespace Framework.IO
             return new Vector3(ReadFloat(), ReadFloat(), ReadFloat());
         }
 
+        public Vector4 ReadVector4()
+        {
+            return new Vector4(ReadFloat(), ReadFloat(), ReadFloat(), ReadFloat());
+        }
+
+        public Quaternion ReadPackedQuaternion()
+        {
+            long packed = ReadInt64();
+            return new Quaternion(packed);
+        }
+
+        public Quaternion ReadQuaternion()
+        {
+            return new Quaternion(ReadFloat(), ReadFloat(), ReadFloat(), ReadFloat());
+        }
+
         //BitPacking
         public byte ReadBit()
         {
@@ -389,6 +405,13 @@ namespace Framework.IO
 
             _bitPosition = 8;
             BitValue = 0;
+        }
+
+        public byte[] ReadToEnd()
+        {
+            Stream stream = GetCurrentStream();
+            var length = (uint)(stream.Length - stream.Position);
+            return ReadBytes(length);
         }
 
         public byte[] GetData()

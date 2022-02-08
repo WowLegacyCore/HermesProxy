@@ -186,6 +186,54 @@ namespace System.Collections.Generic
             while (list.Count <= index)
                 list.Add(defaultValue);
         }
+
+        public static int BinarySearch<TKey, TValue>(this SortedList<TKey, TValue> sortedList, TKey key)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            var array = sortedList.Keys;
+            var comparer = sortedList.Comparer;
+            var lo = 0;
+            var hi = sortedList.Count - 1;
+            while (lo <= hi)
+            {
+                var i = lo + ((hi - lo) >> 1);
+                var order = comparer.Compare(array[i], key);
+                if (order == 0)
+                    return i;
+
+                if (order < 0)
+                    lo = i + 1;
+                else
+                    hi = i - 1;
+            }
+
+            return ~lo;
+        }
+
+        /// <summary>
+        /// Flattens an IEnumerable
+        /// Example:
+        /// [1, 2, [3, [4]], 5] -> [1, 2, 3, 4, 5]
+        /// </summary>
+        /// <typeparam name="T">Type of each object</typeparam>
+        /// <param name="values">Input IEnumerable</param>
+        /// <returns>Flatten result</returns>
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<T> values)
+        {
+            foreach (var item in values)
+            {
+                if (!(item is IEnumerable<T>))
+                    yield return item;
+                var childs = item as IEnumerable<T>;
+                if (childs == null) continue;
+                foreach (var child in childs.Flatten())
+                {
+                    yield return child;
+                }
+            }
+        }
     }
 
     public interface ICheck<in T>

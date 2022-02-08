@@ -18,12 +18,10 @@
 using Framework.IO;
 using Framework.Constants;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HermesProxy;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
+using HermesProxy.World.Client;
+using Ionic.Zlib;
 
 namespace World
 {
@@ -124,12 +122,18 @@ namespace World
     {
         public WorldPacket(uint opcode = 0)
         {
-            this.opcode = (uint)opcode;
+            this.opcode = opcode;
         }
 
-        public WorldPacket(Framework.Constants.World.Opcode opcode)
+        public WorldPacket(Opcode opcode)
         {
-            this.opcode = Framework.Constants.World.Opcodes.GetOpcodeValueForVersion(opcode, Framework.Settings.ServerBuild);
+            this.opcode = Opcodes.GetOpcodeValueForVersion(opcode, Framework.Settings.ServerBuild);
+            System.Diagnostics.Trace.Assert(this.opcode != 0);
+        }
+
+        public WorldPacket(uint opcode, byte[] data) : base(data)
+        {
+            this.opcode = opcode;
             System.Diagnostics.Trace.Assert(this.opcode != 0);
         }
 
@@ -170,6 +174,38 @@ namespace World
                     guid |= (ulong)ReadUInt8() << (i * 8);
 
             return guid;
+        }
+
+        public UpdateField ReadUpdateField()
+        {
+            uint val = ReadUInt32();
+
+            var field = new UpdateField(val);
+            return field;
+        }
+
+        public WorldPacket Inflate(int inflatedSize)
+        {
+            var arr = ReadToEnd();
+            var newarr = new byte[inflatedSize];
+
+            var stream = new ZlibCodec(Ionic.Zlib.CompressionMode.Decompress)
+            {
+                InputBuffer = arr,
+                NextIn = 0,
+                AvailableBytesIn = arr.Length,
+                OutputBuffer = newarr,
+                NextOut = 0,
+                AvailableBytesOut = inflatedSize
+            };
+
+            stream.Inflate(FlushType.None);
+            stream.Inflate(FlushType.Finish);
+            stream.EndInflate();
+
+            // Cannot use "using" here
+            var pkt = new WorldPacket(GetOpcode(), newarr);
+            return pkt;
         }
 
         public void WriteGuid(WowGuid64 guid)
@@ -235,9 +271,9 @@ namespace World
         }
 
         public uint GetOpcode() { return opcode; }
-        public Opcode GetUniversalOpcode(bool fromClient)
+        public Opcode GetUniversalOpcode(bool isModern)
         {
-            return Opcodes.GetUniversalOpcode(GetOpcode(), fromClient ? Framework.Settings.ClientBuild : Framework.Settings.ServerBuild);
+            return Opcodes.GetUniversalOpcode(GetOpcode(), isModern ? Framework.Settings.ClientBuild : Framework.Settings.ServerBuild);
         }
 
         public DateTime GetReceivedTime() { return m_receivedTime; }

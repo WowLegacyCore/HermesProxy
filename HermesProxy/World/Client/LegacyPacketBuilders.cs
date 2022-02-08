@@ -1,5 +1,6 @@
-﻿using Framework.Constants.World;
+﻿using Framework.Constants;
 using HermesProxy.World;
+using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using System;
 using World.Packets;
@@ -13,7 +14,7 @@ namespace World
         void HandleEnumCharacters(EnumCharacters charEnum)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
-            _worldClient.SendPacket(packet);
+            _worldClient.SendPackets(packet);
         }
 
         [PacketHandler(Opcode.CMSG_CREATE_CHARACTER)]
@@ -32,7 +33,7 @@ namespace World
             packet.WriteUInt8(hairColor);
             packet.WriteUInt8(facialhair);
             packet.WriteUInt8(0); // outfit
-            _worldClient.SendPacket(packet);
+            _worldClient.SendPackets(packet);
         }
 
         [PacketHandler(Opcode.CMSG_CHAR_DELETE)]
@@ -40,7 +41,34 @@ namespace World
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAR_DELETE);
             packet.WriteGuid(charDelete.Guid.To64());
-            _worldClient.SendPacket(packet);
+            _worldClient.SendPackets(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_LOADING_SCREEN_NOTIFY)]
+        void HandleLoadScreen(LoadingScreenNotify loadingScreenNotify)
+        {
+            if (loadingScreenNotify.MapID >= 0)
+                Global.CurrentSessionData.GameData.CurrentMapId = (uint)loadingScreenNotify.MapID;
+        }
+
+        [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAME)]
+        void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
+        {
+            if (Global.CurrentSessionData.GameData.CurrentPlayerGuid == null)
+                Global.CurrentSessionData.GameData.CurrentPlayerGuid = queryPlayerName.Player;
+
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
+            packet.WriteGuid(queryPlayerName.Player.To64());
+            _worldClient.SendPackets(packet, Global.CurrentSessionData.GameData.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+        }
+
+        [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
+        void HandlePlayerLogin(PlayerLogin playerLogin)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
+            packet.WriteGuid(playerLogin.Guid.To64());
+            _worldClient.SendPackets(packet);
+            //SendConnectToInstance(ConnectToSerial.WorldAttempt1);
         }
     }
 }

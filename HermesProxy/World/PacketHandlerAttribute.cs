@@ -1,5 +1,5 @@
-﻿using Framework.Constants.World;
-using HermesProxy.Enums;
+﻿using HermesProxy.Enums;
+using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

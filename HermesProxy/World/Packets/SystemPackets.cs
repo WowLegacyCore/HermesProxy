@@ -20,7 +20,7 @@ using Framework.Cryptography;
 using Framework.Dynamic;
 using Framework.IO;
 using World;
-using Framework.Constants.World;
+using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;

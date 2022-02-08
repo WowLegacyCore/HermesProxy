@@ -138,12 +138,19 @@ namespace System
 
             return result;
         }
-        
-        public static bool HasAnyFlag<T>(this T value, T flag) where T : struct
+
+        /// <summary>
+        /// Returns true if flag exists in value (&)
+        /// </summary>
+        /// <param name="value">An enum, int, ...</param>
+        /// <param name="flag">An enum, int, ...</param>
+        /// <returns>A boolean</returns>
+        public static bool HasAnyFlag(this IConvertible value, IConvertible flag)
         {
-            long lValue = Convert.ToInt64(value);
-            long lFlag = Convert.ToInt64(flag);
-            return (lValue & lFlag) != 0;
+            var uFlag = flag.ToUInt64(null);
+            var uThis = value.ToUInt64(null);
+
+            return (uThis & uFlag) != 0;
         }
 
         public static string ToHexString(this byte[] byteArray, bool reverse = false)
