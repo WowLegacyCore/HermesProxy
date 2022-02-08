@@ -16,17 +16,11 @@
  */
 
 using Framework.Constants;
-using Framework.Cryptography;
-using Framework.Dynamic;
 using Framework.IO;
-using World;
 using HermesProxy.World.Enums;
-using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Linq;
 
-namespace World.Packets
+namespace HermesProxy.World.Server.Packets
 {
     class Notification : ServerPacket
     {

@@ -2,9 +2,9 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using BNetServer;
-using HermesProxy;
+using HermesProxy.World;
 using HermesProxy.World.Client;
-using World;
+using HermesProxy.World.Server;
 
 public static class Global
 {

@@ -15,22 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using World;
-using Framework.Constants;
 using Framework.Networking;
 using System.Net.Sockets;
-using System;
 using Framework.Logging;
 
-namespace World
+namespace HermesProxy.World.Server
 {
     public class WorldSocketManager : SocketManager<WorldSocket>
     {
         public override bool StartNetwork(string bindIp, int port, int threadCount)
         {
             _tcpNoDelay = true;
-
-            Log.Print(LogType.Server, $"Max allowed socket connections {ushort.MaxValue}");
 
             // -1 means use default
             _socketSendBufferSize = -1;

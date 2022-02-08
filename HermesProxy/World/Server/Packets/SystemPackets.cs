@@ -15,19 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Constants;
-using Framework.Cryptography;
 using Framework.Dynamic;
-using Framework.IO;
-using World;
 using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Linq;
-using HermesProxy;
 
-namespace World.Packets
+namespace HermesProxy.World.Server.Packets
 {
     public class FeatureSystemStatus : ServerPacket
     {

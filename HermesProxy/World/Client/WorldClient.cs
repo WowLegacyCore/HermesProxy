@@ -10,9 +10,9 @@ using Framework.Cryptography;
 using Framework;
 using Framework.IO;
 using Framework.Logging;
-using World;
 using HermesProxy.World.Enums;
 using System.Reflection;
+using HermesProxy.World.Server;
 
 namespace HermesProxy.World.Client
 {

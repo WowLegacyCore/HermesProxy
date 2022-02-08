@@ -1,14 +1,8 @@
 ﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using HermesProxy.World.Server.Packets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using World;
-using World.Packets;
-using static HermesProxy.World.Client.WorldClient;
 
 namespace HermesProxy.World.Client
 {
@@ -51,6 +45,7 @@ namespace HermesProxy.World.Client
                 char1.MapId = packet.ReadUInt32();
                 char1.PreloadPos = packet.ReadVector3();
                 uint guildId = packet.ReadUInt32();
+                char1.GuildGuid = WowGuid128.Create(HighGuidType703.Guild, guildId);
                 char1.Flags = (CharacterFlags)packet.ReadUInt32();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -81,7 +76,6 @@ namespace HermesProxy.World.Client
                 }
 
                 // placeholders
-                char1.GuildGuid = new HermesProxy.WowGuid128();
                 char1.Flags2 = 402685956;
                 char1.Flags3 = 855688192;
                 char1.Flags4 = 0;
@@ -190,8 +184,6 @@ namespace HermesProxy.World.Client
                         response.Data.DeclinedNames.name[i] = packet.ReadCString();
                 }
             }
-
-            Console.WriteLine("Queried name is " + response.Data.Name + " class " + response.Data.ClassID);
 
             response.Data.IsDeleted = false;
             response.Data.AccountID = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);

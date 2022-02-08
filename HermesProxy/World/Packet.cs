@@ -18,12 +18,11 @@
 using Framework.IO;
 using Framework.Constants;
 using System;
-using HermesProxy;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Client;
 using Ionic.Zlib;
 
-namespace World
+namespace HermesProxy.World
 {
     public abstract class ClientPacket : IDisposable
     {

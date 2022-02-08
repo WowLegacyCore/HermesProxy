@@ -2,11 +2,6 @@
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using World;
 
 namespace HermesProxy.World.Client
 {

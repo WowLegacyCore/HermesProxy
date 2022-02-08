@@ -2,10 +2,9 @@
 using HermesProxy.World;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
-using System;
-using World.Packets;
+using HermesProxy.World.Server.Packets;
 
-namespace World
+namespace HermesProxy.World.Server
 {
     public partial class WorldSocket
     {

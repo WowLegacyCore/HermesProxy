@@ -15,8 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using World;
-using World.Packets;
+
 using Framework.Constants;
 using HermesProxy.World.Enums;
 using Framework.Cryptography;
@@ -27,14 +26,15 @@ using System;
 using System.Net.Sockets;
 using Framework.Logging;
 using Framework.Realm;
-using static World.Packets.AuthResponse;
 using System.Collections.Generic;
 using HermesProxy.World.Objects;
 using System.Reflection;
 using System.Collections.Concurrent;
 using HermesProxy.World;
+using HermesProxy.World.Server.Packets;
+using static HermesProxy.World.Server.Packets.AuthResponse;
 
-namespace World
+namespace HermesProxy.World.Server
 {
     public partial class WorldSocket : SocketBase
     {

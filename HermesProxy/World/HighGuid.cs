@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HermesProxy.World.Enums;
-using HermesProxy.Enums;
 
-namespace HermesProxy
+namespace HermesProxy.World
 {
     public abstract class HighGuid
     {
