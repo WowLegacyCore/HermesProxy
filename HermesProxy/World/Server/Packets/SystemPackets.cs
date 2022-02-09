@@ -88,10 +88,8 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(IsMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
-            _worldPacket.WriteBit(TextToSpeechFeatureEnabled);
-            _worldPacket.WriteBit(ChatDisabledByDefault);
-            _worldPacket.WriteBit(ChatDisabledByPlayer);
-            _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
+            _worldPacket.WriteBit(BattlegroundsEnabled);
+            _worldPacket.WriteBit(RaceClassExpansionLevels.HasValue);
             _worldPacket.FlushBits();
 
             {
@@ -125,6 +123,13 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteInt32(SessionAlert.Value.Delay);
                 _worldPacket.WriteInt32(SessionAlert.Value.Period);
                 _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
+            }
+
+            if (RaceClassExpansionLevels.HasValue)
+            {
+                _worldPacket.WriteInt32(RaceClassExpansionLevels.Value.Count);
+                for (var i = 0; i < RaceClassExpansionLevels.Value.Count; ++i)
+                    _worldPacket.WriteUInt8(RaceClassExpansionLevels.Value[i]);
             }
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
@@ -164,7 +169,6 @@ namespace HermesProxy.World.Server.Packets
         public bool WillKickFromWorld;
         public bool RestrictedAccount;
         public bool TutorialsEnabled;
-        public bool NPETutorialsEnabled;
         public bool KioskModeEnabled;
         public bool CompetitiveModeEnabled;
         public bool TokenBalanceEnabled;
@@ -179,10 +183,8 @@ namespace HermesProxy.World.Server.Packets
         public bool IsMuted;
         public bool ClubFinderEnabled;
         public bool Unknown901CheckoutRelated;
-        public bool TextToSpeechFeatureEnabled;
-        public bool ChatDisabledByDefault;
-        public bool ChatDisabledByPlayer;
-        public bool LFGListCustomRequiresAuthenticator;
+        public bool BattlegroundsEnabled;
+        public Optional<List<byte>> RaceClassExpansionLevels;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -332,7 +334,7 @@ namespace HermesProxy.World.Server.Packets
             }
         }
 
-        public List<string> Text;
+        public List<string> Text = new List<string>();
     }
 
     public class SetTimeZoneInformation : ServerPacket

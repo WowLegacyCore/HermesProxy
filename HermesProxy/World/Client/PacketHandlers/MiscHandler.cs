@@ -32,6 +32,15 @@ namespace HermesProxy.World.Client
                 accountData.AccountTimes[i] = 0;
 
             SendPacketToClient(accountData);
+
+            // These packets don't exist in Vanilla and we must send them here.
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                Global.CurrentSessionData.RealmSocket.SendFeatureSystemStatus();
+                Global.CurrentSessionData.RealmSocket.SendMotd();
+                Global.CurrentSessionData.RealmSocket.SendSetTimeZoneInformation();
+                Global.CurrentSessionData.RealmSocket.SendSeasonInfo();
+            }
         }
 
         [PacketHandler(Opcode.SMSG_BIND_POINT_UPDATE)]
@@ -42,6 +51,14 @@ namespace HermesProxy.World.Client
             point.BindMapID = packet.ReadUInt32();
             point.BindAreaID = packet.ReadUInt32();
             SendPacketToClient(point);
+        }
+
+        [PacketHandler(Opcode.SMSG_CORPSE_RECLAIM_DELAY)]
+        void HandleCorpseReclaimDelay(WorldPacket packet)
+        {
+            CorpseReclaimDelay delay = new CorpseReclaimDelay();
+            delay.Remaining = packet.ReadUInt32();
+            SendPacketToClient(delay);
         }
     }
 }

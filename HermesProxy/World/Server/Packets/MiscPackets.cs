@@ -63,4 +63,16 @@ namespace HermesProxy.World.Server.Packets
 
         public uint[] TutorialData = new uint[(int)Tutorials.Max];
     }
+
+    public class CorpseReclaimDelay : ServerPacket
+    {
+        public CorpseReclaimDelay() : base(Opcode.SMSG_CORPSE_RECLAIM_DELAY, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(Remaining);
+        }
+
+        public uint Remaining;
+    }
 }

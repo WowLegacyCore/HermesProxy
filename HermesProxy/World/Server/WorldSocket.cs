@@ -316,7 +316,10 @@ namespace HermesProxy.World.Server
         public void SendPacket(ServerPacket packet)
         {
             if (!IsOpen())
+            {
+                Log.Print(LogType.Error, $"Can't send {packet.GetUniversalOpcode()}, socket is closed!");
                 return;
+            }
 
             //packet.LogPacket();
             packet.WritePacketData();
@@ -666,11 +669,11 @@ namespace HermesProxy.World.Server
                     SendConnectToInstance(ConnectToSerial.WorldAttempt5);
                     break;
                 case ConnectToSerial.WorldAttempt5:
-                    {
-                        Log.Print(LogType.Error, "Failed to connect 5 times to world socket, aborting login");
-                        AbortLogin(LoginFailureReason.NoWorld);
-                        break;
-                    }
+                {
+                    Log.Print(LogType.Error, "Failed to connect 5 times to world socket, aborting login");
+                    AbortLogin(LoginFailureReason.NoWorld);
+                    break;
+                }
                 default:
                     return;
             }
@@ -692,8 +695,8 @@ namespace HermesProxy.World.Server
             else
             {
                 Log.Print(LogType.Server, "Client has connected to the instance server.");
-                Global.CurrentSessionData.InstanceSocket = this;
                 SendPacket(new ResumeComms(ConnectionType.Instance));
+                Global.CurrentSessionData.InstanceSocket = this;
             }
         }
 
@@ -860,6 +863,83 @@ namespace HermesProxy.World.Server
             features.EuropaTicketSystemStatus.Set(europaTicketConfig);
 
             SendPacket(features);
+        }
+
+        public void SendFeatureSystemStatus()
+        {
+            FeatureSystemStatus features = new();
+            features.ComplaintStatus = 2;
+            features.ScrollOfResurrectionRequestsRemaining = 1;
+            features.ScrollOfResurrectionMaxRequestsPerDay = 1;
+            features.CfgRealmID = 1;
+            features.CfgRealmRecID = 1;
+            features.TwitterPostThrottleLimit = 60;
+            features.TwitterPostThrottleCooldown = 20;
+            features.TokenPollTimeSeconds = 300;
+            features.KioskSessionMinutes = 30;
+            features.BpayStoreProductDeliveryDelay = 180;
+            features.HiddenUIClubsPresenceUpdateTimer = 60000;
+            features.VoiceEnabled = false;
+            features.BrowserEnabled = false;
+
+            features.EuropaTicketSystemStatus.HasValue = true;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.MaxTries = 10;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow = 111111;
+
+            features.TutorialsEnabled = true;
+            features.Unk67 = true;
+            features.QuestSessionEnabled = true;
+            features.BattlegroundsEnabled = true;
+
+            features.QuickJoinConfig.ToastDuration = 7;
+            features.QuickJoinConfig.DelayDuration = 10;
+            features.QuickJoinConfig.QueueMultiplier = 1;
+            features.QuickJoinConfig.PlayerMultiplier = 1;
+            features.QuickJoinConfig.PlayerFriendValue = 5;
+            features.QuickJoinConfig.PlayerGuildValue = 1;
+            features.QuickJoinConfig.ThrottleDecayTime = 60;
+            features.QuickJoinConfig.ThrottlePrioritySpike = 20;
+            features.QuickJoinConfig.ThrottlePvPPriorityNormal = 50;
+            features.QuickJoinConfig.ThrottlePvPPriorityLow = 1;
+            features.QuickJoinConfig.ThrottlePvPHonorThreshold = 10;
+            features.QuickJoinConfig.ThrottleLfgListPriorityDefault = 50;
+            features.QuickJoinConfig.ThrottleLfgListPriorityAbove = 100;
+            features.QuickJoinConfig.ThrottleLfgListPriorityBelow = 50;
+            features.QuickJoinConfig.ThrottleLfgListIlvlScalingAbove = 1;
+            features.QuickJoinConfig.ThrottleLfgListIlvlScalingBelow = 1;
+            features.QuickJoinConfig.ThrottleRfPriorityAbove = 100;
+            features.QuickJoinConfig.ThrottleRfIlvlScalingAbove = 1;
+            features.QuickJoinConfig.ThrottleDfMaxItemLevel = 850;
+            features.QuickJoinConfig.ThrottleDfBestPriority = 80;
+
+            features.Squelch.IsSquelched = false;
+            features.Squelch.BnetAccountGuid = WowGuid128.Create(HighGuidType703.BNetAccount, Global.CurrentSessionData.AccountInfo.Id);
+            features.Squelch.GuildGuid = WowGuid128.Empty;
+
+            features.EuropaTicketSystemStatus.Value.TicketsEnabled = true;
+            features.EuropaTicketSystemStatus.Value.BugsEnabled = true;
+            features.EuropaTicketSystemStatus.Value.ComplaintsEnabled = true;
+            features.EuropaTicketSystemStatus.Value.SuggestionsEnabled = true;
+
+            features.EuropaTicketSystemStatus.Value.ThrottleState.MaxTries = 10;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
+            features.EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow = 10627480;
+            SendPacket(features);
+        }
+
+        public void SendSeasonInfo()
+        {
+            SeasonInfo seasonInfo = new();
+            SendPacket(seasonInfo);
+        }
+
+        public void SendMotd()
+        {
+            MOTD motd = new();
+            SendPacket(motd);
         }
 
         public void SendClientCacheVersion(uint version)

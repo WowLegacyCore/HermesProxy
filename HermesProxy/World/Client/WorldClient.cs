@@ -255,7 +255,6 @@ namespace HermesProxy.World.Client
         {
             if (packet.GetConnection() == Framework.Constants.ConnectionType.Realm)
             {
-                System.Diagnostics.Trace.Assert(Global.CurrentSessionData.RealmSocket != null);
                 Global.CurrentSessionData.RealmSocket.SendPacket(packet);
             }
             else
