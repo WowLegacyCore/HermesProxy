@@ -60,5 +60,50 @@ namespace HermesProxy.World.Client
             delay.Remaining = packet.ReadUInt32();
             SendPacketToClient(delay);
         }
+
+        [PacketHandler(Opcode.SMSG_TIME_SYNC_REQUEST)]
+        void HandleTimeSyncRequest(WorldPacket packet)
+        {
+            TimeSyncRequest sync = new TimeSyncRequest();
+            sync.SequenceIndex = packet.ReadUInt32();
+            SendPacketToClient(sync);
+        }
+
+        [PacketHandler(Opcode.SMSG_WEATHER)]
+        void HandleWeather(WorldPacket packet)
+        {
+            WeatherPkt weather = new WeatherPkt();
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                WeatherType type = (WeatherType)packet.ReadUInt32();
+                weather.Intensity = packet.ReadFloat();
+                weather.WeatherID = Weather.ConvertWeatherTypeToWeatherState(type, weather.Intensity);
+                packet.ReadUInt32(); // sound
+                weather.Abrupt = packet.ReadBool();
+            }
+            else
+            {
+                weather.WeatherID = (WeatherState)packet.ReadUInt32();
+                weather.Intensity = packet.ReadFloat();
+                weather.Abrupt = packet.ReadBool();
+            }
+            SendPacketToClient(weather);
+            SendPacketToClient(new StartLightningStorm());
+        }
+
+        [PacketHandler(Opcode.SMSG_LOGIN_SET_TIME_SPEED)]
+        void HandleLoginSetTimeSpeed(WorldPacket packet)
+        {
+            LoginSetTimeSpeed login = new LoginSetTimeSpeed();
+            login.ServerTime = packet.ReadUInt32();
+            login.GameTime = login.ServerTime;
+            login.NewSpeed = packet.ReadFloat();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
+            {
+                login.ServerTimeHolidayOffset = packet.ReadInt32();
+                login.GameTimeHolidayOffset = login.ServerTimeHolidayOffset;
+            }
+            SendPacketToClient(login);
+        }
     }
 }

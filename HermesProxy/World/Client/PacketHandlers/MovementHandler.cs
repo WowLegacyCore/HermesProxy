@@ -7,6 +7,7 @@ namespace HermesProxy.World.Client
 {
     public partial class WorldClient
     {
+        // Handlers for SMSG opcodes coming the legacy world server
         public static MovementFlag ConvertVanillaMovementFlags(MovementFlagVanilla flags)
         {
             MovementFlag newFlags = MovementFlag.None;

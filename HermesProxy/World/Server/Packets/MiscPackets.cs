@@ -20,6 +20,7 @@ using Framework.Constants;
 using Framework.GameMath;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
@@ -74,5 +75,172 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public uint Remaining;
+    }
+
+    public class SetupCurrency : ServerPacket
+    {
+        public SetupCurrency() : base(Opcode.SMSG_SETUP_CURRENCY, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Data.Count);
+
+            foreach (Record data in Data)
+            {
+                _worldPacket.WriteUInt32(data.Type);
+                _worldPacket.WriteUInt32(data.Quantity);
+
+                _worldPacket.WriteBit(data.WeeklyQuantity.HasValue);
+                _worldPacket.WriteBit(data.MaxWeeklyQuantity.HasValue);
+                _worldPacket.WriteBit(data.TrackedQuantity.HasValue);
+                _worldPacket.WriteBit(data.MaxQuantity.HasValue);
+                _worldPacket.WriteBit(data.Unused901.HasValue);
+                _worldPacket.WriteBits(data.Flags, 5);
+                _worldPacket.FlushBits();
+
+                if (data.WeeklyQuantity.HasValue)
+                    _worldPacket.WriteUInt32(data.WeeklyQuantity.Value);
+                if (data.MaxWeeklyQuantity.HasValue)
+                    _worldPacket.WriteUInt32(data.MaxWeeklyQuantity.Value);
+                if (data.TrackedQuantity.HasValue)
+                    _worldPacket.WriteUInt32(data.TrackedQuantity.Value);
+                if (data.MaxQuantity.HasValue)
+                    _worldPacket.WriteInt32(data.MaxQuantity.Value);
+                if (data.Unused901.HasValue)
+                    _worldPacket.WriteInt32(data.Unused901.Value);
+            }
+        }
+
+        public List<Record> Data = new();
+
+        public struct Record
+        {
+            public uint Type;
+            public uint Quantity;
+            public uint? WeeklyQuantity;       // Currency count obtained this Week.  
+            public uint? MaxWeeklyQuantity;    // Weekly Currency cap.
+            public uint? TrackedQuantity;
+            public int? MaxQuantity;
+            public int? Unused901;
+            public byte Flags;                      // 0 = none, 
+        }
+    }
+
+    class AllAccountCriteria : ServerPacket
+    {
+        public AllAccountCriteria() : base(Opcode.SMSG_ALL_ACCOUNT_CRITERIA, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Progress.Count);
+            foreach (var progress in Progress)
+                progress.Write(_worldPacket);
+        }
+
+        public List<CriteriaProgressPkt> Progress = new();
+    }
+
+    public struct CriteriaProgressPkt
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Id);
+            data.WriteUInt64(Quantity);
+            data.WritePackedGuid128(Player);
+            data.WritePackedTime(Date);
+            data.WriteUInt32(TimeFromStart);
+            data.WriteUInt32(TimeFromCreate);
+            data.WriteBits(Flags, 4);
+            data.WriteBit(RafAcceptanceID.HasValue);
+            data.FlushBits();
+
+            if (RafAcceptanceID.HasValue)
+                data.WriteUInt64(RafAcceptanceID.Value);
+        }
+
+        public uint Id;
+        public ulong Quantity;
+        public WowGuid128 Player;
+        public uint Flags;
+        public long Date;
+        public uint TimeFromStart;
+        public uint TimeFromCreate;
+        public ulong? RafAcceptanceID;
+    }
+
+    public class TimeSyncRequest : ServerPacket
+    {
+        public TimeSyncRequest() : base(Opcode.SMSG_TIME_SYNC_REQUEST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SequenceIndex);
+        }
+
+        public uint SequenceIndex;
+    }
+
+    public class TimeSyncResponse : ClientPacket
+    {
+        public TimeSyncResponse(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SequenceIndex = _worldPacket.ReadUInt32();
+            ClientTime = _worldPacket.ReadUInt32();
+        }
+
+        public uint ClientTime; // Client ticks in ms
+        public uint SequenceIndex; // Same index as in request
+    }
+
+    public class WeatherPkt : ServerPacket
+    {
+        public WeatherPkt() : base(Opcode.SMSG_WEATHER, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32((uint)WeatherID);
+            _worldPacket.WriteFloat(Intensity);
+            _worldPacket.WriteBit(Abrupt);
+
+            _worldPacket.FlushBits();
+        }
+
+        public bool Abrupt;
+        public float Intensity;
+        public WeatherState WeatherID;
+    }
+
+    class StartLightningStorm : ServerPacket
+    {
+        public StartLightningStorm() : base(Opcode.SMSG_START_LIGHTNING_STORM, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(LightningStormId);
+        }
+
+        public uint LightningStormId;
+    }
+
+    public class LoginSetTimeSpeed : ServerPacket
+    {
+        public LoginSetTimeSpeed() : base(Opcode.SMSG_LOGIN_SET_TIME_SPEED, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(ServerTime);
+            _worldPacket.WriteUInt32(GameTime);
+            _worldPacket.WriteFloat(NewSpeed);
+            _worldPacket.WriteInt32(ServerTimeHolidayOffset);
+            _worldPacket.WriteInt32(GameTimeHolidayOffset);
+        }
+
+        public uint ServerTime;
+        public uint GameTime;
+        public float NewSpeed;
+        public int ServerTimeHolidayOffset;
+        public int GameTimeHolidayOffset;
     }
 }

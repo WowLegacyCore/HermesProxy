@@ -11,6 +11,7 @@ namespace HermesProxy.World.Client
 {
     public partial class WorldClient
     {
+        // Handlers for SMSG opcodes coming the legacy world server
         [PacketHandler(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT)]
         void HandleCompressedUpdateObject(WorldPacket packet)
         {
