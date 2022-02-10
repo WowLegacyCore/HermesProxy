@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HermesProxy.World.Enums
 {
-    public enum UpdateType
+    public enum UpdateTypeLegacy
     {
         Values        = 0,
         Movement      = 1,
@@ -16,12 +16,11 @@ namespace HermesProxy.World.Enums
         NearObjects   = 5
     }
 
-    public enum UpdateTypeCataclysm
+    public enum UpdateTypeModern
     {
         Values         = 0,
         CreateObject1  = 1,
         CreateObject2  = 2,
-        DestroyObjects = 3
     }
 
     public enum ObjectCreateType

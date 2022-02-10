@@ -2,6 +2,7 @@
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using HermesProxy.World.Server.Packets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,41 +31,53 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadBool(); // Has Transport
 
+            UpdateObject updateObject = new UpdateObject();
+
             for (var i = 0; i < count; i++)
             {
-                UpdateType type = (UpdateType)packet.ReadUInt8();
+                UpdateTypeLegacy type = (UpdateTypeLegacy)packet.ReadUInt8();
                 PrintString($"Update Type = {type}", i);
 
                 switch (type)
                 {
-                    case UpdateType.Values:
+                    case UpdateTypeLegacy.Values:
                     {
                         WowGuid64 guid = packet.ReadPackedGuid();
                         PrintString($"Guid = {guid.ToString()}", i);
                         ReadValuesUpdateBlock(packet, guid, i);
                         break;
                     }
-                    case UpdateType.Movement:
+                    case UpdateTypeLegacy.Movement:
                     {
                         var guid = LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901) ? packet.ReadPackedGuid() : packet.ReadGuid();
                         PrintString($"Guid = {guid.ToString()}", i);
-                        var moves = ReadMovementUpdateBlock(packet, guid, i);
+                        ReadMovementUpdateBlock(packet, guid, null, i);
                         break;
                     }
-                    case UpdateType.CreateObject1:
-                    case UpdateType.CreateObject2:
+                    case UpdateTypeLegacy.CreateObject1:
                     {
                         var guid = packet.ReadPackedGuid();
                         PrintString($"Guid = {guid.ToString()}", i);
-                        ReadCreateObjectBlock(packet, guid, i);
+
+                        ObjectUpdate updateData = new ObjectUpdate(guid.To128(), UpdateTypeModern.CreateObject1);
+                        ReadCreateObjectBlock(packet, guid, updateData, i);
                         break;
                     }
-                    case UpdateType.NearObjects:
+                    case UpdateTypeLegacy.CreateObject2:
+                    {
+                        var guid = packet.ReadPackedGuid();
+                        PrintString($"Guid = {guid.ToString()}", i);
+
+                        ObjectUpdate updateData = new ObjectUpdate(guid.To128(), UpdateTypeModern.CreateObject2);
+                        ReadCreateObjectBlock(packet, guid, updateData, i);
+                        break;
+                    }
+                    case UpdateTypeLegacy.NearObjects:
                     {
                         ReadObjectsBlock(packet, i);
                         break;
                     }
-                    case UpdateType.FarObjects:
+                    case UpdateTypeLegacy.FarObjects:
                     {
                         ReadDestroyObjectsBlock(packet, i);
                         break;
@@ -95,13 +108,13 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private void ReadCreateObjectBlock(WorldPacket packet, WowGuid guid, object index)
+        private void ReadCreateObjectBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, object index)
         {
-            ObjectType objType = ObjectTypeConverter.Convert((ObjectTypeLegacy)packet.ReadUInt8());
-            var moves = ReadMovementUpdateBlock(packet, guid, index);
+            updateData.CreateData.ObjectType = ObjectTypeConverter.Convert((ObjectTypeLegacy)packet.ReadUInt8());
+            ReadMovementUpdateBlock(packet, guid, updateData, index);
 
             BitArray updateMaskArray = null;
-            var updates = ReadValuesUpdateBlockOnCreate(packet, objType, index, out updateMaskArray);
+            var updates = ReadValuesUpdateBlockOnCreate(packet, updateData.CreateData.ObjectType, index, out updateMaskArray);
         }
 
         public Dictionary<int, UpdateField> ReadValuesUpdateBlockOnCreate(WorldPacket packet, ObjectType type, object index, out BitArray outUpdateMaskArray)
@@ -459,7 +472,7 @@ namespace HermesProxy.World.Client
             return dict;
         }
 
-        private static MovementInfo ReadMovementUpdateBlock(WorldPacket packet, WowGuid guid, object index)
+        private static void ReadMovementUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, object index)
         {
             var moveInfo = new MovementInfo();
 
@@ -468,6 +481,9 @@ namespace HermesProxy.World.Client
                 flags = (UpdateFlag)packet.ReadUInt16();
             else
                 flags = (UpdateFlag)packet.ReadUInt8();
+
+            if (flags.HasAnyFlag(UpdateFlag.Self) && updateData != null)
+                updateData.CreateData.ThisIsYou = true;
 
             if (flags.HasAnyFlag(UpdateFlag.Living))
             {
@@ -535,7 +551,7 @@ namespace HermesProxy.World.Client
                     }
                 }
 
-                if (moveFlags.HasAnyFlag(MovementFlag.SplineEnabled))
+                if (moveFlags.HasAnyFlag(MovementFlagWotLK.SplineEnabled))
                 {
                     ServerSideMovement monsterMove = new ServerSideMovement();
 
@@ -543,43 +559,70 @@ namespace HermesProxy.World.Client
                         monsterMove.TransportGuid = moveInfo.TransportGuid;
                     monsterMove.TransportSeat = moveInfo.TransportSeat;
 
-                    // Temp solution
-                    // TODO: Make Enums version friendly
+                    monsterMove.SplineFlags = SplineFlagModern.None;
+                    monsterMove.SplineType = SplineTypeModern.None;
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     {
-                        SplineFlag splineFlags = (SplineFlag)packet.ReadUInt32();
-                        monsterMove.SplineFlags = (uint)splineFlags;
+                        SplineFlagWotLK splineFlags = (SplineFlagWotLK)packet.ReadUInt32();
+                        monsterMove.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
 
-                        if (splineFlags.HasAnyFlag(SplineFlag.FinalTarget))
+                        if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalTarget))
+                        {
                             monsterMove.FinalFacingGuid = packet.ReadGuid();
-                        else if (splineFlags.HasAnyFlag(SplineFlag.FinalOrientation))
+                            monsterMove.SplineType = SplineTypeModern.FacingTarget;
+                        }
+                        else if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalOrientation))
+                        {
                             monsterMove.FinalOrientation = packet.ReadFloat();
-                        else if (splineFlags.HasAnyFlag(SplineFlag.FinalPoint))
+                            monsterMove.SplineType = SplineTypeModern.FacingAngle;
+                        }
+                        else if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalPoint))
+                        {
                             monsterMove.FinalFacingSpot = packet.ReadVector3();
+                            monsterMove.SplineType = SplineTypeModern.FacingSpot;
+                        }
                     }
                     else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     {
                         SplineFlagTBC splineFlags = (SplineFlagTBC)packet.ReadUInt32();
-                        monsterMove.SplineFlags = (uint)splineFlags;
+                        monsterMove.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
 
                         if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalTarget))
+                        {
                             monsterMove.FinalFacingGuid = packet.ReadGuid();
+                            monsterMove.SplineType = SplineTypeModern.FacingTarget;
+                        }
                         else if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalOrientation))
+                        {
                             monsterMove.FinalOrientation = packet.ReadFloat();
+                            monsterMove.SplineType = SplineTypeModern.FacingAngle;
+                        }
                         else if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalPoint))
+                        {
                             monsterMove.FinalFacingSpot = packet.ReadVector3();
+                            monsterMove.SplineType = SplineTypeModern.FacingSpot;
+                        }
                     }
                     else
                     {
                         SplineFlagVanilla splineFlags = (SplineFlagVanilla)packet.ReadUInt32();
-                        monsterMove.SplineFlags = (uint)splineFlags;
+                        monsterMove.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
 
                         if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalTarget))
+                        {
                             monsterMove.FinalFacingGuid = packet.ReadGuid();
+                            monsterMove.SplineType = SplineTypeModern.FacingTarget;
+                        }
                         else if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalOrientation))
+                        {
                             monsterMove.FinalOrientation = packet.ReadFloat();
+                            monsterMove.SplineType = SplineTypeModern.FacingAngle;
+                        }
                         else if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalPoint))
+                        {
                             monsterMove.FinalFacingSpot = packet.ReadVector3();
+                            monsterMove.SplineType = SplineTypeModern.FacingSpot;
+                        }
                     }
 
                     monsterMove.SplineTime = packet.ReadUInt32();
@@ -605,9 +648,12 @@ namespace HermesProxy.World.Client
                     }
 
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_8_9464))
-                        packet.ReadUInt8(); // Spline Mode
+                        monsterMove.SplineMode = packet.ReadUInt8();
 
                     monsterMove.EndPosition = packet.ReadVector3();
+
+                    if (updateData != null)
+                        updateData.CreateData.MoveSpline = monsterMove;
                 }
             }
             else // !UpdateFlag.Living
@@ -643,7 +689,11 @@ namespace HermesProxy.World.Client
             }
 
             if (flags.HasAnyFlag(UpdateFlag.AttackingTarget))
-                packet.ReadPackedGuid();
+            {
+                WowGuid64 attackGuid = packet.ReadPackedGuid();
+                if (updateData != null)
+                    updateData.CreateData.AutoAttackVictim = attackGuid.To128();
+            }
 
             if (flags.HasAnyFlag(UpdateFlag.Transport))
                 moveInfo.TransportPathTimer = packet.ReadUInt32();
@@ -657,7 +707,11 @@ namespace HermesProxy.World.Client
             if (flags.HasAnyFlag(UpdateFlag.GORotation))
                 moveInfo.Rotation = packet.ReadPackedQuaternion();
 
-            return moveInfo;
+            if (updateData != null)
+            {
+                moveInfo.Flags = (uint)(((MovementFlagWotLK)moveInfo.Flags).CastFlags<MovementFlagModern>());
+                updateData.CreateData.MoveInfo = moveInfo;
+            }
         }
     }
 }

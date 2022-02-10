@@ -1,4 +1,5 @@
 ﻿using Framework.GameMath;
+using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,12 @@ namespace HermesProxy.World.Objects
 {
     public sealed class ServerSideMovement
     {
+        public SplineTypeModern SplineType;
         public uint SplineTime;
         public uint SplineTimeFull;
         public uint SplineId;
-        public uint SplineFlags;
+        public byte SplineMode;
+        public SplineFlagModern SplineFlags;
         public uint SplineCount;
         public float StartPositionX;
         public float StartPositionY;

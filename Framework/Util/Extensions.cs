@@ -299,6 +299,19 @@ namespace System
             return list;
         }
 
+        public static T CastFlags<T> (this Enum input) where T : struct, Enum
+        {
+            uint result = 0;
+            foreach (Enum value in Enum.GetValues(input.GetType()))
+            {
+                if (input.HasFlag(value) && Enum.IsDefined(typeof(T), value.ToString()))
+                {
+                    result |= (uint)Enum.Parse(typeof(T), value.ToString());
+                }
+            }
+            return (T)(object)result;
+        }
+
         #region Strings
         public static bool IsEmpty(this string str)
         {

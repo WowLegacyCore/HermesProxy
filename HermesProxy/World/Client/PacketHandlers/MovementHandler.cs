@@ -8,109 +8,6 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
-        public static MovementFlag ConvertVanillaMovementFlags(MovementFlagVanilla flags)
-        {
-            MovementFlag newFlags = MovementFlag.None;
-
-            if (flags.HasAnyFlag(MovementFlagVanilla.Forward))
-                newFlags |= MovementFlag.Forward;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Backward))
-                newFlags |= MovementFlag.Backward;
-            if (flags.HasAnyFlag(MovementFlagVanilla.StrafeLeft))
-                newFlags |= MovementFlag.StrafeLeft;
-            if (flags.HasAnyFlag(MovementFlagVanilla.StrafeRight))
-                newFlags |= MovementFlag.StrafeRight;
-            if (flags.HasAnyFlag(MovementFlagVanilla.TurnLeft))
-                newFlags |= MovementFlag.TurnLeft;
-            if (flags.HasAnyFlag(MovementFlagVanilla.TurnRight))
-                newFlags |= MovementFlag.TurnRight;
-            if (flags.HasAnyFlag(MovementFlagVanilla.PitchUp))
-                newFlags |= MovementFlag.PitchUp;
-            if (flags.HasAnyFlag(MovementFlagVanilla.PitchDown))
-                newFlags |= MovementFlag.PitchDown;
-            if (flags.HasAnyFlag(MovementFlagVanilla.WalkMode))
-                newFlags |= MovementFlag.WalkMode;
-            if (flags.HasAnyFlag(MovementFlagVanilla.OnTransport))
-                newFlags |= MovementFlag.OnTransport;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Levitating))
-                newFlags |= MovementFlag.DisableGravity;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Root))
-                newFlags |= MovementFlag.Root;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Falling))
-                newFlags |= MovementFlag.Falling;
-            if (flags.HasAnyFlag(MovementFlagVanilla.FallingFar))
-                newFlags |= MovementFlag.FallingFar;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Swimming))
-                newFlags |= MovementFlag.Swimming;
-            if (flags.HasAnyFlag(MovementFlagVanilla.SplineEnabled))
-                newFlags |= MovementFlag.SplineEnabled;
-            if (flags.HasAnyFlag(MovementFlagVanilla.CanFly))
-                newFlags |= MovementFlag.CanFly;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Flying))
-                newFlags |= MovementFlag.Flying;
-            if (flags.HasAnyFlag(MovementFlagVanilla.SplineElevation))
-                newFlags |= MovementFlag.SplineElevation;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Waterwalking))
-                newFlags |= MovementFlag.Waterwalking;
-            if (flags.HasAnyFlag(MovementFlagVanilla.CanSafeFall))
-                newFlags |= MovementFlag.CanSafeFall;
-            if (flags.HasAnyFlag(MovementFlagVanilla.Hover))
-                newFlags |= MovementFlag.Hover;
-
-            return newFlags;
-        }
-
-        public static MovementFlag ConvertTBCMovementFlags(MovementFlagTBC flags)
-        {
-            MovementFlag newFlags = MovementFlag.None;
-
-            if (flags.HasAnyFlag(MovementFlagTBC.Forward))
-                newFlags |= MovementFlag.Forward;
-            if (flags.HasAnyFlag(MovementFlagTBC.Backward))
-                newFlags |= MovementFlag.Backward;
-            if (flags.HasAnyFlag(MovementFlagTBC.StrafeLeft))
-                newFlags |= MovementFlag.StrafeLeft;
-            if (flags.HasAnyFlag(MovementFlagTBC.StrafeRight))
-                newFlags |= MovementFlag.StrafeRight;
-            if (flags.HasAnyFlag(MovementFlagTBC.TurnLeft))
-                newFlags |= MovementFlag.TurnLeft;
-            if (flags.HasAnyFlag(MovementFlagTBC.TurnRight))
-                newFlags |= MovementFlag.TurnRight;
-            if (flags.HasAnyFlag(MovementFlagTBC.PitchUp))
-                newFlags |= MovementFlag.PitchUp;
-            if (flags.HasAnyFlag(MovementFlagTBC.PitchDown))
-                newFlags |= MovementFlag.PitchDown;
-            if (flags.HasAnyFlag(MovementFlagTBC.WalkMode))
-                newFlags |= MovementFlag.WalkMode;
-            if (flags.HasAnyFlag(MovementFlagTBC.OnTransport))
-                newFlags |= MovementFlag.OnTransport;
-            if (flags.HasAnyFlag(MovementFlagTBC.DisableGravity))
-                newFlags |= MovementFlag.DisableGravity;
-            if (flags.HasAnyFlag(MovementFlagTBC.Root))
-                newFlags |= MovementFlag.Root;
-            if (flags.HasAnyFlag(MovementFlagTBC.Falling))
-                newFlags |= MovementFlag.Falling;
-            if (flags.HasAnyFlag(MovementFlagTBC.FallingFar))
-                newFlags |= MovementFlag.FallingFar;
-            if (flags.HasAnyFlag(MovementFlagTBC.Swimming))
-                newFlags |= MovementFlag.Swimming;
-            if (flags.HasAnyFlag(MovementFlagTBC.SplineEnabled))
-                newFlags |= MovementFlag.SplineEnabled;
-            if (flags.HasAnyFlag(MovementFlagTBC.CanFly))
-                newFlags |= MovementFlag.CanFly;
-            if (flags.HasAnyFlag(MovementFlagTBC.Flying) || flags.HasAnyFlag(MovementFlagTBC.Flying2))
-                newFlags |= MovementFlag.Flying;
-            if (flags.HasAnyFlag(MovementFlagTBC.SplineElevation))
-                newFlags |= MovementFlag.SplineElevation;
-            if (flags.HasAnyFlag(MovementFlagTBC.Waterwalking))
-                newFlags |= MovementFlag.Waterwalking;
-            if (flags.HasAnyFlag(MovementFlagTBC.CanSafeFall))
-                newFlags |= MovementFlag.CanSafeFall;
-            if (flags.HasAnyFlag(MovementFlagTBC.Hover))
-                newFlags |= MovementFlag.Hover;
-
-            return newFlags;
-        }
         private static MovementInfo ReadMovementInfo(WorldPacket packet, WowGuid guid)
         {
             var info = new MovementInfo();
@@ -118,9 +15,9 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 info.Flags = packet.ReadUInt32();
             else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                info.Flags = (uint)ConvertTBCMovementFlags((MovementFlagTBC)packet.ReadUInt32());
+                info.Flags = (uint)(((MovementFlagTBC)packet.ReadUInt32()).CastFlags<MovementFlagWotLK>());
             else
-                info.Flags = (uint)ConvertVanillaMovementFlags((MovementFlagVanilla)packet.ReadUInt32());
+                info.Flags = (uint)(((MovementFlagVanilla)packet.ReadUInt32()).CastFlags<MovementFlagWotLK>());
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 info.FlagsExtra = packet.ReadUInt16();
@@ -132,7 +29,7 @@ namespace HermesProxy.World.Client
             info.Position = packet.ReadVector3();
             info.Orientation = packet.ReadFloat();
 
-            if (info.Flags.HasAnyFlag(MovementFlag.OnTransport))
+            if (info.Flags.HasAnyFlag(MovementFlagWotLK.OnTransport))
             {
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                     info.TransportGuid = packet.ReadPackedGuid();
@@ -149,12 +46,12 @@ namespace HermesProxy.World.Client
                     info.TransportTime2 = packet.ReadUInt32();
             }
 
-            if (info.Flags.HasAnyFlag(MovementFlag.Swimming | MovementFlag.Flying) ||
+            if (info.Flags.HasAnyFlag(MovementFlagWotLK.Swimming | MovementFlagWotLK.Flying) ||
                 info.FlagsExtra.HasAnyFlag(MovementFlagExtra.AlwaysAllowPitching))
                 info.SwimPitch = packet.ReadFloat();
 
             info.FallTime = packet.ReadUInt32();
-            if (info.Flags.HasAnyFlag(MovementFlag.Falling))
+            if (info.Flags.HasAnyFlag(MovementFlagWotLK.Falling))
             {
                 info.JumpVerticalSpeed = packet.ReadFloat();
                 info.JumpSinAngle = packet.ReadFloat();
@@ -162,7 +59,7 @@ namespace HermesProxy.World.Client
                 info.JumpHorizontalSpeed = packet.ReadFloat();
             }
 
-            if (info.Flags.HasAnyFlag(MovementFlag.SplineElevation))
+            if (info.Flags.HasAnyFlag(MovementFlagWotLK.SplineElevation))
                 info.SplineElevation = packet.ReadFloat();
 
             return info;
