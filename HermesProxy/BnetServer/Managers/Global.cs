@@ -18,12 +18,12 @@ public static class Global
         public Gender SexId;
         public byte Level;
     }
-    public struct GameSessionData
+    public class GameSessionData
     {
         public bool IsInWorld;
         public int? CurrentMapId;
         public WowGuid128 CurrentPlayerGuid;
-        public Dictionary<WowGuid, PlayerCache> CachedPlayers;
+        public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();
 
         public void UpdatePlayerCache(WowGuid guid, PlayerCache data)
         {
@@ -54,7 +54,7 @@ public static class Global
             return Class.Warrior;
         }
     }
-    public struct LoginSessionData
+    public class LoginSessionData
     {
         public BNetServer.Networking.AccountInfo AccountInfo;
         public BNetServer.Networking.GameAccountInfo GameAccountInfo;
@@ -66,12 +66,12 @@ public static class Global
         public string OS;
         public uint Build;
         public Framework.Realm.RealmId RealmId;
-        public GameSessionData GameData;
+        public GameSessionData GameData = new();
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;
         public WorldClient WorldClient;
     }
-    public static LoginSessionData CurrentSessionData;
+    public static LoginSessionData CurrentSessionData = new();
 
     public static RealmManager RealmMgr { get { return RealmManager.Instance; } }
     public static LoginServiceManager LoginServiceMgr { get { return LoginServiceManager.Instance; } }
