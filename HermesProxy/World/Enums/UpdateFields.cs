@@ -376,6 +376,7 @@ namespace HermesProxy.World.Enums
         UNIT_FIELD_SUMMONED_BY_HOME_REALM,
         [UpdateField(UpdateFieldType.Guid)]
         UNIT_FIELD_TARGET,
+        UNIT_TRAINING_POINTS,
         UNIT_FIELD_UNK63,
         [UpdateField(UpdateFieldType.Int)]
         UNIT_FIELD_WILD_BATTLEPET_LEVEL,

@@ -84,9 +84,9 @@ namespace HermesProxy.World.Server.Packets
                 data.WritePackedGuid128(Guid);
                 data.WriteUInt64(GuildClubMemberID);
                 data.WriteUInt8(ListPosition);
-                data.WriteUInt8(RaceId);
-                data.WriteUInt8(ClassId);
-                data.WriteUInt8(SexId);
+                data.WriteUInt8((byte)RaceId);
+                data.WriteUInt8((byte)ClassId);
+                data.WriteUInt8((byte)SexId);
                 data.WriteInt32(Customizations.Count);
 
                 data.WriteUInt8(ExperienceLevel);
@@ -148,9 +148,9 @@ namespace HermesProxy.World.Server.Packets
             public ulong GuildClubMemberID; // same as bgs.protocol.club.v1.MemberId.unique_id, guessed basing on SMSG_QUERY_PLAYER_NAME_RESPONSE (that one is known)
             public string Name;
             public byte ListPosition; // Order of the characters in list
-            public byte RaceId;
-            public byte ClassId;
-            public byte SexId;
+            public Race RaceId;
+            public Class ClassId;
+            public Gender SexId;
             public Array<ChrCustomizationChoice> Customizations;
             public byte ExperienceLevel;
             public uint ZoneId;

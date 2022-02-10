@@ -4,6 +4,7 @@
 using BNetServer.Networking;
 using Framework.Logging;
 using Framework.Networking;
+using HermesProxy.World;
 using HermesProxy.World.Server;
 using System;
 using System.Globalization;
@@ -19,6 +20,8 @@ namespace HermesProxy
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Log.Print(LogType.Server, "Hello from Hermes Proxy!");
             Log.Start();
+
+            GameData.LoadEverything();
 
             string bindIp = "0.0.0.0";
 

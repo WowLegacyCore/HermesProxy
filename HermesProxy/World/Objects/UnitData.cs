@@ -36,7 +36,7 @@ namespace HermesProxy.World.Objects
         public byte? RaceId;
         public byte? ClassId;
         public byte? PlayerClassId;
-        public byte? Sex;
+        public byte? SexId;
         public byte? DisplayPower;
         public uint? OverrideDisplayPowerID;
         public long? Health;
@@ -58,6 +58,7 @@ namespace HermesProxy.World.Objects
         public uint? Flags;
         public uint? Flags2;
         public uint? Flags3;
+        public uint? AuraState;
         public uint?[] AttackRoundBaseTime = new uint?[2];
         public uint? RangedAttackRoundBaseTime;
         public float? BoundingRadius;

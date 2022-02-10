@@ -163,5 +163,13 @@ namespace HermesProxy
         {
             return Build < build;
         }
+
+        public static int GetPowersCount()
+        {
+            if (RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                return 5;
+
+            return 7;
+        }
     }
 }

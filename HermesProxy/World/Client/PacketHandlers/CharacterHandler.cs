@@ -24,11 +24,12 @@ namespace HermesProxy.World.Client
             for (byte i = 0; i < count; i++)
             {
                 EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
+                Global.PlayerCache cache = new Global.PlayerCache();
                 char1.Guid = packet.ReadGuid().To128();
-                char1.Name = packet.ReadCString();
-                char1.RaceId = packet.ReadUInt8();
-                char1.ClassId = packet.ReadUInt8();
-                char1.SexId = packet.ReadUInt8();
+                char1.Name = cache.Name = packet.ReadCString();
+                char1.RaceId = cache.RaceId = (Race)packet.ReadUInt8();
+                char1.ClassId = cache.ClassId = (Class)packet.ReadUInt8();
+                char1.SexId = cache.SexId = (Gender)packet.ReadUInt8();
 
                 byte skin = packet.ReadUInt8();
                 byte face = packet.ReadUInt8();
@@ -37,9 +38,11 @@ namespace HermesProxy.World.Client
                 byte facialHair = packet.ReadUInt8();
                 char1.Customizations = CharacterCustomizations.ConvertLegacyCustomizationsToModern((Race)char1.RaceId, (Gender)char1.SexId, skin, face, hairStyle, hairColor, facialHair);
 
-                char1.ExperienceLevel = packet.ReadUInt8();
+                char1.ExperienceLevel = cache.Level = packet.ReadUInt8();
                 if (char1.ExperienceLevel > charEnum.MaxCharacterLevel)
                     charEnum.MaxCharacterLevel = char1.ExperienceLevel;
+
+                Global.CurrentSessionData.GameData.UpdatePlayerCache(char1.Guid, cache);
 
                 char1.ZoneId = packet.ReadUInt32();
                 char1.MapId = packet.ReadUInt32();
@@ -160,21 +163,29 @@ namespace HermesProxy.World.Client
             else
                 response.Player = response.Data.GuidActual = packet.ReadGuid().To128();
 
-            response.Data.Name = packet.ReadCString();
+            Global.PlayerCache cache = new Global.PlayerCache();
+            response.Data.Name = cache.Name = packet.ReadCString();
             packet.ReadCString(); // realm name
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
             {
-                response.Data.RaceID = (Race)packet.ReadUInt8();
-                response.Data.Sex = (Gender)packet.ReadUInt8();
-                response.Data.ClassID = (Class)packet.ReadUInt8();
+                response.Data.RaceID = cache.RaceId = (Race)packet.ReadUInt8();
+                response.Data.Sex = cache.SexId = (Gender)packet.ReadUInt8();
+                response.Data.ClassID = cache.ClassId =(Class)packet.ReadUInt8();
             }
             else
             {
-                response.Data.RaceID = (Race)packet.ReadUInt32();
-                response.Data.Sex = (Gender)packet.ReadUInt32();
-                response.Data.ClassID = (Class)packet.ReadInt32();
+                response.Data.RaceID = cache.RaceId = (Race)packet.ReadUInt32();
+                response.Data.Sex = cache.SexId = (Gender)packet.ReadUInt32();
+                response.Data.ClassID = cache.ClassId = (Class)packet.ReadInt32();
             }
+
+            if (Global.CurrentSessionData.GameData.CachedPlayers.ContainsKey(response.Player))
+                response.Data.Level = Global.CurrentSessionData.GameData.CachedPlayers[response.Player].Level;
+            if (response.Data.Level == 0)
+                response.Data.Level = 1;
+
+            Global.CurrentSessionData.GameData.UpdatePlayerCache(response.Player, cache);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
@@ -190,7 +201,6 @@ namespace HermesProxy.World.Client
             response.Data.BnetAccountID = WowGuid128.Create(HighGuidType703.BNetAccount, Global.CurrentSessionData.AccountInfo.Id);
             response.Data.GuidActual = WowGuid128.Empty;
             response.Data.VirtualRealmAddress = Global.CurrentSessionData.RealmId.GetAddress();
-            response.Data.Level = 1;
             SendPacketToClient(response);
         }
 
