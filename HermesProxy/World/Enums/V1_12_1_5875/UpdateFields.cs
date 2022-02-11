@@ -258,7 +258,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         PLAYER_FIELD_VENDORBUYBACK_SLOT_1 = UnitField.UNIT_END + 0x1B4,             // 0x26A - Size: 24 - Type: GUID - Flags: PRIVATE
         PLAYER_FIELD_KEYRING_SLOT_1 = UnitField.UNIT_END + 0x1CC,                   // 0x282 - Size: 64 - Type: GUID - Flags: PRIVATE
         PLAYER_FARSIGHT = UnitField.UNIT_END + 0x20C,                               // 0x2C2 - Size: 2 - Type: GUID - Flags: PRIVATE
-        PLAYER__FIELD_COMBO_TARGET = UnitField.UNIT_END + 0x20E,                    // 0x2C4 - Size: 2 - Type: GUID - Flags: PRIVATE
+        PLAYER_FIELD_COMBO_TARGET = UnitField.UNIT_END + 0x20E,                     // 0x2C4 - Size: 2 - Type: GUID - Flags: PRIVATE
         PLAYER_XP = UnitField.UNIT_END + 0x210,                                     // 0x2C6 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_NEXT_LEVEL_XP = UnitField.UNIT_END + 0x211,                          // 0x2C7 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_SKILL_INFO_1_1 = UnitField.UNIT_END + 0x212,                         // 0x2C8 - Size: 384 - Type: TWO_SHORT - Flags: PRIVATE

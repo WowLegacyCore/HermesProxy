@@ -799,7 +799,6 @@ namespace HermesProxy.World.Client
                     updateData.UnitData.FactionTemplate = updates[UNIT_FIELD_FACTIONTEMPLATE].Int32Value;
                 }
 
-                Class classId = Class.None;
                 int UNIT_FIELD_BYTES_0 = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_BYTES_0);
                 if (UNIT_FIELD_BYTES_0 >= 0 && updateMaskArray[UNIT_FIELD_BYTES_0])
                 {
@@ -808,7 +807,6 @@ namespace HermesProxy.World.Client
                     updateData.UnitData.SexId = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 16) & 0xFF);
                     updateData.UnitData.DisplayPower = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 24) & 0xFF);
 
-                    classId = (Class)updateData.UnitData.ClassId;
                     if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
                         updateData.UnitData.PlayerClassId = updateData.UnitData.ClassId;
                 }
@@ -820,9 +818,14 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_POWER1 + i])
                         {
-                            sbyte index = ClassPowerTypes.GetPowerSlotForClass(classId != Class.None ? classId : Global.CurrentSessionData.GameData.GetUnitClass(guid), (PowerType)i);
-                            if (index >= 0)
-                                updateData.UnitData.Power[i] = updates[UNIT_FIELD_POWER1 + i].Int32Value;
+                            Class classId = Class.None;
+                            if (updateData.UnitData.ClassId != null)
+                                classId = (Class)updateData.UnitData.ClassId;
+                            else
+                                classId = Global.CurrentSessionData.GameData.GetUnitClass(guid);
+                            sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
+                            if (powerSlot >= 0)
+                                updateData.UnitData.Power[powerSlot] = updates[UNIT_FIELD_POWER1 + i].Int32Value;
                         }
                     }
                 }
@@ -833,9 +836,14 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_MAXPOWER1 + i])
                         {
-                            sbyte index = ClassPowerTypes.GetPowerSlotForClass(classId != Class.None ? classId : Global.CurrentSessionData.GameData.GetUnitClass(guid), (PowerType)i);
-                            if (index >= 0)
-                                updateData.UnitData.MaxPower[i] = updates[UNIT_FIELD_MAXPOWER1 + i].Int32Value;
+                            Class classId = Class.None;
+                            if (updateData.UnitData.ClassId != null)
+                                classId = (Class)updateData.UnitData.ClassId;
+                            else
+                                classId = Global.CurrentSessionData.GameData.GetUnitClass(guid);
+                            sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
+                            if (powerSlot >= 0)
+                                updateData.UnitData.MaxPower[powerSlot] = updates[UNIT_FIELD_MAXPOWER1 + i].Int32Value;
                         }
                     }
                 }
@@ -1235,6 +1243,287 @@ namespace HermesProxy.World.Client
                 if (PLAYER_DUEL_TEAM >= 0 && updateMaskArray[PLAYER_DUEL_TEAM])
                 {
                     updateData.PlayerData.DuelTeam = updates[PLAYER_DUEL_TEAM].UInt32Value;
+                }
+                int PLAYER_FARSIGHT = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FARSIGHT);
+                if (PLAYER_FARSIGHT >= 0 && updateMaskArray[PLAYER_FARSIGHT])
+                {
+                    updateData.ActivePlayerData.FarsightObject = GetGuidValue(updates, PlayerField.PLAYER_FARSIGHT).To128();
+                }
+                int PLAYER_FIELD_COMBO_TARGET = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_COMBO_TARGET);
+                if (PLAYER_FIELD_COMBO_TARGET >= 0 && updateMaskArray[PLAYER_FIELD_COMBO_TARGET])
+                {
+                    updateData.ActivePlayerData.ComboTarget = GetGuidValue(updates, PlayerField.PLAYER_FIELD_COMBO_TARGET).To128();
+                }
+                int PLAYER_XP = LegacyVersion.GetUpdateField(PlayerField.PLAYER_XP);
+                if (PLAYER_XP >= 0 && updateMaskArray[PLAYER_XP])
+                {
+                    updateData.ActivePlayerData.XP = updates[PLAYER_XP].Int32Value;
+                }
+                int PLAYER_NEXT_LEVEL_XP = LegacyVersion.GetUpdateField(PlayerField.PLAYER_NEXT_LEVEL_XP);
+                if (PLAYER_NEXT_LEVEL_XP >= 0 && updateMaskArray[PLAYER_NEXT_LEVEL_XP])
+                {
+                    updateData.ActivePlayerData.NextLevelXP = updates[PLAYER_NEXT_LEVEL_XP].Int32Value;
+                }
+                int PLAYER_CHARACTER_POINTS1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_CHARACTER_POINTS1);
+                if (PLAYER_CHARACTER_POINTS1 >= 0 && updateMaskArray[PLAYER_CHARACTER_POINTS1])
+                {
+                    updateData.ActivePlayerData.CharacterPoints = updates[PLAYER_CHARACTER_POINTS1].Int32Value;
+                }
+                int PLAYER_TRACK_CREATURES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_TRACK_CREATURES);
+                if (PLAYER_TRACK_CREATURES >= 0 && updateMaskArray[PLAYER_TRACK_CREATURES])
+                {
+                    updateData.ActivePlayerData.TrackCreatureMask = updates[PLAYER_TRACK_CREATURES].UInt32Value;
+                }
+                int PLAYER_TRACK_RESOURCES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_TRACK_RESOURCES);
+                if (PLAYER_TRACK_RESOURCES >= 0 && updateMaskArray[PLAYER_TRACK_RESOURCES])
+                {
+                    updateData.ActivePlayerData.TrackResourceMask[0] = updates[PLAYER_TRACK_RESOURCES].UInt32Value;
+                }
+                int PLAYER_BLOCK_PERCENTAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_BLOCK_PERCENTAGE);
+                if (PLAYER_BLOCK_PERCENTAGE >= 0 && updateMaskArray[PLAYER_BLOCK_PERCENTAGE])
+                {
+                    updateData.ActivePlayerData.BlockPercentage = updates[PLAYER_BLOCK_PERCENTAGE].FloatValue;
+                }
+                int PLAYER_DODGE_PERCENTAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_DODGE_PERCENTAGE);
+                if (PLAYER_DODGE_PERCENTAGE >= 0 && updateMaskArray[PLAYER_DODGE_PERCENTAGE])
+                {
+                    updateData.ActivePlayerData.DodgePercentage = updates[PLAYER_DODGE_PERCENTAGE].FloatValue;
+                }
+                int PLAYER_PARRY_PERCENTAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_PARRY_PERCENTAGE);
+                if (PLAYER_PARRY_PERCENTAGE >= 0 && updateMaskArray[PLAYER_PARRY_PERCENTAGE])
+                {
+                    updateData.ActivePlayerData.ParryPercentage = updates[PLAYER_PARRY_PERCENTAGE].FloatValue;
+                }
+                int PLAYER_CRIT_PERCENTAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_CRIT_PERCENTAGE);
+                if (PLAYER_CRIT_PERCENTAGE >= 0 && updateMaskArray[PLAYER_CRIT_PERCENTAGE])
+                {
+                    updateData.ActivePlayerData.CritPercentage = updates[PLAYER_CRIT_PERCENTAGE].FloatValue;
+                }
+                int PLAYER_RANGED_CRIT_PERCENTAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_RANGED_CRIT_PERCENTAGE);
+                if (PLAYER_RANGED_CRIT_PERCENTAGE >= 0 && updateMaskArray[PLAYER_RANGED_CRIT_PERCENTAGE])
+                {
+                    updateData.ActivePlayerData.RangedCritPercentage = updates[PLAYER_RANGED_CRIT_PERCENTAGE].FloatValue;
+                }
+                int PLAYER_EXPLORED_ZONES_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_EXPLORED_ZONES_1);
+                if (PLAYER_EXPLORED_ZONES_1 >= 0)
+                {
+                    int maxZones = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 128 : 64;
+                    for (int i = 0; i < maxZones; i++)
+                    {
+                        if (updateMaskArray[PLAYER_EXPLORED_ZONES_1 + i])
+                        {
+                            updateData.ActivePlayerData.ExploredZones[i] = updates[PLAYER_EXPLORED_ZONES_1 + i].UInt32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_COINAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_COINAGE);
+                if (PLAYER_FIELD_COINAGE >= 0 && updateMaskArray[PLAYER_FIELD_COINAGE])
+                {
+                    updateData.ActivePlayerData.Coinage = updates[PLAYER_FIELD_COINAGE].UInt32Value;
+                }
+                int PLAYER_FIELD_POSSTAT0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_POSSTAT0);
+                if (PLAYER_FIELD_POSSTAT0 >= 0)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_POSSTAT0 + i])
+                        {
+                            updateData.UnitData.StatPosBuff[i] = updates[PLAYER_FIELD_POSSTAT0 + i].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_NEGSTAT0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_NEGSTAT0);
+                if (PLAYER_FIELD_NEGSTAT0 >= 0)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_NEGSTAT0 + i])
+                        {
+                            updateData.UnitData.StatNegBuff[i] = updates[PLAYER_FIELD_NEGSTAT0 + i].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE);
+                if (PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE + i])
+                        {
+                            updateData.UnitData.ResistanceBuffModsPositive[i] = updates[PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE + i].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE);
+                if (PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + i])
+                        {
+                            updateData.UnitData.ResistanceBuffModsNegative[i] = updates[PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + i].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_MOD_DAMAGE_DONE_POS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_MOD_DAMAGE_DONE_POS);
+                if (PLAYER_FIELD_MOD_DAMAGE_DONE_POS >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_MOD_DAMAGE_DONE_POS + i])
+                        {
+                            updateData.ActivePlayerData.ModDamageDonePos[i] = updates[PLAYER_FIELD_MOD_DAMAGE_DONE_POS + i].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_MOD_DAMAGE_DONE_NEG = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_MOD_DAMAGE_DONE_NEG);
+                if (PLAYER_FIELD_MOD_DAMAGE_DONE_NEG >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + i])
+                        {
+                            updateData.ActivePlayerData.ModDamageDoneNeg[i] = updates[PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + i].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_MOD_DAMAGE_DONE_PCT = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_MOD_DAMAGE_DONE_PCT);
+                if (PLAYER_FIELD_MOD_DAMAGE_DONE_PCT >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_MOD_DAMAGE_DONE_PCT + i])
+                        {
+                            updateData.ActivePlayerData.ModDamageDonePercent[i] = updates[PLAYER_FIELD_MOD_DAMAGE_DONE_PCT + i].FloatValue;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_BYTES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BYTES);
+                if (PLAYER_FIELD_BYTES >= 0 && updateMaskArray[PLAYER_FIELD_BYTES])
+                {
+                    updateData.ActivePlayerData.LocalFlags = (byte)(updates[PLAYER_FIELD_BYTES].UInt32Value & 0xFF);
+
+                    byte comboPoints = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 8) & 0xFF);
+                    Class classId = Class.None;
+                    if (updateData.UnitData.ClassId != null)
+                        classId = (Class)updateData.UnitData.ClassId;
+                    else
+                        classId = Global.CurrentSessionData.GameData.GetUnitClass(guid);
+                    sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, PowerType.ComboPoints);
+                    if (powerSlot >= 0)
+                        updateData.UnitData.Power[powerSlot] = comboPoints;
+
+                    updateData.ActivePlayerData.MultiActionBars = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 16) & 0xFF);
+                    updateData.ActivePlayerData.LifetimeMaxRank = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 24) & 0xFF);
+                }
+                int PLAYER_AMMO_ID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_AMMO_ID);
+                if (PLAYER_AMMO_ID >= 0 && updateMaskArray[PLAYER_AMMO_ID])
+                {
+                    updateData.ActivePlayerData.AmmoID = updates[PLAYER_AMMO_ID].UInt32Value;
+                }
+                int PLAYER_SELF_RES_SPELL = LegacyVersion.GetUpdateField(PlayerField.PLAYER_SELF_RES_SPELL);
+                if (PLAYER_SELF_RES_SPELL >= 0 && updateMaskArray[PLAYER_SELF_RES_SPELL])
+                {
+                    // ACTIVE_PLAYER_DYNAMIC_FIELD_SELF_RES_SPELLS
+                    //updateData.PlayerData.self = updates[PLAYER_SELF_RES_SPELL].UInt32Value;
+                }
+                int PLAYER_FIELD_PVP_MEDALS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_PVP_MEDALS);
+                if (PLAYER_FIELD_PVP_MEDALS >= 0 && updateMaskArray[PLAYER_FIELD_PVP_MEDALS])
+                {
+                    updateData.ActivePlayerData.PvpMedals = updates[PLAYER_FIELD_PVP_MEDALS].UInt32Value;
+                }
+                int PLAYER_FIELD_BUYBACK_PRICE_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BUYBACK_PRICE_1);
+                if (PLAYER_FIELD_BUYBACK_PRICE_1 >= 0)
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_BUYBACK_PRICE_1 + i])
+                        {
+                            updateData.ActivePlayerData.BuybackPrice[i] = updates[PLAYER_FIELD_BUYBACK_PRICE_1 + i].UInt32Value;
+                        }
+                    }
+                }
+                int PLAYER_FIELD_BUYBACK_TIMESTAMP_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BUYBACK_TIMESTAMP_1);
+                if (PLAYER_FIELD_BUYBACK_TIMESTAMP_1 >= 0)
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + i])
+                        {
+                            updateData.ActivePlayerData.BuybackTimestamp[i] = updates[PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + i].UInt32Value;
+                        }
+                    }
+                }
+                /*
+                int PLAYER_FIELD_SESSION_KILLS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_SESSION_KILLS);
+                if (PLAYER_FIELD_SESSION_KILLS < 0)
+                    PLAYER_FIELD_SESSION_KILLS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_KILLS);
+                if (PLAYER_FIELD_SESSION_KILLS >= 0 && updateMaskArray[PLAYER_FIELD_SESSION_KILLS])
+                {
+                    updateData.ActivePlayerData.TodayHonorableKills = (ushort)(updates[PLAYER_FIELD_SESSION_KILLS].UInt32Value & 0xFFFF);
+                }
+                int PLAYER_FIELD_YESTERDAY_KILLS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_YESTERDAY_KILLS);
+                if (PLAYER_FIELD_YESTERDAY_KILLS >= 0 && updateMaskArray[PLAYER_FIELD_YESTERDAY_KILLS])
+                {
+                    updateData.ActivePlayerData.YesterdayHonorableKills = (ushort)(updates[PLAYER_FIELD_YESTERDAY_KILLS].UInt32Value & 0xFFFF);
+                }
+                int PLAYER_FIELD_LAST_WEEK_KILLS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_LAST_WEEK_KILLS);
+                if (PLAYER_FIELD_LAST_WEEK_KILLS >= 0 && updateMaskArray[PLAYER_FIELD_LAST_WEEK_KILLS])
+                {
+                    updateData.ActivePlayerData.LastWeekHonorableKills = (ushort)(updates[PLAYER_FIELD_LAST_WEEK_KILLS].UInt32Value & 0xFFFF);
+                }
+                int PLAYER_FIELD_THIS_WEEK_KILLS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_THIS_WEEK_KILLS);
+                if (PLAYER_FIELD_THIS_WEEK_KILLS >= 0 && updateMaskArray[PLAYER_FIELD_THIS_WEEK_KILLS])
+                {
+                    updateData.ActivePlayerData.ThisWeekHonorableKills = (ushort)(updates[PLAYER_FIELD_THIS_WEEK_KILLS].UInt32Value & 0xFFFF);
+                }
+                int PLAYER_FIELD_THIS_WEEK_CONTRIBUTION = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+                if (PLAYER_FIELD_THIS_WEEK_CONTRIBUTION >= 0 && updateMaskArray[PLAYER_FIELD_THIS_WEEK_CONTRIBUTION])
+                {
+                    updateData.ActivePlayerData.ThisWeekContribution = (updates[PLAYER_FIELD_THIS_WEEK_CONTRIBUTION].UInt32Value;
+                }
+                int PLAYER_FIELD_LIFETIME_HONORBALE_KILLS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
+                if (PLAYER_FIELD_LIFETIME_HONORBALE_KILLS >= 0 && updateMaskArray[PLAYER_FIELD_LIFETIME_HONORBALE_KILLS])
+                {
+                    updateData.ActivePlayerData.LifetimeHonorableKills = (updates[PLAYER_FIELD_LIFETIME_HONORBALE_KILLS].UInt32Value;
+                }
+                int PLAYER_FIELD_YESTERDAY_CONTRIBUTION = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+                if (PLAYER_FIELD_YESTERDAY_CONTRIBUTION >= 0 && updateMaskArray[PLAYER_FIELD_YESTERDAY_CONTRIBUTION])
+                {
+                    updateData.ActivePlayerData.YesterdayContribution = (updates[PLAYER_FIELD_YESTERDAY_CONTRIBUTION].UInt32Value;
+                }
+                int PLAYER_FIELD_LAST_WEEK_CONTRIBUTION = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+                if (PLAYER_FIELD_LAST_WEEK_CONTRIBUTION >= 0 && updateMaskArray[PLAYER_FIELD_LAST_WEEK_CONTRIBUTION])
+                {
+                    updateData.ActivePlayerData.LastWeekContribution = (updates[PLAYER_FIELD_LAST_WEEK_CONTRIBUTION].UInt32Value;
+                }
+                int PLAYER_FIELD_LAST_WEEK_RANK = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_LAST_WEEK_RANK);
+                if (PLAYER_FIELD_LAST_WEEK_RANK >= 0 && updateMaskArray[PLAYER_FIELD_LAST_WEEK_RANK])
+                {
+                    updateData.ActivePlayerData.LastWeekRank = (updates[PLAYER_FIELD_LAST_WEEK_RANK].UInt32Value;
+                }
+                */
+                int PLAYER_FIELD_BYTES2 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BYTES2);
+                if (PLAYER_FIELD_BYTES2 >= 0 && updateMaskArray[PLAYER_FIELD_BYTES2])
+                {
+                    updateData.ActivePlayerData.PvPRankProgress = (byte)(updates[PLAYER_FIELD_BYTES2].UInt32Value & 0xFF);
+                    updateData.ActivePlayerData.AuraVision = (byte)((updates[PLAYER_FIELD_BYTES2].UInt32Value >> 8) & 0xFF);
+                }
+                int PLAYER_FIELD_WATCHED_FACTION_INDEX = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_WATCHED_FACTION_INDEX);
+                if (PLAYER_FIELD_WATCHED_FACTION_INDEX >= 0 && updateMaskArray[PLAYER_FIELD_WATCHED_FACTION_INDEX])
+                {
+                    updateData.ActivePlayerData.WatchedFactionIndex = updates[PLAYER_FIELD_WATCHED_FACTION_INDEX].Int32Value;
+                }
+                int PLAYER_FIELD_COMBAT_RATING_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_COMBAT_RATING_1);
+                if (PLAYER_FIELD_COMBAT_RATING_1 >= 0)
+                {
+                    for (int i = 0; i < 20; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_COMBAT_RATING_1 + i])
+                        {
+                            updateData.ActivePlayerData.CombatRatings[i] = updates[PLAYER_FIELD_COMBAT_RATING_1 + i].Int32Value;
+                        }
+                    }
                 }
             }
         }
