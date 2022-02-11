@@ -60,6 +60,7 @@ namespace HermesProxy.World.Server.Packets
                 case ObjectType.ActivePlayer:
                     UnitData = new UnitData();
                     PlayerData = new PlayerData();
+                    ActivePlayerData = new ActivePlayerData();
                     break;
             }
 
@@ -71,6 +72,7 @@ namespace HermesProxy.World.Server.Packets
         public ObjectData ObjectData;
         public UnitData UnitData;
         public PlayerData PlayerData;
+        public ActivePlayerData ActivePlayerData;
     }
     
     public class UpdateObject : ServerPacket

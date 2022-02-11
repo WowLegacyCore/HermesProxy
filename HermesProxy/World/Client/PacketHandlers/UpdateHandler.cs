@@ -1127,6 +1127,116 @@ namespace HermesProxy.World.Client
                     }
                 }
             }
+
+            // Player Fields
+            if ((objectType == ObjectType.Player) ||
+                (objectType == ObjectType.ActivePlayer))
+            {
+                int PLAYER_DUEL_ARBITER = LegacyVersion.GetUpdateField(PlayerField.PLAYER_DUEL_ARBITER);
+                if (PLAYER_DUEL_ARBITER >= 0 && updateMaskArray[PLAYER_DUEL_ARBITER])
+                {
+                    updateData.PlayerData.DuelArbiter = GetGuidValue(updates, PlayerField.PLAYER_DUEL_ARBITER).To128();
+                }
+                int PLAYER_FLAGS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FLAGS);
+                if (PLAYER_FLAGS >= 0 && updateMaskArray[PLAYER_FLAGS])
+                {
+                    updateData.PlayerData.PlayerFlags = updates[PLAYER_FLAGS].UInt32Value;
+                }
+                int PLAYER_GUILDID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILDID);
+                if (PLAYER_GUILDID >= 0 && updateMaskArray[PLAYER_GUILDID])
+                {
+                    updateData.UnitData.GuildGUID = WowGuid128.Create(HighGuidType703.Guild, updates[PLAYER_GUILDID].UInt32Value);
+                }
+                int PLAYER_GUILDRANK = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILDRANK);
+                if (PLAYER_GUILDRANK >= 0 && updateMaskArray[PLAYER_GUILDRANK])
+                {
+                    updateData.PlayerData.GuildLevel = 25;
+                    updateData.PlayerData.GuildRankID = updates[PLAYER_GUILDRANK].UInt32Value;
+                }
+                int PLAYER_GUILD_TIMESTAMP = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILD_TIMESTAMP);
+                if (PLAYER_GUILD_TIMESTAMP >= 0 && updateMaskArray[PLAYER_GUILD_TIMESTAMP])
+                {
+                    updateData.PlayerData.GuildTimeStamp = updates[PLAYER_GUILD_TIMESTAMP].Int32Value;
+                }
+
+                byte? skin = null;
+                byte? face = null;
+                byte? hairStyle = null;
+                byte? hairColor = null;
+                byte? facialHair = null;
+
+                int PLAYER_BYTES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_BYTES);
+                if (PLAYER_BYTES >= 0 && updateMaskArray[PLAYER_BYTES])
+                {
+                    skin = (byte)(updates[PLAYER_BYTES].UInt32Value & 0xFF);
+                    face = (byte)((updates[PLAYER_BYTES].UInt32Value >> 8) & 0xFF);
+                    hairStyle = (byte)((updates[PLAYER_BYTES].UInt32Value >> 16) & 0xFF);
+                    hairColor = (byte)((updates[PLAYER_BYTES].UInt32Value >> 24) & 0xFF);
+                }
+
+                byte? restState = null;
+
+                int PLAYER_BYTES_2 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_BYTES_2);
+                if (PLAYER_BYTES_2 >= 0 && updateMaskArray[PLAYER_BYTES_2])
+                {
+                    facialHair = (byte)(updates[PLAYER_BYTES_2].UInt32Value & 0xFF);
+                    updateData.PlayerData.NumBankSlots = (byte)((updates[PLAYER_BYTES_2].UInt32Value >> 16) & 0xFF);
+                    restState = (byte)((updates[PLAYER_BYTES_2].UInt32Value >> 24) & 0xFF);
+                }
+
+                if (skin != null && face != null && hairStyle != null && hairColor != null && facialHair != null)
+                {
+                    Race raceId = Race.None;
+                    Gender sexId = Gender.None;
+
+                    if (updateData.UnitData.RaceId != null)
+                        raceId = (Race)updateData.UnitData.RaceId;
+                    if (updateData.UnitData.SexId != null)
+                        sexId = (Gender)updateData.UnitData.SexId;
+
+                    if (raceId == Race.None || sexId == Gender.None)
+                    {
+                        Global.PlayerCache cache;
+                        if (Global.CurrentSessionData.GameData.CachedPlayers.TryGetValue(guid, out cache))
+                        {
+                            raceId = cache.RaceId;
+                            sexId = cache.SexId;
+                        }
+                    }
+                    
+                    if (raceId != Race.None && sexId != Gender.None)
+                    {
+                        var customizations = CharacterCustomizations.ConvertLegacyCustomizationsToModern(raceId, sexId, (byte)skin, (byte)face, (byte)hairStyle, (byte)hairColor, (byte)facialHair);
+                        for (int i = 0; i < 5; i++)
+                        {
+                            updateData.PlayerData.Customizations[i] = customizations[i];
+                        }
+                    }
+                }
+
+                int PLAYER_REST_STATE_EXPERIENCE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_REST_STATE_EXPERIENCE);
+                if (PLAYER_REST_STATE_EXPERIENCE >= 0 && updateMaskArray[PLAYER_REST_STATE_EXPERIENCE])
+                {
+                    RestInfo restInfo = new RestInfo();
+                    restInfo.StateID = restState;
+                    restInfo.Threshold = updates[PLAYER_REST_STATE_EXPERIENCE].UInt32Value;
+                }
+
+                int PLAYER_BYTES_3 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_BYTES_3);
+                if (PLAYER_BYTES_3 >= 0 && updateMaskArray[PLAYER_BYTES_3])
+                {
+                    ushort genderAndInebriation = (ushort)(updates[PLAYER_BYTES_3].UInt32Value & 0xFFFF);
+                    updateData.PlayerData.NativeSex = (byte)(genderAndInebriation & 0x1);
+                    updateData.PlayerData.Inebriation = (byte)(genderAndInebriation & 0xFFFE);
+                    updateData.PlayerData.PvpTitle = (byte)((updates[PLAYER_BYTES_3].UInt32Value >> 16) & 0xFF); // city protector
+                    updateData.PlayerData.PvPRank = (byte)((updates[PLAYER_BYTES_3].UInt32Value >> 24) & 0xFF); // honor rank
+                }
+                int PLAYER_DUEL_TEAM = LegacyVersion.GetUpdateField(PlayerField.PLAYER_DUEL_TEAM);
+                if (PLAYER_DUEL_TEAM >= 0 && updateMaskArray[PLAYER_DUEL_TEAM])
+                {
+                    updateData.PlayerData.DuelTeam = updates[PLAYER_DUEL_TEAM].UInt32Value;
+                }
+            }
         }
     }
 }
