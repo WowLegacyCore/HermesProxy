@@ -873,7 +873,19 @@ namespace HermesProxy.World.Client
                 int UNIT_FIELD_FLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_FLAGS);
                 if (UNIT_FIELD_FLAGS >= 0 && updateMaskArray[UNIT_FIELD_FLAGS])
                 {
-                    updateData.UnitData.Flags = updates[UNIT_FIELD_FLAGS].UInt32Value;
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    {
+                        UnitFlagsVanilla vanillaFlags = (UnitFlagsVanilla)updates[UNIT_FIELD_FLAGS].UInt32Value;
+                        updateData.UnitData.Flags = (uint)(vanillaFlags.CastFlags<UnitFlags>());
+                    }
+                    else
+                    {
+                        updateData.UnitData.Flags = updates[UNIT_FIELD_FLAGS].UInt32Value;
+                    }
+
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) &&
+                        updateData.UnitData.Flags.HasAnyFlag(UnitFlags.Pvp))
+                        updateData.UnitData.PvpFlags |= (byte)PvPFlags.PvP;
                 }
                 int UNIT_FIELD_AURASTATE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURASTATE);
                 if (UNIT_FIELD_AURASTATE >= 0 && updateMaskArray[UNIT_FIELD_AURASTATE])
@@ -1002,7 +1014,15 @@ namespace HermesProxy.World.Client
                 int UNIT_NPC_FLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_NPC_FLAGS);
                 if (UNIT_NPC_FLAGS >= 0 && updateMaskArray[UNIT_NPC_FLAGS])
                 {
-                    updateData.UnitData.NpcFlags = updates[UNIT_NPC_FLAGS].UInt32Value;
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    {
+                        NPCFlagsVanilla vanillaFlags = (NPCFlagsVanilla)updates[UNIT_NPC_FLAGS].UInt32Value;
+                        updateData.UnitData.NpcFlags = (uint)(vanillaFlags.CastFlags<NPCFlags>());
+                    }
+                    else
+                    {
+                        updateData.UnitData.NpcFlags = updates[UNIT_NPC_FLAGS].UInt32Value;
+                    } 
                 }
                 int UNIT_NPC_EMOTESTATE = LegacyVersion.GetUpdateField(UnitField.UNIT_NPC_EMOTESTATE);
                 if (UNIT_NPC_EMOTESTATE >= 0 && updateMaskArray[UNIT_NPC_EMOTESTATE])
