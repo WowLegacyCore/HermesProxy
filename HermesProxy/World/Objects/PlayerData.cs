@@ -17,9 +17,9 @@ namespace HermesProxy.World.Objects
     }
     public class PlayerData
     {
-        public WowGuid DuelArbiter;
-        public WowGuid WowAccount;
-        public WowGuid LootTargetGUID;
+        public WowGuid128 DuelArbiter;
+        public WowGuid128 WowAccount;
+        public WowGuid128 LootTargetGUID;
         public uint? PlayerFlags;
         public uint? PlayerFlagsEx;
         public uint? GuildRankID;
@@ -36,13 +36,13 @@ namespace HermesProxy.World.Objects
         public int? GuildTimeStamp;
         public QuestLog[] QuestLog = new QuestLog[25];
         public VisibleItem[] VisibleItems = new VisibleItem[19];
-        public int? PlayerTitle;
+        public int? ChosenTitle;
         public int? FakeInebriation;
         public uint? VirtualPlayerRealm;
         public uint? CurrentSpecID;
         public int? TaxiMountAnimKitID;
         public float?[] AvgItemLevel { get; } = new float?[6];
-        public byte? CurrentBattlePetBreedQuality;
+        public uint? CurrentBattlePetBreedQuality;
         public int? HonorLevel;
         public ChrCustomizationChoice[] Customizations = new ChrCustomizationChoice[36];
     }

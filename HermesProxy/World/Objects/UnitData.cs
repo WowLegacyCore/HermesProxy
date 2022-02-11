@@ -20,16 +20,16 @@ namespace HermesProxy.World.Objects
     }
     public class UnitData
     {
-        public WowGuid Charm;
-        public WowGuid Summon;
-        public WowGuid Critter;
-        public WowGuid CharmedBy;
-        public WowGuid SummonedBy;
-        public WowGuid CreatedBy;
-        public WowGuid DemonCreator;
-        public WowGuid LookAtControllerTarget;
-        public WowGuid Target;
-        public WowGuid BattlePetCompanionGUID;
+        public WowGuid128 Charm;
+        public WowGuid128 Summon;
+        public WowGuid128 Critter;
+        public WowGuid128 CharmedBy;
+        public WowGuid128 SummonedBy;
+        public WowGuid128 CreatedBy;
+        public WowGuid128 DemonCreator;
+        public WowGuid128 LookAtControllerTarget;
+        public WowGuid128 Target;
+        public WowGuid128 BattlePetCompanionGUID;
         public ulong? BattlePetDBID;
         public UnitChannel ChannelData;
         public uint? SummonedByHomeRealm;
@@ -37,13 +37,13 @@ namespace HermesProxy.World.Objects
         public byte? ClassId;
         public byte? PlayerClassId;
         public byte? SexId;
-        public byte? DisplayPower;
+        public uint? DisplayPower;
         public uint? OverrideDisplayPowerID;
         public long? Health;
         public int?[] Power = new int?[6];
         public long? MaxHealth;
         public int?[] MaxPower = new int?[6];
-        public float[] ModPowerRegen = new float[6];
+        public float?[] ModPowerRegen = new float?[6];
         public int? Level;
         public int? EffectiveLevel;
         public int? ContentTuningID;
@@ -87,8 +87,7 @@ namespace HermesProxy.World.Objects
         public float? ModHasteRegen;
         public float? ModTimeRate;
         public int? CreatedBySpell;
-        public uint? NpcFlags;
-        public uint? NpcFlags2;
+        public uint?[] NpcFlags = new uint?[2];
         public int? EmoteState;
         public ushort? TrainingPointsUsed;
         public ushort? TrainingPointsTotal;
@@ -112,10 +111,11 @@ namespace HermesProxy.World.Objects
         public int? RangedAttackPowerModPos;
         public int? RangedAttackPowerModNeg;
         public float? RangedAttackPowerMultiplier;
+        public int? AttackSpeedAura;
         public float? Lifesteal;
         public float? MinRangedDamage;
         public float? MaxRangedDamage;
-        public float?[] PowerCostModifier = new float?[7];
+        public int?[] PowerCostModifier = new int?[7];
         public float?[] PowerCostMultiplier = new float?[7];
         public float? MaxHealthModifier;
         public float? HoverHeight;
@@ -133,6 +133,6 @@ namespace HermesProxy.World.Objects
         public int? LooksLikeMountID;
         public int? LooksLikeCreatureID;
         public int? LookAtControllerID;
-        public WowGuid GuildGUID;
+        public WowGuid128 GuildGUID;
     }
 }

@@ -1030,12 +1030,12 @@ namespace HermesProxy.World.Client
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                     {
                         NPCFlagsVanilla vanillaFlags = (NPCFlagsVanilla)updates[UNIT_NPC_FLAGS].UInt32Value;
-                        updateData.UnitData.NpcFlags = (uint)(vanillaFlags.CastFlags<NPCFlags>());
+                        updateData.UnitData.NpcFlags[0] = (uint)(vanillaFlags.CastFlags<NPCFlags>());
                     }
                     else
                     {
-                        updateData.UnitData.NpcFlags = updates[UNIT_NPC_FLAGS].UInt32Value;
-                    } 
+                        updateData.UnitData.NpcFlags[0] = updates[UNIT_NPC_FLAGS].UInt32Value;
+                    }
                 }
                 int UNIT_NPC_EMOTESTATE = LegacyVersion.GetUpdateField(UnitField.UNIT_NPC_EMOTESTATE);
                 if (UNIT_NPC_EMOTESTATE >= 0 && updateMaskArray[UNIT_NPC_EMOTESTATE])
