@@ -14,7 +14,7 @@ namespace HermesProxy.World.Enums
         Spawning            = 0x00000002,           // not attackable
         RemoveClientControl = 0x00000004,
         PlayerControlled    = 0x00000008,           // players, pets, totems, guardians, companions, charms, any units associated with players
-        Rename              = 0x00000010,           // Old pet rename: moved to UNIT_FIELD_BYTES_2,2 in TBC+
+        PetRename           = 0x00000010,           // Old pet rename: moved to UNIT_FIELD_BYTES_2,2 in TBC+
         PetAbandon          = 0x00000020,           // Old pet abandon: moved to UNIT_FIELD_BYTES_2,2 in TBC+
         Unk6                = 0x00000040,
         NotAttackable1      = 0x00000080,           // ?? (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_NOT_ATTACKABLE_1) is NON_PVP_ATTACKABLE

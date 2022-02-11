@@ -877,6 +877,11 @@ namespace HermesProxy.World.Client
                     {
                         UnitFlagsVanilla vanillaFlags = (UnitFlagsVanilla)updates[UNIT_FIELD_FLAGS].UInt32Value;
                         updateData.UnitData.Flags = (uint)(vanillaFlags.CastFlags<UnitFlags>());
+
+                        if (vanillaFlags.HasAnyFlag(UnitFlagsVanilla.PetRename))
+                            updateData.UnitData.PetFlags |= (byte)PetFlags.CanBeRenamed;
+                        if (vanillaFlags.HasAnyFlag(UnitFlagsVanilla.PetAbandon))
+                            updateData.UnitData.PetFlags |= (byte)PetFlags.CanBeAbandoned;
                     }
                     else
                     {
@@ -1071,7 +1076,8 @@ namespace HermesProxy.World.Client
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                         updateData.UnitData.PvpFlags = (byte)((updates[UNIT_FIELD_BYTES_2].UInt32Value >> 8) & 0xFF);
 
-                    updateData.UnitData.PetFlags = (byte)((updates[UNIT_FIELD_BYTES_2].UInt32Value >> 16) & 0xFF);
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                        updateData.UnitData.PetFlags = (byte)((updates[UNIT_FIELD_BYTES_2].UInt32Value >> 16) & 0xFF);
 
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089))
                         updateData.UnitData.ShapeshiftForm = (byte)((updates[UNIT_FIELD_BYTES_2].UInt32Value >> 24) & 0xFF);
