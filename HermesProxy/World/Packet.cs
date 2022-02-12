@@ -46,7 +46,12 @@ namespace HermesProxy.World
 
         public void LogPacket()
         {
-            Console.WriteLine("Received ClientOpcode: {0} ", GetOpcode());
+            if (Global.CurrentSessionData.ModernSniff == null)
+            {
+                Global.CurrentSessionData.ModernSniff = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
+                Global.CurrentSessionData.ModernSniff.WriteHeader();
+            }
+            Global.CurrentSessionData.ModernSniff.WritePacket(GetOpcode(), true, _worldPacket.GetData());
         }
 
         protected WorldPacket _worldPacket;
@@ -94,7 +99,12 @@ namespace HermesProxy.World
 
         public void LogPacket()
         {
-            Console.WriteLine("Sent ServerOpcode: {0}", GetOpcode());
+            if (Global.CurrentSessionData.ModernSniff == null)
+            {
+                Global.CurrentSessionData.ModernSniff = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
+                Global.CurrentSessionData.ModernSniff.WriteHeader();
+            }
+            Global.CurrentSessionData.ModernSniff.WritePacket(GetOpcode(), false, GetData());
         }
 
         public abstract void Write();

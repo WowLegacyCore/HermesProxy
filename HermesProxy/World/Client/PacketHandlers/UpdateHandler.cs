@@ -797,6 +797,11 @@ namespace HermesProxy.World.Client
                 {
                     updateData.UnitData.Health = updates[UNIT_FIELD_HEALTH].Int32Value;
                 }
+                int UNIT_FIELD_MAXHEALTH = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MAXHEALTH);
+                if (UNIT_FIELD_MAXHEALTH >= 0 && updateMaskArray[UNIT_FIELD_MAXHEALTH])
+                {
+                    updateData.UnitData.MaxHealth = updates[UNIT_FIELD_MAXHEALTH].Int32Value;
+                }
                 int UNIT_FIELD_LEVEL = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_LEVEL);
                 if (UNIT_FIELD_LEVEL >= 0 && updateMaskArray[UNIT_FIELD_LEVEL])
                 {
@@ -1313,6 +1318,7 @@ namespace HermesProxy.World.Client
                 {
                     updateData.ActivePlayerData.RangedCritPercentage = updates[PLAYER_RANGED_CRIT_PERCENTAGE].FloatValue;
                 }
+                /*
                 int PLAYER_EXPLORED_ZONES_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_EXPLORED_ZONES_1);
                 if (PLAYER_EXPLORED_ZONES_1 >= 0)
                 {
@@ -1325,6 +1331,7 @@ namespace HermesProxy.World.Client
                         }
                     }
                 }
+                */
                 int PLAYER_FIELD_COINAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_COINAGE);
                 if (PLAYER_FIELD_COINAGE >= 0 && updateMaskArray[PLAYER_FIELD_COINAGE])
                 {

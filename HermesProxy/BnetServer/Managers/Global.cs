@@ -23,6 +23,7 @@ public static class Global
         public bool IsInWorld;
         public int? CurrentMapId;
         public WowGuid128 CurrentPlayerGuid;
+        public List<int> ActionButtons = new();
         public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();
 
         public void UpdatePlayerCache(WowGuid guid, PlayerCache data)
@@ -70,6 +71,7 @@ public static class Global
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;
         public WorldClient WorldClient;
+        public SniffFile ModernSniff;
     }
     public static LoginSessionData CurrentSessionData = new();
 

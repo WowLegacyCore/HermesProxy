@@ -74,6 +74,103 @@ namespace HermesProxy.World.Server.Packets
         public UnitData UnitData;
         public PlayerData PlayerData;
         public ActivePlayerData ActivePlayerData;
+
+        public void InitializePlaceholders()
+        {
+            if (CreateData == null)
+                return;
+
+            if (CreateData.MoveInfo != null)
+            {
+                if (CreateData.MoveInfo.PitchRate == 0)
+                    CreateData.MoveInfo.PitchRate = CreateData.MoveInfo.TurnRate;
+            }
+
+            if (UnitData != null)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    if (UnitData.ModPowerRegen[i] == null)
+                        UnitData.ModPowerRegen[i] = 1;
+                }
+                if (UnitData.Flags2 == null)
+                    UnitData.Flags2 = 2048;
+                if (UnitData.DisplayScale == null)
+                    UnitData.DisplayScale = 1;
+                if (UnitData.NativeXDisplayScale == null)
+                    UnitData.NativeXDisplayScale = 1;
+                if (UnitData.ModCastHaste == null)
+                    UnitData.ModCastHaste = 1;
+                if (UnitData.ModHaste == null)
+                    UnitData.ModHaste = 1;
+                if (UnitData.ModRangedHaste == null)
+                    UnitData.ModRangedHaste = 1;
+                if (UnitData.ModHasteRegen == null)
+                    UnitData.ModHasteRegen = 1;
+                if (UnitData.ModTimeRate == null)
+                    UnitData.ModTimeRate = 1;
+                if (UnitData.HoverHeight == null)
+                    UnitData.HoverHeight = 1;
+                if (UnitData.ScaleDuration == null)
+                    UnitData.ScaleDuration = 100;
+                if (UnitData.LookAtControllerID == null)
+                    UnitData.LookAtControllerID = -1;
+            }
+            if (PlayerData != null)
+            {
+                if (PlayerData.WowAccount == null)
+                    PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
+                if (PlayerData.VirtualPlayerRealm == null)
+                    PlayerData.VirtualPlayerRealm = Global.CurrentSessionData.RealmId.GetAddress();
+                if (PlayerData.HonorLevel == null)
+                    PlayerData.HonorLevel = 1;
+            }
+            if (ActivePlayerData != null)
+            {
+                if (ActivePlayerData.RestInfo[0] == null)
+                    ActivePlayerData.RestInfo[0] = new RestInfo();
+                if (ActivePlayerData.RestInfo[0].Threshold == null)
+                    ActivePlayerData.RestInfo[0].Threshold = 1;
+                if (ActivePlayerData.RestInfo[0].StateID == null)
+                    ActivePlayerData.RestInfo[0].StateID = 0;
+                for (int i = 0; i < 7; i++)
+                {
+                    if (ActivePlayerData.ModDamageDonePercent[i] == null)
+                        ActivePlayerData.ModDamageDonePercent[i] = 1;
+                }
+                if (ActivePlayerData.ModHealingPercent == null)
+                    ActivePlayerData.ModHealingPercent = 1;
+                if (ActivePlayerData.ModHealingDonePercent == null)
+                    ActivePlayerData.ModHealingDonePercent = 1;
+                if (ActivePlayerData.ModPeriodicHealingDonePercent == null)
+                    ActivePlayerData.ModPeriodicHealingDonePercent = 1;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (ActivePlayerData.WeaponDmgMultipliers[i] == null)
+                        ActivePlayerData.WeaponDmgMultipliers[i] = 1;
+                    if (ActivePlayerData.WeaponAtkSpeedMultipliers[i] == null)
+                        ActivePlayerData.WeaponAtkSpeedMultipliers[i] = 1;
+                }
+                if (ActivePlayerData.ModSpellPowerPercent == null)
+                    ActivePlayerData.ModSpellPowerPercent = 1;
+                if (ActivePlayerData.LocalFlags == null)
+                    ActivePlayerData.LocalFlags = 8;
+                if (ActivePlayerData.NumBackpackSlots == null)
+                    ActivePlayerData.NumBackpackSlots = 16;
+                if (ActivePlayerData.MultiActionBars == null)
+                    ActivePlayerData.MultiActionBars = 7;
+                if (ActivePlayerData.MaxLevel == null)
+                    ActivePlayerData.MaxLevel = 70;
+                if (ActivePlayerData.ModPetHaste == null)
+                    ActivePlayerData.ModPetHaste = 1;
+                if (ActivePlayerData.HonorNextLevel == null)
+                    ActivePlayerData.HonorNextLevel = 5500;
+                if (ActivePlayerData.PvPTierMaxFromWins == null)
+                    ActivePlayerData.PvPTierMaxFromWins = 4294967295;
+                if (ActivePlayerData.PvPLastWeeksTierMaxFromWins == null)
+                    ActivePlayerData.PvPLastWeeksTierMaxFromWins = 4294967295;
+            }
+        }
     }
     
     public class UpdateObject : ServerPacket
@@ -104,6 +201,7 @@ namespace HermesProxy.World.Server.Packets
             WorldPacket data = new();
             foreach (var update in ObjectUpdates)
             {
+                update.InitializePlaceholders();
                 switch (Framework.Settings.ClientBuild)
                 {
                     case ClientVersionBuild.V2_5_2_40892:
@@ -114,8 +212,9 @@ namespace HermesProxy.World.Server.Packets
                         throw new System.ArgumentOutOfRangeException("No object update builder defined for current build.");
                 }
             }    
-
+            
             var bytes = data.GetData();
+            System.Console.WriteLine("Count " + ObjectUpdates.Count + " Size " + bytes.Length);
             buffer.WriteInt32(bytes.Length);
             buffer.WriteBytes(bytes);
             Data = buffer.GetData();

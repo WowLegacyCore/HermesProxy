@@ -3,6 +3,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Collections.Generic;
 
 namespace HermesProxy.World.Client
 {
@@ -223,6 +224,36 @@ namespace HermesProxy.World.Client
             CharacterLoginFailed failed = new CharacterLoginFailed();
             failed.Code = (Framework.Constants.LoginFailureReason)packet.ReadUInt8();
             SendPacketToClient(failed);
+        }
+
+        [PacketHandler(Opcode.SMSG_UPDATE_ACTION_BUTTONS)]
+        void HandleUpdateActionButtons(WorldPacket packet)
+        {
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+            {
+                byte type = packet.ReadUInt8();
+                if (type == 2)
+                    return;
+            }
+
+            List<int> buttons = new List<int>();
+
+            int buttonCount = 120;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                buttonCount = 144;
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                buttonCount = 132;
+
+            for (int i = 0; i < buttonCount; i++)
+            {
+                int packed = packet.ReadInt32();
+                buttons.Add(packed);
+            }
+
+            while (buttons.Count < 132)
+                buttons.Add(0);
+
+            Global.CurrentSessionData.GameData.ActionButtons = buttons;
         }
     }
 }

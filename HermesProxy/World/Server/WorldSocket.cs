@@ -273,6 +273,11 @@ namespace HermesProxy.World.Server
                     if (_connectType == ConnectionType.Realm &&
                         Global.CurrentSessionData.WorldClient != null)
                         Global.CurrentSessionData.WorldClient.Disconnect();
+                    if (Global.CurrentSessionData.ModernSniff != null)
+                    {
+                        Global.CurrentSessionData.ModernSniff.CloseFile();
+                        Global.CurrentSessionData.ModernSniff = null;
+                    }
                     break;
                 case Opcode.CMSG_ENABLE_NAGLE:
                     SetNoDelay(false);
@@ -321,8 +326,8 @@ namespace HermesProxy.World.Server
                 return;
             }
 
-            //packet.LogPacket();
             packet.WritePacketData();
+            packet.LogPacket();
 
             var data = packet.GetData();
             Opcode universalOpcode = packet.GetUniversalOpcode();
@@ -1030,6 +1035,7 @@ namespace HermesProxy.World.Server
                     return;
 
                 using var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet);
+                clientPacket.LogPacket();
                 clientPacket.Read();
                 methodCaller(session, clientPacket);
             }

@@ -55,7 +55,7 @@ namespace HermesProxy.World.Objects
             {
                 if (offset > 3)
                 {
-                    Log.Print(LogType.Error,  $"SetUpdateField<UInt8>: Wrong offset: {offset}");
+                    Log.Print(LogType.Error, $"SetUpdateField<UInt8>: Wrong offset: {offset}");
                     return;
                 }
 
@@ -70,7 +70,7 @@ namespace HermesProxy.World.Objects
             {
                 if (offset > 1)
                 {
-                    Log.Print(LogType.Error,  $"SetUpdateField<UInt16>: Wrong offset: {offset}");
+                    Log.Print(LogType.Error, $"SetUpdateField<UInt16>: Wrong offset: {offset}");
                     return;
                 }
 
@@ -119,10 +119,12 @@ namespace HermesProxy.World.Objects
             {
                 //if (GetUpdateField<WowGuid128>(index) != guid)
                 //{
-                    SetUpdateField<ulong>(index, guid.GetLowValue());
-                    SetUpdateField<ulong>((int)index + 2, guid.GetHighValue());
+                SetUpdateField<ulong>(index, guid.GetLowValue());
+                SetUpdateField<ulong>((int)index + 2, guid.GetHighValue());
                 //}
             }
+            else
+                throw new Exception($"Unhandled type {typeof(T).ToString()} in SetUpdateField!");
         }
 
         public T GetUpdateField<T>(object index, byte offset = 0) =>
