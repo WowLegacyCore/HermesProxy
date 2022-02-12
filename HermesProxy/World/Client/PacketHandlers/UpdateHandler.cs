@@ -821,8 +821,8 @@ namespace HermesProxy.World.Client
                     updateData.UnitData.SexId = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 16) & 0xFF);
                     updateData.UnitData.DisplayPower = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 24) & 0xFF);
 
-                    if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
-                        updateData.UnitData.PlayerClassId = updateData.UnitData.ClassId;
+                    //if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
+                    //    updateData.UnitData.PlayerClassId = updateData.UnitData.ClassId;
                 }
 
                 int UNIT_FIELD_POWER1 = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_POWER1);

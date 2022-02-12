@@ -82,6 +82,10 @@ namespace HermesProxy.World.Server.Packets
 
             if (CreateData.MoveInfo != null)
             {
+                if (CreateData.MoveInfo.FlightSpeed == 0)
+                    CreateData.MoveInfo.FlightSpeed = 7;
+                if (CreateData.MoveInfo.FlightBackSpeed == 0)
+                    CreateData.MoveInfo.FlightBackSpeed = 4.5f;
                 if (CreateData.MoveInfo.PitchRate == 0)
                     CreateData.MoveInfo.PitchRate = CreateData.MoveInfo.TurnRate;
             }
@@ -124,6 +128,8 @@ namespace HermesProxy.World.Server.Packets
                     PlayerData.VirtualPlayerRealm = Global.CurrentSessionData.RealmId.GetAddress();
                 if (PlayerData.HonorLevel == null)
                     PlayerData.HonorLevel = 1;
+                if (PlayerData.AvgItemLevel[3] == null)
+                    PlayerData.AvgItemLevel[3] = 1;
             }
             if (ActivePlayerData != null)
             {

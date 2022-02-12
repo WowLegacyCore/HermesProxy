@@ -82,11 +82,6 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
 
         public void WriteToPacket(WorldPacket packet)
         {
-            Console.WriteLine("Guid " + m_updateData.Guid.ToString());
-            Console.WriteLine("UpdateType " + m_updateData.Type);
-            Console.WriteLine("Type " + m_objectType);
-            Console.WriteLine("TypeMask " + (uint)m_objectTypeMask);
-
             packet.WriteUInt8((byte)m_updateData.Type);
             packet.WritePackedGuid128(m_updateData.Guid);
 
