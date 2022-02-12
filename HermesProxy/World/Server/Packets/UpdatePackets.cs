@@ -18,6 +18,7 @@
 
 using Framework.Constants;
 using Framework.GameMath;
+using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using System.Collections.Generic;
@@ -81,8 +82,44 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
+            NumObjUpdates = (uint)ObjectUpdates.Count;
+            MapID = (ushort)Global.CurrentSessionData.GameData.CurrentMapId;
+
             _worldPacket.WriteUInt32(NumObjUpdates);
             _worldPacket.WriteUInt16(MapID);
+
+            WorldPacket buffer = new();
+            if (buffer.WriteBit(!OutOfRangeGuids.Empty() || !DestroyedGuids.Empty()))
+            {
+                buffer.WriteUInt16((ushort)DestroyedGuids.Count);
+                buffer.WriteInt32(DestroyedGuids.Count + OutOfRangeGuids.Count);
+
+                foreach (var destroyGuid in DestroyedGuids)
+                    buffer.WritePackedGuid128(destroyGuid);
+
+                foreach (var outOfRangeGuid in OutOfRangeGuids)
+                    buffer.WritePackedGuid128(outOfRangeGuid);
+            }
+
+            WorldPacket data = new();
+            foreach (var update in ObjectUpdates)
+            {
+                switch (Framework.Settings.ClientBuild)
+                {
+                    case ClientVersionBuild.V2_5_2_40892:
+                        Objects.Version.V2_5_2_39570.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_39570.ObjectUpdateBuilder(update);
+                        builder.WriteToPacket(data);
+                        break;
+                    default:
+                        throw new System.ArgumentOutOfRangeException("No object update builder defined for current build.");
+                }
+            }    
+
+            var bytes = data.GetData();
+            buffer.WriteInt32(bytes.Length);
+            buffer.WriteBytes(bytes);
+            Data = buffer.GetData();
+
             _worldPacket.WriteBytes(Data);
         }
 
@@ -90,8 +127,8 @@ namespace HermesProxy.World.Server.Packets
         public ushort MapID;
         public byte[] Data;
 
-        List<WowGuid128> OutOfRangeGuids = new List<WowGuid128>();
-        List<WowGuid128> DestroyedGuids = new List<WowGuid128>();
-        List<ObjectUpdate> ObjectUpdates = new List<ObjectUpdate>();
+        public List<WowGuid128> OutOfRangeGuids = new List<WowGuid128>();
+        public List<WowGuid128> DestroyedGuids = new List<WowGuid128>();
+        public List<ObjectUpdate> ObjectUpdates = new List<ObjectUpdate>();
     }
 }

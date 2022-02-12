@@ -117,11 +117,11 @@ namespace HermesProxy.World.Objects
             }
             else if (value is WowGuid128 guid)
             {
-                if (GetUpdateField<WowGuid128>(index) != guid)
-                {
+                //if (GetUpdateField<WowGuid128>(index) != guid)
+                //{
                     SetUpdateField<ulong>(index, guid.GetLowValue());
                     SetUpdateField<ulong>((int)index + 2, guid.GetHighValue());
-                }
+                //}
             }
         }
 

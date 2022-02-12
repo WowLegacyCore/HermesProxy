@@ -62,6 +62,9 @@ namespace HermesProxy.World.Client
 
                         ObjectUpdate updateData = new ObjectUpdate(guid.To128(), UpdateTypeModern.CreateObject1);
                         ReadCreateObjectBlock(packet, guid, updateData, i);
+
+                        if (guid.GetObjectType() == ObjectType.Player)
+                            updateObject.ObjectUpdates.Add(updateData);
                         break;
                     }
                     case UpdateTypeLegacy.CreateObject2:
@@ -71,6 +74,9 @@ namespace HermesProxy.World.Client
 
                         ObjectUpdate updateData = new ObjectUpdate(guid.To128(), UpdateTypeModern.CreateObject2);
                         ReadCreateObjectBlock(packet, guid, updateData, i);
+
+                        if (guid.GetObjectType() == ObjectType.Player)
+                            updateObject.ObjectUpdates.Add(updateData);
                         break;
                     }
                     case UpdateTypeLegacy.NearObjects:
@@ -85,6 +91,9 @@ namespace HermesProxy.World.Client
                     }
                 }
             }
+
+            if (updateObject.ObjectUpdates.Count != 0)
+                SendPacketToClient(updateObject);
         }
 
         public void ReadObjectsBlock(WorldPacket packet, object index)

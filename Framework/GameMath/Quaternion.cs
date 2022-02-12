@@ -573,6 +573,21 @@ namespace Framework.GameMath
 
             return result;
         }
+
+        public long GetPackedRotation()
+        {
+            const int PACK_YZ = 1 << 20;
+            const int PACK_X = PACK_YZ << 1;
+
+            const int PACK_YZ_MASK = (PACK_YZ << 1) - 1;
+            const int PACK_X_MASK = (PACK_X << 1) - 1;
+
+            sbyte w_sign = (sbyte)(_w >= 0.0f ? 1 : -1);
+            long x = (int)(_x * PACK_X) * w_sign & PACK_X_MASK;
+            long y = (int)(_y * PACK_YZ) * w_sign & PACK_YZ_MASK;
+            long z = (int)(_z * PACK_YZ) * w_sign & PACK_YZ_MASK;
+            return (z | (y << 21) | (x << 42));
+        }
         #endregion
 
         #region Public Methods
