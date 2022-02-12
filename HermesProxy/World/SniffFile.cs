@@ -16,7 +16,7 @@ namespace HermesProxy.World
         }
         BinaryWriter _fileWriter;
         ushort _gameVersion;
-        System.Threading.Mutex _mitex = new System.Threading.Mutex();
+        System.Threading.Mutex _mutex = new System.Threading.Mutex();
 
         public void WriteHeader()
         {
@@ -36,7 +36,7 @@ namespace HermesProxy.World
 
         public void WritePacket(uint opcode, bool isFromClient, byte[] data)
         {
-            _mitex.WaitOne();
+            _mutex.WaitOne();
             byte direction = !isFromClient ? (byte)0xff : (byte)0x0;
             _fileWriter.Write(direction);
 
@@ -58,7 +58,7 @@ namespace HermesProxy.World
                 _fileWriter.Write(opcode2);
             }
             _fileWriter.Write(data);
-            _mitex.ReleaseMutex();
+            _mutex.ReleaseMutex();
         }
 
         public void CloseFile()
