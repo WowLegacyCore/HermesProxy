@@ -1,4 +1,5 @@
-﻿using HermesProxy.World.Enums.V2_5_2_39570;
+﻿using Framework.IO;
+using HermesProxy.World.Enums.V2_5_2_39570;
 using HermesProxy.World.Server.Packets;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
     {
         public ObjectUpdateBuilder(ObjectUpdate updateData)
         {
+            m_alreadyWritten = false;
             m_updateData = updateData;
 
             Enums.ObjectType objectType = updateData.Guid.GetObjectType();
@@ -22,33 +24,46 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     objectType = Enums.ObjectType.ActivePlayer;
             }
             m_objectType = ObjectTypeConverter.ConvertToBCC(objectType);
+            m_objectTypeMask = Enums.ObjectTypeMask.Object;
 
-            int size;
+            uint size;
             switch (m_objectType)
             {
                 case Enums.ObjectTypeBCC.Item:
-                    size = (int)ItemField.ITEM_END;
+                    size = (uint)ItemField.ITEM_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Item;
                     break;
                 case Enums.ObjectTypeBCC.Container:
-                    size = (int)ContainerField.CONTAINER_END;
+                    size = (uint)ContainerField.CONTAINER_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Item;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Container;
                     break;
                 case Enums.ObjectTypeBCC.Unit:
-                    size = (int)UnitField.UNIT_END;
+                    size = (uint)UnitField.UNIT_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Unit;
                     break;
                 case Enums.ObjectTypeBCC.Player:
-                    size = (int)PlayerField.PLAYER_END;
+                    size = (uint)PlayerField.PLAYER_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Unit;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Player;
                     break;
                 case Enums.ObjectTypeBCC.ActivePlayer:
-                    size = (int)ActivePlayerField.ACTIVE_PLAYER_END;
+                    size = (uint)ActivePlayerField.ACTIVE_PLAYER_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Unit;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Player;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.ActivePlayer;
                     break;
                 case Enums.ObjectTypeBCC.GameObject:
-                    size = (int)GameObjectField.GAMEOBJECT_END;
+                    size = (uint)GameObjectField.GAMEOBJECT_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.GameObject;
                     break;
                 case Enums.ObjectTypeBCC.DynamicObject:
-                    size = (int)DynamicObjectField.DYNAMICOBJECT_END;
+                    size = (uint)DynamicObjectField.DYNAMICOBJECT_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.DynamicObject;
                     break;
                 case Enums.ObjectTypeBCC.Corpse:
-                    size = (int)CorpseField.CORPSE_END;
+                    size = (uint)CorpseField.CORPSE_END;
+                    m_objectTypeMask |= Enums.ObjectTypeMask.Corpse;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unsupported object type!");
@@ -57,12 +72,59 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             m_fields = new UpdateFieldsArray(size);
         }
 
+        protected bool m_alreadyWritten;
         protected ObjectUpdate m_updateData;
         protected UpdateFieldsArray m_fields;
         protected Enums.ObjectTypeBCC m_objectType;
+        protected Enums.ObjectTypeMask m_objectTypeMask;
+        protected CreateObjectBits m_createBits;
+
+        public void WriteToPacket(WorldPacket packet)
+        {
+            packet.WriteUInt8((byte)m_updateData.Type);
+            packet.WritePackedGuid128(m_updateData.Guid);
+
+            if (m_updateData.Type != Enums.UpdateTypeModern.Values)
+            {
+                packet.WriteUInt8((byte)m_objectType);
+                packet.WriteInt32((int)m_objectTypeMask); //< HeirFlags
+
+                //BuildMovementUpdate(buffer, flags);
+            }
+            BuildValuesUpdate(packet);
+            BuildDynamicValuesUpdate(packet);
+        }
+
+        public void SetCreateObjectBits()
+        {
+            m_createBits.Clear();
+            m_createBits.MovementUpdate = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null;
+            m_createBits.MovementTransport = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.TransportGuid != null;
+            m_createBits.Stationary = m_updateData.Guid.GetHighType() == Enums.HighGuidType.Transport;
+            m_createBits.CombatVictim = m_updateData.CreateData != null && m_updateData.CreateData.AutoAttackVictim != null;
+            m_createBits.Vehicle = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.VehicleId != 0;
+            m_createBits.Rotation = m_objectType == Enums.ObjectTypeBCC.GameObject;
+            m_createBits.ThisIsYou = m_createBits.ActivePlayer = m_objectType == Enums.ObjectTypeBCC.ActivePlayer;
+        }
+
+        public void BuildValuesUpdate(WorldPacket packet)
+        {
+            WriteValuesToArray();
+            m_fields.WriteToPacket(packet);
+        }
+
+        public void BuildDynamicValuesUpdate(WorldPacket packet)
+        {
+            uint valueCount = (uint)PlayerDynamicField.PLAYER_DYNAMIC_END;
+            var updateMask = new UpdateMask(valueCount);
+            updateMask.AppendToPacket(packet);
+        }
 
         public void WriteValuesToArray()
         {
+            if (m_alreadyWritten)
+                return;
+
             ObjectData objectData = m_updateData.ObjectData;
             if (objectData.Guid != null)
                 m_fields.SetUpdateField<WowGuid128>(ObjectField.OBJECT_FIELD_GUID, objectData.Guid);
@@ -481,6 +543,359 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)playerData.Customizations[i].ChrCustomizationChoiceID);
                 }
             }
+
+            ActivePlayerData activeData = m_updateData.ActivePlayerData;
+            for (int i =0; i < 129; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD;
+                int sizePerEntry = 4;
+                if (activeData.InvSlots[i] != null)
+                    m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.InvSlots[i]);
+            }
+            if (activeData.FarsightObject != null)
+                m_fields.SetUpdateField<WowGuid128>(ActivePlayerField.ACTIVE_PLAYER_FIELD_FARSIGHT, activeData.FarsightObject);
+            if (activeData.ComboTarget != null)
+                m_fields.SetUpdateField<WowGuid128>(ActivePlayerField.ACTIVE_PLAYER_FIELD_COMBO_TARGET, activeData.ComboTarget);
+            if (activeData.SummonedBattlePetGUID != null)
+                m_fields.SetUpdateField<WowGuid128>(ActivePlayerField.ACTIVE_PLAYER_FIELD_SUMMONED_BATTLE_PET_ID, activeData.SummonedBattlePetGUID);
+            for (int i = 0; i < 12; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_KNOWN_TITLES;
+                if (activeData.KnownTitles[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.KnownTitles[i]);
+            }
+            if (activeData.Coinage != null)
+                m_fields.SetUpdateField<ulong>(ActivePlayerField.ACTIVE_PLAYER_FIELD_COINAGE, (ulong)activeData.Coinage);
+            if (activeData.XP != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_XP, (int)activeData.XP);
+            if (activeData.NextLevelXP != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_NEXT_LEVEL_XP, (int)activeData.NextLevelXP);
+            if (activeData.TrialXP != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_TRIAL_XP, (int)activeData.TrialXP);
+            for (int i = 0; i < 256; i++)
+            {
+                if (activeData.Skill.SkillLineID[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillLineID[i], (byte)(i & 1));
+                }
+                if (activeData.Skill.SkillStep[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID + 128;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillStep[i], (byte)(i & 1));
+                }
+                if (activeData.Skill.SkillRank[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID + 128 + 128;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillRank[i], (byte)(i & 1));
+                }
+                if (activeData.Skill.SkillStartingRank[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID + 128 + 128 + 128;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillStartingRank[i], (byte)(i & 1));
+                }
+                if (activeData.Skill.SkillMaxRank[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID + 128 + 128 + 128 + 128;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillMaxRank[i], (byte)(i & 1));
+                }
+                if (activeData.Skill.SkillTempBonus[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID + 128 + 128 + 128 + 128 + 128;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillTempBonus[i], (byte)(i & 1));
+                }
+                if (activeData.Skill.SkillPermBonus[i] != null)
+                {
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SKILL_LINEID + 128 + 128 + 128 + 128 + 128 + 128;
+                    m_fields.SetUpdateField<ushort>(startIndex + i / 2, (ushort)activeData.Skill.SkillPermBonus[i], (byte)(i & 1));
+                }
+            }
+            if (activeData.CharacterPoints != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_CHARACTER_POINTS, (int)activeData.CharacterPoints);
+            if (activeData.MaxTalentTiers != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MAX_TALENT_TIERS, (int)activeData.MaxTalentTiers);
+            if (activeData.TrackCreatureMask != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_TRACK_CREATURES, (uint)activeData.TrackCreatureMask);
+            for (int i = 0; i < 2; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_TRACK_RESOURCES;
+                if (activeData.TrackResourceMask[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.TrackResourceMask[i]);
+            }
+            if (activeData.MainhandExpertise != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_EXPERTISE, (float)activeData.MainhandExpertise);
+            if (activeData.OffhandExpertise != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_OFFHAND_EXPERTISE, (float)activeData.OffhandExpertise);
+            if (activeData.RangedExpertise != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_RANGED_EXPERTISE, (float)activeData.RangedExpertise);
+            if (activeData.CombatRatingExpertise != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_COMBAT_RATING_EXPERTISE, (float)activeData.CombatRatingExpertise);
+            if (activeData.BlockPercentage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BLOCK_PERCENTAGE, (float)activeData.BlockPercentage);
+            if (activeData.DodgePercentage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_DODGE_PERCENTAGE, (float)activeData.DodgePercentage);
+            if (activeData.DodgePercentageFromAttribute != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_DODGE_PERCENTAGE_FROM_ATTRIBUTE, (float)activeData.DodgePercentageFromAttribute);
+            if (activeData.ParryPercentage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PARRY_PERCENTAGE, (float)activeData.ParryPercentage);
+            if (activeData.ParryPercentageFromAttribute != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PARRY_PERCENTAGE_FROM_ATTRIBUTE, (float)activeData.ParryPercentageFromAttribute);
+            if (activeData.CritPercentage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_CRIT_PERCENTAGE, (float)activeData.CritPercentage);
+            if (activeData.RangedCritPercentage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_RANGED_CRIT_PERCENTAGE, (float)activeData.RangedCritPercentage);
+            if (activeData.OffhandCritPercentage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_OFFHAND_CRIT_PERCENTAGE, (float)activeData.OffhandCritPercentage);
+            for (int i = 0; i < 7; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_SPELL_CRIT_PERCENTAGE1;
+                if (activeData.SpellCritPercentage[i] != null)
+                    m_fields.SetUpdateField<float>(startIndex + i, (float)activeData.SpellCritPercentage[i]);
+            }
+            if (activeData.ShieldBlock != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_SHIELD_BLOCK, (int)activeData.ShieldBlock);
+            if (activeData.Mastery != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MASTERY, (float)activeData.Mastery);
+            if (activeData.Speed != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_SPEED, (float)activeData.Speed);
+            if (activeData.Avoidance != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_AVOIDANCE, (float)activeData.Avoidance);
+            if (activeData.Sturdiness != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_STURDINESS, (float)activeData.Sturdiness);
+            if (activeData.Versatility != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_VERSATILITY, (int)activeData.Versatility);
+            if (activeData.VersatilityBonus != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_VERSATILITY_BONUS, (float)activeData.VersatilityBonus);
+            if (activeData.PvpPowerDamage != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_POWER_DAMAGE, (float)activeData.PvpPowerDamage);
+            if (activeData.PvpPowerHealing != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_POWER_HEALING, (float)activeData.PvpPowerHealing);
+            for (int i = 0; i < 240; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_EXPLORED_ZONES;
+                if (activeData.ExploredZones[i] != null)
+                    m_fields.SetUpdateField<ulong>(startIndex + i * 2, (ulong)activeData.ExploredZones[i]);
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_REST_INFO;
+                int sizePerEntry = 2;
+                if (activeData.RestInfo[i] != null)
+                {
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)activeData.RestInfo[i].Threshold);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)activeData.RestInfo[i].StateID);
+                }
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_DAMAGE_DONE_POS;
+                if (activeData.ModDamageDonePos[i] != null)
+                    m_fields.SetUpdateField<int>(startIndex + i, (int)activeData.ModDamageDonePos[i]);
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_DAMAGE_DONE_NEG;
+                if (activeData.ModDamageDoneNeg[i] != null)
+                    m_fields.SetUpdateField<int>(startIndex + i, (int)activeData.ModDamageDoneNeg[i]);
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_DAMAGE_DONE_PCT;
+                if (activeData.ModDamageDonePercent[i] != null)
+                    m_fields.SetUpdateField<float>(startIndex + i, (float)activeData.ModDamageDonePercent[i]);
+            }
+            if (activeData.ModHealingDonePos != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_HEALING_DONE_POS, (int)activeData.ModHealingDonePos);
+            if (activeData.ModHealingPercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_HEALING_PCT, (float)activeData.ModHealingPercent);
+            if (activeData.ModHealingDonePercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_HEALING_DONE_PCT, (float)activeData.ModHealingDonePercent);
+            if (activeData.ModPeriodicHealingDonePercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_PERIODIC_HEALING_DONE_PERCENT, (float)activeData.ModPeriodicHealingDonePercent);
+            for (int i = 0; i < 3; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_WEAPON_DMG_MULTIPLIERS;
+                if (activeData.WeaponDmgMultipliers[i] != null)
+                    m_fields.SetUpdateField<float>(startIndex + i, (float)activeData.WeaponDmgMultipliers[i]);
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_WEAPON_ATK_SPEED_MULTIPLIERS;
+                if (activeData.WeaponAtkSpeedMultipliers[i] != null)
+                    m_fields.SetUpdateField<float>(startIndex + i, (float)activeData.WeaponAtkSpeedMultipliers[i]);
+            }
+            if (activeData.ModSpellPowerPercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_SPELL_POWER_PCT, (float)activeData.ModSpellPowerPercent);
+            if (activeData.ModResiliencePercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_RESILIENCE_PERCENT, (float)activeData.ModResiliencePercent);
+            if (activeData.OverrideSpellPowerByAPPercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_OVERRIDE_SPELL_POWER_BY_AP_PCT, (float)activeData.OverrideSpellPowerByAPPercent);
+            if (activeData.OverrideAPBySpellPowerPercent != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_OVERRIDE_AP_BY_SPELL_POWER_PERCENT, (float)activeData.OverrideAPBySpellPowerPercent);
+            if (activeData.ModTargetResistance != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_TARGET_RESISTANCE, (int)activeData.ModTargetResistance);
+            if (activeData.ModTargetPhysicalResistance != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE, (int)activeData.ModTargetPhysicalResistance);
+            if (activeData.LocalFlags != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_LOCAL_FLAGS, (uint)activeData.LocalFlags);
+            if (activeData.GrantableLevels != null || activeData.MultiActionBars != null || activeData.LifetimeMaxRank != null || activeData.NumRespecs != null)
+            {
+                if (activeData.GrantableLevels != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES, (byte)activeData.GrantableLevels, 0);
+                if (activeData.MultiActionBars != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES, (byte)activeData.MultiActionBars, 1);
+                if (activeData.LifetimeMaxRank != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES, (byte)activeData.LifetimeMaxRank, 2);
+                if (activeData.NumRespecs != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES, (byte)activeData.NumRespecs, 3);
+            }
+            if (activeData.AmmoID != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_AMMO_ID, (uint)activeData.AmmoID);
+            if (activeData.PvpMedals != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_MEDALS, (uint)activeData.PvpMedals);
+            for (int i = 0; i < 12; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_BUYBACK_PRICE;
+                if (activeData.BuybackPrice[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.BuybackPrice[i]);
+            }
+            for (int i = 0; i < 12; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_BUYBACK_TIMESTAMP;
+                if (activeData.BuybackTimestamp[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.BuybackTimestamp[i]);
+            }
+            if (activeData.TodayHonorableKills != null && activeData.YesterdayHonorableKills != null)
+            {
+                m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_2, (ushort)activeData.TodayHonorableKills, 0);
+                m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_2, (ushort)activeData.YesterdayHonorableKills, 1);
+            }
+            if (activeData.TodayHonorableKills != null && activeData.YesterdayHonorableKills != null)
+            {
+                m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_3, (ushort)activeData.LastWeekHonorableKills, 0);
+                m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_3, (ushort)activeData.ThisWeekHonorableKills, 1);
+            }
+            if (activeData.ThisWeekContribution != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, (uint)activeData.ThisWeekContribution);
+            if (activeData.LifetimeHonorableKills != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, (uint)activeData.LifetimeHonorableKills);
+            if (activeData.YesterdayContribution != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint)activeData.YesterdayContribution);
+            if (activeData.LastWeekContribution != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint)activeData.LastWeekContribution);
+            if (activeData.LastWeekRank != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_LAST_WEEK_RANK, (uint)activeData.LastWeekRank);
+            if (activeData.WatchedFactionIndex != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_WATCHED_FACTION_INDEX, (int)activeData.WatchedFactionIndex);
+            for (int i = 0; i < 32; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_COMBAT_RATINGS;
+                if (activeData.CombatRatings[i] != null)
+                    m_fields.SetUpdateField<int>(startIndex + i, (int)activeData.CombatRatings[i]);
+            }
+            for (int i = 0; i < 6; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_INFO;
+                int sizePerEntry = 12;
+                if (activeData.PvpInfo[i] != null)
+                {
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)activeData.PvpInfo[i].WeeklyPlayed);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)activeData.PvpInfo[i].WeeklyWon);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 2, (uint)activeData.PvpInfo[i].SeasonPlayed);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 3, (uint)activeData.PvpInfo[i].SeasonWon);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 4, (uint)activeData.PvpInfo[i].Rating);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 5, (uint)activeData.PvpInfo[i].WeeklyBestRating);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 6, (uint)activeData.PvpInfo[i].SeasonBestRating);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 7, (uint)activeData.PvpInfo[i].PvpTierID);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 8, (uint)activeData.PvpInfo[i].WeeklyBestWinPvpTierID);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 9, (uint)activeData.PvpInfo[i].Field_28);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 10, (uint)activeData.PvpInfo[i].Field_2C);
+                    m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 11, (uint)(activeData.PvpInfo[i].Disqualified ? 1 : 0));
+                }
+            }
+            if (activeData.MaxLevel != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MAX_LEVEL, (int)activeData.MaxLevel);
+            if (activeData.ScalingPlayerLevelDelta != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_SCALING_PLAYER_LEVEL_DELTA, (int)activeData.ScalingPlayerLevelDelta);
+            if (activeData.MaxCreatureScalingLevel != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MAX_CREATURE_SCALING_LEVEL, (int)activeData.MaxCreatureScalingLevel);
+            for (int i = 0; i < 4; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_NO_REAGENT_COST_MASK;
+                if (activeData.NoReagentCostMask[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.NoReagentCostMask[i]);
+            }
+            if (activeData.PetSpellPower != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PET_SPELL_POWER, (int)activeData.PetSpellPower);
+            for (int i = 0; i < 2; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_PROFESSION_SKILL_LINE;
+                if (activeData.ProfessionSkillLine[i] != null)
+                    m_fields.SetUpdateField<int>(startIndex + i, (int)activeData.ProfessionSkillLine[i]);
+            }
+            if (activeData.UiHitModifier != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_UI_HIT_MODIFIER, (float)activeData.UiHitModifier);
+            if (activeData.UiSpellHitModifier != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_UI_SPELL_HIT_MODIFIER, (float)activeData.UiSpellHitModifier);
+            if (activeData.HomeRealmTimeOffset != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_HOME_REALM_TIME_OFFSET, (int)activeData.HomeRealmTimeOffset);
+            if (activeData.ModPetHaste != null)
+                m_fields.SetUpdateField<float>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MOD_PET_HASTE, (float)activeData.ModPetHaste);
+            if (activeData.LocalRegenFlags != null || activeData.AuraVision != null || activeData.NumBackpackSlots != null)
+            {
+                if (activeData.LocalRegenFlags != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_4, (byte)activeData.LocalRegenFlags, 0);
+                if (activeData.AuraVision != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_4, (byte)activeData.AuraVision, 1);
+                if (activeData.NumBackpackSlots != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_4, (byte)activeData.NumBackpackSlots, 2);
+            }
+            if (activeData.OverrideSpellsID != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_OVERRIDE_SPELLS_ID, (int)activeData.OverrideSpellsID);
+            if (activeData.LfgBonusFactionID != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_LFG_BONUS_FACTION_ID, (int)activeData.LfgBonusFactionID);
+            if (activeData.LootSpecID != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_LOOT_SPEC_ID, (uint)activeData.LootSpecID);
+            if (activeData.OverrideZonePVPType != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_OVERRIDE_ZONE_PVP_TYPE, (uint)activeData.OverrideZonePVPType);
+            for (int i = 0; i < 4; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_BAG_SLOT_FLAGS;
+                if (activeData.BagSlotFlags[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.BagSlotFlags[i]);
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_BANK_BAG_SLOT_FLAGS;
+                if (activeData.BankBagSlotFlags[i] != null)
+                    m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.BankBagSlotFlags[i]);
+            }
+            for (int i = 0; i < 875; i++)
+            {
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_QUEST_COMPLETED;
+                if (activeData.QuestCompleted[i] != null)
+                    m_fields.SetUpdateField<ulong>(startIndex + i * 2, (ulong)activeData.QuestCompleted[i]);
+            }
+            if (activeData.Honor != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_HONOR, (int)activeData.Honor);
+            if (activeData.HonorNextLevel != null)
+                m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_HONOR_NEXT_LEVEL, (int)activeData.HonorNextLevel);
+            if (activeData.PvPTierMaxFromWins != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_TIER_MAX_FROM_WINS, (uint)activeData.PvPTierMaxFromWins);
+            if (activeData.PvPLastWeeksTierMaxFromWins != null)
+                m_fields.SetUpdateField<uint>(ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_LAST_WEEKS_TIER_MAX_FROM_WINS, (uint)activeData.PvPLastWeeksTierMaxFromWins);
+            if (activeData.InsertItemsLeftToRight != null || activeData.PvPRankProgress != null)
+            {
+                if (activeData.InsertItemsLeftToRight != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_5, (byte)(activeData.InsertItemsLeftToRight == true ? 1 : 0), 0);
+                if (activeData.PvPRankProgress != null)
+                    m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_5, (byte)activeData.PvPRankProgress, 1);
+            }
+
+
+            m_alreadyWritten = true;
         }
+
+
     }
 }

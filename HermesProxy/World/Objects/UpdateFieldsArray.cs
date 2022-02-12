@@ -1,4 +1,5 @@
 ﻿using Framework.Collections;
+using Framework.IO;
 using Framework.Logging;
 using System;
 using System.Collections.Generic;
@@ -24,14 +25,29 @@ namespace HermesProxy.World.Objects
 
     public class UpdateFieldsArray
     {
-        public UpdateFieldsArray(int size)
+        public UpdateFieldsArray(uint size)
         {
             ValuesCount = size;
             m_updateValues = new UpdateValues[size];
+            m_updateMask = new UpdateMask(size);
         }
-        public int ValuesCount;
+        public uint ValuesCount;
         public UpdateValues[] m_updateValues;
         public UpdateMask m_updateMask;
+
+        public void WriteToPacket(ByteBuffer buffer)
+        {
+            var fieldBuffer = new ByteBuffer();
+            for (var index = 0; index < ValuesCount; ++index)
+            {
+                if (m_updateMask.GetBit(index))
+                {
+                    fieldBuffer.WriteUInt32(m_updateValues[index].UnsignedValue);
+                }
+            }
+            m_updateMask.AppendToPacket(buffer);
+            buffer.WriteBytes(fieldBuffer);
+        }
 
         public void SetUpdateField<T>(object index, T value, byte offset = 0) where T : new()
         {

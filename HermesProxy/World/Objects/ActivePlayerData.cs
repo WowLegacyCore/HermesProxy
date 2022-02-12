@@ -19,7 +19,7 @@ namespace HermesProxy.World.Objects
     public class RestInfo
     {
         public uint? Threshold;
-        public byte? StateID;
+        public uint? StateID;
     }
     public class PVPInfo
     {
@@ -32,20 +32,22 @@ namespace HermesProxy.World.Objects
         public uint SeasonBestRating;
         public uint PvpTierID;
         public uint WeeklyBestWinPvpTierID;
+        public uint Field_28;
+        public uint Field_2C;
         public bool Disqualified;
     }
     public class ActivePlayerData
     {
-        public WowGuid[] InvSlots = new WowGuid[129];
-        public WowGuid FarsightObject;
-        public WowGuid ComboTarget;
-        public WowGuid SummonedBattlePetGUID;
+        public WowGuid128[] InvSlots = new WowGuid128[129];
+        public WowGuid128 FarsightObject;
+        public WowGuid128 ComboTarget;
+        public WowGuid128 SummonedBattlePetGUID;
         public uint?[] KnownTitles = new uint?[12];
         public ulong? Coinage;
         public int? XP;
         public int? NextLevelXP;
         public int? TrialXP;
-        public SkillInfo Skill;
+        public SkillInfo Skill = new SkillInfo();
         public int? CharacterPoints;
         public int? MaxTalentTiers;
         public uint? TrackCreatureMask;
