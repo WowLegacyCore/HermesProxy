@@ -1278,6 +1278,31 @@ namespace HermesProxy.World.Client
                 {
                     updateData.ActivePlayerData.NextLevelXP = updates[PLAYER_NEXT_LEVEL_XP].Int32Value;
                 }
+                int PLAYER_SKILL_INFO_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_SKILL_INFO_1_1);
+                if (PLAYER_SKILL_INFO_1_1 >= 0)
+                {
+                    for (int i = 0; i < 128; i++)
+                    {
+                        int idIndex = PLAYER_SKILL_INFO_1_1 + i * 3;
+                        if (updateMaskArray[idIndex])
+                        {
+                            updateData.ActivePlayerData.Skill.SkillLineID[i] = (ushort)(updates[idIndex].UInt32Value & 0xFFFF);
+                            updateData.ActivePlayerData.Skill.SkillStep[i] = (ushort)((updates[idIndex].UInt32Value >> 16) & 0xFFFF);
+                }
+                        int valueIndex = idIndex + 1;
+                        if (updateMaskArray[valueIndex])
+                        {
+                            updateData.ActivePlayerData.Skill.SkillRank[i] = (ushort)(updates[valueIndex].UInt32Value & 0xFFFF);
+                            updateData.ActivePlayerData.Skill.SkillMaxRank[i] = (ushort)((updates[valueIndex].UInt32Value >> 16) & 0xFFFF);
+                        }
+                        int bonusIndex = valueIndex + 1;
+                        if (updateMaskArray[bonusIndex])
+                        {
+                            updateData.ActivePlayerData.Skill.SkillTempBonus[i] = (short)(updates[bonusIndex].Int32Value & 0xFFFF);
+                            updateData.ActivePlayerData.Skill.SkillPermBonus[i] = (ushort)((updates[bonusIndex].UInt32Value >> 16) & 0xFFFF);
+                        }
+                    }
+                }
                 int PLAYER_CHARACTER_POINTS1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_CHARACTER_POINTS1);
                 if (PLAYER_CHARACTER_POINTS1 >= 0 && updateMaskArray[PLAYER_CHARACTER_POINTS1])
                 {
