@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HermesProxy.World.Enums.V2_5_2_39570
+namespace HermesProxy.World.Enums.V1_14_0_40237
 {
     // ReSharper disable InconsistentNaming
-    // 2.5.2.39570
+    // 1.14.0.40237
     public enum ObjectField
     {
         OBJECT_FIELD_GUID                                           = 0x000, // Size: 4, Flags: PUBLIC
@@ -278,40 +278,43 @@ namespace HermesProxy.World.Enums.V2_5_2_39570
         ACTIVE_PLAYER_FIELD_PVP_MEDALS                                    = PlayerField.PLAYER_END + 0x7CE, // Size: 1, Flags: PUBLIC
         ACTIVE_PLAYER_FIELD_BUYBACK_PRICE                                 = PlayerField.PLAYER_END + 0x7CF, // Size: 12, Flags: PUBLIC
         ACTIVE_PLAYER_FIELD_BUYBACK_TIMESTAMP                             = PlayerField.PLAYER_END + 0x7DB, // Size: 12, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_BYTES_2                                       = PlayerField.PLAYER_END + 0x7E7, // Size: 1, Flags: PUBLIC Nested: (TodayHonorableKills, YesterdayHonorableKills)
-        ACTIVE_PLAYER_FIELD_BYTES_3                                       = PlayerField.PLAYER_END + 0x7E8, // Size: 1, Flags: PUBLIC Nested: (LastWeekHonorableKills, ThisWeekHonorableKills)
-        ACTIVE_PLAYER_FIELD_THIS_WEEK_CONTRIBUTION                        = PlayerField.PLAYER_END + 0x7E9, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_LIFETIME_HONORABLE_KILLS                      = PlayerField.PLAYER_END + 0x7EA, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_YESTERDAY_CONTRIBUTION                        = PlayerField.PLAYER_END + 0x7EB, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_LAST_WEEK_CONTRIBUTION                        = PlayerField.PLAYER_END + 0x7EC, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_LAST_WEEK_RANK                                = PlayerField.PLAYER_END + 0x7ED, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_WATCHED_FACTION_INDEX                         = PlayerField.PLAYER_END + 0x7EE, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_COMBAT_RATING                                 = PlayerField.PLAYER_END + 0x7EF, // Size: 32, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_ARENA_TEAM_INFO                               = PlayerField.PLAYER_END + 0x80F, // Size: 72, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_MAX_LEVEL                                     = PlayerField.PLAYER_END + 0x857, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_SCALING_PLAYER_LEVEL_DELTA                    = PlayerField.PLAYER_END + 0x858, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_MAX_CREATURE_SCALING_LEVEL                    = PlayerField.PLAYER_END + 0x859, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_NO_REAGENT_COST                               = PlayerField.PLAYER_END + 0x85A, // Size: 4, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_PET_SPELL_POWER                               = PlayerField.PLAYER_END + 0x85E, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_PROFESSION_SKILL_LINE                         = PlayerField.PLAYER_END + 0x85F, // Size: 2, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_UI_HIT_MODIFIER                               = PlayerField.PLAYER_END + 0x861, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_UI_SPELL_HIT_MODIFIER                         = PlayerField.PLAYER_END + 0x862, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_HOME_REALM_TIME_OFFSET                        = PlayerField.PLAYER_END + 0x863, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_MOD_PET_HASTE                                 = PlayerField.PLAYER_END + 0x864, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_BYTES_4                                       = PlayerField.PLAYER_END + 0x865, // Size: 1, Flags: PUBLIC Nested: (LocalRegenFlags, AuraVision, NumBackpackSlots)
-        ACTIVE_PLAYER_FIELD_OVERRIDE_SPELLS_ID                            = PlayerField.PLAYER_END + 0x866, // Size: 1, Flags: PUBLIC, URGENT_SELF_ONLY
-        ACTIVE_PLAYER_FIELD_LFG_BONUS_FACTION_ID                          = PlayerField.PLAYER_END + 0x867, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_LOOT_SPEC_ID                                  = PlayerField.PLAYER_END + 0x868, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_OVERRIDE_ZONE_PVP_TYPE                        = PlayerField.PLAYER_END + 0x869, // Size: 1, Flags: PUBLIC, URGENT_SELF_ONLY
-        ACTIVE_PLAYER_FIELD_BAG_SLOT_FLAGS                                = PlayerField.PLAYER_END + 0x86A, // Size: 4, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_BANK_BAG_SLOT_FLAGS                           = PlayerField.PLAYER_END + 0x86E, // Size: 7, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_QUEST_COMPLETED                               = PlayerField.PLAYER_END + 0x875, // Size: 1750, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_HONOR                                         = PlayerField.PLAYER_END + 0xF4B, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_HONOR_NEXT_LEVEL                              = PlayerField.PLAYER_END + 0xF4C, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_PVP_TIER_MAX_FROM_WINS                        = PlayerField.PLAYER_END + 0xF4D, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_PVP_LAST_WEEKS_TIER_MAX_FROM_WINS             = PlayerField.PLAYER_END + 0xF4E, // Size: 1, Flags: PUBLIC
-        ACTIVE_PLAYER_FIELD_BYTES_5                                       = PlayerField.PLAYER_END + 0xF4F, // Size: 1, Flags: PUBLIC Nested: (InsertItemsLeftToRight, PvpRankProgress)
-        ACTIVE_PLAYER_END                                                 = PlayerField.PLAYER_END + 0xF50,
+        ACTIVE_PLAYER_FIELD_BYTES_2                                       = PlayerField.PLAYER_END + 0x7E7, // Size: 1, Flags: (All) Nested: (TodayHonorableKills, TodayDishonorableKills)
+        ACTIVE_PLAYER_FIELD_BYTES_3                                       = PlayerField.PLAYER_END + 0x7E8, // Size: 1, Flags: (All) Nested: (YesterdayHonorableKills, YesterdayDishonorableKills)
+        ACTIVE_PLAYER_FIELD_BYTES_4                                       = PlayerField.PLAYER_END + 0x7E9, // Size: 1, Flags: (All) Nested: (LastWeekHonorableKills, LastWeekDishonorableKills)
+        ACTIVE_PLAYER_FIELD_BYTES_5                                       = PlayerField.PLAYER_END + 0x7EA, // Size: 1, Flags: (All) Nested: (ThisWeekHonorableKills, ThisWeekDishonorableKills)
+        ACTIVE_PLAYER_FIELD_THIS_WEEK_CONTRIBUTION                        = PlayerField.PLAYER_END + 0x7EB, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_LIFETIME_HONORABLE_KILLS                      = PlayerField.PLAYER_END + 0x7EC, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS                   = PlayerField.PLAYER_END + 0x7ED, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_YESTERDAY_CONTRIBUTION                        = PlayerField.PLAYER_END + 0x7EE, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_LAST_WEEK_CONTRIBUTION                        = PlayerField.PLAYER_END + 0x7EF, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_LAST_WEEK_RANK                                = PlayerField.PLAYER_END + 0x7F0, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_WATCHED_FACTION_INDEX                         = PlayerField.PLAYER_END + 0x7F1, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_COMBAT_RATING                                 = PlayerField.PLAYER_END + 0x7F2, // Size: 32, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_ARENA_TEAM_INFO                               = PlayerField.PLAYER_END + 0x812, // Size: 72, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_MAX_LEVEL                                     = PlayerField.PLAYER_END + 0x85A, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_SCALING_PLAYER_LEVEL_DELTA                    = PlayerField.PLAYER_END + 0x85B, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_MAX_CREATURE_SCALING_LEVEL                    = PlayerField.PLAYER_END + 0x85C, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_NO_REAGENT_COST                               = PlayerField.PLAYER_END + 0x85D, // Size: 4, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_PET_SPELL_POWER                               = PlayerField.PLAYER_END + 0x861, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_PROFESSION_SKILL_LINE                         = PlayerField.PLAYER_END + 0x862, // Size: 2, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_UI_HIT_MODIFIER                               = PlayerField.PLAYER_END + 0x864, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_UI_SPELL_HIT_MODIFIER                         = PlayerField.PLAYER_END + 0x865, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_HOME_REALM_TIME_OFFSET                        = PlayerField.PLAYER_END + 0x866, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_MOD_PET_HASTE                                 = PlayerField.PLAYER_END + 0x867, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_BYTES_6                                       = PlayerField.PLAYER_END + 0x868, // Size: 1, Flags: PUBLIC Nested: (LocalRegenFlags, AuraVision, NumBackpackSlots)
+        ACTIVE_PLAYER_FIELD_OVERRIDE_SPELLS_ID                            = PlayerField.PLAYER_END + 0x869, // Size: 1, Flags: PUBLIC, URGENT_SELF_ONLY
+        ACTIVE_PLAYER_FIELD_LFG_BONUS_FACTION_ID                          = PlayerField.PLAYER_END + 0x86A, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_LOOT_SPEC_ID                                  = PlayerField.PLAYER_END + 0x86B, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_OVERRIDE_ZONE_PVP_TYPE                        = PlayerField.PLAYER_END + 0x86C, // Size: 1, Flags: PUBLIC, URGENT_SELF_ONLY
+        ACTIVE_PLAYER_FIELD_BAG_SLOT_FLAGS                                = PlayerField.PLAYER_END + 0x86D, // Size: 4, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_BANK_BAG_SLOT_FLAGS                           = PlayerField.PLAYER_END + 0x871, // Size: 6, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_QUEST_COMPLETED                               = PlayerField.PLAYER_END + 0x877, // Size: 1750, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_HONOR                                         = PlayerField.PLAYER_END + 0xF4D, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_HONOR_NEXT_LEVEL                              = PlayerField.PLAYER_END + 0xF4E, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_PVP_TIER_MAX_FROM_WINS                        = PlayerField.PLAYER_END + 0xF4F, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_PVP_LAST_WEEKS_TIER_MAX_FROM_WINS             = PlayerField.PLAYER_END + 0xF50, // Size: 1, Flags: PUBLIC
+        ACTIVE_PLAYER_FIELD_BYTES_7                                       = PlayerField.PLAYER_END + 0xF51, // Size: 1, Flags: PUBLIC Nested: (InsertItemsLeftToRight, PvpRankProgress)
+        ACTIVE_PLAYER_END                                                 = PlayerField.PLAYER_END + 0xF52,
     }
 
     public enum ActivePlayerDynamicField

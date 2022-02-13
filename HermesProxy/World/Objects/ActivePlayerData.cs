@@ -101,11 +101,16 @@ namespace HermesProxy.World.Objects
         public uint?[] BuybackPrice = new uint?[12];
         public uint?[] BuybackTimestamp = new uint?[12];
         public ushort? TodayHonorableKills;
+        public ushort? TodayDishonorableKills;
         public ushort? YesterdayHonorableKills;
+        public ushort? YesterdayDishonorableKills;
         public ushort? LastWeekHonorableKills;
+        public ushort? LastWeekDishonorableKills;
         public ushort? ThisWeekHonorableKills;
+        public ushort? ThisWeekDishonorableKills;
         public uint? ThisWeekContribution;
         public uint? LifetimeHonorableKills;
+        public uint? LifetimeDishonorableKills;
         public uint? YesterdayContribution;
         public uint? LastWeekContribution;
         public uint? LastWeekRank;

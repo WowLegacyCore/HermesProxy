@@ -854,11 +854,11 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             if (unitData.DisplayID != null)
                 m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_DISPLAYID, (int)unitData.DisplayID);
             if (unitData.DisplayScale != null)
-                m_fields.SetUpdateField<float>(UnitField.UNIT_FIELD_DISPLAYSCALE, (float)unitData.DisplayScale);
+                m_fields.SetUpdateField<float>(UnitField.UNIT_FIELD_DISPLAY_SCALE, (float)unitData.DisplayScale);
             if (unitData.NativeDisplayID != null)
                 m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_NATIVEDISPLAYID, (int)unitData.NativeDisplayID);
             if (unitData.NativeXDisplayScale != null)
-                m_fields.SetUpdateField<float>(UnitField.UNIT_FIELD_NATIVEXDISPLAYSCALE, (float)unitData.NativeXDisplayScale);
+                m_fields.SetUpdateField<float>(UnitField.UNIT_FIELD_NATIVE_X_DISPLAY_SCALE, (float)unitData.NativeXDisplayScale);
             if (unitData.MountDisplayID != null)
                 m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_MOUNTDISPLAYID, (int)unitData.MountDisplayID);
             if (unitData.MinDamage != null)
@@ -887,7 +887,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             if (unitData.PetExperience != null)
                 m_fields.SetUpdateField<uint>(UnitField.UNIT_FIELD_PETEXPERIENCE, (uint)unitData.PetExperience);
             if (unitData.PetNextLevelExperience != null)
-                m_fields.SetUpdateField<uint>(UnitField.UNIT_FIELD_PETNEXTLEVELEXPERIENCE, (uint)unitData.PetNextLevelExperience);
+                m_fields.SetUpdateField<uint>(UnitField.UNIT_FIELD_PETNEXTLEVELXP, (uint)unitData.PetNextLevelExperience);
             if (unitData.ModCastSpeed != null)
                 m_fields.SetUpdateField<float>(UnitField.UNIT_MOD_CAST_SPEED, (float)unitData.ModCastSpeed);
             if (unitData.ModCastHaste != null)
@@ -1013,11 +1013,11 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             if (unitData.MaxItemLevel != null)
                 m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_MAXITEMLEVEL, (int)unitData.MaxItemLevel);
             if (unitData.WildBattlePetLevel != null)
-                m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_WILD_BATTLE_PET_LEVEL, (int)unitData.WildBattlePetLevel);
+                m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_WILD_BATTLEPET_LEVEL, (int)unitData.WildBattlePetLevel);
             if (unitData.BattlePetCompanionNameTimestamp != null)
                 m_fields.SetUpdateField<uint>(UnitField.UNIT_FIELD_BATTLEPET_COMPANION_NAME_TIMESTAMP, (uint)unitData.BattlePetCompanionNameTimestamp);
             if (unitData.InteractSpellID != null)
-                m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_INTERACT_SPELL_ID, (int)unitData.InteractSpellID);
+                m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_INTERACT_SPELLID, (int)unitData.InteractSpellID);
             if (unitData.StateSpellVisualID != null)
                 m_fields.SetUpdateField<uint>(UnitField.UNIT_FIELD_STATE_SPELL_VISUAL_ID, (uint)unitData.StateSpellVisualID);
             if (unitData.StateAnimID != null)
@@ -1367,7 +1367,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_2, (ushort)activeData.TodayHonorableKills, 0);
                 m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_2, (ushort)activeData.YesterdayHonorableKills, 1);
             }
-            if (activeData.TodayHonorableKills != null && activeData.YesterdayHonorableKills != null)
+            if (activeData.LastWeekHonorableKills != null && activeData.ThisWeekHonorableKills != null)
             {
                 m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_3, (ushort)activeData.LastWeekHonorableKills, 0);
                 m_fields.SetUpdateField<ushort>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_3, (ushort)activeData.ThisWeekHonorableKills, 1);
@@ -1386,13 +1386,13 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_WATCHED_FACTION_INDEX, (int)activeData.WatchedFactionIndex);
             for (int i = 0; i < 32; i++)
             {
-                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_COMBAT_RATINGS;
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_COMBAT_RATING;
                 if (activeData.CombatRatings[i] != null)
                     m_fields.SetUpdateField<int>(startIndex + i, (int)activeData.CombatRatings[i]);
             }
             for (int i = 0; i < 6; i++)
             {
-                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_PVP_INFO;
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_ARENA_TEAM_INFO;
                 int sizePerEntry = 12;
                 if (activeData.PvpInfo[i] != null)
                 {
@@ -1418,7 +1418,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 m_fields.SetUpdateField<int>(ActivePlayerField.ACTIVE_PLAYER_FIELD_MAX_CREATURE_SCALING_LEVEL, (int)activeData.MaxCreatureScalingLevel);
             for (int i = 0; i < 4; i++)
             {
-                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_NO_REAGENT_COST_MASK;
+                int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_NO_REAGENT_COST;
                 if (activeData.NoReagentCostMask[i] != null)
                     m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.NoReagentCostMask[i]);
             }

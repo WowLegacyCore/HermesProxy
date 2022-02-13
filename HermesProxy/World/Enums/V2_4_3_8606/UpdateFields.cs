@@ -371,7 +371,7 @@ namespace HermesProxy.World.Enums.V2_4_3_8606
         PLAYER_FIELD_KILLS = UnitField.UNIT_END + 0x500,                            // 0x5E4 - Size: 1 - Type: TWO_SHORT - Flags: PRIVATE
         PLAYER_FIELD_TODAY_CONTRIBUTION = UnitField.UNIT_END + 0x501,               // 0x5E5 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_FIELD_YESTERDAY_CONTRIBUTION = UnitField.UNIT_END + 0x502,           // 0x5E6 - Size: 1 - Type: INT - Flags: PRIVATE
-        PLAYER_FIELD_LIFETIME_HONORBALE_KILLS = UnitField.UNIT_END + 0x503,         // 0x5E7 - Size: 1 - Type: INT - Flags: PRIVATE
+        PLAYER_FIELD_LIFETIME_HONORABLE_KILLS = UnitField.UNIT_END + 0x503,         // 0x5E7 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_FIELD_BYTES2 = UnitField.UNIT_END + 0x504,                           // 0x5E8 - Size: 1 - Type: BYTES - Flags: PRIVATE
         PLAYER_FIELD_WATCHED_FACTION_INDEX = UnitField.UNIT_END + 0x505,            // 0x5E9 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_FIELD_COMBAT_RATING_1 = UnitField.UNIT_END + 0x506,                  // 0x5EA - Size: 24 - Type: INT - Flags: PRIVATE

@@ -300,8 +300,8 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         PLAYER_FIELD_LAST_WEEK_KILLS = UnitField.UNIT_END + 0x428,                  // 0x4DE - Size: 1 - Type: TWO_SHORT - Flags: PRIVATE
         PLAYER_FIELD_THIS_WEEK_KILLS = UnitField.UNIT_END + 0x429,                  // 0x4DF - Size: 1 - Type: TWO_SHORT - Flags: PRIVATE
         PLAYER_FIELD_THIS_WEEK_CONTRIBUTION = UnitField.UNIT_END + 0x42A,           // 0x4E0 - Size: 1 - Type: INT - Flags: PRIVATE
-        PLAYER_FIELD_LIFETIME_HONORBALE_KILLS = UnitField.UNIT_END + 0x42B,         // 0x4E1 - Size: 1 - Type: INT - Flags: PRIVATE
-        PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS = UnitField.UNIT_END + 0x42C,      // 0x4E2 - Size: 1 - Type: INT - Flags: PRIVATE
+        PLAYER_FIELD_LIFETIME_HONORABLE_KILLS = UnitField.UNIT_END + 0x42B,         // 0x4E1 - Size: 1 - Type: INT - Flags: PRIVATE
+        PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS = UnitField.UNIT_END + 0x42C,      // 0x4E2 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_FIELD_YESTERDAY_CONTRIBUTION = UnitField.UNIT_END + 0x42D,           // 0x4E3 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_FIELD_LAST_WEEK_CONTRIBUTION = UnitField.UNIT_END + 0x42E,           // 0x4E4 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_FIELD_LAST_WEEK_RANK = UnitField.UNIT_END + 0x42F,                   // 0x4E5 - Size: 1 - Type: INT - Flags: PRIVATE
