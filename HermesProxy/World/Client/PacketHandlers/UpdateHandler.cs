@@ -1180,6 +1180,32 @@ namespace HermesProxy.World.Client
                 {
                     updateData.PlayerData.GuildTimeStamp = updates[PLAYER_GUILD_TIMESTAMP].Int32Value;
                 }
+                int PLAYER_VISIBLE_ITEM_1_0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_0);
+                if (PLAYER_VISIBLE_ITEM_1_0 >= 0) // vanilla and tbc
+                {
+                    int offset = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 16 : 12;
+                    for (int i = 0; i < 19; i++)
+                    {
+                        if (updateMaskArray[PLAYER_VISIBLE_ITEM_1_0 + i * offset])
+                        {
+                            updateData.PlayerData.VisibleItems[i] = new VisibleItem();
+                            updateData.PlayerData.VisibleItems[i].ItemID = updates[PLAYER_VISIBLE_ITEM_1_0 + i * offset].Int32Value;
+                        }
+                    }
+                }
+                int PLAYER_VISIBLE_ITEM_1_ENTRYID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_ENTRYID);
+                if (PLAYER_VISIBLE_ITEM_1_ENTRYID >= 0) // wotlk
+                {
+                    int offset = 2;
+                    for (int i = 0; i < 19; i++)
+                    {
+                        if (updateMaskArray[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset])
+                        {
+                            updateData.PlayerData.VisibleItems[i] = new VisibleItem();
+                            updateData.PlayerData.VisibleItems[i].ItemID = updates[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset].Int32Value;
+                        }
+                    }
+                }
 
                 byte? skin = null;
                 byte? face = null;
@@ -1343,7 +1369,6 @@ namespace HermesProxy.World.Client
                 {
                     updateData.ActivePlayerData.RangedCritPercentage = updates[PLAYER_RANGED_CRIT_PERCENTAGE].FloatValue;
                 }
-                /*
                 int PLAYER_EXPLORED_ZONES_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_EXPLORED_ZONES_1);
                 if (PLAYER_EXPLORED_ZONES_1 >= 0)
                 {
@@ -1352,11 +1377,16 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[PLAYER_EXPLORED_ZONES_1 + i])
                         {
-                            updateData.ActivePlayerData.ExploredZones[i] = updates[PLAYER_EXPLORED_ZONES_1 + i].UInt32Value;
+                            if ((i & 1) != 0)
+                            {
+                                ulong oldValue = updateData.ActivePlayerData.ExploredZones[i / 2] != null ? (ulong)updateData.ActivePlayerData.ExploredZones[i / 2] : 0;
+                                updateData.ActivePlayerData.ExploredZones[i / 2] = oldValue | ((ulong)updates[PLAYER_EXPLORED_ZONES_1 + i].UInt32Value << 32);
+                            }
+                            else
+                                updateData.ActivePlayerData.ExploredZones[i / 2] = updates[PLAYER_EXPLORED_ZONES_1 + i].UInt32Value;
                         }
                     }
                 }
-                */
                 int PLAYER_FIELD_COINAGE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_COINAGE);
                 if (PLAYER_FIELD_COINAGE >= 0 && updateMaskArray[PLAYER_FIELD_COINAGE])
                 {
