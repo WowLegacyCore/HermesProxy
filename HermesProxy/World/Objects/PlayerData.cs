@@ -11,9 +11,9 @@ namespace HermesProxy.World.Objects
     {
         public int? QuestID;
         public uint? StateFlags;
+        public short?[] ObjectiveProgress { get; } = new short?[24];
         public uint? EndTime;
         public uint? AcceptTime;
-        public short?[] ObjectiveProgress { get; } = new short?[24];
     }
     public class PlayerData
     {

@@ -534,7 +534,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public bool Allow;
-        public CreatureStats Stats;
+        public CreatureStats Stats = new();
         public uint CreatureID;
     }
 

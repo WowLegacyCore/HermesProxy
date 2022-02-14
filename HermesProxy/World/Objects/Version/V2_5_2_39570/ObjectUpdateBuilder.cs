@@ -1088,15 +1088,15 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                         m_fields.SetUpdateField<int>(startIndex + i * sizePerEntry, (int)playerData.QuestLog[i].QuestID);
                     if (playerData.QuestLog[i].StateFlags != null)
                         m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)playerData.QuestLog[i].StateFlags);
-                    if (playerData.QuestLog[i].EndTime != null)
-                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 2, (uint)playerData.QuestLog[i].EndTime);
-                    if (playerData.QuestLog[i].AcceptTime != null)
-                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 3, (uint)playerData.QuestLog[i].AcceptTime);
                     for (int j = 0; j < 24; j++)
                     {
                         if (playerData.QuestLog[i].ObjectiveProgress[j] != null)
-                            m_fields.SetUpdateField<ushort>(startIndex + i * sizePerEntry + 4 + j / 2, (ushort)playerData.QuestLog[i].ObjectiveProgress[j], (byte)(j & 1));
+                            m_fields.SetUpdateField<ushort>(startIndex + i * sizePerEntry + 2 + j / 2, (ushort)playerData.QuestLog[i].ObjectiveProgress[j], (byte)(j & 1));
                     }
+                    if (playerData.QuestLog[i].EndTime != null)
+                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 2 + 12, (uint)playerData.QuestLog[i].EndTime);
+                    if (playerData.QuestLog[i].AcceptTime != null)
+                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 3 + 12, (uint)playerData.QuestLog[i].AcceptTime); 
                 }
             }
             for (int i = 0; i < 19; i++)

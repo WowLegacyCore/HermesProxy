@@ -24,7 +24,8 @@ namespace HermesProxy.World.Client
             {
                 uint variable = packet.ReadUInt32();
                 int value = packet.ReadInt32();
-                states.AddState(variable, value);
+                if (variable != 0 || value != 0)
+                    states.AddState(variable, value);
             }
             states.AddClassicStates();
             SendPacketToClient(states);

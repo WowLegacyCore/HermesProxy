@@ -1180,6 +1180,45 @@ namespace HermesProxy.World.Client
                 {
                     updateData.PlayerData.GuildTimeStamp = updates[PLAYER_GUILD_TIMESTAMP].Int32Value;
                 }
+                int PLAYER_QUEST_LOG_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_QUEST_LOG_1_1);
+                if (PLAYER_QUEST_LOG_1_1 >= 0)
+                {
+                    int sizePerEntry = 3;
+                    int stateOffset = 1;
+                    int timerOffset = 2;
+                    int questsCount = 20;
+                    for (int i = 0; i < questsCount; i++)
+                    {
+                        int index = PLAYER_QUEST_LOG_1_1 + i * sizePerEntry;
+                        if (updateMaskArray[index])
+                        {
+                            if (updateData.PlayerData.QuestLog[i] == null)
+                                updateData.PlayerData.QuestLog[i] = new QuestLog();
+
+                            updateData.PlayerData.QuestLog[i].QuestID = updates[index].Int32Value;
+                        }
+                        if (updateMaskArray[index + stateOffset])
+                        {
+                            if (updateData.PlayerData.QuestLog[i] == null)
+                                updateData.PlayerData.QuestLog[i] = new QuestLog();
+
+                            // first 3 bytes are objective progress, each counter is 6 bits long, total 4 counters
+                            uint rawValue = updates[index + stateOffset].UInt32Value;
+                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[0] = (byte)(rawValue & 0x3F);
+                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[1] = (byte)((rawValue & (0x3F << 6)) >> 6);
+                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[2] = (byte)((rawValue & (0x3F << 12)) >> 12);
+                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[3] = (byte)((rawValue & (0x3F << 18)) >> 18);
+                            updateData.PlayerData.QuestLog[i].StateFlags = ((rawValue >> 24) & 0xFF);
+                        }
+                        if (updateMaskArray[index + timerOffset])
+                        {
+                            if (updateData.PlayerData.QuestLog[i] == null)
+                                updateData.PlayerData.QuestLog[i] = new QuestLog();
+
+                            updateData.PlayerData.QuestLog[i].EndTime = updates[index + timerOffset].UInt32Value;
+                        }
+                    }
+                }
                 int PLAYER_VISIBLE_ITEM_1_0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_0);
                 if (PLAYER_VISIBLE_ITEM_1_0 >= 0) // vanilla and tbc
                 {
