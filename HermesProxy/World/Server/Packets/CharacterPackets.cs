@@ -416,4 +416,52 @@ namespace HermesProxy.World.Server.Packets
 
         public LoginFailureReason Code;
     }
+
+    public class LogoutRequest : ClientPacket
+    {
+        public LogoutRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            IdleLogout = _worldPacket.HasBit();
+        }
+
+        public bool IdleLogout;
+    }
+
+    public class LogoutResponse : ServerPacket
+    {
+        public LogoutResponse() : base(Opcode.SMSG_LOGOUT_RESPONSE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(LogoutResult);
+            _worldPacket.WriteBit(Instant);
+            _worldPacket.FlushBits();
+        }
+
+        public int LogoutResult;
+        public bool Instant = false;
+    }
+
+    public class LogoutComplete : ServerPacket
+    {
+        public LogoutComplete() : base(Opcode.SMSG_LOGOUT_COMPLETE) { }
+
+        public override void Write() { }
+    }
+
+    public class LogoutCancel : ClientPacket
+    {
+        public LogoutCancel(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class LogoutCancelAck : ServerPacket
+    {
+        public LogoutCancelAck() : base(Opcode.SMSG_LOGOUT_CANCEL_ACK, ConnectionType.Instance) { }
+
+        public override void Write() { }
+    }
 }

@@ -69,5 +69,19 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
             SendConnectToInstance(ConnectToSerial.WorldAttempt1);
         }
+
+        [PacketHandler(Opcode.CMSG_LOGOUT_REQUEST)]
+        void HandleLogoutRequest(LogoutRequest logoutRequest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_LOGOUT_REQUEST);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_LOGOUT_CANCEL)]
+        void HandleLogoutCancel(LogoutRequest logoutRequest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_LOGOUT_CANCEL);
+            SendPacketToServer(packet);
+        }
     }
 }

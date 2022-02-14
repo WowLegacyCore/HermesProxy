@@ -255,5 +255,28 @@ namespace HermesProxy.World.Client
 
             Global.CurrentSessionData.GameData.ActionButtons = buttons;
         }
+
+        [PacketHandler(Opcode.SMSG_LOGOUT_RESPONSE)]
+        void HandleLogoutResponse(WorldPacket packet)
+        {
+            LogoutResponse logout = new LogoutResponse();
+            logout.LogoutResult = packet.ReadInt32();
+            logout.Instant = packet.ReadBool();
+            SendPacketToClient(logout);
+        }
+
+        [PacketHandler(Opcode.SMSG_LOGOUT_COMPLETE)]
+        void HandleLogoutComplete(WorldPacket packet)
+        {
+            LogoutComplete logout = new LogoutComplete();
+            SendPacketToClient(logout);
+        }
+
+        [PacketHandler(Opcode.SMSG_LOGOUT_CANCEL_ACK)]
+        void HandleLogoutCancelAck(WorldPacket packet)
+        {
+            LogoutCancelAck logout = new LogoutCancelAck();
+            SendPacketToClient(logout);
+        }
     }
 }
