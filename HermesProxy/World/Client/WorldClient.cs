@@ -327,7 +327,11 @@ namespace HermesProxy.World.Client
                 case Opcode.SMSG_AUTH_RESPONSE:
                     HandleAuthResponse(packet);
                     break;
+                case Opcode.SMSG_WARDEN_DATA:
+                    Log.Print(LogType.Error, "Server has warden enabled! You may get disconnected in a few seconds.");
+                    break;
                 case Opcode.SMSG_PONG:
+                case Opcode.SMSG_ADDON_INFO:
                     break; // don't need to handle
                 default:
                     if (_packetHandlers.ContainsKey(universalOpcode))
@@ -403,7 +407,10 @@ namespace HermesProxy.World.Client
                 packet.WriteUInt64(zero); // DosResponse
 
             packet.WriteBytes(authResponse);
-            packet.WriteUInt32(zero); // length of addon data
+
+            // packet.WriteUInt32(zero); // length of addon data
+            byte[] addonBytes = new byte[] { 208, 1, 0, 0, 120, 156, 117, 207, 61, 14, 194, 48, 12, 5, 224, 114, 14, 184, 12, 97, 64, 149, 154, 133, 150, 25, 153, 196, 173, 172, 38, 78, 21, 82, 126, 58, 113, 66, 206, 68, 81, 133, 24, 98, 188, 126, 126, 79, 182, 114, 52, 77, 16, 237, 105, 59, 154, 68, 129, 143, 101, 177, 242, 183, 77, 85, 204, 163, 190, 166, 32, 37, 135, 45, 161, 179, 154, 152, 60, 12, 210, 18, 177, 37, 238, 230, 130, 87, 102, 187, 224, 207, 144, 170, 208, 9, 185, 197, 26, 188, 39, 9, 35, 180, 73, 188, 105, 175, 235, 49, 94, 241, 33, 227, 72, 206, 42, 224, 94, 212, 146, 47, 3, 154, 79, 237, 58, 183, 132, 190, 14, 166, 199, 180, 252, 146, 167, 53, 152, 24, 102, 121, 102, 114, 0, 178, 51, 196, 12, 26, 112, 200, 242, 27, 77, 4, 139, 117, 79, 206, 253, 99, 98, 140, 178, 145, 71, 13, 12, 29, 198, 159, 190, 1, 43, 0, 141, 195 };
+            packet.WriteBytes(addonBytes);
 
             SendPacket(packet);
 
