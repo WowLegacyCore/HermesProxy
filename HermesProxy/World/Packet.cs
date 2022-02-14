@@ -21,6 +21,7 @@ using System;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Client;
 using Ionic.Zlib;
+using System.Collections.Generic;
 
 namespace HermesProxy.World
 {
@@ -149,6 +150,16 @@ namespace HermesProxy.World
         public WorldPacket(byte[] data) : base(data)
         {
             opcode = ReadUInt16();
+        }
+
+        public KeyValuePair<int, bool> ReadEntry()
+        {
+            // Entries masked with 0x80000000 are invalid entries OR used to tell apart NPCs and GOs
+
+            var entry = ReadUInt32();
+            var realEntry = entry & 0x7FFFFFFF;
+
+            return new KeyValuePair<int, bool>((int)realEntry, realEntry != entry);
         }
 
         public WowGuid64 ReadGuid()
