@@ -65,7 +65,7 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        if (guid.GetObjectType() == ObjectType.Player)
+                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item)
                             updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
@@ -80,7 +80,7 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        if (guid.GetObjectType() == ObjectType.Player)
+                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item)
                             updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
@@ -494,7 +494,7 @@ namespace HermesProxy.World.Client
 
         private static void ReadMovementUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, object index)
         {
-            var moveInfo = new MovementInfo();
+            MovementInfo moveInfo = null ;
 
             UpdateFlag flags;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
@@ -680,6 +680,7 @@ namespace HermesProxy.World.Client
             {
                 if (flags.HasAnyFlag(UpdateFlag.GOPosition))
                 {
+                    moveInfo = new MovementInfo();
                     moveInfo.TransportGuid = packet.ReadPackedGuid();
 
                     moveInfo.Position = packet.ReadVector3();
@@ -694,6 +695,7 @@ namespace HermesProxy.World.Client
                 }
                 else if (flags.HasAnyFlag(UpdateFlag.StationaryObject))
                 {
+                    moveInfo = new MovementInfo();
                     moveInfo.Position = packet.ReadVector3();
                     moveInfo.Orientation = packet.ReadFloat();
                 }
@@ -727,7 +729,7 @@ namespace HermesProxy.World.Client
             if (flags.HasAnyFlag(UpdateFlag.GORotation))
                 moveInfo.Rotation = packet.ReadPackedQuaternion();
 
-            if (updateData != null)
+            if (updateData != null && moveInfo != null)
             {
                 moveInfo.Flags = (uint)(((MovementFlagWotLK)moveInfo.Flags).CastFlags<MovementFlagModern>());
                 updateData.CreateData.MoveInfo = moveInfo;
@@ -744,6 +746,19 @@ namespace HermesProxy.World.Client
             else
             {
                 var parts = UpdateFields.GetArray<T, uint>(field, 4);
+                return new WowGuid128(Utilities.MAKE_PAIR64(parts[0], parts[1]), Utilities.MAKE_PAIR64(parts[2], parts[3]));
+            }
+        }
+        private static WowGuid GetGuidValue(Dictionary<int, UpdateField> UpdateFields, int field)
+        {
+            if (!LegacyVersion.AddedInVersion(ClientVersionBuild.V6_0_2_19033))
+            {
+                var parts = UpdateFields.GetArray<uint>(field, 2);
+                return new WowGuid64(Utilities.MAKE_PAIR64(parts[0], parts[1]));
+            }
+            else
+            {
+                var parts = UpdateFields.GetArray<uint>(field, 4);
                 return new WowGuid128(Utilities.MAKE_PAIR64(parts[0], parts[1]), Utilities.MAKE_PAIR64(parts[2], parts[3]));
             }
         }
@@ -765,6 +780,132 @@ namespace HermesProxy.World.Client
             if (OBJECT_FIELD_SCALE_X >= 0 && updateMaskArray[OBJECT_FIELD_SCALE_X])
             {
                 updateData.ObjectData.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+            }
+
+            // Item Fields
+            if ((objectType == ObjectType.Item) ||
+                (objectType == ObjectType.Container))
+            {
+                int ITEM_FIELD_OWNER = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_OWNER);
+                if (ITEM_FIELD_OWNER >= 0 && updateMaskArray[ITEM_FIELD_OWNER])
+                {
+                    updateData.ItemData.Owner = GetGuidValue(updates, ItemField.ITEM_FIELD_OWNER).To128();
+                }
+                int ITEM_FIELD_CONTAINED = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_CONTAINED);
+                if (ITEM_FIELD_CONTAINED >= 0 && updateMaskArray[ITEM_FIELD_CONTAINED])
+                {
+                    updateData.ItemData.ContainedIn = GetGuidValue(updates, ItemField.ITEM_FIELD_CONTAINED).To128();
+                }
+                int ITEM_FIELD_CREATOR = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_CREATOR);
+                if (ITEM_FIELD_CREATOR >= 0 && updateMaskArray[ITEM_FIELD_CREATOR])
+                {
+                    updateData.ItemData.Creator = GetGuidValue(updates, ItemField.ITEM_FIELD_CREATOR).To128();
+                }
+                int ITEM_FIELD_GIFTCREATOR = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_GIFTCREATOR);
+                if (ITEM_FIELD_GIFTCREATOR >= 0 && updateMaskArray[ITEM_FIELD_GIFTCREATOR])
+                {
+                    updateData.ItemData.GiftCreator = GetGuidValue(updates, ItemField.ITEM_FIELD_GIFTCREATOR).To128();
+                }
+                int ITEM_FIELD_STACK_COUNT = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_STACK_COUNT);
+                if (ITEM_FIELD_STACK_COUNT >= 0 && updateMaskArray[ITEM_FIELD_STACK_COUNT])
+                {
+                    updateData.ItemData.StackCount = updates[ITEM_FIELD_STACK_COUNT].UInt32Value;
+                }
+                int ITEM_FIELD_DURATION = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_DURATION);
+                if (ITEM_FIELD_DURATION >= 0 && updateMaskArray[ITEM_FIELD_DURATION])
+                {
+                    updateData.ItemData.Duration = updates[ITEM_FIELD_DURATION].UInt32Value;
+                }
+                int ITEM_FIELD_SPELL_CHARGES = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_SPELL_CHARGES);
+                if (ITEM_FIELD_SPELL_CHARGES >= 0)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (updateMaskArray[ITEM_FIELD_SPELL_CHARGES + i])
+                        {
+                            updateData.ItemData.SpellCharges[i] = updates[ITEM_FIELD_SPELL_CHARGES + i].Int32Value;
+                        }
+                    }
+                }
+                int ITEM_FIELD_FLAGS = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_FLAGS);
+                if (ITEM_FIELD_FLAGS >= 0 && updateMaskArray[ITEM_FIELD_FLAGS])
+                {
+                    updateData.ItemData.Flags = updates[ITEM_FIELD_FLAGS].UInt32Value;
+                }
+                int ITEM_FIELD_ENCHANTMENT = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_ENCHANTMENT);
+                if (ITEM_FIELD_ENCHANTMENT >= 0)
+                {
+                    int enchantSlotsCount = 7;
+                    int sizePerEntry = 3;
+                    for (int i = 0; i < enchantSlotsCount; i++)
+                    {
+                        int idIndex = ITEM_FIELD_ENCHANTMENT + i * sizePerEntry;
+                        int durationIndex = idIndex + 1;
+                        int chargesIndex = durationIndex + 1;
+                        if (updateMaskArray[idIndex])
+                        {
+                            if (updateData.ItemData.Enchantment[i] == null)
+                                updateData.ItemData.Enchantment[i] = new ItemEnchantment();
+
+                            updateData.ItemData.Enchantment[i].ID = updates[idIndex].Int32Value;
+                        }
+                        if (updateMaskArray[durationIndex])
+                        {
+                            if (updateData.ItemData.Enchantment[i] == null)
+                                updateData.ItemData.Enchantment[i] = new ItemEnchantment();
+
+                            updateData.ItemData.Enchantment[i].Duration = updates[durationIndex].UInt32Value;
+                        }
+                        if (updateMaskArray[chargesIndex])
+                        {
+                            if (updateData.ItemData.Enchantment[i] == null)
+                                updateData.ItemData.Enchantment[i] = new ItemEnchantment();
+
+                            updateData.ItemData.Enchantment[i].Charges = (ushort)updates[chargesIndex].UInt32Value;
+                        }
+                    }
+                }
+                int ITEM_FIELD_PROPERTY_SEED = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_PROPERTY_SEED);
+                if (ITEM_FIELD_PROPERTY_SEED >= 0 && updateMaskArray[ITEM_FIELD_PROPERTY_SEED])
+                {
+                    updateData.ItemData.PropertySeed = updates[ITEM_FIELD_PROPERTY_SEED].UInt32Value;
+                }
+                int ITEM_FIELD_RANDOM_PROPERTIES_ID = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_RANDOM_PROPERTIES_ID);
+                if (ITEM_FIELD_RANDOM_PROPERTIES_ID >= 0 && updateMaskArray[ITEM_FIELD_RANDOM_PROPERTIES_ID])
+                {
+                    updateData.ItemData.RandomProperty = updates[ITEM_FIELD_RANDOM_PROPERTIES_ID].UInt32Value;
+                }
+                int ITEM_FIELD_DURABILITY = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_DURABILITY);
+                if (ITEM_FIELD_DURABILITY >= 0 && updateMaskArray[ITEM_FIELD_DURABILITY])
+                {
+                    updateData.ItemData.Durability = updates[ITEM_FIELD_DURABILITY].UInt32Value;
+                }
+                int ITEM_FIELD_MAXDURABILITY = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_MAXDURABILITY);
+                if (ITEM_FIELD_MAXDURABILITY >= 0 && updateMaskArray[ITEM_FIELD_MAXDURABILITY])
+                {
+                    updateData.ItemData.MaxDurability = updates[ITEM_FIELD_MAXDURABILITY].UInt32Value;
+                }
+            }
+
+            // Container Fields
+            if (objectType == ObjectType.Container)
+            {
+                int CONTAINER_FIELD_NUM_SLOTS = LegacyVersion.GetUpdateField(ContainerField.CONTAINER_FIELD_NUM_SLOTS);
+                if (CONTAINER_FIELD_NUM_SLOTS >= 0 && updateMaskArray[CONTAINER_FIELD_NUM_SLOTS])
+                {
+                    updateData.ContainerData.NumSlots = updates[CONTAINER_FIELD_NUM_SLOTS].UInt32Value;
+                }
+                int CONTAINER_FIELD_SLOT_1 = LegacyVersion.GetUpdateField(ContainerField.CONTAINER_FIELD_SLOT_1);
+                if (CONTAINER_FIELD_SLOT_1 >= 0)
+                {
+                    for (int i = 0; i < 36; i++)
+                    {
+                        if (updateMaskArray[CONTAINER_FIELD_SLOT_1 + i * 2])
+                        {
+                            updateData.ContainerData.Slots[i] = GetGuidValue(updates, CONTAINER_FIELD_SLOT_1 + i * 2).To128();
+                        }
+                    }
+                }
             }
 
             // Unit Fields
@@ -1320,6 +1461,62 @@ namespace HermesProxy.World.Client
                             updateData.PlayerData.VisibleItems[i] = new VisibleItem();
                             updateData.PlayerData.VisibleItems[i].ItemID = updates[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset].Int32Value;
                         }
+                    }
+                }
+                int PLAYER_FIELD_INV_SLOT_HEAD = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_INV_SLOT_HEAD);
+                if (PLAYER_FIELD_INV_SLOT_HEAD >= 0)
+                {
+                    for (int i = 0; i < 23; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_INV_SLOT_HEAD + i * 2])
+                            updateData.ActivePlayerData.InvSlots[i] = GetGuidValue(updates, PLAYER_FIELD_INV_SLOT_HEAD + i * 2).To128();
+                    }
+                }
+                int PLAYER_FIELD_PACK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_PACK_SLOT_1);
+                if (PLAYER_FIELD_PACK_SLOT_1 >= 0)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_PACK_SLOT_1 + i * 2])
+                            updateData.ActivePlayerData.PackSlots[i] = GetGuidValue(updates, PLAYER_FIELD_PACK_SLOT_1 + i * 2).To128();
+                    }
+                }
+                int PLAYER_FIELD_BANK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BANK_SLOT_1);
+                if (PLAYER_FIELD_BANK_SLOT_1 >= 0)
+                {
+                    int bankSlots = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 28 : 24; // 2.0.0.5965 Alpha 
+                    for (int i = 0; i < bankSlots; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_BANK_SLOT_1 + i * 2])
+                            updateData.ActivePlayerData.BankSlots[i] = GetGuidValue(updates, PLAYER_FIELD_BANK_SLOT_1 + i * 2).To128();
+                    }
+                }
+                int PLAYER_FIELD_BANKBAG_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BANKBAG_SLOT_1);
+                if (PLAYER_FIELD_BANKBAG_SLOT_1 >= 0)
+                {
+                    int bankBagSlots = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 7 : 6; // 2.0.0.5965 Alpha 
+                    for (int i = 0; i < bankBagSlots; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_BANKBAG_SLOT_1 + i * 2])
+                            updateData.ActivePlayerData.BankBagSlots[i] = GetGuidValue(updates, PLAYER_FIELD_BANKBAG_SLOT_1 + i * 2).To128();
+                    }
+                }
+                int PLAYER_FIELD_VENDORBUYBACK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_VENDORBUYBACK_SLOT_1);
+                if (PLAYER_FIELD_VENDORBUYBACK_SLOT_1 >= 0)
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i * 2])
+                            updateData.ActivePlayerData.BuyBackSlots[i] = GetGuidValue(updates, PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i * 2).To128();
+                    }
+                }
+                int PLAYER_FIELD_KEYRING_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_KEYRING_SLOT_1);
+                if (PLAYER_FIELD_KEYRING_SLOT_1 >= 0)
+                {
+                    for (int i = 0; i < 32; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_KEYRING_SLOT_1 + i * 2])
+                            updateData.ActivePlayerData.KeyringSlots[i] = GetGuidValue(updates, PLAYER_FIELD_KEYRING_SLOT_1 + i * 2).To128();
                     }
                 }
 

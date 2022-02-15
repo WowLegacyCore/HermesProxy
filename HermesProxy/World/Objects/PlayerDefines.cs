@@ -791,10 +791,8 @@ namespace HermesProxy.World.Objects
 
         public const byte BuyBackStart = 86;
         public const byte BuyBackEnd = 98;
-        public const byte ReagentStart = 98;
-        public const byte ReagentEnd = 196;
-        public const byte ChildEquipmentStart = 196;
-        public const byte ChildEquipmentEnd = 199;
+        public const byte KeyringStart = 98;
+        public const byte KeyringEnd = 130;
 
         public const byte Bag0 = 255;
         public const byte DefaultSize = 16;

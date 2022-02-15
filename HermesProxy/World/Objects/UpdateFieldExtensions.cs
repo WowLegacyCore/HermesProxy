@@ -113,14 +113,18 @@ namespace HermesProxy.World.Objects
         /// <param name="firstUpdateField">The first update field of the sequence</param>
         /// <param name="count">Number of values to retrieve</param>
         /// <returns></returns>
-        public static TK[] GetArray<T, TK>(this Dictionary<int, UpdateField> dict, T firstUpdateField, int count) // where T: System.Enum // C# 7.3
+        public static TK[] GetArray<T, TK>(this Dictionary<int, UpdateField> dict, T firstUpdateField, int count) where T: System.Enum // C# 7.3
+        {
+            return GetArray<TK>(dict, LegacyVersion.GetUpdateField(firstUpdateField), count);
+        }
+        public static TK[] GetArray<TK>(this Dictionary<int, UpdateField> dict, int firstUpdateField, int count)
         {
             var result = new TK[count];
             var type = GetTypeCodeOfReturnValue<TK>();
             for (var i = 0; i < count; i++)
             {
                 UpdateField uf;
-                if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(firstUpdateField) + i, out uf))
+                if (dict != null && dict.TryGetValue(firstUpdateField + i, out uf))
                 {
                     switch (type)
                     {

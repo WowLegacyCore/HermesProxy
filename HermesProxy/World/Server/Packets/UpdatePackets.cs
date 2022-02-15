@@ -54,6 +54,11 @@ namespace HermesProxy.World.Server.Packets
 
             switch (guid.GetObjectType())
             {
+                case ObjectType.Item:
+                case ObjectType.Container:
+                    ItemData = new ItemData();
+                    ContainerData = new ContainerData();
+                    break;
                 case ObjectType.Unit:
                     UnitData = new UnitData();
                     break;
@@ -71,6 +76,8 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 Guid;
         public CreateObjectData CreateData;
         public ObjectData ObjectData;
+        public ItemData ItemData;
+        public ContainerData ContainerData;
         public UnitData UnitData;
         public PlayerData PlayerData;
         public ActivePlayerData ActivePlayerData;
