@@ -326,5 +326,55 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(response);
         }
+        [PacketHandler(Opcode.SMSG_QUERY_GAME_OBJECT_RESPONSE)]
+        void HandleQueryGameObjectResposne(WorldPacket packet)
+        {
+            QueryGameObjectResponse response = new QueryGameObjectResponse();
+            var id = packet.ReadEntry();
+            response.GameObjectID = (uint)id.Key;
+            response.Guid = WowGuid128.Empty;
+            if (id.Value) // entry is masked
+            {
+                response.Allow = false;
+                SendPacketToClient(response);
+                return;
+            }
+
+            response.Allow = true;
+            GameObjectStats gameObject = response.Stats;
+
+            gameObject.Type = packet.ReadUInt32();
+            gameObject.DisplayID = packet.ReadUInt32();
+
+            for (int i = 0; i < 4; i++)
+                gameObject.Name[i] = packet.ReadCString();
+
+            gameObject.IconName = packet.ReadCString();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                gameObject.CastBarCaption = packet.ReadCString();
+                gameObject.UnkString = packet.ReadCString();
+            }
+
+            for (int i = 0; i < 24; i++)
+                gameObject.Data[i] = packet.ReadInt32();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                gameObject.Size = packet.ReadFloat();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+            {
+                uint count = (uint)(LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192) ? 6 : 4);
+                for (uint i = 0; i < count; i++)
+                {
+                    uint itemId = packet.ReadUInt32();
+                    if (itemId != 0)
+                        gameObject.QuestItems.Add(itemId);
+                }
+            }
+
+            SendPacketToClient(response);
+        }
     }
 }

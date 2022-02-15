@@ -19,10 +19,17 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUERY_CREATURE)]
         void HandleQueryCreature(QueryCreature queryCreature)
         {
-            System.Console.WriteLine($"Query CREATURE {queryCreature.CreatureID}");
             WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_CREATURE);
             packet.WriteUInt32(queryCreature.CreatureID);
             packet.WriteGuid(new WowGuid64(HighGuidTypeLegacy.Creature, queryCreature.CreatureID, 1));
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_QUERY_GAME_OBJECT)]
+        void HandleQueryGameObject(QueryGameObject queryGo)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_GAME_OBJECT);
+            packet.WriteUInt32(queryGo.GameObjectID);
+            packet.WriteGuid(queryGo.Guid.To64());
             SendPacketToServer(packet);
         }
     }

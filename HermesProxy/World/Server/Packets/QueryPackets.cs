@@ -21,6 +21,7 @@ using HermesProxy.World.Objects;
 using Framework.Collections;
 using Framework.Constants;
 using System.Collections.Generic;
+using Framework.IO;
 
 namespace HermesProxy.World.Server.Packets
 {
@@ -585,5 +586,78 @@ namespace HermesProxy.World.Server.Packets
     {
         public float TotalProbability;
         public List<CreatureXDisplay> CreatureDisplay = new();
+    }
+
+    public class QueryGameObject : ClientPacket
+    {
+        public QueryGameObject(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            GameObjectID = _worldPacket.ReadUInt32();
+            Guid = _worldPacket.ReadPackedGuid128();
+        }
+
+        public uint GameObjectID;
+        public WowGuid128 Guid;
+    }
+
+    public class QueryGameObjectResponse : ServerPacket
+    {
+        public QueryGameObjectResponse() : base(Opcode.SMSG_QUERY_GAME_OBJECT_RESPONSE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(GameObjectID);
+            _worldPacket.WritePackedGuid128(Guid);
+            _worldPacket.WriteBit(Allow);
+            _worldPacket.FlushBits();
+
+            ByteBuffer statsData = new();
+            if (Allow)
+            {
+                statsData.WriteUInt32(Stats.Type);
+                statsData.WriteUInt32(Stats.DisplayID);
+                for (int i = 0; i < 4; i++)
+                    statsData.WriteCString(Stats.Name[i]);
+
+                statsData.WriteCString(Stats.IconName);
+                statsData.WriteCString(Stats.CastBarCaption);
+                statsData.WriteCString(Stats.UnkString);
+
+                for (uint i = 0; i < 34; i++)
+                    statsData.WriteInt32(Stats.Data[i]);
+
+                statsData.WriteFloat(Stats.Size);
+                statsData.WriteUInt8((byte)Stats.QuestItems.Count);
+                foreach (uint questItem in Stats.QuestItems)
+                    statsData.WriteUInt32(questItem);
+
+                statsData.WriteUInt32(Stats.ContentTuningId);
+            }
+
+            _worldPacket.WriteUInt32(statsData.GetSize());
+            if (statsData.GetSize() != 0)
+                _worldPacket.WriteBytes(statsData);
+        }
+
+        public uint GameObjectID;
+        public WowGuid128 Guid;
+        public bool Allow;
+        public GameObjectStats Stats;
+    }
+
+    public class GameObjectStats
+    {
+        public string[] Name = new string[4];
+        public string IconName = "";
+        public string CastBarCaption = "";
+        public string UnkString = "";
+        public uint Type;
+        public uint DisplayID;
+        public int[] Data = new int[34];
+        public float Size = 1;
+        public List<uint> QuestItems = new();
+        public uint ContentTuningId;
     }
 }
