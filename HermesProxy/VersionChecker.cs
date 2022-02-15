@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Framework.Logging;
+using HermesProxy.World.Objects;
 
 namespace HermesProxy
 {
@@ -170,6 +171,73 @@ namespace HermesProxy
                 return 5;
 
             return 7;
+        }
+    }
+
+    public static class ModernVersion
+    {
+        public static void ConvertAuraFlags(ushort oldFlags, byte slot, out AuraFlagsModern newFlags, out uint activeFlags)
+        {
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                activeFlags = 0;
+                newFlags = AuraFlagsModern.None;
+
+                if (slot >= 32)
+                    newFlags |= AuraFlagsModern.Negative;
+                else
+                    newFlags |= AuraFlagsModern.Positive;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsVanilla.Cancelable))
+                    newFlags |= AuraFlagsModern.Cancelable;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsVanilla.EffectIndex0))
+                    activeFlags |= 1;
+                if (oldFlags.HasAnyFlag(AuraFlagsVanilla.EffectIndex1))
+                    activeFlags |= 2;
+                if (oldFlags.HasAnyFlag(AuraFlagsVanilla.EffectIndex2))
+                    activeFlags |= 4;
+            }
+            else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                activeFlags = 1;
+                newFlags = AuraFlagsModern.None;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.Negative))
+                    newFlags |= AuraFlagsModern.Negative;
+                else if (oldFlags.HasAnyFlag(AuraFlagsTBC.Positive))
+                    newFlags |= AuraFlagsModern.Positive; 
+                else if (oldFlags.HasAnyFlag(AuraFlagsTBC.NotCancelable))
+                    newFlags |= AuraFlagsModern.Negative;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.Cancelable))
+                    newFlags |= AuraFlagsModern.Cancelable;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.Passive))
+                    newFlags |= AuraFlagsModern.Passive;
+            }
+            else
+            {
+                activeFlags = 0;
+                newFlags = AuraFlagsModern.None;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsWotLK.Negative))
+                    newFlags |= AuraFlagsModern.Negative;
+                else if (oldFlags.HasAnyFlag(AuraFlagsWotLK.Positive))
+                    newFlags |= (AuraFlagsModern.Positive | AuraFlagsModern.Cancelable);
+
+                if (oldFlags.HasAnyFlag(AuraFlagsWotLK.NoCaster))
+                    newFlags |= AuraFlagsModern.NoCaster;
+                if (oldFlags.HasAnyFlag(AuraFlagsWotLK.Duration))
+                    newFlags |= AuraFlagsModern.Duration;
+
+                if (oldFlags.HasAnyFlag(AuraFlagsWotLK.EffectIndex0))
+                    activeFlags |= 1;
+                if (oldFlags.HasAnyFlag(AuraFlagsWotLK.EffectIndex1))
+                    activeFlags |= 2;
+                if (oldFlags.HasAnyFlag(AuraFlagsWotLK.EffectIndex2))
+                    activeFlags |= 4;
+            }
         }
     }
 }

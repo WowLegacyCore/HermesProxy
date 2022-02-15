@@ -132,4 +132,148 @@ namespace HermesProxy.World.Server.Packets
         public float ChargeModRate = 1.0f;
         public byte ConsumedCharges;
     }
+
+    public class AuraUpdate : ServerPacket
+    {
+        public AuraUpdate(WowGuid128 guid, bool all) : base(Opcode.SMSG_AURA_UPDATE, ConnectionType.Instance) 
+        {
+            UnitGUID = guid;
+            UpdateAll = all;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(UpdateAll);
+            _worldPacket.WriteBits(Auras.Count, 9);
+            foreach (AuraInfo aura in Auras)
+                aura.Write(_worldPacket);
+
+            _worldPacket.WritePackedGuid128(UnitGUID);
+        }
+
+        public bool UpdateAll;
+        public WowGuid128 UnitGUID;
+        public List<AuraInfo> Auras = new();
+    }
+
+    public struct AuraInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(Slot);
+            data.WriteBit(AuraData != null);
+            data.FlushBits();
+
+            if (AuraData != null)
+                AuraData.Write(data);
+        }
+
+        public byte Slot;
+        public AuraDataInfo AuraData;
+    }
+
+    public class AuraDataInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(CastID);
+            data.WriteInt32(SpellID);
+            data.WriteUInt32(SpellXSpellVisualID);
+            data.WriteUInt16((ushort)Flags);
+            data.WriteUInt32(ActiveFlags);
+            data.WriteUInt16(CastLevel);
+            data.WriteUInt8(Applications);
+            data.WriteInt32(ContentTuningID);
+            data.WriteBit(CastUnit != null);
+            data.WriteBit(Duration.HasValue);
+            data.WriteBit(Remaining.HasValue);
+            data.WriteBit(TimeMod.HasValue);
+            data.WriteBits(Points.Count, 6);
+            data.WriteBits(EstimatedPoints.Count, 6);
+            data.WriteBit(ContentTuning != null);
+
+            if (ContentTuning != null)
+                ContentTuning.Write(data);
+
+            if (CastUnit != null)
+                data.WritePackedGuid128(CastUnit);
+
+            if (Duration.HasValue)
+                data.WriteInt32(Duration.Value);
+
+            if (Remaining.HasValue)
+                data.WriteInt32(Remaining.Value);
+
+            if (TimeMod.HasValue)
+                data.WriteFloat(TimeMod.Value);
+
+            foreach (var point in Points)
+                data.WriteFloat(point);
+
+            foreach (var point in EstimatedPoints)
+                data.WriteFloat(point);
+        }
+
+        public WowGuid128 CastID;
+        public int SpellID;
+        public uint SpellXSpellVisualID;
+        public AuraFlagsModern Flags;
+        public uint ActiveFlags;
+        public ushort CastLevel = 1;
+        public byte Applications = 1;
+        public int ContentTuningID;
+        ContentTuningParams ContentTuning;
+        public WowGuid128 CastUnit;
+        public int? Duration;
+        public int? Remaining;
+        float? TimeMod;
+        public List<float> Points = new();
+        public List<float> EstimatedPoints = new();
+    }
+
+    class ContentTuningParams
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteFloat(PlayerItemLevel);
+            data.WriteFloat(TargetItemLevel);
+            data.WriteInt16(PlayerLevelDelta);
+            data.WriteUInt16(ScalingHealthItemLevelCurveID);
+            data.WriteUInt8(TargetLevel);
+            data.WriteUInt8(Expansion);
+            data.WriteUInt8(TargetMinScalingLevel);
+            data.WriteUInt8(TargetMaxScalingLevel);
+            data.WriteInt8(TargetScalingLevelDelta);
+            data.WriteUInt32((uint)Flags);
+            data.WriteBits(TuningType, 4);
+            data.FlushBits();
+        }
+
+        public ContentTuningType TuningType;
+        public short PlayerLevelDelta;
+        public float PlayerItemLevel;
+        public float TargetItemLevel = 0.0f;
+        public ushort ScalingHealthItemLevelCurveID;
+        public byte TargetLevel;
+        public byte Expansion;
+        public byte TargetMinScalingLevel;
+        public byte TargetMaxScalingLevel;
+        public sbyte TargetScalingLevelDelta;
+        public ContentTuningFlags Flags = ContentTuningFlags.NoLevelScaling | ContentTuningFlags.NoItemLevelScaling;
+
+        public enum ContentTuningType
+        {
+            CreatureToPlayerDamage = 1,
+            PlayerToCreatureDamage = 2,
+            CreatureToCreatureDamage = 4,
+            PlayerToSandboxScaling = 7, // NYI
+            PlayerToPlayerExpectedStat = 8
+        }
+
+        public enum ContentTuningFlags
+        {
+            NoLevelScaling = 0x1,
+            NoItemLevelScaling = 0x2
+        }
+    }
 }

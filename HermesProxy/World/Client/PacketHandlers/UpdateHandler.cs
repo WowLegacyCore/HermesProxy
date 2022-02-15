@@ -32,6 +32,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadBool(); // Has Transport
 
+            List<AuraUpdate> auraUpdates = new List<AuraUpdate>();
             UpdateObject updateObject = new UpdateObject();
 
             for (var i = 0; i < count; i++)
@@ -57,26 +58,32 @@ namespace HermesProxy.World.Client
                     }
                     case UpdateTypeLegacy.CreateObject1:
                     {
-                        var guid = packet.ReadPackedGuid();
+                        var guid = packet.ReadPackedGuid().To128();
                         PrintString($"Guid = {guid.ToString()}", i);
 
-                        ObjectUpdate updateData = new ObjectUpdate(guid.To128(), UpdateTypeModern.CreateObject1);
-                        ReadCreateObjectBlock(packet, guid, updateData, i);
+                        ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject1);
+                        AuraUpdate auraUpdate = new AuraUpdate(guid, true);
+                        ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
                         if (guid.GetObjectType() == ObjectType.Player)
                             updateObject.ObjectUpdates.Add(updateData);
+                        if (auraUpdate.Auras.Count != 0)
+                            auraUpdates.Add(auraUpdate);
                         break;
                     }
                     case UpdateTypeLegacy.CreateObject2:
                     {
-                        var guid = packet.ReadPackedGuid();
+                        var guid = packet.ReadPackedGuid().To128();
                         PrintString($"Guid = {guid.ToString()}", i);
 
-                        ObjectUpdate updateData = new ObjectUpdate(guid.To128(), UpdateTypeModern.CreateObject2);
-                        ReadCreateObjectBlock(packet, guid, updateData, i);
+                        ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject2);
+                        AuraUpdate auraUpdate = new AuraUpdate(guid, true);
+                        ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
                         if (guid.GetObjectType() == ObjectType.Player)
                             updateObject.ObjectUpdates.Add(updateData);
+                        if (auraUpdate.Auras.Count != 0)
+                            auraUpdates.Add(auraUpdate);
                         break;
                     }
                     case UpdateTypeLegacy.NearObjects:
@@ -94,6 +101,9 @@ namespace HermesProxy.World.Client
 
             if (updateObject.ObjectUpdates.Count != 0)
                 SendPacketToClient(updateObject);
+
+            foreach (var auraUpdate in auraUpdates)
+                SendPacketToClient(auraUpdate);
         }
 
         public void ReadObjectsBlock(WorldPacket packet, object index)
@@ -118,18 +128,18 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private void ReadCreateObjectBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, object index)
+        private void ReadCreateObjectBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             updateData.CreateData.ObjectType = ObjectTypeConverter.Convert((ObjectTypeLegacy)packet.ReadUInt8());
             ReadMovementUpdateBlock(packet, guid, updateData, index);
-            ReadValuesUpdateBlockOnCreate(packet, guid, updateData.CreateData.ObjectType, updateData, index);
+            ReadValuesUpdateBlockOnCreate(packet, guid, updateData.CreateData.ObjectType, updateData, auraUpdate, index);
         }
 
-        public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid guid, ObjectType type, ObjectUpdate updateData, object index)
+        public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             BitArray updateMaskArray = null;
             var updates = ReadValuesUpdateBlock(packet, type, index, true, null, out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, true, updateData);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, true, updateData);
         }
 
         public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, int index)
@@ -738,7 +748,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        public void StoreObjectUpdate(WowGuid guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, bool isCreate, ObjectUpdate updateData)
+        public void StoreObjectUpdate(WowGuid guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, bool isCreate, ObjectUpdate updateData)
         {
             // Object Fields
             int OBJECT_FIELD_GUID = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_GUID);
@@ -1146,6 +1156,60 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_POWER_COST_MULTIPLIER + i])
                             updateData.UnitData.PowerCostMultiplier[i] = updates[UNIT_FIELD_POWER_COST_MULTIPLIER + i].FloatValue;
+                    }
+                }
+                int UNIT_FIELD_AURA = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURA);
+                int UNIT_FIELD_AURAFLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURAFLAGS);
+                int UNIT_FIELD_AURALEVELS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURALEVELS);
+                int UNIT_FIELD_AURAAPPLICATIONS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURAAPPLICATIONS);
+                if (UNIT_FIELD_AURA > 0 && UNIT_FIELD_AURAFLAGS > 0 && UNIT_FIELD_AURALEVELS > 0 && UNIT_FIELD_AURAAPPLICATIONS > 0)
+                {
+                    int aurasCount = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 56 : 48;
+                    for (byte i = 0; i < aurasCount; i++)
+                    {
+                        if (updateMaskArray[UNIT_FIELD_AURA + i])
+                        {
+                            AuraInfo aura = new AuraInfo();
+                            aura.Slot = i;
+                            int spellId = updates[UNIT_FIELD_AURA + i].Int32Value;
+                            if (spellId != 0)
+                            {
+                                AuraDataInfo data = new AuraDataInfo();
+                                data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Objects.SpellCastSource.Aura, (uint)Global.CurrentSessionData.GameData.CurrentMapId, (uint)spellId, guid.GetLow());
+                                data.SpellID = spellId;
+                                data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
+
+                                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                                {
+                                    int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 4;
+                                    if (updateMaskArray[flagsIndex])
+                                    {
+                                        ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+                                        ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
+                                    }
+                                }
+                                else
+                                {
+                                    int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 8;
+                                    if (updateMaskArray[flagsIndex])
+                                    {
+                                        ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 8) * 4)) & 0xF);
+                                        ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
+                                    }
+                                }
+
+                                int levelsIndex = UNIT_FIELD_AURALEVELS + i / 4;
+                                if (updateMaskArray[levelsIndex])
+                                    data.CastLevel = (ushort)((updates[levelsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+
+                                int stacksIndex = UNIT_FIELD_AURAAPPLICATIONS + i / 4;
+                                if (updateMaskArray[stacksIndex])
+                                    data.Applications = (byte)((updates[stacksIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+
+                                aura.AuraData = data;
+                            }
+                            auraUpdate.Auras.Add(aura);
+                        }
                     }
                 }
             }
