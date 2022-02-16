@@ -59,6 +59,9 @@ namespace HermesProxy.World.Server.Packets
                     ItemData = new ItemData();
                     ContainerData = new ContainerData();
                     break;
+                case ObjectType.GameObject:
+                    GameObjectData = new GameObjectData();
+                    break;
                 case ObjectType.Unit:
                     UnitData = new UnitData();
                     break;
@@ -78,6 +81,7 @@ namespace HermesProxy.World.Server.Packets
         public ObjectData ObjectData;
         public ItemData ItemData;
         public ContainerData ContainerData;
+        public GameObjectData GameObjectData;
         public UnitData UnitData;
         public PlayerData PlayerData;
         public ActivePlayerData ActivePlayerData;
@@ -96,7 +100,28 @@ namespace HermesProxy.World.Server.Packets
                 if (CreateData.MoveInfo.PitchRate == 0)
                     CreateData.MoveInfo.PitchRate = CreateData.MoveInfo.TurnRate;
             }
-
+            if (GameObjectData != null)
+            {
+                if ((GameObjectData.PercentHealth == null) &&
+                    (GameObjectData.State != null || GameObjectData.TypeID != null || GameObjectData.ArtKit != null))
+                    GameObjectData.PercentHealth = 255;
+                if (GameObjectData.ParentRotation[3] == null)
+                    GameObjectData.ParentRotation[3] = 1;
+                if (GameObjectData.StateAnimID == null)
+                    GameObjectData.StateAnimID = 1556;
+                if (Guid.GetHighType() == HighGuidType.Transport)
+                {
+                    int period = GameData.GetTransportPeriod((int)ObjectData.EntryID);
+                    if (period != 0)
+                    {
+                        if (GameObjectData.Level == null)
+                            GameObjectData.Level = period;
+                        if (ObjectData.DynamicFlags == null)
+                            ObjectData.DynamicFlags = (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * System.UInt16.MaxValue)) << 16);
+                        GameObjectData.Flags = 1048616;
+                    }
+                }
+            }
             if (UnitData != null)
             {
                 for (int i = 0; i < 6; i++)

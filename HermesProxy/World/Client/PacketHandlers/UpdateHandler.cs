@@ -65,7 +65,7 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item)
+                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item || guid.GetObjectType() == ObjectType.GameObject)
                             updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
@@ -80,7 +80,7 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item)
+                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item || guid.GetObjectType() == ObjectType.GameObject)
                             updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
@@ -905,6 +905,65 @@ namespace HermesProxy.World.Client
                             updateData.ContainerData.Slots[i] = GetGuidValue(updates, CONTAINER_FIELD_SLOT_1 + i * 2).To128();
                         }
                     }
+                }
+            }
+
+            if (objectType == ObjectType.GameObject)
+            {
+                int GAMEOBJECT_FIELD_CREATED_BY = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY);
+                if (GAMEOBJECT_FIELD_CREATED_BY >= 0 && updateMaskArray[GAMEOBJECT_FIELD_CREATED_BY])
+                {
+                    updateData.GameObjectData.CreatedBy = GetGuidValue(updates, GameObjectField.GAMEOBJECT_FIELD_CREATED_BY).To128();
+                }
+                int GAMEOBJECT_DISPLAYID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DISPLAYID);
+                if (GAMEOBJECT_DISPLAYID >= 0 && updateMaskArray[GAMEOBJECT_DISPLAYID])
+                {
+                    updateData.GameObjectData.DisplayID = updates[GAMEOBJECT_DISPLAYID].Int32Value;
+                }
+                int GAMEOBJECT_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FLAGS);
+                if (GAMEOBJECT_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_FLAGS])
+                {
+                    updateData.GameObjectData.Flags = updates[GAMEOBJECT_FLAGS].UInt32Value;
+                }
+                int GAMEOBJECT_ROTATION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ROTATION);
+                if (GAMEOBJECT_ROTATION >= 0 && updateData.CreateData != null)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (updateMaskArray[GAMEOBJECT_ROTATION + i])
+                            updateData.CreateData.MoveInfo.Rotation[i] = updates[GAMEOBJECT_ROTATION + i].FloatValue;
+                    }
+                }
+                int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);
+                if (GAMEOBJECT_STATE >= 0 && updateMaskArray[GAMEOBJECT_STATE])
+                {
+                    updateData.GameObjectData.State = (sbyte)updates[GAMEOBJECT_STATE].Int32Value;
+                }
+                int GAMEOBJECT_DYN_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DYN_FLAGS);
+                if (GAMEOBJECT_DYN_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_DYN_FLAGS])
+                {
+                    uint oldValue = updateData.ObjectData.DynamicFlags != null ? (uint)updateData.ObjectData.DynamicFlags : 0;
+                    updateData.ObjectData.DynamicFlags = (oldValue | (updates[GAMEOBJECT_DYN_FLAGS].UInt32Value & 0xFFFF));
+                }
+                int GAMEOBJECT_FACTION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FACTION);
+                if (GAMEOBJECT_FACTION >= 0 && updateMaskArray[GAMEOBJECT_FACTION])
+                {
+                    updateData.GameObjectData.FactionTemplate = updates[GAMEOBJECT_FACTION].Int32Value;
+                }
+                int GAMEOBJECT_TYPE_ID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_TYPE_ID);
+                if (GAMEOBJECT_TYPE_ID >= 0 && updateMaskArray[GAMEOBJECT_TYPE_ID])
+                {
+                    updateData.GameObjectData.TypeID = (sbyte)updates[GAMEOBJECT_TYPE_ID].Int32Value;
+                }
+                int GAMEOBJECT_LEVEL = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_LEVEL);
+                if (GAMEOBJECT_LEVEL >= 0 && updateMaskArray[GAMEOBJECT_LEVEL])
+                {
+                    updateData.GameObjectData.Level = updates[GAMEOBJECT_LEVEL].Int32Value;
+                }
+                int GAMEOBJECT_ARTKIT = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ARTKIT);
+                if (GAMEOBJECT_ARTKIT >= 0 && updateMaskArray[GAMEOBJECT_ARTKIT])
+                {
+                    updateData.GameObjectData.ArtKit = (byte)updates[GAMEOBJECT_ARTKIT].UInt32Value;
                 }
             }
 

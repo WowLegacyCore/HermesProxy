@@ -40,6 +40,32 @@ namespace HermesProxy.World
             return 0;
         }
 
+        public static int GetTransportPeriod(int entry)
+        {
+            switch (entry)
+            {
+                case 20808:
+                    return 350822;
+                case 164871:
+                    return 356287;
+                case 175080:
+                    return 303466;
+                case 176231:
+                    return 329315;
+                case 176244:
+                    return 316253;
+                case 176310:
+                    return 295580;
+                case 176495:
+                    return 335297;
+                case 177233:
+                    return 317044;
+                case 181056:
+                    return 1208095;
+            }
+            return 0;
+        }
+
         // Loading code
         public static void LoadEverything()
         {

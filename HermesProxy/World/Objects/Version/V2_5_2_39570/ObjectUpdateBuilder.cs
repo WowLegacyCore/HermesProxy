@@ -100,12 +100,13 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
         public void SetCreateObjectBits()
         {
             m_createBits.Clear();
-            m_createBits.MovementUpdate = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null;
+            m_createBits.MovementUpdate = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_objectTypeMask.HasAnyFlag(Enums.ObjectTypeMask.Unit);
             m_createBits.MovementTransport = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.TransportGuid != null;
-            m_createBits.Stationary = m_updateData.Guid.GetHighType() == Enums.HighGuidType.Transport;
+            m_createBits.Stationary = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_objectType == Enums.ObjectTypeBCC.GameObject;
+            m_createBits.ServerTime = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.Guid.GetHighType() == Enums.HighGuidType.Transport;
             m_createBits.CombatVictim = m_updateData.CreateData != null && m_updateData.CreateData.AutoAttackVictim != null;
             m_createBits.Vehicle = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.VehicleId != 0;
-            m_createBits.Rotation = m_objectType == Enums.ObjectTypeBCC.GameObject;
+            m_createBits.Rotation = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_objectType == Enums.ObjectTypeBCC.GameObject;
             m_createBits.ThisIsYou = m_createBits.ActivePlayer = m_objectType == Enums.ObjectTypeBCC.ActivePlayer;
         }
 
@@ -811,6 +812,54 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 }
                 if (containerData.NumSlots != null)
                     m_fields.SetUpdateField<uint>(ContainerField.CONTAINER_FIELD_NUM_SLOTS, (uint)containerData.NumSlots);
+            }
+
+            GameObjectData goData = m_updateData.GameObjectData;
+            if (goData != null)
+            {
+                if (goData.CreatedBy != null)
+                    m_fields.SetUpdateField<WowGuid128>(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY, goData.CreatedBy);
+                if (goData.DisplayID != null)
+                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_DISPLAYID, (int)goData.DisplayID);
+                if (goData.Flags != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FLAGS, (uint)goData.Flags);
+                for (int i = 0; i < 4; i++)
+                {
+                    int startIndex = (int)GameObjectField.GAMEOBJECT_PARENTROTATION;
+                    if (goData.ParentRotation[i] != null)
+                        m_fields.SetUpdateField<float>(startIndex + i, (float)(goData.ParentRotation[i]));
+                }
+                if (goData.FactionTemplate != null)
+                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_FACTION, (int)goData.FactionTemplate);
+                if (goData.Level != null)
+                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_LEVEL, (int)goData.Level);
+                if (goData.State != null || goData.TypeID != null || goData.ArtKit != null || goData.PercentHealth != null)
+                {
+                    if (goData.State != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.State, 0);
+                    if (goData.TypeID != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.TypeID, 1);
+                    if (goData.ArtKit != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.ArtKit, 2);
+                    if (goData.PercentHealth != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.PercentHealth, 3);
+                }
+                if (goData.SpellVisualID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_SPELL_VISUAL_ID, (uint)goData.SpellVisualID);
+                if (goData.StateSpellVisualID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_SPELL_VISUAL_ID, (uint)goData.StateSpellVisualID);
+                if (goData.StateAnimID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_ANIM_ID, (uint)goData.StateAnimID);
+                if (goData.StateAnimKitID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_ANIM_KIT_ID, (uint)goData.StateAnimKitID);
+                for (int i = 0; i < 4; i++)
+                {
+                    int startIndex = (int)GameObjectField.GAMEOBJECT_STATE_WORLD_EFFECT_ID;
+                    if (goData.StateWorldEffectIDs[i] != null)
+                        m_fields.SetUpdateField<uint>(startIndex + i, (uint)(goData.StateWorldEffectIDs[i]));
+                }
+                if (goData.CustomParam != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FIELD_CUSTOM_PARAM, (uint)goData.CustomParam);
             }
 
             UnitData unitData = m_updateData.UnitData;

@@ -25,7 +25,9 @@ namespace HermesProxy.World.Client
             }
 
             response.Allow = true;
+            response.Info = new QuestInfo();
             QuestInfo quest = response.Info;
+
             quest.QuestID = response.QuestID;
             quest.QuestType = packet.ReadInt32();
             quest.QuestLevel = packet.ReadInt32();
@@ -256,6 +258,7 @@ namespace HermesProxy.World.Client
             }
 
             response.Allow = true;
+            response.Stats = new CreatureStats();
             CreatureStats creature = response.Stats;
 
             for (int i = 0; i < 4; i++)
@@ -341,6 +344,7 @@ namespace HermesProxy.World.Client
             }
 
             response.Allow = true;
+            response.Stats = new GameObjectStats();
             GameObjectStats gameObject = response.Stats;
 
             gameObject.Type = packet.ReadUInt32();

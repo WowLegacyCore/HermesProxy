@@ -1059,6 +1059,7 @@ namespace HermesProxy.World.Enums
         GAMEOBJECT_ROTATION,
         GAMEOBJECT_PARENTROTATION,
         GAMEOBJECT_STATE,
+        GAMEOBJECT_TYPE_ID,
         GAMEOBJECT_POS_X,
         GAMEOBJECT_POS_Y,
         GAMEOBJECT_POS_Z,

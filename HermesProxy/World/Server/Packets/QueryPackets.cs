@@ -272,7 +272,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public bool Allow;
-        public QuestInfo Info = new();
+        public QuestInfo Info;
         public uint QuestID;
     }
 
@@ -535,7 +535,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public bool Allow;
-        public CreatureStats Stats = new();
+        public CreatureStats Stats;
         public uint CreatureID;
     }
 
