@@ -183,7 +183,7 @@ namespace HermesProxy.World.Client
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Packet Read Error: {ex.Message}");
+                Log.Print(LogType.Error, $"Packet Read Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
                 _isSuccessful = false;
             }
         }

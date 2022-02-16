@@ -62,6 +62,9 @@ namespace HermesProxy.World.Server.Packets
                 case ObjectType.GameObject:
                     GameObjectData = new GameObjectData();
                     break;
+                case ObjectType.Corpse:
+                    CorpseData = new CorpseData();
+                    break;
                 case ObjectType.Unit:
                     UnitData = new UnitData();
                     break;
@@ -82,6 +85,7 @@ namespace HermesProxy.World.Server.Packets
         public ItemData ItemData;
         public ContainerData ContainerData;
         public GameObjectData GameObjectData;
+        public CorpseData CorpseData;
         public UnitData UnitData;
         public PlayerData PlayerData;
         public ActivePlayerData ActivePlayerData;
@@ -120,6 +124,18 @@ namespace HermesProxy.World.Server.Packets
                             ObjectData.DynamicFlags = (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * System.UInt16.MaxValue)) << 16);
                         GameObjectData.Flags = 1048616;
                     }
+                    else if (ObjectData.DynamicFlags == null)
+                        ObjectData.DynamicFlags = (CreateData.MoveInfo.TransportPathTimer % System.UInt16.MaxValue);
+                }
+            }
+            if (CorpseData != null)
+            {
+                if (CorpseData.ClassId == null)
+                {
+                    if (CorpseData.Owner != null)
+                        CorpseData.ClassId = (byte)Global.CurrentSessionData.GameData.GetUnitClass(CorpseData.Owner);
+                    else
+                        CorpseData.ClassId = 1;
                 }
             }
             if (UnitData != null)
@@ -198,7 +214,7 @@ namespace HermesProxy.World.Server.Packets
                 if (ActivePlayerData.MultiActionBars == null)
                     ActivePlayerData.MultiActionBars = 7;
                 if (ActivePlayerData.MaxLevel == null)
-                    ActivePlayerData.MaxLevel = 70;
+                    ActivePlayerData.MaxLevel = LegacyVersion.GetMaxLevel();
                 if (ActivePlayerData.ModPetHaste == null)
                     ActivePlayerData.ModPetHaste = 1;
                 if (ActivePlayerData.HonorNextLevel == null)

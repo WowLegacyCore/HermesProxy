@@ -102,7 +102,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             m_createBits.Clear();
             m_createBits.MovementUpdate = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_objectTypeMask.HasAnyFlag(Enums.ObjectTypeMask.Unit);
             m_createBits.MovementTransport = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.TransportGuid != null;
-            m_createBits.Stationary = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_objectType == Enums.ObjectTypeBCC.GameObject;
+            m_createBits.Stationary = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && !m_objectTypeMask.HasAnyFlag(Enums.ObjectTypeMask.Unit);
             m_createBits.ServerTime = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.Guid.GetHighType() == Enums.HighGuidType.Transport;
             m_createBits.CombatVictim = m_updateData.CreateData != null && m_updateData.CreateData.AutoAttackVictim != null;
             m_createBits.Vehicle = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.VehicleId != 0;
@@ -860,6 +860,50 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 }
                 if (goData.CustomParam != null)
                     m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FIELD_CUSTOM_PARAM, (uint)goData.CustomParam);
+            }
+
+            CorpseData corpseData = m_updateData.CorpseData;
+            if (corpseData != null)
+            {
+                if (corpseData.Owner != null)
+                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_OWNER, corpseData.Owner);
+                if (corpseData.PartyGUID != null)
+                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_PARTY_GUID, corpseData.PartyGUID);
+                if (corpseData.GuildGUID != null)
+                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_GUILD_GUID, corpseData.GuildGUID);
+                if (corpseData.DisplayID != null)
+                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_DISPLAY_ID, (uint)corpseData.DisplayID);
+                for (int i = 0; i < 19; i++)
+                {
+                    int startIndex = (int)CorpseField.CORPSE_FIELD_ITEMS;
+                    if (corpseData.Items[i] != null)
+                        m_fields.SetUpdateField<uint>(startIndex + i, (uint)corpseData.Items[i]);
+                }
+                if (corpseData.RaceId != null || corpseData.SexId != null || corpseData.ClassId != null)
+                {
+                    if (corpseData.RaceId != null)
+                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.RaceId, 0);
+                    if (corpseData.SexId != null)
+                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.SexId, 1);
+                    if (corpseData.ClassId != null)
+                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.ClassId, 2);
+                }
+                if (corpseData.Flags != null)
+                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_FLAGS, (uint)corpseData.Flags);
+                if (corpseData.DynamicFlags != null)
+                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_DYNAMIC_FLAGS, (uint)corpseData.DynamicFlags);
+                if (corpseData.FactionTemplate != null)
+                    m_fields.SetUpdateField<int>(CorpseField.CORPSE_FIELD_FACTION_TEMPLATE, (int)corpseData.FactionTemplate);
+                for (int i = 0; i < 36; i++)
+                {
+                    int startIndex = (int)CorpseField.CORPSE_FIELD_CUSTOMIZATION_CHOICES;
+                    int sizePerEntry = 2;
+                    if (corpseData.Customizations[i] != null)
+                    {
+                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)corpseData.Customizations[i].ChrCustomizationOptionID);
+                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)corpseData.Customizations[i].ChrCustomizationChoiceID);
+                    }
+                }
             }
 
             UnitData unitData = m_updateData.UnitData;

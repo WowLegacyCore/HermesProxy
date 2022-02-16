@@ -31,6 +31,8 @@ namespace HermesProxy.World
                     return ObjectType.Player;
                 case HighGuidType.DynamicObject:
                     return ObjectType.DynamicObject;
+                case HighGuidType.Corpse:
+                    return ObjectType.Corpse;
                 case HighGuidType.Item:
                     return ObjectType.Item;
                 case HighGuidType.GameObject:

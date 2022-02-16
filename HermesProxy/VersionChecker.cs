@@ -172,6 +172,16 @@ namespace HermesProxy
 
             return 7;
         }
+
+        public static int GetMaxLevel()
+        {
+            if (RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                return 60;
+            else if (RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                return 70;
+            else
+                return 80;
+        }
     }
 
     public static class ModernVersion
