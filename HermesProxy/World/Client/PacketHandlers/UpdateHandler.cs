@@ -65,8 +65,7 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item || guid.GetObjectType() == ObjectType.GameObject || guid.GetObjectType() == ObjectType.Corpse)
-                            updateObject.ObjectUpdates.Add(updateData);
+                        updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
                         break;
@@ -80,8 +79,7 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        if (guid.GetObjectType() == ObjectType.Player || guid.GetObjectType() == ObjectType.Item || guid.GetObjectType() == ObjectType.GameObject || guid.GetObjectType() == ObjectType.Corpse)
-                            updateObject.ObjectUpdates.Add(updateData);
+                        updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
                         break;
@@ -905,126 +903,6 @@ namespace HermesProxy.World.Client
                             updateData.ContainerData.Slots[i] = GetGuidValue(updates, CONTAINER_FIELD_SLOT_1 + i * 2).To128();
                         }
                     }
-                }
-            }
-
-            if (objectType == ObjectType.GameObject)
-            {
-                int GAMEOBJECT_FIELD_CREATED_BY = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY);
-                if (GAMEOBJECT_FIELD_CREATED_BY >= 0 && updateMaskArray[GAMEOBJECT_FIELD_CREATED_BY])
-                {
-                    updateData.GameObjectData.CreatedBy = GetGuidValue(updates, GameObjectField.GAMEOBJECT_FIELD_CREATED_BY).To128();
-                }
-                int GAMEOBJECT_DISPLAYID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DISPLAYID);
-                if (GAMEOBJECT_DISPLAYID >= 0 && updateMaskArray[GAMEOBJECT_DISPLAYID])
-                {
-                    updateData.GameObjectData.DisplayID = updates[GAMEOBJECT_DISPLAYID].Int32Value;
-                }
-                int GAMEOBJECT_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FLAGS);
-                if (GAMEOBJECT_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_FLAGS])
-                {
-                    updateData.GameObjectData.Flags = updates[GAMEOBJECT_FLAGS].UInt32Value;
-                }
-                int GAMEOBJECT_ROTATION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ROTATION);
-                if (GAMEOBJECT_ROTATION >= 0 && updateData.CreateData != null)
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (updateMaskArray[GAMEOBJECT_ROTATION + i])
-                            updateData.CreateData.MoveInfo.Rotation[i] = updates[GAMEOBJECT_ROTATION + i].FloatValue;
-                    }
-                }
-                int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);
-                if (GAMEOBJECT_STATE >= 0 && updateMaskArray[GAMEOBJECT_STATE])
-                {
-                    updateData.GameObjectData.State = (sbyte)updates[GAMEOBJECT_STATE].Int32Value;
-                }
-                int GAMEOBJECT_DYN_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DYN_FLAGS);
-                if (GAMEOBJECT_DYN_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_DYN_FLAGS])
-                {
-                    uint oldValue = updateData.ObjectData.DynamicFlags != null ? (uint)updateData.ObjectData.DynamicFlags : 0;
-                    updateData.ObjectData.DynamicFlags = (oldValue | (updates[GAMEOBJECT_DYN_FLAGS].UInt32Value & 0xFFFF));
-                }
-                int GAMEOBJECT_FACTION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FACTION);
-                if (GAMEOBJECT_FACTION >= 0 && updateMaskArray[GAMEOBJECT_FACTION])
-                {
-                    updateData.GameObjectData.FactionTemplate = updates[GAMEOBJECT_FACTION].Int32Value;
-                }
-                int GAMEOBJECT_TYPE_ID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_TYPE_ID);
-                if (GAMEOBJECT_TYPE_ID >= 0 && updateMaskArray[GAMEOBJECT_TYPE_ID])
-                {
-                    updateData.GameObjectData.TypeID = (sbyte)updates[GAMEOBJECT_TYPE_ID].Int32Value;
-                }
-                int GAMEOBJECT_LEVEL = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_LEVEL);
-                if (GAMEOBJECT_LEVEL >= 0 && updateMaskArray[GAMEOBJECT_LEVEL])
-                {
-                    updateData.GameObjectData.Level = updates[GAMEOBJECT_LEVEL].Int32Value;
-                }
-                int GAMEOBJECT_ARTKIT = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ARTKIT);
-                if (GAMEOBJECT_ARTKIT >= 0 && updateMaskArray[GAMEOBJECT_ARTKIT])
-                {
-                    updateData.GameObjectData.ArtKit = (byte)updates[GAMEOBJECT_ARTKIT].UInt32Value;
-                }
-            }
-
-            // Corpse Fields
-            if (objectType == ObjectType.Corpse)
-            {
-                int CORPSE_FIELD_OWNER = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_OWNER);
-                if (CORPSE_FIELD_OWNER >= 0 && updateMaskArray[CORPSE_FIELD_OWNER])
-                {
-                    updateData.CorpseData.Owner = GetGuidValue(updates, CorpseField.CORPSE_FIELD_OWNER).To128();
-                }
-                int CORPSE_FIELD_DISPLAY_ID = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_DISPLAY_ID);
-                if (CORPSE_FIELD_DISPLAY_ID >= 0 && updateMaskArray[CORPSE_FIELD_DISPLAY_ID])
-                {
-                    updateData.CorpseData.DisplayID = updates[CORPSE_FIELD_DISPLAY_ID].UInt32Value;
-                }
-                int CORPSE_FIELD_ITEM = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_ITEM);
-                if (CORPSE_FIELD_ITEM >= 0)
-                {
-                    for (int i = 0; i < 19; i++)
-                    {
-                        if (updateMaskArray[CORPSE_FIELD_ITEM + i])
-                            updateData.CorpseData.Items[i] = updates[CORPSE_FIELD_ITEM + i].UInt32Value;
-                    }
-                }
-                int CORPSE_FIELD_BYTES_1 = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_BYTES_1);
-                if (CORPSE_FIELD_BYTES_1 >= 0 && updateMaskArray[CORPSE_FIELD_BYTES_1])
-                {
-                    updateData.CorpseData.RaceId = (byte)((updates[CORPSE_FIELD_BYTES_1].UInt32Value >> 8) & 0xFF);
-                    updateData.CorpseData.SexId = (byte)((updates[CORPSE_FIELD_BYTES_1].UInt32Value >> 16) & 0xFF);
-                    byte skin = (byte)((updates[CORPSE_FIELD_BYTES_1].UInt32Value >> 24) & 0xFF);
-
-                    int CORPSE_FIELD_BYTES_2 = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_BYTES_2);
-                    if (CORPSE_FIELD_BYTES_2 >= 0 && updateMaskArray[CORPSE_FIELD_BYTES_2])
-                    {
-                        byte face = (byte)(updates[CORPSE_FIELD_BYTES_2].UInt32Value & 0xFF);
-                        byte hairStyle = (byte)((updates[CORPSE_FIELD_BYTES_2].UInt32Value >> 8) & 0xFF);
-                        byte hairColor = (byte)((updates[CORPSE_FIELD_BYTES_2].UInt32Value >> 16) & 0xFF);
-                        byte facialHair = (byte)((updates[CORPSE_FIELD_BYTES_2].UInt32Value >> 24) & 0xFF);
-
-                        var customizations = CharacterCustomizations.ConvertLegacyCustomizationsToModern((Race)updateData.CorpseData.RaceId, (Gender)updateData.CorpseData.SexId, (byte)skin, (byte)face, (byte)hairStyle, (byte)hairColor, (byte)facialHair);
-                        for (int i = 0; i < 5; i++)
-                        {
-                            updateData.CorpseData.Customizations[i] = customizations[i];
-                        }
-                    }
-                }
-                int CORPSE_FIELD_GUILD = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_GUILD);
-                if (CORPSE_FIELD_GUILD >= 0 && updateMaskArray[CORPSE_FIELD_GUILD])
-                {
-                    updateData.CorpseData.GuildGUID = WowGuid128.Create(HighGuidType703.Guild, updates[CORPSE_FIELD_GUILD].UInt32Value);
-                }
-                int CORPSE_FIELD_FLAGS = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_FLAGS);
-                if (CORPSE_FIELD_FLAGS >= 0 && updateMaskArray[CORPSE_FIELD_FLAGS])
-                {
-                    updateData.CorpseData.Flags = updates[CORPSE_FIELD_FLAGS].UInt32Value;
-                }
-                int CORPSE_FIELD_DYNAMIC_FLAGS = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_DYNAMIC_FLAGS);
-                if (CORPSE_FIELD_DYNAMIC_FLAGS >= 0 && updateMaskArray[CORPSE_FIELD_DYNAMIC_FLAGS])
-                {
-                    updateData.CorpseData.DynamicFlags = updates[CORPSE_FIELD_DYNAMIC_FLAGS].UInt32Value;
                 }
             }
 
@@ -2041,6 +1919,148 @@ namespace HermesProxy.World.Client
                             updateData.ActivePlayerData.CombatRatings[i] = updates[PLAYER_FIELD_COMBAT_RATING_1 + i].Int32Value;
                         }
                     }
+                }
+            }
+
+            // GameObject Fields
+            if (objectType == ObjectType.GameObject)
+            {
+                int GAMEOBJECT_FIELD_CREATED_BY = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY);
+                if (GAMEOBJECT_FIELD_CREATED_BY >= 0 && updateMaskArray[GAMEOBJECT_FIELD_CREATED_BY])
+                {
+                    updateData.GameObjectData.CreatedBy = GetGuidValue(updates, GameObjectField.GAMEOBJECT_FIELD_CREATED_BY).To128();
+                }
+                int GAMEOBJECT_DISPLAYID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DISPLAYID);
+                if (GAMEOBJECT_DISPLAYID >= 0 && updateMaskArray[GAMEOBJECT_DISPLAYID])
+                {
+                    updateData.GameObjectData.DisplayID = updates[GAMEOBJECT_DISPLAYID].Int32Value;
+                }
+                int GAMEOBJECT_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FLAGS);
+                if (GAMEOBJECT_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_FLAGS])
+                {
+                    updateData.GameObjectData.Flags = updates[GAMEOBJECT_FLAGS].UInt32Value;
+                }
+                int GAMEOBJECT_ROTATION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ROTATION);
+                if (GAMEOBJECT_ROTATION >= 0 && updateData.CreateData != null)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (updateMaskArray[GAMEOBJECT_ROTATION + i])
+                            updateData.CreateData.MoveInfo.Rotation[i] = updates[GAMEOBJECT_ROTATION + i].FloatValue;
+                    }
+                }
+                int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);
+                if (GAMEOBJECT_STATE >= 0 && updateMaskArray[GAMEOBJECT_STATE])
+                {
+                    updateData.GameObjectData.State = (sbyte)updates[GAMEOBJECT_STATE].Int32Value;
+                }
+                int GAMEOBJECT_DYN_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DYN_FLAGS);
+                if (GAMEOBJECT_DYN_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_DYN_FLAGS])
+                {
+                    uint oldValue = updateData.ObjectData.DynamicFlags != null ? (uint)updateData.ObjectData.DynamicFlags : 0;
+                    updateData.ObjectData.DynamicFlags = (oldValue | (updates[GAMEOBJECT_DYN_FLAGS].UInt32Value & 0xFFFF));
+                }
+                int GAMEOBJECT_FACTION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FACTION);
+                if (GAMEOBJECT_FACTION >= 0 && updateMaskArray[GAMEOBJECT_FACTION])
+                {
+                    updateData.GameObjectData.FactionTemplate = updates[GAMEOBJECT_FACTION].Int32Value;
+                }
+                int GAMEOBJECT_TYPE_ID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_TYPE_ID);
+                if (GAMEOBJECT_TYPE_ID >= 0 && updateMaskArray[GAMEOBJECT_TYPE_ID])
+                {
+                    updateData.GameObjectData.TypeID = (sbyte)updates[GAMEOBJECT_TYPE_ID].Int32Value;
+                }
+                int GAMEOBJECT_LEVEL = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_LEVEL);
+                if (GAMEOBJECT_LEVEL >= 0 && updateMaskArray[GAMEOBJECT_LEVEL])
+                {
+                    updateData.GameObjectData.Level = updates[GAMEOBJECT_LEVEL].Int32Value;
+                }
+                int GAMEOBJECT_ARTKIT = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ARTKIT);
+                if (GAMEOBJECT_ARTKIT >= 0 && updateMaskArray[GAMEOBJECT_ARTKIT])
+                {
+                    updateData.GameObjectData.ArtKit = (byte)updates[GAMEOBJECT_ARTKIT].UInt32Value;
+                }
+            }
+
+            // DynamicObject Fields
+            if (objectType == ObjectType.DynamicObject)
+            {
+                int DYNAMICOBJECT_CASTER = LegacyVersion.GetUpdateField(DynamicObjectField.DYNAMICOBJECT_CASTER);
+                if (DYNAMICOBJECT_CASTER >= 0 && updateMaskArray[DYNAMICOBJECT_CASTER])
+                {
+                    updateData.DynamicObjectData.Caster = GetGuidValue(updates, DynamicObjectField.DYNAMICOBJECT_CASTER).To128();
+                }
+                int DYNAMICOBJECT_SPELLID = LegacyVersion.GetUpdateField(DynamicObjectField.DYNAMICOBJECT_SPELLID);
+                if (DYNAMICOBJECT_SPELLID >= 0 && updateMaskArray[DYNAMICOBJECT_SPELLID])
+                {
+                    updateData.DynamicObjectData.SpellID = updates[DYNAMICOBJECT_SPELLID].Int32Value;
+                    updateData.DynamicObjectData.SpellXSpellVisualID = (int)GameData.GetSpellVisual((uint)updateData.DynamicObjectData.SpellID);
+                }
+                int DYNAMICOBJECT_RADIUS = LegacyVersion.GetUpdateField(DynamicObjectField.DYNAMICOBJECT_RADIUS);
+                if (DYNAMICOBJECT_RADIUS >= 0 && updateMaskArray[DYNAMICOBJECT_RADIUS])
+                {
+                    updateData.DynamicObjectData.Radius = updates[DYNAMICOBJECT_RADIUS].FloatValue;
+                }
+            }
+
+            // Corpse Fields
+            if (objectType == ObjectType.Corpse)
+            {
+                int CORPSE_FIELD_OWNER = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_OWNER);
+                if (CORPSE_FIELD_OWNER >= 0 && updateMaskArray[CORPSE_FIELD_OWNER])
+                {
+                    updateData.CorpseData.Owner = GetGuidValue(updates, CorpseField.CORPSE_FIELD_OWNER).To128();
+                }
+                int CORPSE_FIELD_DISPLAY_ID = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_DISPLAY_ID);
+                if (CORPSE_FIELD_DISPLAY_ID >= 0 && updateMaskArray[CORPSE_FIELD_DISPLAY_ID])
+                {
+                    updateData.CorpseData.DisplayID = updates[CORPSE_FIELD_DISPLAY_ID].UInt32Value;
+                }
+                int CORPSE_FIELD_ITEM = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_ITEM);
+                if (CORPSE_FIELD_ITEM >= 0)
+                {
+                    for (int i = 0; i < 19; i++)
+                    {
+                        if (updateMaskArray[CORPSE_FIELD_ITEM + i])
+                            updateData.CorpseData.Items[i] = updates[CORPSE_FIELD_ITEM + i].UInt32Value;
+                    }
+                }
+                int CORPSE_FIELD_BYTES_1 = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_BYTES_1);
+                if (CORPSE_FIELD_BYTES_1 >= 0 && updateMaskArray[CORPSE_FIELD_BYTES_1])
+                {
+                    updateData.CorpseData.RaceId = (byte)((updates[CORPSE_FIELD_BYTES_1].UInt32Value >> 8) & 0xFF);
+                    updateData.CorpseData.SexId = (byte)((updates[CORPSE_FIELD_BYTES_1].UInt32Value >> 16) & 0xFF);
+                    byte skin = (byte)((updates[CORPSE_FIELD_BYTES_1].UInt32Value >> 24) & 0xFF);
+
+                    int CORPSE_FIELD_BYTES_2 = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_BYTES_2);
+                    if (CORPSE_FIELD_BYTES_2 >= 0 && updateMaskArray[CORPSE_FIELD_BYTES_2])
+                    {
+                        byte face = (byte)(updates[CORPSE_FIELD_BYTES_2].UInt32Value & 0xFF);
+                        byte hairStyle = (byte)((updates[CORPSE_FIELD_BYTES_2].UInt32Value >> 8) & 0xFF);
+                        byte hairColor = (byte)((updates[CORPSE_FIELD_BYTES_2].UInt32Value >> 16) & 0xFF);
+                        byte facialHair = (byte)((updates[CORPSE_FIELD_BYTES_2].UInt32Value >> 24) & 0xFF);
+
+                        var customizations = CharacterCustomizations.ConvertLegacyCustomizationsToModern((Race)updateData.CorpseData.RaceId, (Gender)updateData.CorpseData.SexId, (byte)skin, (byte)face, (byte)hairStyle, (byte)hairColor, (byte)facialHair);
+                        for (int i = 0; i < 5; i++)
+                        {
+                            updateData.CorpseData.Customizations[i] = customizations[i];
+                        }
+                    }
+                }
+                int CORPSE_FIELD_GUILD = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_GUILD);
+                if (CORPSE_FIELD_GUILD >= 0 && updateMaskArray[CORPSE_FIELD_GUILD])
+                {
+                    updateData.CorpseData.GuildGUID = WowGuid128.Create(HighGuidType703.Guild, updates[CORPSE_FIELD_GUILD].UInt32Value);
+                }
+                int CORPSE_FIELD_FLAGS = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_FLAGS);
+                if (CORPSE_FIELD_FLAGS >= 0 && updateMaskArray[CORPSE_FIELD_FLAGS])
+                {
+                    updateData.CorpseData.Flags = updates[CORPSE_FIELD_FLAGS].UInt32Value;
+                }
+                int CORPSE_FIELD_DYNAMIC_FLAGS = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_DYNAMIC_FLAGS);
+                if (CORPSE_FIELD_DYNAMIC_FLAGS >= 0 && updateMaskArray[CORPSE_FIELD_DYNAMIC_FLAGS])
+                {
+                    updateData.CorpseData.DynamicFlags = updates[CORPSE_FIELD_DYNAMIC_FLAGS].UInt32Value;
                 }
             }
         }

@@ -642,9 +642,9 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
         {
             data.WriteUInt32(moveSpline.SplineId);                                          // ID
 
-            //if (!moveSpline.IsCyclic())                                                     // Destination
-            //    data.WriteVector3(moveSpline.FinalDestination());
-            //else
+            if (!moveSpline.SplineFlags.HasAnyFlag(Enums.SplineFlagModern.Cyclic))          // Destination
+                data.WriteVector3(moveSpline.EndPosition);
+            else
                 data.WriteVector3(Vector3.Zero);
 
             bool hasSplineMove = data.WriteBit(moveSpline.SplineCount != 0);
@@ -812,98 +812,6 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 }
                 if (containerData.NumSlots != null)
                     m_fields.SetUpdateField<uint>(ContainerField.CONTAINER_FIELD_NUM_SLOTS, (uint)containerData.NumSlots);
-            }
-
-            GameObjectData goData = m_updateData.GameObjectData;
-            if (goData != null)
-            {
-                if (goData.CreatedBy != null)
-                    m_fields.SetUpdateField<WowGuid128>(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY, goData.CreatedBy);
-                if (goData.DisplayID != null)
-                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_DISPLAYID, (int)goData.DisplayID);
-                if (goData.Flags != null)
-                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FLAGS, (uint)goData.Flags);
-                for (int i = 0; i < 4; i++)
-                {
-                    int startIndex = (int)GameObjectField.GAMEOBJECT_PARENTROTATION;
-                    if (goData.ParentRotation[i] != null)
-                        m_fields.SetUpdateField<float>(startIndex + i, (float)(goData.ParentRotation[i]));
-                }
-                if (goData.FactionTemplate != null)
-                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_FACTION, (int)goData.FactionTemplate);
-                if (goData.Level != null)
-                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_LEVEL, (int)goData.Level);
-                if (goData.State != null || goData.TypeID != null || goData.ArtKit != null || goData.PercentHealth != null)
-                {
-                    if (goData.State != null)
-                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.State, 0);
-                    if (goData.TypeID != null)
-                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.TypeID, 1);
-                    if (goData.ArtKit != null)
-                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.ArtKit, 2);
-                    if (goData.PercentHealth != null)
-                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.PercentHealth, 3);
-                }
-                if (goData.SpellVisualID != null)
-                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_SPELL_VISUAL_ID, (uint)goData.SpellVisualID);
-                if (goData.StateSpellVisualID != null)
-                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_SPELL_VISUAL_ID, (uint)goData.StateSpellVisualID);
-                if (goData.StateAnimID != null)
-                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_ANIM_ID, (uint)goData.StateAnimID);
-                if (goData.StateAnimKitID != null)
-                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_ANIM_KIT_ID, (uint)goData.StateAnimKitID);
-                for (int i = 0; i < 4; i++)
-                {
-                    int startIndex = (int)GameObjectField.GAMEOBJECT_STATE_WORLD_EFFECT_ID;
-                    if (goData.StateWorldEffectIDs[i] != null)
-                        m_fields.SetUpdateField<uint>(startIndex + i, (uint)(goData.StateWorldEffectIDs[i]));
-                }
-                if (goData.CustomParam != null)
-                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FIELD_CUSTOM_PARAM, (uint)goData.CustomParam);
-            }
-
-            CorpseData corpseData = m_updateData.CorpseData;
-            if (corpseData != null)
-            {
-                if (corpseData.Owner != null)
-                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_OWNER, corpseData.Owner);
-                if (corpseData.PartyGUID != null)
-                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_PARTY_GUID, corpseData.PartyGUID);
-                if (corpseData.GuildGUID != null)
-                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_GUILD_GUID, corpseData.GuildGUID);
-                if (corpseData.DisplayID != null)
-                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_DISPLAY_ID, (uint)corpseData.DisplayID);
-                for (int i = 0; i < 19; i++)
-                {
-                    int startIndex = (int)CorpseField.CORPSE_FIELD_ITEMS;
-                    if (corpseData.Items[i] != null)
-                        m_fields.SetUpdateField<uint>(startIndex + i, (uint)corpseData.Items[i]);
-                }
-                if (corpseData.RaceId != null || corpseData.SexId != null || corpseData.ClassId != null)
-                {
-                    if (corpseData.RaceId != null)
-                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.RaceId, 0);
-                    if (corpseData.SexId != null)
-                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.SexId, 1);
-                    if (corpseData.ClassId != null)
-                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.ClassId, 2);
-                }
-                if (corpseData.Flags != null)
-                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_FLAGS, (uint)corpseData.Flags);
-                if (corpseData.DynamicFlags != null)
-                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_DYNAMIC_FLAGS, (uint)corpseData.DynamicFlags);
-                if (corpseData.FactionTemplate != null)
-                    m_fields.SetUpdateField<int>(CorpseField.CORPSE_FIELD_FACTION_TEMPLATE, (int)corpseData.FactionTemplate);
-                for (int i = 0; i < 36; i++)
-                {
-                    int startIndex = (int)CorpseField.CORPSE_FIELD_CUSTOMIZATION_CHOICES;
-                    int sizePerEntry = 2;
-                    if (corpseData.Customizations[i] != null)
-                    {
-                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)corpseData.Customizations[i].ChrCustomizationOptionID);
-                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)corpseData.Customizations[i].ChrCustomizationChoiceID);
-                    }
-                }
             }
 
             UnitData unitData = m_updateData.UnitData;
@@ -1704,6 +1612,115 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                         m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_5, (byte)(activeData.InsertItemsLeftToRight == true ? 1 : 0), 0);
                     if (activeData.PvPRankProgress != null)
                         m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_5, (byte)activeData.PvPRankProgress, 1);
+                }
+            }
+
+            GameObjectData goData = m_updateData.GameObjectData;
+            if (goData != null)
+            {
+                if (goData.CreatedBy != null)
+                    m_fields.SetUpdateField<WowGuid128>(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY, goData.CreatedBy);
+                if (goData.DisplayID != null)
+                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_DISPLAYID, (int)goData.DisplayID);
+                if (goData.Flags != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FLAGS, (uint)goData.Flags);
+                for (int i = 0; i < 4; i++)
+                {
+                    int startIndex = (int)GameObjectField.GAMEOBJECT_PARENTROTATION;
+                    if (goData.ParentRotation[i] != null)
+                        m_fields.SetUpdateField<float>(startIndex + i, (float)(goData.ParentRotation[i]));
+                }
+                if (goData.FactionTemplate != null)
+                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_FACTION, (int)goData.FactionTemplate);
+                if (goData.Level != null)
+                    m_fields.SetUpdateField<int>(GameObjectField.GAMEOBJECT_LEVEL, (int)goData.Level);
+                if (goData.State != null || goData.TypeID != null || goData.ArtKit != null || goData.PercentHealth != null)
+                {
+                    if (goData.State != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.State, 0);
+                    if (goData.TypeID != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.TypeID, 1);
+                    if (goData.ArtKit != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.ArtKit, 2);
+                    if (goData.PercentHealth != null)
+                        m_fields.SetUpdateField<byte>(GameObjectField.GAMEOBJECT_BYTES_1, (byte)goData.PercentHealth, 3);
+                }
+                if (goData.SpellVisualID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_SPELL_VISUAL_ID, (uint)goData.SpellVisualID);
+                if (goData.StateSpellVisualID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_SPELL_VISUAL_ID, (uint)goData.StateSpellVisualID);
+                if (goData.StateAnimID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_ANIM_ID, (uint)goData.StateAnimID);
+                if (goData.StateAnimKitID != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_STATE_ANIM_KIT_ID, (uint)goData.StateAnimKitID);
+                for (int i = 0; i < 4; i++)
+                {
+                    int startIndex = (int)GameObjectField.GAMEOBJECT_STATE_WORLD_EFFECT_ID;
+                    if (goData.StateWorldEffectIDs[i] != null)
+                        m_fields.SetUpdateField<uint>(startIndex + i, (uint)(goData.StateWorldEffectIDs[i]));
+                }
+                if (goData.CustomParam != null)
+                    m_fields.SetUpdateField<uint>(GameObjectField.GAMEOBJECT_FIELD_CUSTOM_PARAM, (uint)goData.CustomParam);
+            }
+
+            DynamicObjectData dynData = m_updateData.DynamicObjectData;
+            if (dynData != null)
+            {
+                if (dynData.Caster != null)
+                    m_fields.SetUpdateField<WowGuid128>(DynamicObjectField.DYNAMICOBJECT_CASTER, dynData.Caster);
+                if (dynData.Type != null)
+                    m_fields.SetUpdateField<uint>(DynamicObjectField.DYNAMICOBJECT_TYPE, (uint)dynData.Type);
+                if (dynData.SpellXSpellVisualID != null)
+                    m_fields.SetUpdateField<int>(DynamicObjectField.DYNAMICOBJECT_SPELL_X_SPELL_VISUAL_ID, (int)dynData.SpellXSpellVisualID);
+                if (dynData.SpellID != null)
+                    m_fields.SetUpdateField<int>(DynamicObjectField.DYNAMICOBJECT_SPELLID, (int)dynData.SpellID);
+                if (dynData.Radius != null)
+                    m_fields.SetUpdateField<float>(DynamicObjectField.DYNAMICOBJECT_RADIUS, (float)dynData.Radius);
+                if (dynData.CastTime != null)
+                    m_fields.SetUpdateField<uint>(DynamicObjectField.DYNAMICOBJECT_CASTTIME, (uint)dynData.CastTime);
+            }
+
+            CorpseData corpseData = m_updateData.CorpseData;
+            if (corpseData != null)
+            {
+                if (corpseData.Owner != null)
+                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_OWNER, corpseData.Owner);
+                if (corpseData.PartyGUID != null)
+                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_PARTY_GUID, corpseData.PartyGUID);
+                if (corpseData.GuildGUID != null)
+                    m_fields.SetUpdateField<WowGuid128>(CorpseField.CORPSE_FIELD_GUILD_GUID, corpseData.GuildGUID);
+                if (corpseData.DisplayID != null)
+                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_DISPLAY_ID, (uint)corpseData.DisplayID);
+                for (int i = 0; i < 19; i++)
+                {
+                    int startIndex = (int)CorpseField.CORPSE_FIELD_ITEMS;
+                    if (corpseData.Items[i] != null)
+                        m_fields.SetUpdateField<uint>(startIndex + i, (uint)corpseData.Items[i]);
+                }
+                if (corpseData.RaceId != null || corpseData.SexId != null || corpseData.ClassId != null)
+                {
+                    if (corpseData.RaceId != null)
+                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.RaceId, 0);
+                    if (corpseData.SexId != null)
+                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.SexId, 1);
+                    if (corpseData.ClassId != null)
+                        m_fields.SetUpdateField<byte>(CorpseField.CORPSE_FIELD_BYTES_1, (byte)corpseData.ClassId, 2);
+                }
+                if (corpseData.Flags != null)
+                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_FLAGS, (uint)corpseData.Flags);
+                if (corpseData.DynamicFlags != null)
+                    m_fields.SetUpdateField<uint>(CorpseField.CORPSE_FIELD_DYNAMIC_FLAGS, (uint)corpseData.DynamicFlags);
+                if (corpseData.FactionTemplate != null)
+                    m_fields.SetUpdateField<int>(CorpseField.CORPSE_FIELD_FACTION_TEMPLATE, (int)corpseData.FactionTemplate);
+                for (int i = 0; i < 36; i++)
+                {
+                    int startIndex = (int)CorpseField.CORPSE_FIELD_CUSTOMIZATION_CHOICES;
+                    int sizePerEntry = 2;
+                    if (corpseData.Customizations[i] != null)
+                    {
+                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)corpseData.Customizations[i].ChrCustomizationOptionID);
+                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)corpseData.Customizations[i].ChrCustomizationChoiceID);
+                    }
                 }
             }
 

@@ -21,6 +21,7 @@ using Framework.GameMath;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
@@ -59,12 +60,6 @@ namespace HermesProxy.World.Server.Packets
                     ItemData = new ItemData();
                     ContainerData = new ContainerData();
                     break;
-                case ObjectType.GameObject:
-                    GameObjectData = new GameObjectData();
-                    break;
-                case ObjectType.Corpse:
-                    CorpseData = new CorpseData();
-                    break;
                 case ObjectType.Unit:
                     UnitData = new UnitData();
                     break;
@@ -74,8 +69,16 @@ namespace HermesProxy.World.Server.Packets
                     PlayerData = new PlayerData();
                     ActivePlayerData = new ActivePlayerData();
                     break;
+                case ObjectType.GameObject:
+                    GameObjectData = new GameObjectData();
+                    break;
+                case ObjectType.DynamicObject:
+                    DynamicObjectData = new DynamicObjectData();
+                    break;
+                case ObjectType.Corpse:
+                    CorpseData = new CorpseData();
+                    break;
             }
-
         }
 
         public UpdateTypeModern Type;
@@ -84,11 +87,12 @@ namespace HermesProxy.World.Server.Packets
         public ObjectData ObjectData;
         public ItemData ItemData;
         public ContainerData ContainerData;
-        public GameObjectData GameObjectData;
-        public CorpseData CorpseData;
         public UnitData UnitData;
         public PlayerData PlayerData;
         public ActivePlayerData ActivePlayerData;
+        public GameObjectData GameObjectData;
+        public DynamicObjectData DynamicObjectData;
+        public CorpseData CorpseData;
 
         public void InitializePlaceholders()
         {
@@ -103,6 +107,15 @@ namespace HermesProxy.World.Server.Packets
                     CreateData.MoveInfo.FlightBackSpeed = 4.5f;
                 if (CreateData.MoveInfo.PitchRate == 0)
                     CreateData.MoveInfo.PitchRate = CreateData.MoveInfo.TurnRate;
+                if (CreateData.MoveInfo.Flags.HasAnyFlag(MovementFlagModern.WalkMode) && (CreateData.MoveSpline != null))
+                    CreateData.MoveInfo.Flags &= ~(uint)MovementFlagModern.WalkMode;
+                if (CreateData.MoveInfo.Orientation < 0)
+                    CreateData.MoveInfo.Orientation += (float)(Math.PI * 2f); 
+            }
+            if (CreateData.MoveSpline != null)
+            {
+                if (CreateData.MoveSpline.SplineFlags == 0)
+                    CreateData.MoveSpline.SplineFlags = (SplineFlagModern)2432696320;
             }
             if (GameObjectData != null)
             {
@@ -268,7 +281,6 @@ namespace HermesProxy.World.Server.Packets
             }    
             
             var bytes = data.GetData();
-            System.Console.WriteLine("Count " + ObjectUpdates.Count + " Size " + bytes.Length);
             buffer.WriteInt32(bytes.Length);
             buffer.WriteBytes(bytes);
             Data = buffer.GetData();
