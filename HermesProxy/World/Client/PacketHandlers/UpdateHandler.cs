@@ -608,7 +608,7 @@ namespace HermesProxy.World.Client
 
                         if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalTarget))
                         {
-                            monsterMove.FinalFacingGuid = packet.ReadGuid();
+                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128();
                             monsterMove.SplineType = SplineTypeModern.FacingTarget;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalOrientation))
@@ -629,7 +629,7 @@ namespace HermesProxy.World.Client
 
                         if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalTarget))
                         {
-                            monsterMove.FinalFacingGuid = packet.ReadGuid();
+                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128();
                             monsterMove.SplineType = SplineTypeModern.FacingTarget;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalOrientation))
@@ -650,7 +650,7 @@ namespace HermesProxy.World.Client
 
                         if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalTarget))
                         {
-                            monsterMove.FinalFacingGuid = packet.ReadGuid();
+                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128();
                             monsterMove.SplineType = SplineTypeModern.FacingTarget;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalOrientation))
@@ -701,7 +701,7 @@ namespace HermesProxy.World.Client
                 if (flags.HasAnyFlag(UpdateFlag.GOPosition))
                 {
                     moveInfo = new MovementInfo();
-                    moveInfo.TransportGuid = packet.ReadPackedGuid();
+                    moveInfo.TransportGuid = packet.ReadPackedGuid().To128();
 
                     moveInfo.Position = packet.ReadVector3();
                     moveInfo.TransportOffset.X = packet.ReadFloat();

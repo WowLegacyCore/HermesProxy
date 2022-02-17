@@ -147,6 +147,11 @@ namespace Framework.IO
             readStream.BaseStream.Position += count;
         }
 
+        public bool CanRead()
+        {
+            return GetCurrentStream().Position != GetCurrentStream().Length;
+        }
+
         public uint ReadPackedTime()
         {
             return (uint)Time.GetUnixTimeFromPackedTime(ReadUInt32());
@@ -155,6 +160,15 @@ namespace Framework.IO
         public Vector3 ReadVector3()
         {
             return new Vector3(ReadFloat(), ReadFloat(), ReadFloat());
+        }
+
+        public Vector3 ReadPackedVector3()
+        {
+            int packed = ReadInt32();
+            float x = ((packed & 0x7FF) << 21 >> 21) * 0.25f;
+            float y = ((((packed >> 11) & 0x7FF) << 21) >> 21) * 0.25f;
+            float z = ((packed >> 22 << 22) >> 22) * 0.25f;
+            return new Vector3(x, y, z);
         }
 
         public Vector4 ReadVector4()

@@ -17,17 +17,15 @@ namespace HermesProxy.World.Objects
         public byte SplineMode;
         public SplineFlagModern SplineFlags;
         public uint SplineCount;
-        public float StartPositionX;
-        public float StartPositionY;
-        public float StartPositionZ;
+        public Vector3 StartPosition;
         public Vector3 EndPosition;
         public float FinalOrientation;
         public Vector3 FinalFacingSpot;
-        public WowGuid FinalFacingGuid;
-        public WowGuid TransportGuid = WowGuid64.Empty;
+        public WowGuid128 FinalFacingGuid;
+        public WowGuid128 TransportGuid;
         public uint TransportId;
         public string TransportType = "";
         public sbyte TransportSeat;
-        public List<Vector3> SplinePoints = null;
+        public List<Vector3> SplinePoints = new();
     }
 }

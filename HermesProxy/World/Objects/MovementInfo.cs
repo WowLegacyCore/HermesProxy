@@ -48,7 +48,7 @@ namespace HermesProxy.World.Objects
 
         public float CorpseOrientation;
 
-        public WowGuid TransportGuid;
+        public WowGuid128 TransportGuid;
 
         public Vector4 TransportOffset;
 
