@@ -433,6 +433,7 @@ namespace HermesProxy.World.Server
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
                 Log.Print(LogType.Error, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.CurrentSessionData.Build} ({GetRemoteIpAddress()}).");
                 CloseSocket();
+                Global.CurrentSessionData.OnDisconnect();
                 return;
             }
 
@@ -451,6 +452,7 @@ namespace HermesProxy.World.Server
             {
                 Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Unknown OS for account: {account.game.Id} ('{authSession.RealmJoinTicket}') address: {address}");
                 CloseSocket();
+                Global.CurrentSessionData.OnDisconnect();
                 return;
             }
 
@@ -464,6 +466,7 @@ namespace HermesProxy.World.Server
             {
                 Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Authentication failed for account: {account.game.Id} ('{authSession.RealmJoinTicket}') address: {address}");
                 CloseSocket();
+                Global.CurrentSessionData.OnDisconnect();
                 return;
             }
 
@@ -501,26 +504,6 @@ namespace HermesProxy.World.Server
 
             Global.CurrentSessionData.SessionKey = _sessionKey;
 
-            //Re-check ip locking (same check as in auth).
-            if (account.battleNet.IsLockedToIP) // if ip is locked
-            {
-                if (account.battleNet.LastIP != address.Address.ToString())
-                {
-                    SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
-                    Log.Print(LogType.Error, "HandleAuthSession: Sent Auth Response (Account IP differs).");
-                    CloseSocket();
-                    return;
-                }
-            }
-
-            if (account.IsBanned()) // if account banned
-            {
-                SendAuthResponseError(BattlenetRpcErrorCode.GameAccountBanned);
-                Log.Print(LogType.Error, "WorldSocket:HandleAuthSession: Sent Auth Response (Account banned).");
-                CloseSocket();
-                return;
-            }
-
             Log.Print(LogType.Server, $"WorldSocket:HandleAuthSession: Client '{authSession.RealmJoinTicket}' authenticated successfully from {address}.");
 
             // Update the last_ip in the database
@@ -536,6 +519,7 @@ namespace HermesProxy.World.Server
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
                 Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
                 CloseSocket();
+                Global.CurrentSessionData.OnDisconnect();
                 return;
             }
 
@@ -682,7 +666,6 @@ namespace HermesProxy.World.Server
                 default:
                     return;
             }
-
         }
 
         void HandleEnterEncryptedModeAck()
@@ -1061,24 +1044,13 @@ namespace HermesProxy.World.Server
         {
             game.Id = Global.CurrentSessionData.GameAccountInfo.Id;
             game.SessionKey = Global.CurrentSessionData.SessionKey;
-            battleNet.LastIP = Global.CurrentSessionData.AccountInfo.LastIP;
-            battleNet.IsLockedToIP = Global.CurrentSessionData.AccountInfo.IsLockedToIP;
-            battleNet.LockCountry = Global.CurrentSessionData.AccountInfo.LockCountry;
-            game.Expansion = 9;
-            game.MuteTime = 0;
             battleNet.Locale = Global.CurrentSessionData.Locale.ToEnum<Locale>();
-            game.Recruiter = 0;
             game.OS = Global.CurrentSessionData.OS;
             battleNet.Id = Global.CurrentSessionData.AccountInfo.Id;
-            battleNet.IsBanned = Global.CurrentSessionData.AccountInfo.IsBanned;
-            game.IsBanned = Global.CurrentSessionData.GameAccountInfo.IsBanned;
-            game.IsRectuiter = false;
 
             if (battleNet.Locale >= Locale.Total)
                 battleNet.Locale = Locale.enUS;
         }
-
-        public bool IsBanned() { return battleNet.IsBanned || game.IsBanned; }
 
         public BattleNet battleNet;
         public Game game;
@@ -1086,23 +1058,14 @@ namespace HermesProxy.World.Server
         public struct BattleNet
         {
             public uint Id;
-            public bool IsLockedToIP;
-            public string LastIP;
-            public string LockCountry;
             public Locale Locale;
-            public bool IsBanned;
         }
 
         public struct Game
         {
             public uint Id;
             public byte[] SessionKey;
-            public byte Expansion;
-            public long MuteTime;
             public string OS;
-            public uint Recruiter;
-            public bool IsRectuiter;
-            public bool IsBanned;
         }
     }
 

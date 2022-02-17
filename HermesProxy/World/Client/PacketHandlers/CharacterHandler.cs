@@ -43,7 +43,7 @@ namespace HermesProxy.World.Client
                 if (char1.ExperienceLevel > charEnum.MaxCharacterLevel)
                     charEnum.MaxCharacterLevel = char1.ExperienceLevel;
 
-                Global.CurrentSessionData.GameData.UpdatePlayerCache(char1.Guid, cache);
+                Global.CurrentSessionData.GameState.UpdatePlayerCache(char1.Guid, cache);
 
                 char1.ZoneId = packet.ReadUInt32();
                 char1.MapId = packet.ReadUInt32();
@@ -181,12 +181,12 @@ namespace HermesProxy.World.Client
                 response.Data.ClassID = cache.ClassId = (Class)packet.ReadInt32();
             }
 
-            if (Global.CurrentSessionData.GameData.CachedPlayers.ContainsKey(response.Player))
-                response.Data.Level = Global.CurrentSessionData.GameData.CachedPlayers[response.Player].Level;
+            if (Global.CurrentSessionData.GameState.CachedPlayers.ContainsKey(response.Player))
+                response.Data.Level = Global.CurrentSessionData.GameState.CachedPlayers[response.Player].Level;
             if (response.Data.Level == 0)
                 response.Data.Level = 1;
 
-            Global.CurrentSessionData.GameData.UpdatePlayerCache(response.Player, cache);
+            Global.CurrentSessionData.GameState.UpdatePlayerCache(response.Player, cache);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
@@ -210,12 +210,14 @@ namespace HermesProxy.World.Client
         {
             LoginVerifyWorld verify = new LoginVerifyWorld();
             verify.MapID = packet.ReadInt32();
-            Global.CurrentSessionData.GameData.CurrentMapId = verify.MapID;
+            Global.CurrentSessionData.GameState.CurrentMapId = verify.MapID;
             verify.Pos.X = packet.ReadFloat();
             verify.Pos.Y = packet.ReadFloat();
             verify.Pos.Z = packet.ReadFloat();
             verify.Pos.Orientation = packet.ReadFloat();
             SendPacketToClient(verify);
+
+            Global.CurrentSessionData.GameState.IsInWorld = true;
         }
 
         [PacketHandler(Opcode.SMSG_CHARACTER_LOGIN_FAILED)]
@@ -224,6 +226,8 @@ namespace HermesProxy.World.Client
             CharacterLoginFailed failed = new CharacterLoginFailed();
             failed.Code = (Framework.Constants.LoginFailureReason)packet.ReadUInt8();
             SendPacketToClient(failed);
+
+            Global.CurrentSessionData.GameState.IsInWorld = false;
         }
 
         [PacketHandler(Opcode.SMSG_UPDATE_ACTION_BUTTONS)]
@@ -253,7 +257,7 @@ namespace HermesProxy.World.Client
             while (buttons.Count < 132)
                 buttons.Add(0);
 
-            Global.CurrentSessionData.GameData.ActionButtons = buttons;
+            Global.CurrentSessionData.GameState.ActionButtons = buttons;
         }
 
         [PacketHandler(Opcode.SMSG_LOGOUT_RESPONSE)]
@@ -270,6 +274,8 @@ namespace HermesProxy.World.Client
         {
             LogoutComplete logout = new LogoutComplete();
             SendPacketToClient(logout);
+
+            Global.CurrentSessionData.GameState.IsInWorld = false;
         }
 
         [PacketHandler(Opcode.SMSG_LOGOUT_CANCEL_ACK)]

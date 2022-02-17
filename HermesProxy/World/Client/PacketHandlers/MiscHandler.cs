@@ -23,7 +23,7 @@ namespace HermesProxy.World.Client
         void HandleAccountDataTimes(WorldPacket packet)
         {
             AccountDataTimes accountData = new AccountDataTimes();
-            accountData.PlayerGuid = Global.CurrentSessionData.GameData.CurrentPlayerGuid;
+            accountData.PlayerGuid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
             accountData.ServerTime = Time.UnixTime;
 
             int count = (Settings.GetClientExpansionVersion() == 1) ? 10 : 8;

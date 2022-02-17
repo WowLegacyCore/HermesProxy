@@ -25,6 +25,7 @@ public static class Global
         public WowGuid128 CurrentPlayerGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();
+        public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
 
         public void UpdatePlayerCache(WowGuid guid, PlayerCache data)
         {
@@ -67,11 +68,34 @@ public static class Global
         public string OS;
         public uint Build;
         public Framework.Realm.RealmId RealmId;
-        public GameSessionData GameData = new();
+        public GameSessionData GameState = new();
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;
         public WorldClient WorldClient;
         public SniffFile ModernSniff;
+
+        public void OnDisconnect()
+        {
+            HermesProxy.Auth.AuthClient.Disconnect();
+
+            if (WorldClient != null)
+            {
+                WorldClient.Disconnect();
+                WorldClient = null;
+            }
+            if (RealmSocket != null)
+            {
+                RealmSocket.CloseSocket();
+                RealmSocket = null;
+            }
+            if (InstanceSocket != null)
+            {
+                InstanceSocket.CloseSocket();
+                InstanceSocket = null;
+            }
+
+            GameState = new();
+        }
     }
     public static LoginSessionData CurrentSessionData = new();
 

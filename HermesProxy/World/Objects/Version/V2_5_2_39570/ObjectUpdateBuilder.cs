@@ -70,7 +70,14 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     throw new ArgumentOutOfRangeException("Unsupported object type!");
             }
 
-            m_fields = new UpdateFieldsArray(size);
+            Global.CurrentSessionData.GameState.Objects.TryGetValue(updateData.Guid, out m_fields);
+            if (m_fields == null)
+            {
+                m_fields = new UpdateFieldsArray(size);
+                Global.CurrentSessionData.GameState.Objects.Add(updateData.Guid, m_fields);
+            }
+            else
+                m_fields.m_updateMask.Clear();
         }
 
         protected bool m_alreadyWritten;
@@ -568,7 +575,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             {
                 bool hasSceneInstanceIDs = false;
                 bool hasRuneState = false;
-                bool hasActionButtons = Global.CurrentSessionData.GameData.ActionButtons.Count != 0;
+                bool hasActionButtons = Global.CurrentSessionData.GameState.ActionButtons.Count != 0;
 
                 data.WriteBit(hasSceneInstanceIDs);
                 data.WriteBit(hasRuneState);
@@ -599,7 +606,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 if (hasActionButtons)
                 {
                     for (int i = 0; i < 132; i++)
-                        data.WriteInt32(Global.CurrentSessionData.GameData.ActionButtons[i]);
+                        data.WriteInt32(Global.CurrentSessionData.GameState.ActionButtons[i]);
                 }
             }
 
@@ -1230,7 +1237,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             }
 
             ActivePlayerData activeData = m_updateData.ActivePlayerData;
-            if (activeData != null)
+            if (activeData != null && m_objectType == Enums.ObjectTypeBCC.ActivePlayer)
             {
                 for (int i = 0; i < 23; i++)
                 {

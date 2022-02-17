@@ -88,6 +88,7 @@ namespace HermesProxy.World.Client
 
             _clientSocket.Shutdown(SocketShutdown.Both);
             _clientSocket.Disconnect(false);
+            Global.CurrentSessionData.WorldClient = null;
         }
 
         public bool IsConnected()
@@ -109,7 +110,8 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
-                _isSuccessful = false;
+                if (_isSuccessful == null)
+                    _isSuccessful = false;
             }
         }
 
@@ -122,14 +124,20 @@ namespace HermesProxy.World.Client
                 if (received == 0)
                 {
                     Log.Print(LogType.Error, "Socket Closed By Server");
-                    _isSuccessful = false;
+                    if (_isSuccessful == null)
+                        _isSuccessful = false;
+                    else
+                        Global.CurrentSessionData.OnDisconnect();
                     return;
                 }
 
                 if (received != LegacyServerPacketHeader.StructSize)
                 {
                     Log.Print(LogType.Error, $"Received {received} bytes when reading header!");
-                    _isSuccessful = false;
+                    if (_isSuccessful == null)
+                        _isSuccessful = false;
+                    else
+                        Global.CurrentSessionData.OnDisconnect();
                     return;
                 }
 
@@ -184,7 +192,8 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Packet Read Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
-                _isSuccessful = false;
+                if (_isSuccessful == null)
+                    _isSuccessful = false;
             }
         }
 
@@ -197,7 +206,8 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Packet Send Error: {ex.Message}");
-                _isSuccessful = false;
+                if (_isSuccessful == null)
+                    _isSuccessful = false;
             }
         }
 
@@ -227,7 +237,8 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Packet Write Error: {ex.Message}");
-                _isSuccessful = false;
+                if (_isSuccessful == null)
+                    _isSuccessful = false;
             }
         }
 

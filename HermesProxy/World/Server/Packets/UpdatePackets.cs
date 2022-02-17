@@ -146,7 +146,7 @@ namespace HermesProxy.World.Server.Packets
                 if (CorpseData.ClassId == null)
                 {
                     if (CorpseData.Owner != null)
-                        CorpseData.ClassId = (byte)Global.CurrentSessionData.GameData.GetUnitClass(CorpseData.Owner);
+                        CorpseData.ClassId = (byte)Global.CurrentSessionData.GameState.GetUnitClass(CorpseData.Owner);
                     else
                         CorpseData.ClassId = 1;
                 }
@@ -247,7 +247,7 @@ namespace HermesProxy.World.Server.Packets
         public override void Write()
         {
             NumObjUpdates = (uint)ObjectUpdates.Count;
-            MapID = (ushort)Global.CurrentSessionData.GameData.CurrentMapId;
+            MapID = (ushort)Global.CurrentSessionData.GameState.CurrentMapId;
 
             _worldPacket.WriteUInt32(NumObjUpdates);
             _worldPacket.WriteUInt16(MapID);

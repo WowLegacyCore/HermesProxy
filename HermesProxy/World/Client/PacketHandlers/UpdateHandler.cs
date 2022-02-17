@@ -14,6 +14,17 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_DESTROY_OBJECT)]
+        void HandleDestroyObject(WorldPacket packet)
+        {
+            WowGuid128 guid = packet.ReadGuid().To128();
+            Global.CurrentSessionData.GameState.Objects.Remove(guid);
+
+            UpdateObject updateObject = new UpdateObject();
+            updateObject.DestroyedGuids.Add(guid);
+            SendPacketToClient(updateObject);
+        }
+
         [PacketHandler(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT)]
         void HandleCompressedUpdateObject(WorldPacket packet)
         {
@@ -44,9 +55,16 @@ namespace HermesProxy.World.Client
                 {
                     case UpdateTypeLegacy.Values:
                     {
-                        WowGuid64 guid = packet.ReadPackedGuid();
+                        var guid = packet.ReadPackedGuid().To128();
                         PrintString($"Guid = {guid.ToString()}", i);
-                        ReadValuesUpdateBlock(packet, guid, i);
+
+                        ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.Values);
+                        AuraUpdate auraUpdate = new AuraUpdate(guid, false);
+                        ReadValuesUpdateBlock(packet, guid, updateData, auraUpdate, i);
+
+                        updateObject.ObjectUpdates.Add(updateData);
+                        if (auraUpdate.Auras.Count != 0)
+                            auraUpdates.Add(auraUpdate);
                         break;
                     }
                     case UpdateTypeLegacy.Movement:
@@ -86,25 +104,27 @@ namespace HermesProxy.World.Client
                     }
                     case UpdateTypeLegacy.NearObjects:
                     {
-                        ReadObjectsBlock(packet, i);
+                        ReadNearObjectsBlock(packet, i);
                         break;
                     }
                     case UpdateTypeLegacy.FarObjects:
                     {
-                        ReadDestroyObjectsBlock(packet, i);
+                        ReadFarObjectsBlock(packet, updateObject, i);
                         break;
                     }
                 }
             }
 
-            if (updateObject.ObjectUpdates.Count != 0)
+            if (updateObject.ObjectUpdates.Count != 0 ||
+                updateObject.DestroyedGuids.Count != 0 ||
+                updateObject.OutOfRangeGuids.Count != 0)
                 SendPacketToClient(updateObject);
 
             foreach (var auraUpdate in auraUpdates)
                 SendPacketToClient(auraUpdate);
         }
 
-        public void ReadObjectsBlock(WorldPacket packet, object index)
+        public void ReadNearObjectsBlock(WorldPacket packet, object index)
         {
             var objCount = packet.ReadInt32();
             PrintString($"NearObjectsCount = {objCount}", index);
@@ -115,14 +135,16 @@ namespace HermesProxy.World.Client
             }
         }
 
-        public void ReadDestroyObjectsBlock(WorldPacket packet, object index)
+        public void ReadFarObjectsBlock(WorldPacket packet, UpdateObject updateObject, object index)
         {
             var objCount = packet.ReadInt32();
             PrintString($"FarObjectsCount = {objCount}", index);
             for (var j = 0; j < objCount; j++)
             {
-                var guid = packet.ReadPackedGuid();
+                var guid = packet.ReadPackedGuid().To128();
                 PrintString($"Guid = {objCount}", index, j);
+                Global.CurrentSessionData.GameState.Objects.Remove(guid);
+                updateObject.OutOfRangeGuids.Add(guid);
             }
         }
 
@@ -140,11 +162,11 @@ namespace HermesProxy.World.Client
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, true, updateData);
         }
 
-        public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, int index)
+        public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, int index)
         {
             BitArray updateMaskArray = null;
             var updates = ReadValuesUpdateBlock(packet, guid.GetObjectType(), index, false, null, out updateMaskArray);
-            //StoreObjectUpdate
+            StoreObjectUpdate(guid, guid.GetObjectType(), updateMaskArray, updates, auraUpdate, false, updateData);
         }
 
         private string GetIndexString(params object[] values)
@@ -985,7 +1007,7 @@ namespace HermesProxy.World.Client
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
-                                classId = Global.CurrentSessionData.GameData.GetUnitClass(guid);
+                                classId = Global.CurrentSessionData.GameState.GetUnitClass(guid);
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
                                 updateData.UnitData.Power[powerSlot] = updates[UNIT_FIELD_POWER1 + i].Int32Value;
@@ -1003,7 +1025,7 @@ namespace HermesProxy.World.Client
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
-                                classId = Global.CurrentSessionData.GameData.GetUnitClass(guid);
+                                classId = Global.CurrentSessionData.GameState.GetUnitClass(guid);
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
                                 updateData.UnitData.MaxPower[powerSlot] = updates[UNIT_FIELD_MAXPOWER1 + i].Int32Value;
@@ -1314,7 +1336,7 @@ namespace HermesProxy.World.Client
                             if (spellId != 0)
                             {
                                 AuraDataInfo data = new AuraDataInfo();
-                                data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Objects.SpellCastSource.Aura, (uint)Global.CurrentSessionData.GameData.CurrentMapId, (uint)spellId, guid.GetLow());
+                                data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Objects.SpellCastSource.Aura, (uint)Global.CurrentSessionData.GameState.CurrentMapId, (uint)spellId, guid.GetLow());
                                 data.SpellID = spellId;
                                 data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
 
@@ -1556,7 +1578,7 @@ namespace HermesProxy.World.Client
                     if (raceId == Race.None || sexId == Gender.None)
                     {
                         Global.PlayerCache cache;
-                        if (Global.CurrentSessionData.GameData.CachedPlayers.TryGetValue(guid, out cache))
+                        if (Global.CurrentSessionData.GameState.CachedPlayers.TryGetValue(guid, out cache))
                         {
                             raceId = cache.RaceId;
                             sexId = cache.SexId;
@@ -1790,7 +1812,7 @@ namespace HermesProxy.World.Client
                     if (updateData.UnitData.ClassId != null)
                         classId = (Class)updateData.UnitData.ClassId;
                     else
-                        classId = Global.CurrentSessionData.GameData.GetUnitClass(guid);
+                        classId = Global.CurrentSessionData.GameState.GetUnitClass(guid);
                     sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, PowerType.ComboPoints);
                     if (powerSlot >= 0)
                         updateData.UnitData.Power[powerSlot] = comboPoints;

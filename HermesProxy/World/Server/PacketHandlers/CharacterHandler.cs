@@ -47,18 +47,18 @@ namespace HermesProxy.World.Server
         void HandleLoadScreen(LoadingScreenNotify loadingScreenNotify)
         {
             if (loadingScreenNotify.MapID >= 0)
-                Global.CurrentSessionData.GameData.CurrentMapId = loadingScreenNotify.MapID;
+                Global.CurrentSessionData.GameState.CurrentMapId = loadingScreenNotify.MapID;
         }
 
         [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAME)]
         void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
-            if (Global.CurrentSessionData.GameData.CurrentPlayerGuid == null)
-                Global.CurrentSessionData.GameData.CurrentPlayerGuid = queryPlayerName.Player;
+            if (Global.CurrentSessionData.GameState.CurrentPlayerGuid == null)
+                Global.CurrentSessionData.GameState.CurrentPlayerGuid = queryPlayerName.Player;
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
             packet.WriteGuid(queryPlayerName.Player.To64());
-            SendPacketToServer(packet, Global.CurrentSessionData.GameData.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+            SendPacketToServer(packet, Global.CurrentSessionData.GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
         }
 
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
