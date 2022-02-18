@@ -4,6 +4,7 @@
 using BNetServer;
 using HermesProxy.World;
 using HermesProxy.World.Client;
+using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server;
 using System.Collections.Generic;
@@ -26,6 +27,33 @@ public static class Global
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
+        public List<WowGuid128> OwnCharacters = new();
+
+        public WowGuid128 GetGameAccountGuidForPlayer(WowGuid128 playerGuid)
+        {
+            if (OwnCharacters.Contains(playerGuid))
+                return WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
+            else
+                return WowGuid128.Create(HighGuidType703.WowAccount, playerGuid.GetLow());
+        }
+
+        public WowGuid128 GetBnetAccountGuidForPlayer(WowGuid128 playerGuid)
+        {
+            if (OwnCharacters.Contains(playerGuid))
+                return WowGuid128.Create(HighGuidType703.BNetAccount, Global.CurrentSessionData.AccountInfo.Id);
+            else
+                return WowGuid128.Create(HighGuidType703.BNetAccount, playerGuid.GetLow());
+        }
+
+        public string GetPlayerName(WowGuid128 guid)
+        {
+            if (CachedPlayers.ContainsKey(guid))
+            {
+                if (CachedPlayers[guid].Name != null)
+                    return CachedPlayers[guid].Name;
+            }
+            return "";
+        }
 
         public void UpdatePlayerCache(WowGuid guid, PlayerCache data)
         {

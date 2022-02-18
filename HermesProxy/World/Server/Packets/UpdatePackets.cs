@@ -184,7 +184,12 @@ namespace HermesProxy.World.Server.Packets
             if (PlayerData != null)
             {
                 if (PlayerData.WowAccount == null)
-                    PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
+                {
+                    if (CreateData.ThisIsYou == true)
+                        PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
+                    else
+                        PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Guid.GetLow());
+                }
                 if (PlayerData.VirtualPlayerRealm == null)
                     PlayerData.VirtualPlayerRealm = Global.CurrentSessionData.RealmId.GetAddress();
                 if (PlayerData.HonorLevel == null)

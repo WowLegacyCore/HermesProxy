@@ -27,6 +27,7 @@ namespace HermesProxy.World.Client
                 EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
                 Global.PlayerCache cache = new Global.PlayerCache();
                 char1.Guid = packet.ReadGuid().To128();
+                Global.CurrentSessionData.GameState.OwnCharacters.Add(char1.Guid);
                 char1.Name = cache.Name = packet.ReadCString();
                 char1.RaceId = cache.RaceId = (Race)packet.ReadUInt8();
                 char1.ClassId = cache.ClassId = (Class)packet.ReadUInt8();
@@ -198,8 +199,8 @@ namespace HermesProxy.World.Client
             }
 
             response.Data.IsDeleted = false;
-            response.Data.AccountID = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
-            response.Data.BnetAccountID = WowGuid128.Create(HighGuidType703.BNetAccount, Global.CurrentSessionData.AccountInfo.Id);
+            response.Data.AccountID = Global.CurrentSessionData.GameState.GetGameAccountGuidForPlayer(response.Player);
+            response.Data.BnetAccountID = Global.CurrentSessionData.GameState.GetBnetAccountGuidForPlayer(response.Player);
             response.Data.GuidActual = WowGuid128.Empty;
             response.Data.VirtualRealmAddress = Global.CurrentSessionData.RealmId.GetAddress();
             SendPacketToClient(response);
