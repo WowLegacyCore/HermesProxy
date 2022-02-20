@@ -28,7 +28,15 @@ public static class Global
         public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
         public List<WowGuid128> OwnCharacters = new();
+        public Dictionary<string, int> ChannelIds = new();
 
+        public void SetChannelId(string name, int id)
+        {
+            if (ChannelIds.ContainsKey(name))
+                ChannelIds[name] = id;
+            else
+                ChannelIds.Add(name, id);
+        }
         public WowGuid128 GetGameAccountGuidForPlayer(WowGuid128 playerGuid)
         {
             if (OwnCharacters.Contains(playerGuid))

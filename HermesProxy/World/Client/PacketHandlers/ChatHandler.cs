@@ -10,6 +10,121 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_CHANNEL_NOTIFY)]
+        void HandleChannelNotify(WorldPacket packet)
+        {
+            ChatNotify type = (ChatNotify)packet.ReadUInt8();
+
+            if (type == ChatNotify.InvalidName)           // hack, because of some silly reason this type
+                packet.ReadBytes(3);                      // has 3 null bytes before the invalid channel name
+
+            string channelName = packet.ReadCString();
+
+            Console.WriteLine("Notify " + type + " channel " + channelName);
+
+            switch (type)
+            {
+                case ChatNotify.PlayerAlreadyMember:
+                case ChatNotify.Invite:
+                case ChatNotify.ModerationOn:
+                case ChatNotify.ModerationOff:
+                case ChatNotify.AnnouncementsOn:
+                case ChatNotify.AnnouncementsOff:
+                case ChatNotify.PasswordChanged:
+                case ChatNotify.OwnerChanged:
+                case ChatNotify.Joined:
+                case ChatNotify.Left:
+                case ChatNotify.VoiceOn:
+                case ChatNotify.VoiceOff:
+                {
+                    packet.ReadGuid();
+                    break;
+                }
+                case ChatNotify.YouJoined:
+                {
+                    ChannelFlags flags;
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                        flags = (ChannelFlags)packet.ReadUInt8();
+                    else
+                        flags = (ChannelFlags)packet.ReadUInt32();
+                    int channelId = packet.ReadInt32();
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                        packet.ReadInt32(); // unk
+
+                    Global.CurrentSessionData.GameState.SetChannelId(channelName, channelId);
+
+                    ChannelNotifyJoined joined = new ChannelNotifyJoined();
+                    joined.Channel = channelName;
+                    joined.ChannelFlags = flags;
+                    joined.ChatChannelID = channelId;
+                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)Global.CurrentSessionData.GameState.CurrentMapId, 1, (ulong)channelId);
+                    SendPacketToClient(joined);
+
+                    break;
+                }
+                case ChatNotify.YouLeft:
+                {
+                    ChannelNotifyLeft left = new ChannelNotifyLeft();
+                    left.Channel = channelName;
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    {
+                        left.ChatChannelID = packet.ReadInt32();
+                        left.Suspended = packet.ReadBool(); // Banned?
+                    }
+                    else
+                    {
+                        left.ChatChannelID = Global.CurrentSessionData.GameState.ChannelIds[channelName];
+                        left.Suspended = false;
+                    }
+                    SendPacketToClient(left);
+                    break;
+                }
+                case ChatNotify.PlayerNotFound:
+                case ChatNotify.ChannelOwner:
+                case ChatNotify.PlayerNotBanned:
+                case ChatNotify.PlayerInvited:
+                case ChatNotify.PlayerInviteBanned:
+                {
+                    packet.ReadCString(); // Player Name
+                    break;
+                }
+                case ChatNotify.ModeChange:
+                {
+                    packet.ReadGuid();
+                    packet.ReadUInt8(); // Old ChannelMemberFlag
+                    packet.ReadUInt8(); // New ChannelMemberFlag
+                    break;
+                }
+                case ChatNotify.PlayerKicked:
+                case ChatNotify.PlayerBanned:
+                case ChatNotify.PlayerUnbanned:
+                {
+                    packet.ReadGuid(); // Bad
+                    packet.ReadGuid(); // Good
+                    break;
+                }
+                case ChatNotify.TrialRestricted:
+                {
+                    packet.ReadGuid();
+                    break;
+                }
+                case ChatNotify.WrongPassword:
+                case ChatNotify.NotMember:
+                case ChatNotify.NotModerator:
+                case ChatNotify.NotOwner:
+                case ChatNotify.Muted:
+                case ChatNotify.Banned:
+                case ChatNotify.InviteWrongFaction:
+                case ChatNotify.WrongFaction:
+                case ChatNotify.InvalidName:
+                case ChatNotify.NotModerated:
+                case ChatNotify.Throttled:
+                case ChatNotify.NotInArea:
+                case ChatNotify.NotInLfg:
+                    break;
+            }
+        }
+
         [PacketHandler(Opcode.SMSG_CHAT, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleServerChatMessageVanilla(WorldPacket packet)
         {

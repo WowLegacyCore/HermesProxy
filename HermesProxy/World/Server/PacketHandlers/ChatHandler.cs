@@ -27,6 +27,16 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_CHAT_LEAVE_CHANNEL)]
+        void HandleChatLeaveChannel(LeaveChannel leave)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_LEAVE_CHANNEL);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WriteInt32(leave.ZoneChannelID);
+            packet.WriteCString(leave.ChannelName);
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_AFK)]
         void HandleChatMessageAFK(ChatMessageAFK afk)
         {
@@ -43,6 +53,15 @@ namespace HermesProxy.World.Server
                 Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, dnd.Text, "", "");
             else
                 Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, dnd.Text, "", "");
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_CHANNEL)]
+        void HandleChatMessageChannel(ChatMessageChannel channel)
+        {
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, channel.Text, channel.Target, "");
+            else
+                Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, channel.Text, channel.Target, "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_WHISPER)]

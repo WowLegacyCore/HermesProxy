@@ -43,6 +43,61 @@ namespace HermesProxy.World.Server.Packets
         public int ChatChannelId;
     }
 
+    public class ChannelNotifyJoined : ServerPacket
+    {
+        public ChannelNotifyJoined() : base(Opcode.SMSG_CHANNEL_NOTIFY_JOINED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
+            _worldPacket.WriteBits(ChannelWelcomeMsg.GetByteCount(), 11);
+            _worldPacket.WriteUInt32((uint)ChannelFlags);
+            _worldPacket.WriteInt32(ChatChannelID);
+            _worldPacket.WriteUInt64(InstanceID);
+            _worldPacket.WritePackedGuid128(ChannelGUID);
+            _worldPacket.WriteString(Channel);
+            _worldPacket.WriteString(ChannelWelcomeMsg);
+        }
+
+        public string ChannelWelcomeMsg = "";
+        public int ChatChannelID;
+        public ulong InstanceID;
+        public ChannelFlags ChannelFlags;
+        public string Channel = "";
+        public WowGuid128 ChannelGUID;
+    }
+
+    public class LeaveChannel : ClientPacket
+    {
+        public LeaveChannel(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ZoneChannelID = _worldPacket.ReadInt32();
+            ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
+        }
+
+        public int ZoneChannelID;
+        public string ChannelName;
+    }
+
+    public class ChannelNotifyLeft : ServerPacket
+    {
+        public ChannelNotifyLeft() : base(Opcode.SMSG_CHANNEL_NOTIFY_LEFT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
+            _worldPacket.WriteBit(Suspended);
+            _worldPacket.WriteInt32(ChatChannelID);
+            _worldPacket.WriteString(Channel);
+        }
+
+        public string Channel;
+        public int ChatChannelID;
+        public bool Suspended;
+    }
+
     public class ChatMessageAFK : ClientPacket
     {
         public ChatMessageAFK(WorldPacket packet) : base(packet) { }
@@ -67,6 +122,26 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public string Text;
+    }
+
+    public class ChatMessageChannel : ClientPacket
+    {
+        public ChatMessageChannel(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Language = _worldPacket.ReadUInt32();
+            ChannelGUID = _worldPacket.ReadPackedGuid128();
+            uint targetLen = _worldPacket.ReadBits<uint>(9);
+            uint textLen = _worldPacket.ReadBits<uint>(9);
+            Target = _worldPacket.ReadString(targetLen);
+            Text = _worldPacket.ReadString(textLen);
+        }
+
+        public uint Language;
+        public WowGuid128 ChannelGUID;
+        public string Text;
+        public string Target;
     }
 
     public class ChatMessageWhisper : ClientPacket
