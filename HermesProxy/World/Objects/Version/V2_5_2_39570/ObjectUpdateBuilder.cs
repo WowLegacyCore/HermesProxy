@@ -165,50 +165,8 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
             if (m_createBits.MovementUpdate)
             {
                 MovementInfo moveInfo = m_updateData.CreateData.MoveInfo;
-                bool HasFallDirection = moveInfo.Flags.HasAnyFlag(HermesProxy.World.Enums.MovementFlagModern.Falling);
-                bool HasFall = HasFallDirection || moveInfo.FallTime != 0;
-                bool HasSpline = m_updateData.CreateData.MoveSpline != null;
-
-                data.WritePackedGuid128(m_updateData.Guid);                     // MoverGUID
-
-                data.WriteUInt32(moveInfo.MoveTime);                            // MoveTime
-                data.WriteFloat(moveInfo.Position.X);
-                data.WriteFloat(moveInfo.Position.Y);
-                data.WriteFloat(moveInfo.Position.Z);
-                data.WriteFloat(moveInfo.Orientation);
-
-                data.WriteFloat(moveInfo.SwimPitch);                            // Pitch
-                data.WriteFloat(moveInfo.SplineElevation);                      // StepUpStartElevation
-
-                data.WriteUInt32(0);                                            // RemoveForcesIDs.size()
-                data.WriteUInt32(0);                                            // MoveIndex
-
-                //for (public uint i = 0; i < RemoveForcesIDs.Count; ++i)
-                //    *data << ObjectGuid(RemoveForcesIDs);
-
-                data.WriteBits(moveInfo.Flags, 30);
-                data.WriteBits(moveInfo.FlagsExtra, 18);
-                data.WriteBit(moveInfo.TransportGuid != null);                 // HasTransport
-                data.WriteBit(HasFall);                                        // HasFall
-                data.WriteBit(HasSpline);                                      // HasSpline - marks that the unit uses spline movement
-                data.WriteBit(false);                                          // HeightChangeFailed
-                data.WriteBit(false);                                          // RemoteTimeValid
-
-                if (moveInfo.TransportGuid != null)
-                    WriteTransportInfo(data, moveInfo);
-
-                if (HasFall)
-                {
-                    data.WriteUInt32(moveInfo.FallTime);                              // Time
-                    data.WriteFloat(moveInfo.JumpVerticalSpeed);                      // JumpVelocity
-
-                    if (data.WriteBit(HasFallDirection))
-                    {
-                        data.WriteFloat(moveInfo.JumpSinAngle);                       // Direction
-                        data.WriteFloat(moveInfo.JumpCosAngle);
-                        data.WriteFloat(moveInfo.JumpHorizontalSpeed);                // Speed
-                    }
-                }
+                bool hasSpline = m_updateData.CreateData.MoveSpline != null;
+                moveInfo.WriteMovementInfoModern(data, m_updateData.Guid);
 
                 data.WriteFloat(moveInfo.WalkSpeed);
                 data.WriteFloat(moveInfo.RunSpeed);
@@ -232,7 +190,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     data.WriteFloat(1.0f);                                       // MovementForcesModMagnitude
                 //}
 
-                data.WriteBit(HasSpline);
+                data.WriteBit(hasSpline);
                 data.FlushBits();
 
                 //if (movementForces != null)
@@ -240,7 +198,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 //        MovementExtensions.WriteMovementForceWithDirection(force, data, unit);
 
                 // HasMovementSpline - marks that spline data is present in packet
-                if (HasSpline)
+                if (hasSpline)
                     WriteCreateObjectSplineDataBlock(m_updateData.CreateData.MoveSpline, data);
             }
 
@@ -290,7 +248,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 data.WriteUInt32(0);
 
             if (m_createBits.MovementTransport)
-                WriteTransportInfo(data, m_updateData.CreateData.MoveInfo);
+                m_updateData.CreateData.MoveInfo.WriteTransportInfoModern(data);
 
             /*
             if (m_createBits.AreaTrigger)
@@ -619,30 +577,6 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 data.FlushBits();
             }
             */
-        }
-
-        public static void WriteTransportInfo(WorldPacket data, MovementInfo moveInfo)
-        {
-            bool hasPrevTime = false;
-            bool hasVehicleId = moveInfo.VehicleId != 0;
-
-            data.WritePackedGuid128(moveInfo.TransportGuid.To128()); // Transport Guid
-            data.WriteFloat(moveInfo.TransportOffset.X);
-            data.WriteFloat(moveInfo.TransportOffset.Y);
-            data.WriteFloat(moveInfo.TransportOffset.Z);
-            data.WriteFloat(moveInfo.TransportOffset.W);
-            data.WriteInt8(moveInfo.TransportSeat);                  // VehicleSeatIndex
-            data.WriteUInt32(moveInfo.TransportTime);                // MoveTime
-
-            data.WriteBit(hasPrevTime);
-            data.WriteBit(hasVehicleId);
-            data.FlushBits();
-
-            if (hasPrevTime)
-                data.WriteUInt32(0);                                 // PrevMoveTime
-
-            if (hasVehicleId)
-                data.WriteUInt32(moveInfo.VehicleId);                // VehicleRecID
         }
 
         public static void WriteCreateObjectSplineDataBlock(ServerSideMovement moveSpline, WorldPacket data)

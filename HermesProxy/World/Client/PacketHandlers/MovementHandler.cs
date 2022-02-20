@@ -10,61 +10,55 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
-        private static MovementInfo ReadMovementInfo(WorldPacket packet, WowGuid guid)
+        [PacketHandler(Opcode.MSG_MOVE_START_FORWARD)]
+        [PacketHandler(Opcode.MSG_MOVE_START_BACKWARD)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP)]
+        [PacketHandler(Opcode.MSG_MOVE_START_STRAFE_LEFT)]
+        [PacketHandler(Opcode.MSG_MOVE_START_STRAFE_RIGHT)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP_STRAFE)]
+        [PacketHandler(Opcode.MSG_MOVE_START_ASCEND)]
+        [PacketHandler(Opcode.MSG_MOVE_START_DESCEND)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP_ASCEND)]
+        [PacketHandler(Opcode.MSG_MOVE_JUMP)]
+        [PacketHandler(Opcode.MSG_MOVE_START_TURN_LEFT)]
+        [PacketHandler(Opcode.MSG_MOVE_START_TURN_RIGHT)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP_TURN)]
+        [PacketHandler(Opcode.MSG_MOVE_START_PITCH_UP)]
+        [PacketHandler(Opcode.MSG_MOVE_START_PITCH_DOWN)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP_PITCH)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_RUN_MODE)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_WALK_MODE)]
+        [PacketHandler(Opcode.MSG_MOVE_TELEPORT)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_FACING)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_PITCH)]
+        [PacketHandler(Opcode.MSG_MOVE_TOGGLE_COLLISION_CHEAT)]
+        [PacketHandler(Opcode.MSG_MOVE_GRAVITY_CHNG)]
+        [PacketHandler(Opcode.MSG_MOVE_ROOT)]
+        [PacketHandler(Opcode.MSG_MOVE_UNROOT)]
+        [PacketHandler(Opcode.MSG_MOVE_START_SWIM)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP_SWIM)]
+        [PacketHandler(Opcode.MSG_MOVE_START_SWIM_CHEAT)]
+        [PacketHandler(Opcode.MSG_MOVE_STOP_SWIM_CHEAT)]
+        [PacketHandler(Opcode.MSG_MOVE_HEARTBEAT)]
+        [PacketHandler(Opcode.MSG_MOVE_FALL_LAND)]
+        [PacketHandler(Opcode.MSG_MOVE_UPDATE_CAN_FLY)]
+        [PacketHandler(Opcode.MSG_MOVE_UPDATE_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY)]
+        [PacketHandler(Opcode.MSG_MOVE_HOVER)]
+        [PacketHandler(Opcode.MSG_MOVE_FEATHER_FALL)]
+        [PacketHandler(Opcode.MSG_MOVE_WATER_WALK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FALL_RESET)]
+        [PacketHandler(Opcode.CMSG_MOVE_SET_FLY)]
+        [PacketHandler(Opcode.CMSG_MOVE_CHANGE_TRANSPORT)]
+        [PacketHandler(Opcode.CMSG_MOVE_NOT_ACTIVE_MOVER)]
+        [PacketHandler(Opcode.CMSG_DISMISS_CONTROLLED_VEHICLE)]
+        void HandleMovementMessages(WorldPacket packet)
         {
-            var info = new MovementInfo();
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                info.Flags = packet.ReadUInt32();
-            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                info.Flags = (uint)(((MovementFlagTBC)packet.ReadUInt32()).CastFlags<MovementFlagWotLK>());
-            else
-                info.Flags = (uint)(((MovementFlagVanilla)packet.ReadUInt32()).CastFlags<MovementFlagWotLK>());
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                info.FlagsExtra = packet.ReadUInt16();
-            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                info.FlagsExtra = packet.ReadUInt8();
-
-            info.MoveTime = packet.ReadUInt32();
-
-            info.Position = packet.ReadVector3();
-            info.Orientation = packet.ReadFloat();
-
-            if (info.Flags.HasAnyFlag(MovementFlagWotLK.OnTransport))
-            {
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
-                    info.TransportGuid = packet.ReadPackedGuid().To128();
-                else
-                    info.TransportGuid = packet.ReadGuid().To128();
-
-                info.TransportOffset = packet.ReadVector4();
-                info.TransportTime = packet.ReadUInt32();
-
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    info.TransportSeat = packet.ReadInt8();
-
-                if (info.FlagsExtra.HasAnyFlag(MovementFlagExtra.InterpolateMove))
-                    info.TransportTime2 = packet.ReadUInt32();
-            }
-
-            if (info.Flags.HasAnyFlag(MovementFlagWotLK.Swimming | MovementFlagWotLK.Flying) ||
-                info.FlagsExtra.HasAnyFlag(MovementFlagExtra.AlwaysAllowPitching))
-                info.SwimPitch = packet.ReadFloat();
-
-            info.FallTime = packet.ReadUInt32();
-            if (info.Flags.HasAnyFlag(MovementFlagWotLK.Falling))
-            {
-                info.JumpVerticalSpeed = packet.ReadFloat();
-                info.JumpSinAngle = packet.ReadFloat();
-                info.JumpCosAngle = packet.ReadFloat();
-                info.JumpHorizontalSpeed = packet.ReadFloat();
-            }
-
-            if (info.Flags.HasAnyFlag(MovementFlagWotLK.SplineElevation))
-                info.SplineElevation = packet.ReadFloat();
-
-            return info;
+            MoveUpdate moveUpdate = new MoveUpdate();
+            moveUpdate.Guid = packet.ReadPackedGuid().To128();
+            moveUpdate.MoveInfo = new();
+            moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet);
+            moveUpdate.MoveInfo.Flags = (uint)(((MovementFlagWotLK)moveUpdate.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            SendPacketToClient(moveUpdate);
         }
 
         [PacketHandler(Opcode.SMSG_COMPRESSED_MOVES)]

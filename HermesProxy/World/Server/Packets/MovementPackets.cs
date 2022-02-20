@@ -20,10 +20,24 @@ using Framework.Constants;
 using Framework.GameMath;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
+    public class MoveUpdate : ServerPacket
+    {
+        public MoveUpdate() : base(Opcode.SMSG_MOVE_UPDATE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            MoveInfo.WriteMovementInfoModern(_worldPacket, Guid);
+        }
+
+        public WowGuid128 Guid;
+        public MovementInfo MoveInfo;
+    }
+
     public class MonsterMove : ServerPacket
     {
         public MonsterMove(WowGuid128 guid, ServerSideMovement moveSpline) : base(Opcode.SMSG_ON_MONSTER_MOVE, ConnectionType.Instance)

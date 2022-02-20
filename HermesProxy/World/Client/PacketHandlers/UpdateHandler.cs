@@ -527,7 +527,8 @@ namespace HermesProxy.World.Client
 
             if (flags.HasAnyFlag(UpdateFlag.Living))
             {
-                moveInfo = ReadMovementInfo(packet, guid);
+                moveInfo = new MovementInfo();
+                moveInfo.ReadMovementInfoLegacy(packet);
                 var moveFlags = moveInfo.Flags;
 
                 var speeds = 6;
@@ -593,6 +594,7 @@ namespace HermesProxy.World.Client
 
                 if (moveFlags.HasAnyFlag(MovementFlagWotLK.SplineEnabled))
                 {
+                    moveInfo.HasSplineData = true;
                     ServerSideMovement monsterMove = new ServerSideMovement();
 
                     if (moveInfo.TransportGuid != null)
