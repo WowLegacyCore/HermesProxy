@@ -23,6 +23,7 @@ public static class Global
     {
         public bool IsInWorld;
         public uint? CurrentMapId;
+        public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();

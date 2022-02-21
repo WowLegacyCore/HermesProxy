@@ -374,4 +374,44 @@ namespace HermesProxy.World.Server.Packets
         public MovementInfo MoveInfo;
         public float Speed = 1.0f;
     }
+
+    public class MoveSplineSetFlag : ServerPacket
+    {
+        public MoveSplineSetFlag(Opcode opcode) : base(opcode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(MoverGUID);
+        }
+
+        public WowGuid128 MoverGUID;
+    }
+
+    public class MoveSetFlag : ServerPacket
+    {
+        public MoveSetFlag(Opcode opcode) : base(opcode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(MoverGUID);
+            _worldPacket.WriteUInt32(MoveCounter);
+        }
+
+        public WowGuid128 MoverGUID;
+        public uint MoveCounter = 0;
+    }
+
+    public class MovementAckMessage : ClientPacket
+    {
+        public MovementAckMessage(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MoverGUID = _worldPacket.ReadPackedGuid128();
+            Ack.Read(_worldPacket);
+        }
+
+        public WowGuid128 MoverGUID;
+        public MovementAck Ack;
+    }
 }

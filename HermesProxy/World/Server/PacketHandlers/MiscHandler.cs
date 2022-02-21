@@ -21,5 +21,17 @@ namespace HermesProxy.World.Server
                 SendPacketToServer(packet);
             }
         }
+
+        [PacketHandler(Opcode.CMSG_AREA_TRIGGER)]
+        void HandleAreaTrigger(AreaTriggerPkt at)
+        {
+            if (at.Entered == false)
+                return;
+
+            Global.CurrentSessionData.GameState.LastEnteredAreaTrigger = at.AreaTriggerID;
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_AREA_TRIGGER);
+            packet.WriteUInt32(at.AreaTriggerID);
+            SendPacketToServer(packet);
+        }
     }
 }

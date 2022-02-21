@@ -243,4 +243,35 @@ namespace HermesProxy.World.Server.Packets
         public int ServerTimeHolidayOffset;
         public int GameTimeHolidayOffset;
     }
+
+    class AreaTriggerPkt : ClientPacket
+    {
+        public AreaTriggerPkt(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            AreaTriggerID = _worldPacket.ReadUInt32();
+            Entered = _worldPacket.HasBit();
+            FromClient = _worldPacket.HasBit();
+        }
+
+        public uint AreaTriggerID;
+        public bool Entered;
+        public bool FromClient;
+    }
+
+    class AreaTriggerDenied : ServerPacket
+    {
+        public AreaTriggerDenied() : base(Opcode.SMSG_AREA_TRIGGER_DENIED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(AreaTriggerID);
+            //_worldPacket.WriteBit(Entered);
+            //_worldPacket.FlushBits();
+        }
+
+        public uint AreaTriggerID = 0;
+        public bool Entered = false;
+    }
 }

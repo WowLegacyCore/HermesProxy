@@ -105,5 +105,24 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(login);
         }
+
+        [PacketHandler(Opcode.SMSG_AREA_TRIGGER_MESSAGE)]
+        void HandleAreaTriggerMessage(WorldPacket packet)
+        {
+            uint length = packet.ReadUInt32();
+            string message = packet.ReadString(length);
+
+            if (Global.CurrentSessionData.GameState.LastEnteredAreaTrigger != 0)
+            {
+                AreaTriggerDenied denied = new AreaTriggerDenied();
+                denied.AreaTriggerID = Global.CurrentSessionData.GameState.LastEnteredAreaTrigger;
+                SendPacketToClient(denied);
+            }
+            else
+            {
+                ChatPkt chat = new ChatPkt(ChatMessageTypeModern.System, 0, null, "", null, "", message, "", ChatFlags.None, 0);
+                SendPacketToClient(chat);
+            }
+        }
     }
 }

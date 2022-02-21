@@ -5,6 +5,7 @@ using HermesProxy.World;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
+using System;
 
 namespace HermesProxy.World.Server
 {
@@ -87,10 +88,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK)]
         void HandleMoveForceSpeedChangeAck(MovementSpeedAck speed)
         {
-            string opcodeName = speed.GetUniversalOpcode().ToString().Replace("CMSG_MOVE_FORCE", "CMSG_FORCE");
-            Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
-
-            WorldPacket packet = new WorldPacket(universalOpcode);
+            WorldPacket packet = new WorldPacket(speed.GetUniversalOpcode());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.WritePackedGuid(speed.MoverGUID.To64());
             else
@@ -98,6 +96,56 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(speed.Ack.MoveCounter);
             speed.Ack.MoveInfo.WriteMovementInfoLegacy(packet);
             packet.WriteFloat(speed.Speed);
+            SendPacketToServer(packet);
+        }
+
+        MovementFlagModern GetFlagForAckOpcode(Opcode opcode)
+        {
+            switch (opcode)
+            {
+                case Opcode.CMSG_MOVE_FEATHER_FALL_ACK:
+                    return MovementFlagModern.CanSafeFall;
+                case Opcode.CMSG_MOVE_HOVER_ACK:
+                    return MovementFlagModern.Hover;
+                case Opcode.CMSG_MOVE_SET_CAN_FLY_ACK:
+                    return MovementFlagModern.CanFly;
+                case Opcode.CMSG_MOVE_WATER_WALK_ACK:
+                    return MovementFlagModern.Waterwalking;
+            }
+            return MovementFlagModern.None;
+        }
+
+        [PacketHandler(Opcode.CMSG_MOVE_FEATHER_FALL_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_HOVER_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_SET_CAN_FLY_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_WATER_WALK_ACK)]
+        void HandleMoveForceAck1(MovementAckMessage movementAck)
+        {
+            WorldPacket packet = new WorldPacket(movementAck.GetUniversalOpcode());
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WritePackedGuid(movementAck.MoverGUID.To64());
+            else
+                packet.WriteGuid(movementAck.MoverGUID.To64());
+            packet.WriteUInt32(movementAck.Ack.MoveCounter);
+            movementAck.Ack.MoveInfo.WriteMovementInfoLegacy(packet);
+            packet.WriteInt32(movementAck.Ack.MoveInfo.Flags.HasAnyFlag(GetFlagForAckOpcode(movementAck.GetUniversalOpcode())) ? 1 : 0);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_ROOT_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_UNROOT_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_KNOCK_BACK_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_GRAVITY_DISABLE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_GRAVITY_ENABLE_ACK)]
+        void HandleMoveForceAck2(MovementAckMessage movementAck)
+        {
+            WorldPacket packet = new WorldPacket(movementAck.GetUniversalOpcode());
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WritePackedGuid(movementAck.MoverGUID.To64());
+            else
+                packet.WriteGuid(movementAck.MoverGUID.To64());
+            packet.WriteUInt32(movementAck.Ack.MoveCounter);
+            movementAck.Ack.MoveInfo.WriteMovementInfoLegacy(packet);
             SendPacketToServer(packet);
         }
     }

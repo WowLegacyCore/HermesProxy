@@ -139,7 +139,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FORCE_FLIGHT_SPEED_CHANGE)]
         [PacketHandler(Opcode.SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE)]
         [PacketHandler(Opcode.SMSG_FORCE_PITCH_RATE_CHANGE)]
-        void HandleForceSpeedChange(WorldPacket packet)
+        void HandleMoveForceSpeedChange(WorldPacket packet)
         {
             string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("SMSG_FORCE_", "SMSG_MOVE_SET_").Replace("_CHANGE", "");
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
@@ -175,6 +175,51 @@ namespace HermesProxy.World.Client
             SendPacketToClient(speed);
         }
 
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_ROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_UNROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_ENABLE_GRAVITY)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_DISABLE_GRAVITY)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_FEATHER_FALL)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_NORMAL_FALL)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_HOVER)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_UNSET_HOVER)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_WATER_WALK)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_LAND_WALK)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_START_SWIM)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_STOP_SWIM)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_RUN_MODE)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_WALK_MODE)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_FLYING)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_UNSET_FLYING)]
+        void HandleSplineMovementMessages(WorldPacket packet)
+        {
+            MoveSplineSetFlag spline = new MoveSplineSetFlag(packet.GetUniversalOpcode(false));
+            spline.MoverGUID = packet.ReadPackedGuid().To128();
+            SendPacketToClient(spline);
+        }
+
+        [PacketHandler(Opcode.SMSG_MOVE_FORCE_ROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_FORCE_UNROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_SET_WATER_WALK)]
+        [PacketHandler(Opcode.SMSG_MOVE_SET_LAND_WALK)]
+        [PacketHandler(Opcode.SMSG_MOVE_SET_HOVERING)]
+        [PacketHandler(Opcode.SMSG_MOVE_UNSET_HOVERING)]
+        [PacketHandler(Opcode.SMSG_MOVE_SET_CAN_FLY)]
+        [PacketHandler(Opcode.SMSG_MOVE_UNSET_CAN_FLY)]
+        [PacketHandler(Opcode.SMSG_MOVE_ENABLE_TRANSITION_BETWEEN_SWIM_AND_FLY)]
+        [PacketHandler(Opcode.SMSG_MOVE_DISABLE_TRANSITION_BETWEEN_SWIM_AND_FLY)]
+        [PacketHandler(Opcode.SMSG_MOVE_DISABLE_GRAVITY)]
+        [PacketHandler(Opcode.SMSG_MOVE_ENABLE_GRAVITY)]
+        [PacketHandler(Opcode.SMSG_MOVE_SET_FEATHER_FALL)]
+        [PacketHandler(Opcode.SMSG_MOVE_SET_NORMAL_FALL)]
+        void HandleMoveForceFlagChange(WorldPacket packet)
+        {
+            MoveSetFlag flag = new MoveSetFlag(packet.GetUniversalOpcode(false));
+            flag.MoverGUID = packet.ReadPackedGuid().To128();
+            flag.MoveCounter = packet.ReadUInt32();
+            SendPacketToClient(flag);
+        }
+
         [PacketHandler(Opcode.SMSG_COMPRESSED_MOVES)]
         void HandleCompressedMoves(WorldPacket packet)
         {
@@ -188,7 +233,7 @@ namespace HermesProxy.World.Client
                 var opc = pkt.ReadUInt16();
                 var data = pkt.ReadBytes((uint)(size - 2));
 
-                if (size == 0)
+                if (size < 21)
                     return;
 
                 var pkt2 = new WorldPacket(opc, data);
