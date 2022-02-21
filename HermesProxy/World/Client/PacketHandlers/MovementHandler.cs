@@ -61,6 +61,120 @@ namespace HermesProxy.World.Client
             SendPacketToClient(moveUpdate);
         }
 
+        [PacketHandler(Opcode.MSG_MOVE_TELEPORT_ACK)]
+        void HandleMoveTeleportAck(WorldPacket packet)
+        {
+            MoveTeleport teleport = new MoveTeleport();
+            teleport.MoverGUID = packet.ReadPackedGuid().To128();
+            teleport.MoveCounter = packet.ReadUInt32();
+            MovementInfo moveInfo = new();
+            moveInfo.ReadMovementInfoLegacy(packet);
+            teleport.Position = moveInfo.Position;
+            teleport.Orientation = moveInfo.Orientation;
+            teleport.TransportGUID = moveInfo.TransportGuid;
+            if (moveInfo.TransportSeat > 0)
+            {
+                teleport.Vehicle = new();
+                teleport.Vehicle.VehicleSeatIndex = moveInfo.TransportSeat;
+            }
+            SendPacketToClient(teleport);
+        }
+
+        [PacketHandler(Opcode.SMSG_TRANSFER_PENDING)]
+        void HandleTransferPending(WorldPacket packet)
+        {
+            TransferPending transfer = new TransferPending();
+            transfer.MapID = packet.ReadInt32();
+            transfer.OldMapPosition = Vector3.Zero;
+            SendPacketToClient(transfer);
+        }
+
+        [PacketHandler(Opcode.SMSG_TRANSFER_ABORTED)]
+        void HandleTransferAborted(WorldPacket packet)
+        {
+            TransferAborted transfer = new TransferAborted();
+            transfer.MapID = packet.ReadUInt32();
+            transfer.Reason = (TransferAbortReason)packet.ReadUInt8();
+            transfer.Arg = packet.ReadUInt8();
+            SendPacketToClient(transfer);
+        }
+
+        [PacketHandler(Opcode.SMSG_NEW_WORLD)]
+        void HandleNewWorld(WorldPacket packet)
+        {
+            NewWorld teleport = new NewWorld();
+            Global.CurrentSessionData.GameState.CurrentMapId = teleport.MapID = packet.ReadUInt32();
+            teleport.Position = packet.ReadVector3();
+            teleport.Orientation = packet.ReadFloat();
+            teleport.Reason = 4;
+            SendPacketToClient(teleport);
+        }
+
+        // for server controlled units
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_FLIGHT_BACK_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_FLIGHT_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_PITCH_RATE)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_RUN_BACK_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_RUN_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_SWIM_BACK_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_SWIM_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_TURN_RATE)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_WALK_BACK_SPEED)]
+        [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_WALK_SPEED)]
+        void HandleMoveSplineSetSpeed(WorldPacket packet)
+        {
+            MoveSplineSetSpeed speed = new MoveSplineSetSpeed(packet.GetUniversalOpcode(false));
+            speed.MoverGUID = packet.ReadPackedGuid().To128();
+            speed.Speed = packet.ReadFloat();
+            SendPacketToClient(speed);
+        }
+
+        // for own player
+        [PacketHandler(Opcode.SMSG_FORCE_WALK_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_RUN_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_RUN_BACK_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_SWIM_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_SWIM_BACK_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_TURN_RATE_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_FLIGHT_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE)]
+        [PacketHandler(Opcode.SMSG_FORCE_PITCH_RATE_CHANGE)]
+        void HandleForceSpeedChange(WorldPacket packet)
+        {
+            string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("SMSG_FORCE_", "SMSG_MOVE_SET_").Replace("_CHANGE", "");
+            Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
+
+            MoveSetSpeed speed = new MoveSetSpeed(universalOpcode);
+            speed.MoverGUID = packet.ReadPackedGuid().To128();
+            speed.MoveCounter = packet.ReadUInt32();
+            speed.Speed = packet.ReadFloat();
+            SendPacketToClient(speed);
+        }
+
+        // for other players
+        [PacketHandler(Opcode.MSG_MOVE_SET_FLIGHT_BACK_SPEED)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_FLIGHT_SPEED)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_PITCH_RATE)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_RUN_BACK_SPEED)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_RUN_SPEED)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_SWIM_BACK_SPEED)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_SWIM_SPEED)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_TURN_RATE)]
+        [PacketHandler(Opcode.MSG_MOVE_SET_WALK_SPEED)]
+        void HandleMoveUpdateSpeed(WorldPacket packet)
+        {
+            string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("MSG_MOVE_SET", "SMSG_MOVE_UPDATE");
+            Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
+
+            MoveUpdateSpeed speed = new MoveUpdateSpeed(universalOpcode);
+            speed.MoverGUID = packet.ReadPackedGuid().To128();
+            speed.MoveInfo = new MovementInfo();
+            speed.MoveInfo.ReadMovementInfoLegacy(packet);
+            speed.MoveInfo.Flags = (uint)(((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            speed.Speed = packet.ReadFloat();
+            SendPacketToClient(speed);
+        }
+
         [PacketHandler(Opcode.SMSG_COMPRESSED_MOVES)]
         void HandleCompressedMoves(WorldPacket packet)
         {
@@ -73,6 +187,9 @@ namespace HermesProxy.World.Client
                 var size = pkt.ReadUInt8();
                 var opc = pkt.ReadUInt16();
                 var data = pkt.ReadBytes((uint)(size - 2));
+
+                if (size == 0)
+                    return;
 
                 var pkt2 = new WorldPacket(opc, data);
                 HandleMonsterMove(pkt2);

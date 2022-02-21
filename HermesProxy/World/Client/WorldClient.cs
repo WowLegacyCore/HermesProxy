@@ -25,6 +25,7 @@ namespace HermesProxy.World.Client
         LegacyWorldCrypt _worldCrypt;
         Dictionary<Opcode, Action<WorldPacket>> _packetHandlers;
         WorldSocket _modernSocket;
+        System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
 
         // packet order is not always the same as new client, sometimes we need to delay packet until another one
         Dictionary<Opcode, List<WorldPacket>> _delayedPacketsToServer;
@@ -88,7 +89,9 @@ namespace HermesProxy.World.Client
 
             _clientSocket.Shutdown(SocketShutdown.Both);
             _clientSocket.Disconnect(false);
-            Global.CurrentSessionData.WorldClient = null;
+
+            if (Global.CurrentSessionData.WorldClient == this)
+                Global.CurrentSessionData.WorldClient = null;
         }
 
         public bool IsConnected()
@@ -194,6 +197,11 @@ namespace HermesProxy.World.Client
                 Log.Print(LogType.Error, $"Packet Read Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
                 if (_isSuccessful == null)
                     _isSuccessful = false;
+                else
+                {
+                    Disconnect();
+                    Global.CurrentSessionData.OnDisconnect();
+                }
             }
         }
 
@@ -213,6 +221,7 @@ namespace HermesProxy.World.Client
 
         private void SendPacket(WorldPacket packet)
         {
+            _sendMutex.WaitOne();
             try
             {
                 ByteBuffer buffer = new ByteBuffer();
@@ -240,6 +249,7 @@ namespace HermesProxy.World.Client
                 if (_isSuccessful == null)
                     _isSuccessful = false;
             }
+            _sendMutex.ReleaseMutex();
         }
 
         private void SendPacketToClient(ServerPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)

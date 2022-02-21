@@ -362,11 +362,11 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Read()
         {
-            MapID = _worldPacket.ReadInt32();
+            MapID = _worldPacket.ReadUInt32();
             Showing = _worldPacket.HasBit();
         }
 
-        public int MapID = -1;
+        public uint MapID;
         public bool Showing;
     }
 
@@ -392,7 +392,7 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteFloat(Pos.X);
             _worldPacket.WriteFloat(Pos.Y);
             _worldPacket.WriteFloat(Pos.Z);
@@ -400,9 +400,9 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt32(Reason);
         }
 
-        public int MapID = -1;
+        public uint MapID;
         public Position Pos;
-        public uint Reason = 0;
+        public uint Reason;
     }
 
     public class CharacterLoginFailed : ServerPacket

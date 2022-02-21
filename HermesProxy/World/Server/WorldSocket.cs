@@ -253,7 +253,8 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_PING:
                     Ping ping = new(packet);
                     ping.Read();
-                    if (Global.CurrentSessionData.WorldClient != null)
+                    if (_connectType == ConnectionType.Realm &&
+                        Global.CurrentSessionData.WorldClient != null)
                         Global.CurrentSessionData.WorldClient.SendPing(ping.Serial, ping.Latency);
                     HandlePing(ping);
                     break;

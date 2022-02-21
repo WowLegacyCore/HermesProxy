@@ -210,7 +210,7 @@ namespace HermesProxy.World.Client
         void HandleLoginVerifyWorld(WorldPacket packet)
         {
             LoginVerifyWorld verify = new LoginVerifyWorld();
-            verify.MapID = packet.ReadInt32();
+            verify.MapID = packet.ReadUInt32();
             Global.CurrentSessionData.GameState.CurrentMapId = verify.MapID;
             verify.Pos.X = packet.ReadFloat();
             verify.Pos.Y = packet.ReadFloat();

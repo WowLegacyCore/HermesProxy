@@ -22,7 +22,7 @@ public static class Global
     public class GameSessionData
     {
         public bool IsInWorld;
-        public int? CurrentMapId;
+        public uint? CurrentMapId;
         public WowGuid128 CurrentPlayerGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();

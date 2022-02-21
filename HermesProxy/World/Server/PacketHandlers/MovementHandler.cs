@@ -55,5 +55,50 @@ namespace HermesProxy.World.Server
             movement.MoveInfo.WriteMovementInfoLegacy(packet);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_MOVE_TELEPORT_ACK)]
+        void HandleMoveTeleportAck(MoveTeleportAck teleport)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_TELEPORT_ACK);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WritePackedGuid(teleport.MoverGUID.To64());
+            else
+                packet.WriteGuid(teleport.MoverGUID.To64());
+            packet.WriteUInt32(teleport.MoveCounter);
+            packet.WriteUInt32(teleport.MoveTime);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_WORLD_PORT_RESPONSE)]
+        void HandleWorldPortResponse(WorldPortResponse teleport)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_WORLDPORT_ACK);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_PITCH_RATE_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_RUN_BACK_SPEED_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_RUN_SPEED_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_SWIM_BACK_SPEED_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_SWIM_SPEED_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_TURN_RATE_CHANGE_ACK)]
+        [PacketHandler(Opcode.CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK)]
+        void HandleMoveForceSpeedChangeAck(MovementSpeedAck speed)
+        {
+            string opcodeName = speed.GetUniversalOpcode().ToString().Replace("CMSG_MOVE_FORCE", "CMSG_FORCE");
+            Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
+
+            WorldPacket packet = new WorldPacket(universalOpcode);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WritePackedGuid(speed.MoverGUID.To64());
+            else
+                packet.WriteGuid(speed.MoverGUID.To64());
+            packet.WriteUInt32(speed.Ack.MoveCounter);
+            speed.Ack.MoveInfo.WriteMovementInfoLegacy(packet);
+            packet.WriteFloat(speed.Speed);
+            SendPacketToServer(packet);
+        }
     }
 }

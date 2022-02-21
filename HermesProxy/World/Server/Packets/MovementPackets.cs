@@ -156,4 +156,222 @@ namespace HermesProxy.World.Server.Packets
         public List<Vector3> Points = new();
         public List<Vector3> PackedDeltas = new();
     }
+
+    class MoveTeleportAck : ClientPacket
+    {
+        public MoveTeleportAck(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MoverGUID = _worldPacket.ReadPackedGuid128();
+            MoveCounter = _worldPacket.ReadUInt32();
+            MoveTime = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 MoverGUID;
+        public uint MoveCounter;
+        public uint MoveTime;
+    }
+
+    public class MoveTeleport : ServerPacket
+    {
+        public MoveTeleport() : base(Opcode.SMSG_MOVE_TELEPORT, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(MoverGUID);
+            _worldPacket.WriteUInt32(MoveCounter);
+            _worldPacket.WriteVector3(Position);
+            _worldPacket.WriteFloat(Orientation);
+            _worldPacket.WriteUInt8(PreloadWorld);
+
+            _worldPacket.WriteBit(TransportGUID != null);
+            _worldPacket.WriteBit(Vehicle != null);
+            _worldPacket.FlushBits();
+
+            if (Vehicle != null)
+            {
+                _worldPacket.WriteInt8(Vehicle.VehicleSeatIndex);
+                _worldPacket.WriteBit(Vehicle.VehicleExitVoluntary);
+                _worldPacket.WriteBit(Vehicle.VehicleExitTeleport);
+                _worldPacket.FlushBits();
+            }
+
+            if (TransportGUID != null)
+                _worldPacket.WritePackedGuid128(TransportGUID);
+        }
+
+        public Vector3 Position;
+        public VehicleTeleport Vehicle;
+        public uint MoveCounter;
+        public WowGuid128 MoverGUID;
+        public WowGuid128 TransportGUID;
+        public float Orientation;
+        public byte PreloadWorld;
+    }
+
+    public class VehicleTeleport
+    {
+        public sbyte VehicleSeatIndex;
+        public bool VehicleExitVoluntary;
+        public bool VehicleExitTeleport;
+    }
+
+    public class TransferPending : ServerPacket
+    {
+        public TransferPending() : base(Opcode.SMSG_TRANSFER_PENDING) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteVector3(OldMapPosition);
+            _worldPacket.WriteBit(Ship != null);
+            _worldPacket.WriteBit(TransferSpellID.HasValue);
+
+            if (Ship != null)
+            {
+                _worldPacket.WriteUInt32(Ship.Id);
+                _worldPacket.WriteInt32(Ship.OriginMapID);
+            }
+
+            if (TransferSpellID.HasValue)
+                _worldPacket.WriteInt32(TransferSpellID.Value);
+
+            _worldPacket.FlushBits();
+        }
+
+        public int MapID = -1;
+        public Vector3 OldMapPosition;
+        public ShipTransferPending Ship;
+        public int? TransferSpellID;
+
+        public class ShipTransferPending
+        {
+            public uint Id;              // gameobject_template.entry of the transport the player is teleporting on
+            public int OriginMapID;     // Map id the player is currently on (before teleport)
+        }
+    }
+
+    public class TransferAborted : ServerPacket
+    {
+        public TransferAborted() : base(Opcode.SMSG_TRANSFER_ABORTED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteUInt8(Arg);
+            _worldPacket.WriteUInt32(MapDifficultyXConditionID);
+            _worldPacket.WriteBits(Reason, 5);
+            _worldPacket.FlushBits();
+        }
+
+        public uint MapID;
+        public byte Arg;
+        public uint MapDifficultyXConditionID;
+        public TransferAbortReason Reason;
+    }
+
+    public class NewWorld : ServerPacket
+    {
+        public NewWorld() : base(Opcode.SMSG_NEW_WORLD) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteVector3(Position);
+            _worldPacket.WriteFloat(Orientation);
+            _worldPacket.WriteUInt32(Reason);
+            _worldPacket.WriteVector3(MovementOffset);
+        }
+
+        public uint MapID;
+        public uint Reason;
+        public Vector3 Position = new();
+        public float Orientation;
+        public Vector3 MovementOffset;    // Adjusts all pending movement events by this offset
+    }
+
+    public class WorldPortResponse : ClientPacket
+    {
+        public WorldPortResponse(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    // for server controlled units
+    public class MoveSplineSetSpeed : ServerPacket
+    {
+        public MoveSplineSetSpeed(Opcode opcode) : base(opcode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(MoverGUID);
+            _worldPacket.WriteFloat(Speed);
+        }
+
+        public WowGuid128 MoverGUID;
+        public float Speed = 1.0f;
+    }
+
+    // for own player
+    public class MoveSetSpeed : ServerPacket
+    {
+        public MoveSetSpeed(Opcode opcode) : base(opcode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(MoverGUID);
+            _worldPacket.WriteUInt32(MoveCounter);
+            _worldPacket.WriteFloat(Speed);
+        }
+
+        public WowGuid128 MoverGUID;
+        public uint MoveCounter = 0;
+        public float Speed = 1.0f;
+    }
+
+    public class MovementSpeedAck : ClientPacket
+    {
+        public MovementSpeedAck(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MoverGUID = _worldPacket.ReadPackedGuid128();
+            Ack.Read(_worldPacket);
+            Speed = _worldPacket.ReadFloat();
+        }
+
+        public WowGuid128 MoverGUID;
+        public MovementAck Ack;
+        public float Speed;
+    }
+
+    public struct MovementAck
+    {
+        public void Read(WorldPacket data)
+        {
+            MoveInfo = new();
+            MoveInfo.ReadMovementInfoModern(data);
+            MoveCounter = data.ReadUInt32();
+        }
+
+        public MovementInfo MoveInfo;
+        public uint MoveCounter;
+    }
+
+    // for other players
+    public class MoveUpdateSpeed : ServerPacket
+    {
+        public MoveUpdateSpeed(Opcode opcode) : base(opcode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            MoveInfo.WriteMovementInfoModern(_worldPacket, MoverGUID);
+            _worldPacket.WriteFloat(Speed);
+        }
+
+        public WowGuid128 MoverGUID;
+        public MovementInfo MoveInfo;
+        public float Speed = 1.0f;
+    }
 }

@@ -70,14 +70,18 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     throw new ArgumentOutOfRangeException("Unsupported object type!");
             }
 
-            Global.CurrentSessionData.GameState.Objects.TryGetValue(updateData.Guid, out m_fields);
-            if (m_fields == null)
+            if (m_updateData.CreateData == null &&
+                Global.CurrentSessionData.GameState.Objects.TryGetValue(updateData.Guid, out m_fields) &&
+                m_fields != null)
             {
-                m_fields = new UpdateFieldsArray(size);
-                Global.CurrentSessionData.GameState.Objects.Add(updateData.Guid, m_fields);
+                m_fields.m_updateMask.Clear();
             }
             else
-                m_fields.m_updateMask.Clear();
+            {
+                m_fields = new UpdateFieldsArray(size);
+                Global.CurrentSessionData.GameState.Objects.Remove(updateData.Guid);
+                Global.CurrentSessionData.GameState.Objects.Add(updateData.Guid, m_fields);
+            }
         }
 
         protected bool m_alreadyWritten;
