@@ -233,6 +233,11 @@ namespace HermesProxy.World
             WriteUInt64(guid.GetLowValue());
         }
 
+        public void WritePackedGuid(WowGuid64 guid)
+        {
+            WritePackedUInt64(guid.Low);
+        }
+
         public void WritePackedGuid128(WowGuid128 guid)
         {
             if (guid.IsEmpty())

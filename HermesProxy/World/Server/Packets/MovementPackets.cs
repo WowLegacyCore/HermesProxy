@@ -25,6 +25,20 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
+    public class ClientPlayerMovement : ClientPacket
+    {
+        public ClientPlayerMovement(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128(); ;
+            MoveInfo = new MovementInfo();
+            MoveInfo.ReadMovementInfoModern(_worldPacket);
+        }
+
+        public WowGuid128 Guid;
+        public MovementInfo MoveInfo;
+    }
     public class MoveUpdate : ServerPacket
     {
         public MoveUpdate() : base(Opcode.SMSG_MOVE_UPDATE, ConnectionType.Instance) { }

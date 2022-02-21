@@ -148,6 +148,164 @@ namespace HermesProxy.World.Objects
                 info.SplineElevation = packet.ReadFloat();
         }
 
+        public void WriteMovementInfoLegacy(WorldPacket data)
+        {
+            MovementInfo info = this;
+
+            uint flags;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                flags = (uint)(((MovementFlagModern)info.Flags).CastFlags<MovementFlagWotLK>());
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                flags = (uint)(((MovementFlagModern)info.Flags).CastFlags<MovementFlagTBC>());
+            else
+                flags = (uint)(((MovementFlagModern)info.Flags).CastFlags<MovementFlagVanilla>());
+            data.WriteUInt32(flags);
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                data.WriteUInt16((ushort)info.FlagsExtra);
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                data.WriteUInt8((byte)info.FlagsExtra);
+
+            data.WriteUInt32(info.MoveTime);
+            data.WriteVector3(info.Position);
+            data.WriteFloat(info.Orientation);
+
+            bool hasTransport;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                hasTransport = flags.HasAnyFlag(MovementFlagWotLK.OnTransport);
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                hasTransport = flags.HasAnyFlag(MovementFlagTBC.OnTransport);
+            else
+                hasTransport = flags.HasAnyFlag(MovementFlagVanilla.OnTransport);
+
+            if (hasTransport)
+            {
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+                    data.WritePackedGuid(info.TransportGuid.To64());
+                else
+                    data.WriteGuid(info.TransportGuid.To64());
+
+                data.WriteVector4(info.TransportOffset);
+                data.WriteUInt32(info.TransportTime);
+
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    data.WriteInt8(info.TransportSeat);
+
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056) &&
+                    info.FlagsExtra.HasAnyFlag(MovementFlagExtra.InterpolateMove))
+                    data.WriteUInt32(info.TransportTime2);
+            }
+
+            bool hasSwimPitch;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                hasSwimPitch = flags.HasAnyFlag(MovementFlagWotLK.Swimming | MovementFlagWotLK.Flying) || info.FlagsExtra.HasAnyFlag(MovementFlagExtra.AlwaysAllowPitching);
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                hasSwimPitch = flags.HasAnyFlag(MovementFlagTBC.Swimming | MovementFlagTBC.Flying2);
+            else
+                hasSwimPitch = flags.HasAnyFlag(MovementFlagVanilla.Swimming);
+
+            if (hasSwimPitch)
+                data.WriteFloat(info.SwimPitch);
+
+            data.WriteUInt32(info.FallTime);
+
+            bool hasFallDirection;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                hasFallDirection = flags.HasAnyFlag(MovementFlagWotLK.Falling);
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                hasFallDirection = flags.HasAnyFlag(MovementFlagTBC.Falling);
+            else
+                hasFallDirection = flags.HasAnyFlag(MovementFlagVanilla.Falling);
+
+            if (hasFallDirection)
+            {
+                data.WriteFloat(info.JumpVerticalSpeed);
+                data.WriteFloat(info.JumpSinAngle);
+                data.WriteFloat(info.JumpCosAngle);
+                data.WriteFloat(info.JumpHorizontalSpeed);
+            }
+
+            bool hasSplineElevation;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                hasSplineElevation = flags.HasAnyFlag(MovementFlagWotLK.SplineElevation);
+            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                hasSplineElevation = flags.HasAnyFlag(MovementFlagTBC.SplineElevation);
+            else
+                hasSplineElevation = flags.HasAnyFlag(MovementFlagVanilla.SplineElevation);
+
+            if (hasSplineElevation)
+                data.WriteFloat(info.SplineElevation);
+        }
+
+        public void ReadMovementInfoModern(WorldPacket data)
+        {
+            var moveInfo = this;
+            moveInfo.MoveTime = data.ReadUInt32();
+            moveInfo.Position = data.ReadVector3();
+            moveInfo.Orientation = data.ReadFloat();
+
+            moveInfo.SwimPitch = data.ReadFloat();
+            moveInfo.SplineElevation = data.ReadFloat();
+
+            uint removeMovementForcesCount = data.ReadUInt32();
+
+            uint moveIndex = data.ReadUInt32();
+
+            for (uint i = 0; i < removeMovementForcesCount; ++i)
+            {
+                data.ReadPackedGuid128();
+            }
+
+            // ResetBitReader
+
+            moveInfo.Flags = data.ReadBits<uint>(30);
+            moveInfo.FlagsExtra = data.ReadBits<uint>(18);
+
+            bool hasTransport = data.HasBit();
+            bool hasFall = data.HasBit();
+            bool hasSpline = data.HasBit(); // todo 6.x read this infos
+
+            data.ReadBit(); // HeightChangeFailed
+            data.ReadBit(); // RemoteTimeValid
+
+            if (hasTransport)
+                ReadTransportInfoModern(data);
+
+            if (hasFall)
+            {
+                moveInfo.FallTime = data.ReadUInt32();
+                moveInfo.JumpVerticalSpeed = data.ReadFloat();
+
+                // ResetBitReader
+
+                bool hasFallDirection = data.HasBit();
+                if (hasFallDirection)
+                {
+                    moveInfo.JumpSinAngle = data.ReadFloat();
+                    moveInfo.JumpCosAngle = data.ReadFloat();
+                    moveInfo.JumpHorizontalSpeed = data.ReadFloat();
+                }
+            }
+        }
+
+        public void ReadTransportInfoModern(WorldPacket data)
+        {
+            var moveInfo = this;
+            moveInfo.TransportGuid = data.ReadPackedGuid128();
+            moveInfo.TransportOffset = data.ReadVector4();
+            moveInfo.TransportSeat = data.ReadInt8();           // VehicleSeatIndex
+            moveInfo.TransportTime = data.ReadUInt32();         // MoveTime
+
+            bool hasPrevTime = data.HasBit();
+            bool hasVehicleId = data.HasBit();
+
+            if (hasPrevTime)
+                moveInfo.TransportTime2 = data.ReadUInt32();    // PrevMoveTime
+
+            if (hasVehicleId)
+                moveInfo.VehicleId = data.ReadUInt32();         // VehicleRecID
+        }
+
         public void WriteMovementInfoModern(WorldPacket data, WowGuid128 guid)
         {
             MovementInfo moveInfo = this;

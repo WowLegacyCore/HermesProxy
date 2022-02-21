@@ -26,6 +26,23 @@ namespace HermesProxy.World.Enums
             return 0;
         }
 
+        public static uint GetOpcodeValueForVersion(string opcode, ClientVersionBuild version)
+        {
+            switch (version)
+            {
+                case ClientVersionBuild.V1_12_1_5875:
+                    return FindOpcodeValueInEnum<V1_12_1_5875.Opcode>(opcode);
+                case ClientVersionBuild.V2_4_3_8606:
+                    return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode);
+                case ClientVersionBuild.V1_14_0_40618:
+                case ClientVersionBuild.V2_5_2_40892:
+                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode);
+                case ClientVersionBuild.V3_3_5a_12340:
+                    return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode);
+            }
+            return 0;
+        }
+
         public static string GetOpcodeNameForVersion(uint opcode, ClientVersionBuild version)
         {
             switch (version)
