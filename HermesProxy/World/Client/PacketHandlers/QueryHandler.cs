@@ -380,5 +380,43 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(response);
         }
+        [PacketHandler(Opcode.SMSG_QUERY_NPC_TEXT_RESPONSE)]
+        void HandleQueryNpcTextResponse(WorldPacket packet)
+        {
+            QueryNPCTextResponse response = new QueryNPCTextResponse();
+            var id = packet.ReadEntry();
+            response.TextID = (uint)id.Key;
+            if (id.Value) // entry is masked
+            {
+                response.Allow = false;
+                SendPacketToClient(response);
+                return;
+            }
+
+            response.Allow = true;
+
+            for (int i = 0; i < 8; i++)
+            {
+                response.Probabilities[i] = packet.ReadFloat();
+                string maleText = packet.ReadCString();
+                string femaleText = packet.ReadCString();
+                uint language = packet.ReadUInt32();
+
+                ushort[] emoteDelays = new ushort[3];
+                ushort[]  emotes = new ushort[3];
+                for (int j = 0; j < 3; j++)
+                {
+                    emoteDelays[j] = (ushort)packet.ReadUInt32();
+                    emotes[j] = (ushort)packet.ReadUInt32();
+                }
+
+                if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText))
+                    response.BroadcastTextID[i] = 0;
+                else
+                    response.BroadcastTextID[i] = GameData.GetBroadcastTextId(maleText, femaleText, language, emoteDelays, emotes);
+            }
+
+            SendPacketToClient(response);
+        }
     }
 }

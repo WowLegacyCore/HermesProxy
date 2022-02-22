@@ -114,7 +114,7 @@ namespace HermesProxy.World.Client
 
             if (Global.CurrentSessionData.GameState.LastEnteredAreaTrigger != 0)
             {
-                AreaTriggerDenied denied = new AreaTriggerDenied();
+                AreaTriggerMessage denied = new AreaTriggerMessage();
                 denied.AreaTriggerID = Global.CurrentSessionData.GameState.LastEnteredAreaTrigger;
                 SendPacketToClient(denied);
             }

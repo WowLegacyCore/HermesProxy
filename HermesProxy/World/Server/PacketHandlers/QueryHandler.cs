@@ -32,5 +32,13 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(queryGo.Guid.To64());
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_QUERY_NPC_TEXT)]
+        void HandleQueryNpcText(QueryNPCText queryText)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_GAME_OBJECT);
+            packet.WriteUInt32(queryText.TextID);
+            packet.WriteGuid(queryText.Guid.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

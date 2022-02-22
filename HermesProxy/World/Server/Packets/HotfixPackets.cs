@@ -1,0 +1,76 @@
+﻿/*
+ * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+using Framework.Constants;
+using Framework.GameMath;
+using Framework.IO;
+using HermesProxy.World.Enums;
+using HermesProxy.World.Objects;
+using System.Collections.Generic;
+
+namespace HermesProxy.World.Server.Packets
+{
+    public enum HotfixStatus : byte
+    {
+        Valid         = 1,
+        RecordRemoved = 2,
+        Invalid       = 3,
+        NotPublic     = 4,
+    }
+
+    class DBQueryBulk : ClientPacket
+    {
+        public DBQueryBulk(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TableHash = (DB2Hash)_worldPacket.ReadUInt32();
+
+            uint count = _worldPacket.ReadBits<uint>(13);
+            for (uint i = 0; i < count; ++i)
+            {
+                Queries.Add(_worldPacket.ReadUInt32());
+            }
+        }
+
+        public DB2Hash TableHash;
+        public List<uint> Queries = new();
+    }
+
+    public class DBReply : ServerPacket
+    {
+        public DBReply() : base(Opcode.SMSG_DB_REPLY) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32((uint)TableHash);
+            _worldPacket.WriteUInt32(RecordID);
+            _worldPacket.WriteUInt32(Timestamp);
+            _worldPacket.WriteBits((byte)Status, 3);
+            _worldPacket.WriteUInt32(Data.GetSize());
+            _worldPacket.WriteBytes(Data.GetData());
+        }
+
+        public DB2Hash TableHash;
+        public uint Timestamp;
+        public uint RecordID;
+        public HotfixStatus Status = HotfixStatus.Invalid;
+
+        public ByteBuffer Data = new();
+    }
+}

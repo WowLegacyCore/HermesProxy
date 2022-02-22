@@ -260,18 +260,15 @@ namespace HermesProxy.World.Server.Packets
         public bool FromClient;
     }
 
-    class AreaTriggerDenied : ServerPacket
+    class AreaTriggerMessage : ServerPacket
     {
-        public AreaTriggerDenied() : base(Opcode.SMSG_AREA_TRIGGER_DENIED) { }
+        public AreaTriggerMessage() : base(Opcode.SMSG_AREA_TRIGGER_MESSAGE) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(AreaTriggerID);
-            //_worldPacket.WriteBit(Entered);
-            //_worldPacket.FlushBits();
         }
 
         public uint AreaTriggerID = 0;
-        public bool Entered = false;
     }
 }

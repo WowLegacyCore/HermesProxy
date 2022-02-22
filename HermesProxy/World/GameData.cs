@@ -12,7 +12,7 @@ namespace HermesProxy.World
     public static class GameData
     {
         // Storages
-        public static Dictionary<uint, BroadcastText> BroadcastTextStore = new Dictionary<uint, BroadcastText>();
+        public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
 
@@ -66,6 +66,39 @@ namespace HermesProxy.World
             return 0;
         }
 
+        public static BroadcastText GetBroadcastText(uint entry)
+        {
+            BroadcastText data;
+            if (BroadcastTextStore.TryGetValue(entry, out data))
+                return data;
+            return null;
+        }
+
+        public static uint GetBroadcastTextId(string maleText, string femaleText, uint language, ushort[] emoteDelays, ushort[] emotes)
+        {
+            foreach (var itr in BroadcastTextStore)
+            {
+                if (itr.Value.MaleText == maleText &&
+                    itr.Value.FemaleText == femaleText &&
+                    itr.Value.Language == language &&
+                    itr.Value.EmoteDelays == emoteDelays &&
+                    itr.Value.Emotes == emotes)
+                {
+                    return itr.Key;
+                }
+            }
+
+            BroadcastText broadcastText = new();
+            broadcastText.Entry = BroadcastTextStore.Keys.Last() + 1;
+            broadcastText.MaleText = maleText;
+            broadcastText.FemaleText = femaleText;
+            broadcastText.Language = language;
+            broadcastText.EmoteDelays = emoteDelays;
+            broadcastText.Emotes = emotes;
+            BroadcastTextStore.Add(broadcastText.Entry, broadcastText);
+            return broadcastText.Entry;
+        }
+
         // Loading code
         public static void LoadEverything()
         {
@@ -77,7 +110,35 @@ namespace HermesProxy.World
         }
         public static void LoadBroadcastTexts()
         {
-            // not implemented
+            var path = $"CSV\\BroadcastTexts{Settings.GetClientExpansionVersion()}.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    BroadcastText broadcastText = new BroadcastText();
+                    broadcastText.Entry = UInt32.Parse(fields[0]);
+                    broadcastText.MaleText = fields[1].Replace("~", "\n");
+                    broadcastText.FemaleText = fields[2].Replace("~", "\n");
+                    broadcastText.Language = UInt32.Parse(fields[3]);
+                    broadcastText.Emotes[0] = UInt16.Parse(fields[4]);
+                    broadcastText.Emotes[1] = UInt16.Parse(fields[5]);
+                    broadcastText.Emotes[2] = UInt16.Parse(fields[6]);
+                    broadcastText.EmoteDelays[0] = UInt16.Parse(fields[7]);
+                    broadcastText.EmoteDelays[1] = UInt16.Parse(fields[8]);
+                    broadcastText.EmoteDelays[2] = UInt16.Parse(fields[9]);
+                    BroadcastTextStore.Add(broadcastText.Entry, broadcastText);
+                }
+            }
         }
         public static void LoadItemTemplates()
         {
@@ -135,6 +196,9 @@ namespace HermesProxy.World
         public uint Entry;
         public string MaleText;
         public string FemaleText;
+        public uint Language;
+        public ushort[] Emotes = new ushort[3];
+        public ushort[] EmoteDelays = new ushort[3];
     }
     public class ItemTemplate
     {
