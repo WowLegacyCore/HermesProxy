@@ -410,7 +410,10 @@ namespace HermesProxy.World.Client
                     emotes[j] = (ushort)packet.ReadUInt32();
                 }
 
-                if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText))
+                const string placeholderGossip = "Greetings $N";
+
+                if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText) ||
+                    maleText == placeholderGossip && femaleText == placeholderGossip)
                     response.BroadcastTextID[i] = 0;
                 else
                     response.BroadcastTextID[i] = GameData.GetBroadcastTextId(maleText, femaleText, language, emoteDelays, emotes);

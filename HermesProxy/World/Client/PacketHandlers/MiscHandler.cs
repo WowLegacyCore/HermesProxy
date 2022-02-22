@@ -53,6 +53,15 @@ namespace HermesProxy.World.Client
             SendPacketToClient(point);
         }
 
+        [PacketHandler(Opcode.SMSG_PLAYER_BOUND)]
+        void HandlePlayerBound(WorldPacket packet)
+        {
+            PlayerBound bound = new PlayerBound();
+            bound.BinderGUID = packet.ReadGuid().To128();
+            bound.AreaID = packet.ReadUInt32();
+            SendPacketToClient(bound);
+        }
+
         [PacketHandler(Opcode.SMSG_CORPSE_RECLAIM_DELAY)]
         void HandleCorpseReclaimDelay(WorldPacket packet)
         {

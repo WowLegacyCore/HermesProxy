@@ -633,7 +633,6 @@ namespace HermesProxy.World.Enums
         CMSG_GM_VISION,
         CMSG_GM_WHISPER,
         CMSG_GODMODE,
-        CMSG_GOSSIP_HELLO,
         CMSG_GOSSIP_REFRESH_OPTIONS,
         CMSG_GOSSIP_SELECT_OPTION,
         CMSG_GRANT_LEVEL,

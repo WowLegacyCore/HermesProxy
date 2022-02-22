@@ -163,7 +163,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         CMSG_GM_UPDATE_TICKET_STATUS                          = 0x327,
         CMSG_GM_VISION                                        = 0x226,
         CMSG_GODMODE                                          = 0x022,
-        CMSG_GOSSIP_HELLO                                     = 0x17B,
+        CMSG_TALK_TO_GOSSIP                                   = 0x17B,
         CMSG_GOSSIP_SELECT_OPTION                             = 0x17C,
         CMSG_GROUP_ACCEPT                                     = 0x072,
         CMSG_GROUP_CANCEL                                     = 0x070,

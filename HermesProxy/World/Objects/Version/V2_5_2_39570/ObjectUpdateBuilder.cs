@@ -24,6 +24,8 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 if (updateData.CreateData.ThisIsYou)
                     objectType = Enums.ObjectType.ActivePlayer;
             }
+            if (objectType == Enums.ObjectType.Player && Global.CurrentSessionData.GameState.CurrentPlayerGuid == updateData.Guid)
+                objectType = Enums.ObjectType.ActivePlayer;
             m_objectType = ObjectTypeConverter.ConvertToBCC(objectType);
             m_objectTypeMask = Enums.ObjectTypeMask.Object;
 

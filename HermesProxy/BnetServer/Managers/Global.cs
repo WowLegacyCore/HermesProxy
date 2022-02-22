@@ -30,7 +30,22 @@ public static class Global
         public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
         public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
+        public Dictionary<uint, uint> ItemBuyCount = new();
 
+        public void SetItemBuyCount(uint itemId, uint buyCount)
+        {
+            if (ItemBuyCount.ContainsKey(itemId))
+                ItemBuyCount[itemId] = buyCount;
+            else
+                ItemBuyCount.Add(itemId, buyCount);
+        }
+        public uint GetItemBuyCount(uint itemId)
+        {
+            if (ItemBuyCount.ContainsKey(itemId))
+                return ItemBuyCount[itemId];
+
+            return 1;
+        }
         public void SetChannelId(string name, int id)
         {
             if (ChannelIds.ContainsKey(name))

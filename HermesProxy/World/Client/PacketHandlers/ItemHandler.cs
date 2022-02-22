@@ -18,5 +18,38 @@ namespace HermesProxy.World.Client
             proficiency.ProficiencyMask = packet.ReadUInt32();
             SendPacketToClient(proficiency);
         }
+        [PacketHandler(Opcode.SMSG_BUY_SUCCEEDED)]
+        void HandleBuySucceeded(WorldPacket packet)
+        {
+            BuySucceeded buy = new BuySucceeded();
+            buy.VendorGUID = packet.ReadGuid().To128();
+            buy.Slot = packet.ReadUInt32();
+            buy.NewQuantity = packet.ReadInt32();
+            buy.QuantityBought = packet.ReadUInt32();
+            SendPacketToClient(buy);
+        }
+        [PacketHandler(Opcode.SMSG_ITEM_PUSH_RESULT)]
+        void HandleItemPushResult(WorldPacket packet)
+        {
+            ItemPushResult item = new ItemPushResult();
+            item.PlayerGUID = packet.ReadGuid().To128();
+            if (packet.ReadUInt32() == 1)
+                item.DisplayText = ItemPushResult.DisplayType.Normal;
+            else
+                item.DisplayText = ItemPushResult.DisplayType.EncounterLoot;
+            item.Created = packet.ReadUInt32() == 1;
+            if (packet.ReadUInt32() == 0)
+                item.DisplayText = ItemPushResult.DisplayType.Hidden;
+            item.SlotInBag = packet.ReadUInt8();
+            item.Slot = (byte)packet.ReadUInt32();
+            item.Item.ItemID = packet.ReadUInt32();
+            item.Item.RandomPropertiesSeed = packet.ReadUInt32();
+            item.Item.RandomPropertiesID = packet.ReadUInt32();
+            item.Quantity = packet.ReadUInt32();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                item.QuantityInInventory = packet.ReadUInt32();
+            item.ItemGUID = WowGuid128.Empty;
+            SendPacketToClient(item);
+        }
     }
 }

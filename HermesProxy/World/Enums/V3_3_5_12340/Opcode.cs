@@ -280,7 +280,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         CMSG_GM_VISION                                        = 0x226,
         CMSG_GM_WHISPER                                       = 0x3B2,
         CMSG_GODMODE                                          = 0x022,
-        CMSG_GOSSIP_HELLO                                     = 0x17B,
+        CMSG_TALK_TO_GOSSIP                                   = 0x17B,
         CMSG_GOSSIP_SELECT_OPTION                             = 0x17C,
         CMSG_GRANT_LEVEL                                      = 0x40D,
         CMSG_GROUP_ACCEPT                                     = 0x072,

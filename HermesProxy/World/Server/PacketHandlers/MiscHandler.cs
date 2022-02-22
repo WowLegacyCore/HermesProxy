@@ -33,5 +33,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(at.AreaTriggerID);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_SET_SELECTION)]
+        void HandleSetSelection(SetSelection selection)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_SELECTION);
+            packet.WriteGuid(selection.TargetGUID.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

@@ -81,8 +81,8 @@ namespace HermesProxy.World
                 if (itr.Value.MaleText == maleText &&
                     itr.Value.FemaleText == femaleText &&
                     itr.Value.Language == language &&
-                    itr.Value.EmoteDelays == emoteDelays &&
-                    itr.Value.Emotes == emotes)
+                    Enumerable.SequenceEqual(itr.Value.EmoteDelays, emoteDelays) &&
+                    Enumerable.SequenceEqual(itr.Value.Emotes, emotes))
                 {
                     return itr.Key;
                 }

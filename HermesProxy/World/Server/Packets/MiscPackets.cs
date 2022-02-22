@@ -40,6 +40,20 @@ namespace HermesProxy.World.Server.Packets
         public uint BindAreaID;
     }
 
+    public class PlayerBound : ServerPacket
+    {
+        public PlayerBound() : base(Opcode.SMSG_PLAYER_BOUND) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(BinderGUID);
+            _worldPacket.WriteUInt32(AreaID);
+        }
+
+        public WowGuid128 BinderGUID;
+        public uint AreaID;
+    }
+
     public class ServerTimeOffset : ServerPacket
     {
         public ServerTimeOffset() : base(Opcode.SMSG_SERVER_TIME_OFFSET) { }
@@ -270,5 +284,17 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public uint AreaTriggerID = 0;
+    }
+
+    public class SetSelection : ClientPacket
+    {
+        public SetSelection(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TargetGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 TargetGUID;
     }
 }

@@ -46,9 +46,12 @@ namespace HermesProxy.World
 
             if (isFromClient)
             {
-                uint packetSize = (uint)data.Length + sizeof(uint);
+                uint packetSize = (uint)(data.Length - 2 + sizeof(uint));
                 _fileWriter.Write(packetSize);
                 _fileWriter.Write(opcode);
+
+                for (int i = 2; i < data.Length; i++)
+                    _fileWriter.Write(data[i]);
             }
             else
             {
@@ -56,8 +59,8 @@ namespace HermesProxy.World
                 _fileWriter.Write(packetSize);
                 ushort opcode2 = (ushort)opcode;
                 _fileWriter.Write(opcode2);
+                _fileWriter.Write(data);
             }
-            _fileWriter.Write(data);
             _mutex.ReleaseMutex();
         }
 
