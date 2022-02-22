@@ -155,6 +155,123 @@ namespace HermesProxy.World.Server.Packets
         public uint Amount;
     }
 
+    public class SplitItem : ClientPacket
+    {
+        public SplitItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Inv = new InvUpdate(_worldPacket);
+            FromPackSlot = _worldPacket.ReadUInt8();
+            FromSlot = _worldPacket.ReadUInt8();
+            ToPackSlot = _worldPacket.ReadUInt8();
+            ToSlot = _worldPacket.ReadUInt8();
+            Quantity = _worldPacket.ReadInt32();
+        }
+
+        public byte ToSlot;
+        public byte ToPackSlot;
+        public byte FromPackSlot;
+        public int Quantity;
+        public InvUpdate Inv;
+        public byte FromSlot;
+    }
+
+    public class SwapInvItem : ClientPacket
+    {
+        public SwapInvItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Inv = new InvUpdate(_worldPacket);
+            Slot2 = _worldPacket.ReadUInt8();
+            Slot1 = _worldPacket.ReadUInt8();
+        }
+
+        public InvUpdate Inv;
+        public byte Slot1; // Source Slot
+        public byte Slot2; // Destination Slot
+    }
+
+    public class SwapItem : ClientPacket
+    {
+        public SwapItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Inv = new InvUpdate(_worldPacket);
+            ContainerSlotB = _worldPacket.ReadUInt8();
+            ContainerSlotA = _worldPacket.ReadUInt8();
+            SlotB = _worldPacket.ReadUInt8();
+            SlotA = _worldPacket.ReadUInt8();
+        }
+
+        public InvUpdate Inv;
+        public byte SlotA;
+        public byte ContainerSlotB;
+        public byte SlotB;
+        public byte ContainerSlotA;
+    }
+
+    public class AutoEquipItem : ClientPacket
+    {
+        public AutoEquipItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Inv = new InvUpdate(_worldPacket);
+            PackSlot = _worldPacket.ReadUInt8();
+            Slot = _worldPacket.ReadUInt8();
+        }
+
+        public byte Slot;
+        public InvUpdate Inv;
+        public byte PackSlot;
+    }
+
+    public struct InvUpdate
+    {
+        public InvUpdate(WorldPacket data)
+        {
+            Items = new List<InvItem>();
+            int size = data.ReadBits<int>(2);
+            data.ResetBitPos();
+            for (int i = 0; i < size; ++i)
+            {
+                var item = new InvItem
+                {
+                    ContainerSlot = data.ReadUInt8(),
+                    Slot = data.ReadUInt8()
+                };
+                Items.Add(item);
+            }
+        }
+
+        public List<InvItem> Items;
+
+        public struct InvItem
+        {
+            public byte ContainerSlot;
+            public byte Slot;
+        }
+    }
+
+    public class DestroyItem : ClientPacket
+    {
+        public DestroyItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Count = _worldPacket.ReadUInt32();
+            ContainerId = _worldPacket.ReadUInt8();
+            SlotNum = _worldPacket.ReadUInt8();
+        }
+
+        public uint Count;
+        public byte SlotNum;
+        public byte ContainerId;
+    }
+
     public class ItemInstance
     {
         public uint ItemID;

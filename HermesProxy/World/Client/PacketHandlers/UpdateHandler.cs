@@ -158,15 +158,16 @@ namespace HermesProxy.World.Client
         public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             BitArray updateMaskArray = null;
-            var updates = ReadValuesUpdateBlock(packet, type, index, true, null, out updateMaskArray);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, true, updateData);
         }
 
         public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, int index)
         {
             BitArray updateMaskArray = null;
-            var updates = ReadValuesUpdateBlock(packet, guid.GetObjectType(), index, false, null, out updateMaskArray);
-            StoreObjectUpdate(guid, guid.GetObjectType(), updateMaskArray, updates, auraUpdate, false, updateData);
+            ObjectType type = guid.GetObjectType();
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, null, out updateMaskArray);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, false, updateData);
         }
 
         private string GetIndexString(params object[] values)
@@ -195,7 +196,7 @@ namespace HermesProxy.World.Client
             return obj;
         }
 
-        private Dictionary<int, UpdateField> ReadValuesUpdateBlock(WorldPacket packet, ObjectType type, object index, bool isCreating, Dictionary<int, UpdateField> oldValues, out BitArray outUpdateMaskArray)
+        private Dictionary<int, UpdateField> ReadValuesUpdateBlock(WorldPacket packet, ref ObjectType type, object index, bool isCreating, Dictionary<int, UpdateField> oldValues, out BitArray outUpdateMaskArray)
         {
             bool skipDictionary = false;
             bool missingCreateObject = !isCreating && oldValues == null;

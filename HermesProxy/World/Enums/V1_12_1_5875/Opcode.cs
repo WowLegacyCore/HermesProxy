@@ -108,7 +108,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         CMSG_DEL_IGNORE                                       = 0x06D,
         CMSG_DEL_PVP_MEDAL_CHEAT                              = 0x28A,
         CMSG_DESTROYMONSTER                                   = 0x012,
-        CMSG_DESTROY_ITEMS                                    = 0x111,
+        CMSG_DESTROY_ITEM                                     = 0x111,
         CMSG_DISABLE_PVP_CHEAT                                = 0x030,
         CMSG_DROP_ITEM                                        = 0x110,
         CMSG_DUEL_ACCEPTED                                    = 0x16C,

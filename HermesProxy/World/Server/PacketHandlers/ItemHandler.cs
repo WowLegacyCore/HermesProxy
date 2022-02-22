@@ -40,5 +40,59 @@ namespace HermesProxy.World.Server
                 packet.WriteUInt8((byte)item.Amount);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_SPLIT_ITEM)]
+        void HandleSplitItem(SplitItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SPLIT_ITEM);
+            packet.WriteUInt8(item.FromPackSlot);
+            packet.WriteUInt8(item.FromSlot);
+            packet.WriteUInt8(item.ToPackSlot);
+            packet.WriteUInt8(item.ToSlot);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                packet.WriteInt32(item.Quantity);
+            else
+                packet.WriteUInt8((byte)item.Quantity);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SWAP_INV_ITEM)]
+        void HandleSwapInvItem(SwapInvItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SWAP_INV_ITEM);
+            packet.WriteUInt8(item.Slot1);
+            packet.WriteUInt8(item.Slot2);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SWAP_ITEM)]
+        void HandleSwapItem(SwapItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SWAP_ITEM);
+            packet.WriteUInt8(item.ContainerSlotB);
+            packet.WriteUInt8(item.SlotB);
+            packet.WriteUInt8(item.ContainerSlotA);
+            packet.WriteUInt8(item.SlotA);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_DESTROY_ITEM)]
+        void HandleDestroyItem(DestroyItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_DESTROY_ITEM);
+            packet.WriteUInt8(item.ContainerId);
+            packet.WriteUInt8(item.SlotNum);
+            packet.WriteUInt32(item.Count);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_AUTO_EQUIP_ITEM)]
+        void HandleAutoEquipItem(AutoEquipItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTO_EQUIP_ITEM);
+            packet.WriteUInt8(item.PackSlot);
+            packet.WriteUInt8(item.Slot);
+            SendPacketToServer(packet);
+        }
     }
 }
