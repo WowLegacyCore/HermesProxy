@@ -243,4 +243,28 @@ namespace HermesProxy.World.Server.Packets
         public bool DoNotFilterOnVendor;
         public bool Refundable;
     }
+
+    public class ShowBank : ServerPacket
+    {
+        public ShowBank() : base(Opcode.SMSG_SHOW_BANK, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+        }
+
+        public WowGuid128 Guid;
+    }
+
+    public class BuyBankSlot : ClientPacket
+    {
+        public BuyBankSlot(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Guid;
+    }
 }

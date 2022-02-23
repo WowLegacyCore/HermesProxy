@@ -111,5 +111,13 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(vendor);
         }
+
+        [PacketHandler(Opcode.SMSG_SHOW_BANK)]
+        void HandleShowBank(WorldPacket packet)
+        {
+            ShowBank bank = new ShowBank();
+            bank.Guid = packet.ReadGuid().To128();
+            SendPacketToClient(bank);
+        }
     }
 }

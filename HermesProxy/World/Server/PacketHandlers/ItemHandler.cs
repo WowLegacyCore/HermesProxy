@@ -45,10 +45,14 @@ namespace HermesProxy.World.Server
         void HandleSplitItem(SplitItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SPLIT_ITEM);
-            packet.WriteUInt8(item.FromPackSlot);
-            packet.WriteUInt8(item.FromSlot);
-            packet.WriteUInt8(item.ToPackSlot);
-            packet.WriteUInt8(item.ToSlot);
+            byte containerSlot1 = item.FromPackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.FromPackSlot) : item.FromPackSlot;
+            byte slot1 = item.FromPackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.FromSlot) : item.FromSlot;
+            byte containerSlot2 = item.ToPackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ToPackSlot) : item.ToPackSlot;
+            byte slot2 = item.ToPackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ToSlot) : item.ToSlot;
+            packet.WriteUInt8(containerSlot1);
+            packet.WriteUInt8(slot1);
+            packet.WriteUInt8(containerSlot2);
+            packet.WriteUInt8(slot2);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WriteInt32(item.Quantity);
             else
@@ -60,8 +64,10 @@ namespace HermesProxy.World.Server
         void HandleSwapInvItem(SwapInvItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SWAP_INV_ITEM);
-            packet.WriteUInt8(item.Slot1);
-            packet.WriteUInt8(item.Slot2);
+            byte slot1 = ModernVersion.AdjustInventorySlot(item.Slot1);
+            byte slot2 = ModernVersion.AdjustInventorySlot(item.Slot2);
+            packet.WriteUInt8(slot1);
+            packet.WriteUInt8(slot2);
             SendPacketToServer(packet);
         }
 
@@ -69,10 +75,14 @@ namespace HermesProxy.World.Server
         void HandleSwapItem(SwapItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SWAP_ITEM);
-            packet.WriteUInt8(item.ContainerSlotB);
-            packet.WriteUInt8(item.SlotB);
-            packet.WriteUInt8(item.ContainerSlotA);
-            packet.WriteUInt8(item.SlotA);
+            byte containerSlotB = item.ContainerSlotB != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerSlotB) : item.ContainerSlotB;
+            byte slotB = item.ContainerSlotB == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotB) : item.SlotB;
+            byte containerSlotA = item.ContainerSlotA != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerSlotA) : item.ContainerSlotA;
+            byte slotA = item.ContainerSlotA == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotA) : item.SlotA;
+            packet.WriteUInt8(containerSlotB);
+            packet.WriteUInt8(slotB);
+            packet.WriteUInt8(containerSlotA);
+            packet.WriteUInt8(slotA);
             SendPacketToServer(packet);
         }
 
@@ -80,8 +90,10 @@ namespace HermesProxy.World.Server
         void HandleDestroyItem(DestroyItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_DESTROY_ITEM);
-            packet.WriteUInt8(item.ContainerId);
-            packet.WriteUInt8(item.SlotNum);
+            byte containerSlot = item.ContainerId != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerId) : item.ContainerId;
+            byte slot = item.ContainerId == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotNum) : item.SlotNum;
+            packet.WriteUInt8(containerSlot);
+            packet.WriteUInt8(slot);
             packet.WriteUInt32(item.Count);
             SendPacketToServer(packet);
         }
@@ -90,16 +102,20 @@ namespace HermesProxy.World.Server
         void HandleAutoEquipItem(AutoEquipItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTO_EQUIP_ITEM);
-            packet.WriteUInt8(item.PackSlot);
-            packet.WriteUInt8(item.Slot);
+            byte containerSlot = item.PackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
+            byte slot = item.PackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
+            packet.WriteUInt8(containerSlot);
+            packet.WriteUInt8(slot);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_READ_ITEM)]
         void HandleReadItem(ReadItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_READ_ITEM);
-            packet.WriteUInt8(item.PackSlot);
-            packet.WriteUInt8(item.Slot);
+            byte containerSlot = item.PackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
+            byte slot = item.PackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
+            packet.WriteUInt8(containerSlot);
+            packet.WriteUInt8(slot);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_BUY_BACK_ITEM)]
@@ -107,18 +123,8 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_BUY_BACK_ITEM);
             packet.WriteGuid(item.VendorGUID.To64());
-
-            byte oldSlot = 0;
-            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                oldSlot = Objects.Vanilla.InventorySlots.BuyBackStart;
-            else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                oldSlot = Objects.TBC.InventorySlots.BuyBackStart;
-            else
-                oldSlot = Objects.WotLK.InventorySlots.BuyBackStart;
-
-            byte slotOffset = (byte)(Objects.Classic.InventorySlots.BuyBackStart - oldSlot);
-
-            packet.WriteUInt32(item.Slot - slotOffset);
+            byte slot = ModernVersion.AdjustInventorySlot((byte)item.Slot);
+            packet.WriteUInt32(slot);
             SendPacketToServer(packet);
         }
     }

@@ -75,5 +75,36 @@ namespace HermesProxy.World.Client
             fail.Reason = (BuyResult)packet.ReadUInt8();
             SendPacketToClient(fail);
         }
+        [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE)]
+        void HandleInventoryChangeFailure(WorldPacket packet)
+        {
+            InventoryChangeFailure failure = new();
+            failure.BagResult = (InventoryResult)packet.ReadUInt8();
+            if (failure.BagResult == InventoryResult.Ok)
+                return;
+
+            failure.Item[0] = packet.ReadGuid().To128();
+            failure.Item[1] = packet.ReadGuid().To128();
+            failure.ContainerBSlot = packet.ReadUInt8();
+
+            switch (failure.BagResult)
+            {
+                case InventoryResult.CantEquipLevel:
+                case InventoryResult.PurchaseLevelTooLow:
+                    failure.Level = packet.ReadInt32();
+                    break;
+                case InventoryResult.EventAutoEquipBindConfirm:
+                    failure.SrcContainer = packet.ReadGuid().To128();
+                    failure.SrcSlot = packet.ReadInt32();
+                    failure.DstContainer = packet.ReadGuid().To128();
+                    break;
+                case InventoryResult.ItemMaxLimitCategoryCountExceeded:
+                case InventoryResult.ItemMaxLimitCategorySocketedExceeded:
+                case InventoryResult.ItemMaxLimitCategoryEquippedExceeded:
+                    failure.LimitCategory = packet.ReadInt32();
+                    break;
+            }
+            SendPacketToClient(failure);
+        }
     }
 }

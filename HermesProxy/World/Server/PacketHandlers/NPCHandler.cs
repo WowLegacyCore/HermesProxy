@@ -36,5 +36,13 @@ namespace HermesProxy.World.Server
                 packet.WriteCString(gossip.PromotionCode);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_BUY_BANK_SLOT)]
+        void HandleBuyBankSlot(BuyBankSlot bank)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BUY_BANK_SLOT);
+            packet.WriteGuid(bank.Guid.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

@@ -1186,7 +1186,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     if (activeData.InvSlots[i] != null)
                         m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.InvSlots[i]);
                 }
-                for (int i = 0; i < 28; i++)
+                for (int i = 0; i < 24; i++)
                 {
                     int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + Classic.InventorySlots.ItemStart * 4;
                     int sizePerEntry = 4;

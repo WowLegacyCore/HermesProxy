@@ -186,6 +186,47 @@ namespace HermesProxy
 
     public static class ModernVersion
     {
+        public static byte AdjustInventorySlot(byte slot)
+        {
+            byte offset = 0;
+            if (slot >= World.Objects.Classic.InventorySlots.BankItemStart && slot < World.Objects.Classic.InventorySlots.BankItemEnd)
+            {
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    offset = World.Objects.Classic.InventorySlots.BankItemStart - World.Objects.Vanilla.InventorySlots.BankItemStart;
+                else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    offset = World.Objects.Classic.InventorySlots.BankItemStart - World.Objects.TBC.InventorySlots.BankItemStart;
+                else
+                    offset = World.Objects.Classic.InventorySlots.BankItemStart - World.Objects.WotLK.InventorySlots.BankItemStart;
+            }
+            else if (slot >= World.Objects.Classic.InventorySlots.BankBagStart && slot < World.Objects.Classic.InventorySlots.BankBagEnd)
+            {
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    offset = World.Objects.Classic.InventorySlots.BankBagStart - World.Objects.Vanilla.InventorySlots.BankBagStart;
+                else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    offset = World.Objects.Classic.InventorySlots.BankBagStart - World.Objects.TBC.InventorySlots.BankBagStart;
+                else
+                    offset = World.Objects.Classic.InventorySlots.BankBagStart - World.Objects.WotLK.InventorySlots.BankBagStart;
+            }
+            else if (slot >= World.Objects.Classic.InventorySlots.BuyBackStart && slot < World.Objects.Classic.InventorySlots.BuyBackEnd)
+            {
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    offset = World.Objects.Classic.InventorySlots.BuyBackStart - World.Objects.Vanilla.InventorySlots.BuyBackStart;
+                else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    offset = World.Objects.Classic.InventorySlots.BuyBackStart - World.Objects.TBC.InventorySlots.BuyBackStart;
+                else
+                    offset = World.Objects.Classic.InventorySlots.BuyBackStart - World.Objects.WotLK.InventorySlots.BuyBackStart;
+            }
+            else if (slot >= World.Objects.Classic.InventorySlots.KeyringStart && slot < World.Objects.Classic.InventorySlots.KeyringEnd)
+            {
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    offset = World.Objects.Classic.InventorySlots.KeyringStart - World.Objects.Vanilla.InventorySlots.KeyringStart;
+                else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    offset = World.Objects.Classic.InventorySlots.KeyringStart - World.Objects.TBC.InventorySlots.KeyringStart;
+                else
+                    offset = World.Objects.Classic.InventorySlots.KeyringStart - World.Objects.WotLK.InventorySlots.KeyringStart;
+            }
+            return (byte)(slot - offset);
+        }
         public static void ConvertAuraFlags(ushort oldFlags, byte slot, out AuraFlagsModern newFlags, out uint activeFlags)
         {
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
