@@ -54,11 +54,38 @@ namespace HermesProxy.World.Client
         void HandleMovementMessages(WorldPacket packet)
         {
             MoveUpdate moveUpdate = new MoveUpdate();
-            moveUpdate.Guid = packet.ReadPackedGuid().To128();
+            moveUpdate.MoverGUID = packet.ReadPackedGuid().To128();
             moveUpdate.MoveInfo = new();
             moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet);
             moveUpdate.MoveInfo.Flags = (uint)(((MovementFlagWotLK)moveUpdate.MoveInfo.Flags).CastFlags<MovementFlagModern>());
             SendPacketToClient(moveUpdate);
+        }
+
+        [PacketHandler(Opcode.MSG_MOVE_KNOCK_BACK)]
+        void HandleMoveKnockBack(WorldPacket packet)
+        {
+            MoveUpdateKnockBack knockback = new MoveUpdateKnockBack();
+            knockback.MoverGUID = packet.ReadPackedGuid().To128();
+            knockback.MoveInfo = new();
+            knockback.MoveInfo.ReadMovementInfoLegacy(packet);
+            knockback.MoveInfo.Flags = (uint)(((MovementFlagWotLK)knockback.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            knockback.MoveInfo.JumpSinAngle = packet.ReadFloat();
+            knockback.MoveInfo.JumpCosAngle = packet.ReadFloat();
+            knockback.MoveInfo.JumpHorizontalSpeed = packet.ReadFloat();
+            knockback.MoveInfo.JumpVerticalSpeed = packet.ReadFloat();
+            SendPacketToClient(knockback);
+        }
+
+        [PacketHandler(Opcode.SMSG_MOVE_KNOCK_BACK)]
+        void HandleMoveForceKnockBack(WorldPacket packet)
+        {
+            MoveKnockBack knockback = new MoveKnockBack();
+            knockback.MoverGUID = packet.ReadPackedGuid().To128();
+            knockback.MoveCounter = packet.ReadUInt32();
+            knockback.Direction = packet.ReadVector2();
+            knockback.HorizontalSpeed = packet.ReadFloat();
+            knockback.VerticalSpeed = packet.ReadFloat();
+            SendPacketToClient(knockback);
         }
 
         [PacketHandler(Opcode.MSG_MOVE_TELEPORT_ACK)]
