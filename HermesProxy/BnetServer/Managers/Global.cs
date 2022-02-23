@@ -26,7 +26,7 @@ public static class Global
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
         public List<int> ActionButtons = new();
-        public Dictionary<WowGuid, PlayerCache> CachedPlayers = new();
+        public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
         public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
@@ -79,8 +79,21 @@ public static class Global
             return "";
         }
 
-        public void UpdatePlayerCache(WowGuid guid, PlayerCache data)
+        public WowGuid128 GetPlayerGuidByName(string name)
         {
+            name = name.Trim().Replace("\0", "");
+            foreach (var player in CachedPlayers)
+            {
+                if (player.Value.Name == name)
+                    return player.Key;
+            }
+            return null;
+        }
+
+        public void UpdatePlayerCache(WowGuid128 guid, PlayerCache data)
+        {
+            if (data.Name != null)
+                data.Name = data.Name.Trim().Replace("\0", "");
             if (CachedPlayers.ContainsKey(guid))
             {
                 if (!string.IsNullOrEmpty(data.Name))
@@ -98,7 +111,7 @@ public static class Global
                 CachedPlayers.Add(guid, data);
         }
 
-        public Class GetUnitClass(WowGuid guid)
+        public Class GetUnitClass(WowGuid128 guid)
         {
             if (CachedPlayers.ContainsKey(guid))
                 return CachedPlayers[guid].ClassId;

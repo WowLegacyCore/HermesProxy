@@ -350,5 +350,29 @@ namespace HermesProxy.World.Client
 
             SendPacket(packet);
         }
+
+        [PacketHandler(Opcode.SMSG_EMOTE)]
+        void HandleEmote(WorldPacket packet)
+        {
+            EmoteMessage emote = new EmoteMessage();
+            emote.EmoteID = packet.ReadUInt32();
+            emote.Guid = packet.ReadGuid().To128();
+            SendPacketToClient(emote);
+        }
+
+        [PacketHandler(Opcode.SMSG_TEXT_EMOTE)]
+        void HandleTextEmote(WorldPacket packet)
+        {
+            STextEmote emote = new STextEmote();
+            emote.SourceGUID = packet.ReadGuid().To128();
+            emote.SourceAccountGUID = Global.CurrentSessionData.GameState.GetGameAccountGuidForPlayer(emote.SourceGUID);
+            emote.EmoteID = packet.ReadInt32();
+            emote.SoundIndex = packet.ReadInt32();
+            uint nameLength = packet.ReadUInt32();
+            string targetName = packet.ReadString(nameLength);
+            WowGuid128 targetGuid = Global.CurrentSessionData.GameState.GetPlayerGuidByName(targetName);
+            emote.TargetGUID = targetGuid != null ? targetGuid : emote.SourceGUID;
+            SendPacketToClient(emote);
+        }
     }
 }

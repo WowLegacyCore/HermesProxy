@@ -1010,7 +1010,7 @@ namespace HermesProxy.World.Client
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
-                                classId = Global.CurrentSessionData.GameState.GetUnitClass(guid);
+                                classId = Global.CurrentSessionData.GameState.GetUnitClass(guid.To128());
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
                                 updateData.UnitData.Power[powerSlot] = updates[UNIT_FIELD_POWER1 + i].Int32Value;
@@ -1028,7 +1028,7 @@ namespace HermesProxy.World.Client
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
-                                classId = Global.CurrentSessionData.GameState.GetUnitClass(guid);
+                                classId = Global.CurrentSessionData.GameState.GetUnitClass(guid.To128());
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
                                 updateData.UnitData.MaxPower[powerSlot] = updates[UNIT_FIELD_MAXPOWER1 + i].Int32Value;
@@ -1581,7 +1581,7 @@ namespace HermesProxy.World.Client
                     if (raceId == Race.None || sexId == Gender.None)
                     {
                         Global.PlayerCache cache;
-                        if (Global.CurrentSessionData.GameState.CachedPlayers.TryGetValue(guid, out cache))
+                        if (Global.CurrentSessionData.GameState.CachedPlayers.TryGetValue(guid.To128(), out cache))
                         {
                             raceId = cache.RaceId;
                             sexId = cache.SexId;
@@ -1815,7 +1815,7 @@ namespace HermesProxy.World.Client
                     if (updateData.UnitData.ClassId != null)
                         classId = (Class)updateData.UnitData.ClassId;
                     else
-                        classId = Global.CurrentSessionData.GameState.GetUnitClass(guid);
+                        classId = Global.CurrentSessionData.GameState.GetUnitClass(guid.To128());
                     sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, PowerType.ComboPoints);
                     if (powerSlot >= 0)
                         updateData.UnitData.Power[powerSlot] = comboPoints;

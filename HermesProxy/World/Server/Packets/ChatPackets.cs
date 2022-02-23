@@ -21,6 +21,7 @@ using Framework.GameMath;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using System;
+using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
@@ -266,5 +267,65 @@ namespace HermesProxy.World.Server.Packets
         public uint? Unused_801;
         public bool HideChatLog = false;
         public bool FakeSenderName = false;
+    }
+
+    public class EmoteMessage : ServerPacket
+    {
+        public EmoteMessage() : base(Opcode.SMSG_EMOTE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+            _worldPacket.WriteUInt32(EmoteID);
+            _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
+
+            foreach (var id in SpellVisualKitIDs)
+                _worldPacket.WriteUInt32(id);
+        }
+
+        public WowGuid128 Guid;
+        public uint EmoteID;
+        public List<uint> SpellVisualKitIDs = new();
+    }
+
+    public class CTextEmote : ClientPacket
+    {
+        public CTextEmote(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Target = _worldPacket.ReadPackedGuid128();
+            EmoteID = _worldPacket.ReadInt32();
+            SoundIndex = _worldPacket.ReadInt32();
+
+            SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
+            for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
+                SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 Target;
+        public int EmoteID;
+        public int SoundIndex;
+        public uint[] SpellVisualKitIDs;
+    }
+
+    public class STextEmote : ServerPacket
+    {
+        public STextEmote() : base(Opcode.SMSG_TEXT_EMOTE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(SourceGUID);
+            _worldPacket.WritePackedGuid128(SourceAccountGUID);
+            _worldPacket.WriteInt32(EmoteID);
+            _worldPacket.WriteInt32(SoundIndex);
+            _worldPacket.WritePackedGuid128(TargetGUID);
+        }
+
+        public WowGuid128 SourceGUID;
+        public WowGuid128 SourceAccountGUID;
+        public WowGuid128 TargetGUID;
+        public int SoundIndex = -1;
+        public int EmoteID;
     }
 }

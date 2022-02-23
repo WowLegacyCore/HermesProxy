@@ -127,5 +127,15 @@ namespace HermesProxy.World.Server
                 Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(chatMsg, packet.Language, packet.Text, "", "");
             }
         }
+
+        [PacketHandler(Opcode.CMSG_SEND_TEXT_EMOTE)]
+        void HandleSendTextEmote(CTextEmote emote)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SEND_TEXT_EMOTE);
+            packet.WriteInt32(emote.EmoteID);
+            packet.WriteInt32(emote.SoundIndex);
+            packet.WriteGuid(emote.Target.To64());
+            SendPacketToServer(packet);
+        }
     }
 }
