@@ -94,5 +94,32 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(item.Slot);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_READ_ITEM)]
+        void HandleReadItem(ReadItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_READ_ITEM);
+            packet.WriteUInt8(item.PackSlot);
+            packet.WriteUInt8(item.Slot);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_BUY_BACK_ITEM)]
+        void HandleBuyBackItem(BuyBackItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BUY_BACK_ITEM);
+            packet.WriteGuid(item.VendorGUID.To64());
+
+            byte oldSlot = 0;
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                oldSlot = Objects.Vanilla.InventorySlots.BuyBackStart;
+            else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                oldSlot = Objects.TBC.InventorySlots.BuyBackStart;
+            else
+                oldSlot = Objects.WotLK.InventorySlots.BuyBackStart;
+
+            byte slotOffset = (byte)(Objects.Classic.InventorySlots.BuyBackStart - oldSlot);
+
+            packet.WriteUInt32(item.Slot - slotOffset);
+            SendPacketToServer(packet);
+        }
     }
 }

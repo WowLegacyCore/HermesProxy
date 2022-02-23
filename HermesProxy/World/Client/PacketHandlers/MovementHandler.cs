@@ -46,11 +46,6 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_MOVE_HOVER)]
         [PacketHandler(Opcode.MSG_MOVE_FEATHER_FALL)]
         [PacketHandler(Opcode.MSG_MOVE_WATER_WALK)]
-        [PacketHandler(Opcode.CMSG_MOVE_FALL_RESET)]
-        [PacketHandler(Opcode.CMSG_MOVE_SET_FLY)]
-        [PacketHandler(Opcode.CMSG_MOVE_CHANGE_TRANSPORT)]
-        [PacketHandler(Opcode.CMSG_MOVE_NOT_ACTIVE_MOVER)]
-        [PacketHandler(Opcode.CMSG_DISMISS_CONTROLLED_VEHICLE)]
         void HandleMovementMessages(WorldPacket packet)
         {
             MoveUpdate moveUpdate = new MoveUpdate();

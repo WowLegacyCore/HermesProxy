@@ -174,7 +174,7 @@ namespace HermesProxy.World.Server.Packets
             public uint PetCreatureFamilyId;
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
-            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
+            public VisualItemInfo[] VisualItems = new VisualItemInfo[Objects.Classic.InventorySlots.BagEnd];
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
 

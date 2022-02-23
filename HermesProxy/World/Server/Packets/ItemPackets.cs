@@ -38,6 +38,20 @@ namespace HermesProxy.World.Server.Packets
         public byte ProficiencyClass;
     }
 
+    public class BuyBackItem : ClientPacket
+    {
+        public BuyBackItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            VendorGUID = _worldPacket.ReadPackedGuid128();
+            Slot = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 VendorGUID;
+        public uint Slot;
+    }
+
     public class BuyItem : ClientPacket
     {
         public BuyItem(WorldPacket packet) : base(packet)
@@ -81,6 +95,22 @@ namespace HermesProxy.World.Server.Packets
         public uint Slot;
         public int NewQuantity;
         public uint QuantityBought;
+    }
+
+    public class BuyFailed : ServerPacket
+    {
+        public BuyFailed() : base(Opcode.SMSG_BUY_FAILED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(VendorGUID);
+            _worldPacket.WriteUInt32(Slot);
+            _worldPacket.WriteUInt8((byte)Reason);
+        }
+
+        public WowGuid128 VendorGUID;
+        public uint Slot;
+        public BuyResult Reason = BuyResult.CantFindItem;
     }
 
     class ItemPushResult : ServerPacket
@@ -392,5 +422,48 @@ namespace HermesProxy.World.Server.Packets
             foreach (ItemMod itemMod in Values)
                 itemMod.Write(data);
         }
+    }
+
+    class ReadItem : ClientPacket
+    {
+        public ReadItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PackSlot = _worldPacket.ReadUInt8();
+            Slot = _worldPacket.ReadUInt8();
+        }
+
+        public byte PackSlot;
+        public byte Slot;
+    }
+
+    class ReadItemResultFailed : ServerPacket
+    {
+        public ReadItemResultFailed() : base(Opcode.SMSG_READ_ITEM_RESULT_FAILED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(ItemGUID);
+            _worldPacket.WriteUInt32(Delay);
+            _worldPacket.WriteBits(Subcode, 2);
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 ItemGUID;
+        public uint Delay;
+        public byte Subcode;
+    }
+
+    class ReadItemResultOK : ServerPacket
+    {
+        public ReadItemResultOK() : base(Opcode.SMSG_READ_ITEM_RESULT_OK) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(ItemGUID);
+        }
+
+        public WowGuid128 ItemGUID;
     }
 }

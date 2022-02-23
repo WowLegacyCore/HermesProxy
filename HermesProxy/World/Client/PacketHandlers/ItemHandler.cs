@@ -51,5 +51,29 @@ namespace HermesProxy.World.Client
             item.ItemGUID = WowGuid128.Empty;
             SendPacketToClient(item);
         }
+        [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_OK)]
+        void HandleReadItemResultOk(WorldPacket packet)
+        {
+            ReadItemResultOK read = new ReadItemResultOK();
+            read.ItemGUID = packet.ReadGuid().To128();
+            SendPacketToClient(read);
+        }
+        [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_FAILED)]
+        void HandleReadItemResultFailed(WorldPacket packet)
+        {
+            ReadItemResultFailed read = new ReadItemResultFailed();
+            read.ItemGUID = packet.ReadGuid().To128();
+            read.Subcode = 2;
+            SendPacketToClient(read);
+        }
+        [PacketHandler(Opcode.SMSG_BUY_FAILED)]
+        void HandleBuyFailed(WorldPacket packet)
+        {
+            BuyFailed fail = new BuyFailed();
+            fail.VendorGUID = packet.ReadGuid().To128();
+            fail.Slot = packet.ReadUInt32();
+            fail.Reason = (BuyResult)packet.ReadUInt8();
+            SendPacketToClient(fail);
+        }
     }
 }

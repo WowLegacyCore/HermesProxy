@@ -777,26 +777,101 @@ namespace HermesProxy.World.Objects
         NPE = 1
     }
 
-    public struct InventorySlots
+    namespace Vanilla
     {
-        public const byte BagStart = 19;
-        public const byte BagEnd = 23;
-        public const byte ItemStart = 23;
-        public const byte ItemEnd = 51;
+        public struct InventorySlots
+        {
+            public const byte BagStart = 19;
+            public const byte BagEnd = 23;
+            public const byte ItemStart = 23;
+            public const byte ItemEnd = 39;
 
-        public const byte BankItemStart = 51;
-        public const byte BankItemEnd = 79;
-        public const byte BankBagStart = 79;
-        public const byte BankBagEnd = 86;
+            public const byte BankItemStart = 39;
+            public const byte BankItemEnd = 63;
+            public const byte BankBagStart = 63;
+            public const byte BankBagEnd = 69;
 
-        public const byte BuyBackStart = 86;
-        public const byte BuyBackEnd = 98;
-        public const byte KeyringStart = 98;
-        public const byte KeyringEnd = 130;
+            public const byte BuyBackStart = 69;
+            public const byte BuyBackEnd = 81;
+            public const byte KeyringStart = 81;
+            public const byte KeyringEnd = 97;
 
-        public const byte Bag0 = 255;
-        public const byte DefaultSize = 16;
+            public const byte Bag0 = 255;
+            public const byte DefaultSize = 16;
+        }
     }
+    namespace TBC
+    {
+        public struct InventorySlots
+        {
+            public const byte BagStart = 19;
+            public const byte BagEnd = 23;
+            public const byte ItemStart = 23;
+            public const byte ItemEnd = 39;
+
+            public const byte BankItemStart = 39;
+            public const byte BankItemEnd = 67;
+            public const byte BankBagStart = 67;
+            public const byte BankBagEnd = 74;
+
+            public const byte BuyBackStart = 74;
+            public const byte BuyBackEnd = 86;
+            public const byte KeyringStart = 86;
+            public const byte KeyringEnd = 118;
+
+            public const byte Bag0 = 255;
+            public const byte DefaultSize = 16;
+        }
+    }
+    namespace WotLK
+    {
+        public struct InventorySlots
+        {
+            public const byte BagStart = 19;
+            public const byte BagEnd = 23;
+            public const byte ItemStart = 23;
+            public const byte ItemEnd = 39;
+
+            public const byte BankItemStart = 39;
+            public const byte BankItemEnd = 67;
+            public const byte BankBagStart = 67;
+            public const byte BankBagEnd = 74;
+
+            public const byte BuyBackStart = 74;
+            public const byte BuyBackEnd = 86;
+            public const byte KeyringStart = 86;
+            public const byte KeyringEnd = 118;
+            public const byte CurrencyStart = 118;
+            public const byte CurrencyEnd = 150;
+
+            public const byte Bag0 = 255;
+            public const byte DefaultSize = 16;
+        }
+    }
+    namespace Classic
+    {
+        public struct InventorySlots
+        {
+            public const byte BagStart = 19;
+            public const byte BagEnd = 23;
+            public const byte ItemStart = 23;
+            public const byte ItemEnd = 51;
+
+            public const byte BankItemStart = 51;
+            public const byte BankItemEnd = 79;
+            public const byte BankBagStart = 79;
+            public const byte BankBagEnd = 86;
+
+            public const byte BuyBackStart = 82;
+            public const byte BuyBackEnd = 94;
+            public const byte KeyringStart = 98;
+            public const byte KeyringEnd = 130;
+
+            public const byte Bag0 = 255;
+            public const byte DefaultSize = 16;
+        }
+    }
+    
 
     public struct EquipmentSlot
     {

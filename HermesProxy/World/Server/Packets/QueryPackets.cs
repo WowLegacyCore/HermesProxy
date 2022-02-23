@@ -661,6 +661,64 @@ namespace HermesProxy.World.Server.Packets
         public uint ContentTuningId;
     }
 
+    public class QueryPageText : ClientPacket
+    {
+        public QueryPageText(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PageTextID = _worldPacket.ReadUInt32();
+            ItemGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 ItemGUID;
+        public uint PageTextID;
+    }
+
+    public class QueryPageTextResponse : ServerPacket
+    {
+        public QueryPageTextResponse() : base(Opcode.SMSG_QUERY_PAGE_TEXT_RESPONSE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(PageTextID);
+            _worldPacket.WriteBit(Allow);
+            _worldPacket.FlushBits();
+
+            if (Allow)
+            {
+                _worldPacket.WriteInt32(Pages.Count);
+                foreach (PageTextInfo pageText in Pages)
+                    pageText.Write(_worldPacket);
+            }
+        }
+
+        public uint PageTextID;
+        public bool Allow;
+        public List<PageTextInfo> Pages = new();
+
+        public struct PageTextInfo
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt32(Id);
+                data.WriteUInt32(NextPageID);
+                data.WriteInt32(PlayerConditionID);
+                data.WriteUInt8(Flags);
+                data.WriteBits(Text.GetByteCount(), 12);
+                data.FlushBits();
+
+                data.WriteString(Text);
+            }
+
+            public uint Id;
+            public uint NextPageID;
+            public int PlayerConditionID;
+            public byte Flags;
+            public string Text;
+        }
+    }
+
     public class QueryNPCText : ClientPacket
     {
         public QueryNPCText(WorldPacket packet) : base(packet) { }

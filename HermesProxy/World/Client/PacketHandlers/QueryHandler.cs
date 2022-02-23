@@ -5,6 +5,7 @@ using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
 using System.Collections.Generic;
+using static HermesProxy.World.Server.Packets.QueryPageTextResponse;
 
 namespace HermesProxy.World.Client
 {
@@ -380,6 +381,19 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(response);
         }
+        [PacketHandler(Opcode.SMSG_QUERY_PAGE_TEXT_RESPONSE)]
+        void HandleQueryPageTextResponse(WorldPacket packet)
+        {
+            QueryPageTextResponse response = new QueryPageTextResponse();
+            response.PageTextID = packet.ReadUInt32();
+            response.Allow = true;
+            PageTextInfo page = new PageTextInfo();
+            page.Id = response.PageTextID;
+            page.Text = packet.ReadCString();
+            page.NextPageID = packet.ReadUInt32();
+            response.Pages.Add(page);
+            SendPacketToClient(response);
+        }
         [PacketHandler(Opcode.SMSG_QUERY_NPC_TEXT_RESPONSE)]
         void HandleQueryNpcTextResponse(WorldPacket packet)
         {
@@ -413,7 +427,7 @@ namespace HermesProxy.World.Client
                 const string placeholderGossip = "Greetings $N";
 
                 if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText) ||
-                    maleText == placeholderGossip && femaleText == placeholderGossip)
+                    maleText == placeholderGossip && femaleText == placeholderGossip && i != 0)
                     response.BroadcastTextID[i] = 0;
                 else
                     response.BroadcastTextID[i] = GameData.GetBroadcastTextId(maleText, femaleText, language, emoteDelays, emotes);

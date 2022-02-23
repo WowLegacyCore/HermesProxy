@@ -1188,35 +1188,35 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                 }
                 for (int i = 0; i < 28; i++)
                 {
-                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + InventorySlots.ItemStart * 4;
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + Classic.InventorySlots.ItemStart * 4;
                     int sizePerEntry = 4;
                     if (activeData.PackSlots[i] != null)
                         m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.PackSlots[i]);
                 }
                 for (int i = 0; i < 28; i++)
                 {
-                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + InventorySlots.BankItemStart * 4;
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + Classic.InventorySlots.BankItemStart * 4;
                     int sizePerEntry = 4;
                     if (activeData.BankSlots[i] != null)
                         m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.BankSlots[i]);
                 }
                 for (int i = 0; i < 7; i++)
                 {
-                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + InventorySlots.BankBagStart * 4;
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + Classic.InventorySlots.BankBagStart * 4;
                     int sizePerEntry = 4;
                     if (activeData.BankBagSlots[i] != null)
                         m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.BankBagSlots[i]);
                 }
                 for (int i = 0; i < 12; i++)
                 {
-                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + InventorySlots.BuyBackStart * 4;
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + Classic.InventorySlots.BuyBackStart * 4;
                     int sizePerEntry = 4;
                     if (activeData.BuyBackSlots[i] != null)
                         m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.BuyBackSlots[i]);
                 }
                 for (int i = 0; i < 32; i++)
                 {
-                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + InventorySlots.KeyringStart * 4;
+                    int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_INV_SLOT_HEAD + Classic.InventorySlots.KeyringStart * 4;
                     int sizePerEntry = 4;
                     if (activeData.KeyringSlots[i] != null)
                         m_fields.SetUpdateField<WowGuid128>(startIndex + i * sizePerEntry, activeData.KeyringSlots[i]);
