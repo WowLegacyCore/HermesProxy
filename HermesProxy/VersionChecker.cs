@@ -182,6 +182,14 @@ namespace HermesProxy
             else
                 return 80;
         }
+
+        public static HitInfo ConvertHitInfoFlags(uint hitInfo)
+        {
+            if (RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                return ((HitInfoVanilla)hitInfo).CastFlags<HitInfo>();
+            else
+                return (HitInfo)hitInfo;
+        }
     }
 
     public static class ModernVersion
