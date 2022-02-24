@@ -20,6 +20,7 @@ using Framework.Constants;
 using Framework.GameMath;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
@@ -274,6 +275,283 @@ namespace HermesProxy.World.Server.Packets
         {
             NoLevelScaling = 0x1,
             NoItemLevelScaling = 0x2
+        }
+    }
+
+    class SpellGo : ServerPacket
+    {
+        public SpellGo() : base(Opcode.SMSG_SPELL_GO, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            Cast.Write(_worldPacket);
+
+            _worldPacket.WriteBit(LogData != null);
+            if (LogData != null)
+                LogData.Write(_worldPacket);
+            _worldPacket.FlushBits();
+        }
+
+        public SpellCastData Cast = new();
+        public SpellCastLogData LogData;
+    }
+
+    public class SpellCastData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(CasterGUID);
+            data.WritePackedGuid128(CasterUnit);
+            data.WritePackedGuid128(CastID);
+            data.WritePackedGuid128(OriginalCastID);
+            data.WriteInt32(SpellID);
+            data.WriteUInt32(SpellXSpellVisualID);
+            data.WriteUInt32(CastFlags);
+            data.WriteUInt32(CastFlagsEx);
+            data.WriteUInt32(CastTime);
+
+            MissileTrajectory.Write(data);
+
+            data.WriteUInt8(DestLocSpellCastIndex);
+
+            Immunities.Write(data);
+            Predict.Write(data);
+
+            data.WriteBits(HitTargets.Count, 16);
+            data.WriteBits(MissTargets.Count, 16);
+            data.WriteBits(MissStatus.Count, 16);
+            data.WriteBits(RemainingPower.Count, 9);
+            data.WriteBit(RemainingRunes != null);
+            data.WriteBits(TargetPoints.Count, 16);
+            data.WriteBit(AmmoDisplayId != null);
+            data.WriteBit(AmmoInventoryType != null);
+            data.FlushBits();
+
+            foreach (SpellMissStatus missStatus in MissStatus)
+                missStatus.Write(data);
+
+            Target.Write(data);
+
+            foreach (WowGuid128 hitTarget in HitTargets)
+                data.WritePackedGuid128(hitTarget);
+
+            foreach (WowGuid128 missTarget in MissTargets)
+                data.WritePackedGuid128(missTarget);
+
+            foreach (SpellPowerData power in RemainingPower)
+                power.Write(data);
+
+            if (RemainingRunes != null)
+                RemainingRunes.Write(data);
+
+            foreach (TargetLocation targetLoc in TargetPoints)
+                targetLoc.Write(data);
+
+            if (AmmoDisplayId != null)
+                data.WriteInt32((int)AmmoDisplayId);
+
+            if (AmmoInventoryType != null)
+                data.WriteInt32((int)AmmoInventoryType);
+        }
+
+        public WowGuid128 CasterGUID;
+        public WowGuid128 CasterUnit;
+        public WowGuid128 CastID = WowGuid128.Empty;
+        public WowGuid128 OriginalCastID = WowGuid128.Empty;
+        public int SpellID;
+        public uint SpellXSpellVisualID;
+        public uint CastFlags;
+        public uint CastFlagsEx;
+        public uint CastTime;
+        public List<WowGuid128> HitTargets = new();
+        public List<WowGuid128> MissTargets = new();
+        public List<SpellMissStatus> MissStatus = new();
+        public SpellTargetData Target = new();
+        public List<SpellPowerData> RemainingPower = new();
+        public RuneData RemainingRunes;
+        public MissileTrajectoryResult MissileTrajectory;
+        public int? AmmoDisplayId;
+        public int? AmmoInventoryType;
+        public byte DestLocSpellCastIndex;
+        public List<TargetLocation> TargetPoints = new();
+        public CreatureImmunities Immunities;
+        public SpellHealPrediction Predict = new();
+    }
+
+    public struct SpellMissStatus
+    {
+        public SpellMissStatus(SpellMissInfo reason, SpellMissInfo reflectStatus)
+        {
+            Reason = reason;
+            ReflectStatus = reflectStatus;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits((byte)Reason, 4);
+            if (Reason == SpellMissInfo.Reflect)
+                data.WriteBits(ReflectStatus, 4);
+
+            data.FlushBits();
+        }
+
+        public SpellMissInfo Reason;
+        public SpellMissInfo ReflectStatus;
+    }
+
+    public class TargetLocation
+    {
+        public WowGuid128 Transport = WowGuid128.Empty;
+        public Vector3 Location;
+
+        public void Read(WorldPacket data)
+        {
+            Transport = data.ReadPackedGuid128();
+            Location = data.ReadVector3();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(Transport);
+            data.WriteVector3(Location);
+        }
+    }
+
+    public class SpellTargetData
+    {
+        public void Read(WorldPacket data)
+        {
+            Flags = (SpellCastTargetFlags)data.ReadBits<uint>(26);
+            if (data.HasBit())
+                SrcLocation = new();
+            if (data.HasBit())
+                DstLocation = new();
+            if (data.HasBit())
+                Orientation = new();
+            if (data.HasBit())
+                MapID = new();
+            uint nameLength = data.ReadBits<uint>(7);
+
+            Unit = data.ReadPackedGuid128();
+            Item = data.ReadPackedGuid128();
+
+            if (SrcLocation != null)
+                SrcLocation.Read(data);
+
+            if (DstLocation != null)
+                DstLocation.Read(data);
+
+            if (Orientation != null)
+                Orientation = data.ReadFloat();
+
+            if (MapID != null)
+                MapID = data.ReadInt32();
+
+            Name = data.ReadString(nameLength);
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits((uint)Flags, 26);
+            data.WriteBit(SrcLocation != null);
+            data.WriteBit(DstLocation != null);
+            data.WriteBit(Orientation.HasValue);
+            data.WriteBit(MapID.HasValue);
+            data.WriteBits(Name.GetByteCount(), 7);
+            data.FlushBits();
+
+            data.WritePackedGuid128(Unit);
+            data.WritePackedGuid128(Item);
+
+            if (SrcLocation != null)
+                SrcLocation.Write(data);
+
+            if (DstLocation != null)
+                DstLocation.Write(data);
+
+            if (Orientation.HasValue)
+                data.WriteFloat(Orientation.Value);
+
+            if (MapID.HasValue)
+                data.WriteInt32(MapID.Value);
+
+            data.WriteString(Name);
+        }
+
+        public SpellCastTargetFlags Flags;
+        public WowGuid128 Unit;
+        public WowGuid128 Item;
+        public TargetLocation SrcLocation;
+        public TargetLocation DstLocation;
+        public float? Orientation;
+        public int? MapID;
+        public string Name = "";
+    }
+
+    public struct SpellPowerData
+    {
+        public int Cost;
+        public PowerType Type;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Cost);
+            data.WriteInt8((sbyte)Type);
+        }
+    }
+
+    public class RuneData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(Start);
+            data.WriteUInt8(Count);
+            data.WriteInt32(Cooldowns.Count);
+
+            foreach (byte cd in Cooldowns)
+                data.WriteUInt8(cd);
+        }
+
+        public byte Start;
+        public byte Count;
+        public List<byte> Cooldowns = new();
+    }
+
+    public struct MissileTrajectoryResult
+    {
+        public uint TravelTime;
+        public float Pitch;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TravelTime);
+            data.WriteFloat(Pitch);
+        }
+    }
+
+    public struct CreatureImmunities
+    {
+        public uint School;
+        public uint Value;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(School);
+            data.WriteUInt32(Value);
+        }
+    }
+
+    public class SpellHealPrediction
+    {
+        public WowGuid128 BeaconGUID = WowGuid128.Empty;
+        public uint Points;
+        public byte Type;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Points);
+            data.WriteUInt8(Type);
+            data.WritePackedGuid128(BeaconGUID);
         }
     }
 }

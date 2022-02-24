@@ -80,5 +80,191 @@ namespace HermesProxy.World.Client
             SendPacketToClient(spells);
             SendPacketToClient(new SendUnlearnSpells());
         }
+
+        [PacketHandler(Opcode.SMSG_SPELL_GO)]
+        void HandleSpellGo(WorldPacket packet)
+        {
+            SpellGo spell = new SpellGo();
+            spell.Cast = HandleSpellStart(packet, true);
+            SendPacketToClient(spell);
+        }
+
+        public static SpellCastData HandleSpellStart(WorldPacket packet, bool isSpellGo)
+        {
+            SpellCastData dbdata = new SpellCastData();
+            
+            dbdata.CasterGUID = packet.ReadPackedGuid().To128();
+            dbdata.CasterUnit = packet.ReadPackedGuid().To128();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.ReadUInt8(); // cast count
+
+            dbdata.SpellID = packet.ReadInt32();
+            dbdata.SpellXSpellVisualID = GameData.GetSpellVisual((uint)dbdata.SpellID);
+            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, (uint)dbdata.SpellID, dbdata.CasterGUID.GetLow());
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) && LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) && !isSpellGo)
+                packet.ReadUInt8(); // cast count
+
+            uint flags;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                flags = packet.ReadUInt32();
+            else
+                flags = packet.ReadUInt16();
+            dbdata.CastFlags = flags;
+
+            if (!isSpellGo || LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                dbdata.CastTime = packet.ReadUInt32();
+
+            if (isSpellGo)
+            {
+                var hitCount = packet.ReadUInt8();
+                for (var i = 0; i < hitCount; i++)
+                {
+                    WowGuid128 hitTarget = packet.ReadGuid().To128();
+                    dbdata.HitTargets.Add(hitTarget);
+                }
+
+                var missCount = packet.ReadUInt8();
+                for (var i = 0; i < missCount; i++)
+                {
+                    WowGuid128 missTarget = packet.ReadGuid().To128();
+                    SpellMissInfo missType = (SpellMissInfo)packet.ReadUInt8();
+                    SpellMissInfo reflectType = SpellMissInfo.None;
+                    if (missType == SpellMissInfo.Reflect)
+                        reflectType = (SpellMissInfo)packet.ReadUInt8();
+
+                    dbdata.MissTargets.Add(missTarget);
+                    dbdata.MissStatus.Add(new SpellMissStatus(missType, reflectType));
+                }
+            }
+
+            var targetFlags = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 
+                (SpellCastTargetFlags)packet.ReadUInt32() : (SpellCastTargetFlags)packet.ReadUInt16();
+            dbdata.Target.Flags = targetFlags;
+
+            WowGuid128 unitTarget = WowGuid128.Empty;
+            if (targetFlags.HasAnyFlag(SpellCastTargetFlags.Unit | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.GameObject |
+                SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.UnitMinipet))
+                unitTarget = packet.ReadPackedGuid().To128();
+            dbdata.Target.Unit = unitTarget;
+
+            WowGuid128 itemTarget = WowGuid128.Empty;
+            if (targetFlags.HasAnyFlag(SpellCastTargetFlags.Item | SpellCastTargetFlags.TradeItem))
+                itemTarget = packet.ReadPackedGuid().To128();
+            dbdata.Target.Item = itemTarget;
+
+            if (targetFlags.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
+            {
+                dbdata.Target.SrcLocation = new TargetLocation();
+                dbdata.Target.SrcLocation.Transport = WowGuid128.Empty;
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                    dbdata.Target.SrcLocation.Transport = packet.ReadPackedGuid().To128();
+
+                dbdata.Target.SrcLocation.Location = packet.ReadVector3();
+            }
+
+            if (targetFlags.HasAnyFlag(SpellCastTargetFlags.DestLocation))
+            {
+                dbdata.Target.DstLocation = new TargetLocation();
+                dbdata.Target.DstLocation.Transport = WowGuid128.Empty;
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_8_9464))
+                    dbdata.Target.DstLocation.Transport = packet.ReadPackedGuid().To128();
+
+                dbdata.Target.DstLocation.Location = packet.ReadVector3();
+            }
+            
+            if (targetFlags.HasAnyFlag(SpellCastTargetFlags.String))
+                dbdata.Target.Name = packet.ReadCString();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                if (flags.HasAnyFlag(CastFlag.PredictedPower))
+                {
+                        packet.ReadInt32(); // Rune Cooldown
+                }
+
+                if (flags.HasAnyFlag(CastFlag.RuneInfo))
+                {
+                    var spellRuneState = packet.ReadUInt8();
+                    var playerRuneState = packet.ReadUInt8();
+
+                    for (var i = 0; i < 6; i++)
+                    {
+                        var mask = 1 << i;
+                        if ((mask & spellRuneState) == 0)
+                            continue;
+
+                        if ((mask & playerRuneState) != 0)
+                            continue;
+
+                        packet.ReadUInt8(); // Rune Cooldown Passed
+                    }
+                }
+
+                if (isSpellGo)
+                {
+                    if (flags.HasAnyFlag(CastFlag.AdjustMissile))
+                    {
+                        dbdata.MissileTrajectory.Pitch = packet.ReadFloat(); // Elevation
+                        dbdata.MissileTrajectory.TravelTime = packet.ReadUInt32(); // Delay time
+                    }
+                }
+            }
+
+            if (flags.HasAnyFlag(CastFlag.Projectile))
+            {
+                dbdata.AmmoDisplayId = packet.ReadInt32();
+                dbdata.AmmoInventoryType = packet.ReadInt32();
+            }
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                if (isSpellGo)
+                {
+                    if (flags.HasAnyFlag(CastFlag.VisualChain))
+                    {
+                        packet.ReadInt32();
+                        packet.ReadInt32();
+                    }
+
+                    if (targetFlags.HasAnyFlag(SpellCastTargetFlags.DestLocation))
+                        packet.ReadInt8(); // Some count
+
+                    if (targetFlags.HasAnyFlag(SpellCastTargetFlags.ExtraTargets))
+                    {
+                        var targetCount = packet.ReadInt32();
+                        if (targetCount > 0)
+                        {
+                            TargetLocation location = new();
+                            for (var i = 0; i < targetCount; i++)
+                            {
+                                location.Location = packet.ReadVector3();
+                                location.Transport = packet.ReadGuid().To128();
+                            }
+                            dbdata.TargetPoints.Add(location);
+                        }
+                    }
+                }
+                else
+                {
+                    if (flags.HasAnyFlag(CastFlag.Immunity))
+                    {
+                        dbdata.Immunities.School = packet.ReadUInt32();
+                        dbdata.Immunities.Value = packet.ReadUInt32();
+                    }
+
+                    if (flags.HasAnyFlag(CastFlag.HealPrediction))
+                    {
+                        packet.ReadInt32(); // Predicted Spell ID
+
+                        if (packet.ReadUInt8() == 2)
+                            packet.ReadPackedGuid();
+                    }
+                }
+            }
+
+            return dbdata;
+        }
     }
 }
