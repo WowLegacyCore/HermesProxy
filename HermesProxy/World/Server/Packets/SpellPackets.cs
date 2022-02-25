@@ -278,6 +278,220 @@ namespace HermesProxy.World.Server.Packets
         }
     }
 
+    public class CastSpell : ClientPacket
+    {
+        public SpellCastRequest Cast;
+
+        public CastSpell(WorldPacket packet) : base(packet)
+        {
+            Cast = new SpellCastRequest();
+        }
+
+        public override void Read()
+        {
+            Cast.Read(_worldPacket);
+        }
+    }
+
+    public class SpellCastRequest
+    {
+        public WowGuid128 CastID;
+        public uint SpellID;
+        public uint SpellXSpellVisualID;
+        public uint SendCastFlags;
+        public SpellTargetData Target = new();
+        public MissileTrajectoryRequest MissileTrajectory;
+        public WowGuid128 MoverGUID;
+        public MovementInfo MoveUpdate;
+        public List<SpellWeight> Weight = new();
+        public Array<SpellOptionalReagent> OptionalReagents = new(3);
+        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
+        public WowGuid128 CraftingNPC;
+        public uint[] Misc = new uint[2];
+
+        public void Read(WorldPacket data)
+        {
+            CastID = data.ReadPackedGuid128();
+            Misc[0] = data.ReadUInt32();
+            Misc[1] = data.ReadUInt32();
+            SpellID = data.ReadUInt32();
+
+            SpellXSpellVisualID = data.ReadUInt32();
+
+            MissileTrajectory.Read(data);
+            CraftingNPC = data.ReadPackedGuid128();
+
+            var optionalReagents = data.ReadUInt32();
+            var optionalCurrencies = data.ReadUInt32();
+
+            for (var i = 0; i < optionalReagents; ++i)
+                OptionalReagents[i].Read(data);
+
+            for (var i = 0; i < optionalCurrencies; ++i)
+                OptionalCurrencies[i].Read(data);
+
+            SendCastFlags = data.ReadBits<uint>(5);
+            if (data.HasBit())
+                MoveUpdate = new();
+            var weightCount = data.ReadBits<uint>(2);
+            Target.Read(data);
+
+            if (MoveUpdate != null)
+            {
+                MoverGUID = data.ReadPackedGuid128();
+                MoveUpdate.ReadMovementInfoModern(data);
+            }
+
+            for (var i = 0; i < weightCount; ++i)
+            {
+                data.ResetBitPos();
+                SpellWeight weight;
+                weight.Type = data.ReadBits<uint>(2);
+                weight.ID = data.ReadInt32();
+                weight.Quantity = data.ReadUInt32();
+                Weight.Add(weight);
+            }
+        }
+    }
+
+    public struct MissileTrajectoryRequest
+    {
+        public float Pitch;
+        public float Speed;
+
+        public void Read(WorldPacket data)
+        {
+            Pitch = data.ReadFloat();
+            Speed = data.ReadFloat();
+        }
+    }
+
+    public struct SpellWeight
+    {
+        public uint Type;
+        public int ID;
+        public uint Quantity;
+    }
+
+    public struct SpellOptionalReagent
+    {
+        public int ItemID;
+        public int Slot;
+        public int Count;
+
+        public void Read(WorldPacket data)
+        {
+            ItemID = data.ReadInt32();
+            Slot = data.ReadInt32();
+            Count = data.ReadInt32();
+        }
+    }
+
+    public struct SpellExtraCurrencyCost
+    {
+        public int CurrencyID;
+        public int Slot;
+        public int Count;
+
+        public void Read(WorldPacket data)
+        {
+            CurrencyID = data.ReadInt32();
+            Slot = data.ReadInt32();
+            Count = data.ReadInt32();
+        }
+    }
+
+    class SpellPrepare : ServerPacket
+    {
+        public SpellPrepare() : base(Opcode.SMSG_SPELL_PREPARE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(ClientCastID);
+            _worldPacket.WritePackedGuid128(ServerCastID);
+        }
+
+        public WowGuid128 ClientCastID;
+        public WowGuid128 ServerCastID;
+    }
+
+    class CastFailed : ServerPacket
+    {
+        public WowGuid128 CastID;
+        public int SpellID;
+        public uint Reason;
+        public int FailedArg1 = -1;
+        public int FailedArg2 = -1;
+        public uint SpellXSpellVisualID;
+
+        public CastFailed() : base(Opcode.SMSG_CAST_FAILED, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CastID);
+            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+            _worldPacket.WriteInt32((int)Reason);
+            _worldPacket.WriteInt32(FailedArg1);
+            _worldPacket.WriteInt32(FailedArg2);
+        }
+    }
+
+    public class SpellFailure : ServerPacket
+    {
+        public SpellFailure() : base(Opcode.SMSG_SPELL_FAILURE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CasterUnit);
+            _worldPacket.WritePackedGuid128(CastID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+            _worldPacket.WriteUInt16(Reason);
+        }
+
+        public WowGuid128 CasterUnit;
+        public WowGuid128 CastID;
+        public uint SpellID;
+        public uint SpellXSpellVisualID;
+        public ushort Reason;
+    }
+
+    public class SpellFailedOther : ServerPacket
+    {
+        public SpellFailedOther() : base(Opcode.SMSG_SPELL_FAILED_OTHER, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CasterUnit);
+            _worldPacket.WritePackedGuid128(CastID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+            _worldPacket.WriteUInt8(Reason);
+        }
+
+        public WowGuid128 CasterUnit;
+        public WowGuid128 CastID;
+        public uint SpellID;
+        public uint SpellXSpellVisualID;
+        public byte Reason;
+    }
+
+    public class SpellStart : ServerPacket
+    {
+        public SpellCastData Cast;
+
+        public SpellStart() : base(Opcode.SMSG_SPELL_START, ConnectionType.Instance)
+        {
+            Cast = new SpellCastData();
+        }
+
+        public override void Write()
+        {
+            Cast.Write(_worldPacket);
+        }
+    }
+
     class SpellGo : ServerPacket
     {
         public SpellGo() : base(Opcode.SMSG_SPELL_GO, ConnectionType.Instance) { }

@@ -25,6 +25,8 @@ public static class Global
         public uint? CurrentMapId;
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
+        public uint LastClientCastId;
+        public WowGuid128 LastClientCastGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();

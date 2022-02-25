@@ -336,6 +336,7 @@ namespace HermesProxy.World.Objects
             data.WriteBit(HasSplineData);                                  // HasSpline - marks that the unit uses spline movement
             data.WriteBit(false);                                          // HeightChangeFailed
             data.WriteBit(false);                                          // RemoteTimeValid
+            data.FlushBits();
 
             if (moveInfo.TransportGuid != null)
                 WriteTransportInfoModern(data);
@@ -344,8 +345,10 @@ namespace HermesProxy.World.Objects
             {
                 data.WriteUInt32(moveInfo.FallTime);                              // Time
                 data.WriteFloat(moveInfo.JumpVerticalSpeed);                      // JumpVelocity
+                data.WriteBit(hasFallDirection);
+                data.FlushBits();
 
-                if (data.WriteBit(hasFallDirection))
+                if (hasFallDirection)
                 {
                     data.WriteFloat(moveInfo.JumpSinAngle);                       // Direction
                     data.WriteFloat(moveInfo.JumpCosAngle);

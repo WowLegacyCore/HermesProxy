@@ -81,6 +81,90 @@ namespace HermesProxy.World.Client
             SendPacketToClient(new SendUnlearnSpells());
         }
 
+        [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandleCastFailed(WorldPacket packet)
+        {
+            int spellId = packet.ReadInt32();
+            var status = packet.ReadUInt8();
+            if (status != 2)
+            {
+                SpellPrepare prepare = new();
+                prepare.ClientCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+                prepare.ServerCastID = WowGuid128.Empty;
+                SendPacketToClient(prepare);
+                return;
+            }
+
+            CastFailed failed = new();
+            failed.SpellID = spellId;
+            failed.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
+            failed.CastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+            failed.Reason = packet.ReadUInt8();
+            switch (failed.Reason)
+            {
+                case 94: // SPELL_FAILED_REQUIRES_SPELL_FOCUS
+                {
+                    failed.FailedArg1 = packet.ReadInt32(); // Required Spell Focus
+                    break;
+                }
+                case 93: // SPELL_FAILED_REQUIRES_AREA
+                {
+                    failed.FailedArg1 = packet.ReadInt32(); // Required Area
+                    break;
+                }
+                case 25: // SPELL_FAILED_EQUIPPED_ITEM_CLASS
+                {
+                    failed.FailedArg1 = packet.ReadInt32(); // Equipped Item Class
+                    failed.FailedArg2 = packet.ReadInt32(); // Equipped Item Sub Class Mask
+                    packet.ReadUInt32(); // Equipped Item Inventory Type Mask
+                    break;
+                }
+            }
+            SendPacketToClient(failed);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_FAILED_OTHER)]
+        void HandleSpellFailedOther(WorldPacket packet)
+        {
+            WowGuid128 casterUnit;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                casterUnit = packet.ReadPackedGuid().To128();
+            else
+                casterUnit = packet.ReadGuid().To128();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.ReadUInt8(); // Cast Count
+            uint spellId = packet.ReadUInt32();
+            uint spellVisual = GameData.GetSpellVisual(spellId);
+            byte reason = 61;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                reason = packet.ReadUInt8();
+            WowGuid128 castId = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spellId, spellId + casterUnit.GetLow());
+
+            SpellFailure spell = new SpellFailure();
+            spell.CasterUnit = casterUnit;
+            spell.CastID = castId;
+            spell.SpellID = spellId;
+            spell.SpellXSpellVisualID = spellVisual;
+            spell.Reason = reason;
+            SendPacketToClient(spell);
+
+            SpellFailedOther spell2 = new SpellFailedOther();
+            spell2.CasterUnit = casterUnit;
+            spell2.CastID = castId;
+            spell2.SpellID = spellId;
+            spell2.SpellXSpellVisualID = spellVisual;
+            spell2.Reason = reason;
+            SendPacketToClient(spell2);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_START)]
+        void HandleSpellStart(WorldPacket packet)
+        {
+            SpellStart spell = new SpellStart();
+            spell.Cast = HandleSpellStart(packet, false);
+            SendPacketToClient(spell);
+        }
+
         [PacketHandler(Opcode.SMSG_SPELL_GO)]
         void HandleSpellGo(WorldPacket packet)
         {
@@ -101,7 +185,14 @@ namespace HermesProxy.World.Client
 
             dbdata.SpellID = packet.ReadInt32();
             dbdata.SpellXSpellVisualID = GameData.GetSpellVisual((uint)dbdata.SpellID);
-            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, (uint)dbdata.SpellID, dbdata.CasterGUID.GetLow());
+            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, (uint)dbdata.SpellID, (ulong)dbdata.SpellID + dbdata.CasterUnit.GetLow());
+
+            if (Global.CurrentSessionData.GameState.CurrentPlayerGuid == dbdata.CasterUnit &&
+                Global.CurrentSessionData.GameState.LastClientCastId == dbdata.SpellID &&
+                Global.CurrentSessionData.GameState.LastClientCastGuid != null)
+            {
+                dbdata.OriginalCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) && LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) && !isSpellGo)
                 packet.ReadUInt8(); // cast count
