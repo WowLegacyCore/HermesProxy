@@ -112,7 +112,9 @@ namespace HermesProxy.World.Server.Packets
                 if (CreateData.MoveInfo.FlagsExtra == 0)
                     CreateData.MoveInfo.FlagsExtra = 512;
                 if (CreateData.MoveInfo.Orientation < 0)
-                    CreateData.MoveInfo.Orientation += (float)(Math.PI * 2f); 
+                    CreateData.MoveInfo.Orientation += (float)(Math.PI * 2f);
+                if (CreateData.MoveInfo.Orientation > (float)(Math.PI * 2f))
+                    CreateData.MoveInfo.Orientation -= (float)(Math.PI * 2f);
             }
             if (CreateData.MoveSpline != null)
             {

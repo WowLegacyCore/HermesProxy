@@ -794,6 +794,30 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(8, 0, 0));
                 availableRaces.Add(race);
 
+                if (Framework.Settings.GetClientExpansionVersion() >= 2 &&
+                    Framework.Settings.GetServerExpansionVersion() >= 2)
+                {
+                    race = new RaceClassAvailability();
+                    race.RaceID = 10;
+                    race.Classes.Add(new ClassAvailability(3, 0, 0));
+                    race.Classes.Add(new ClassAvailability(4, 0, 0));
+                    race.Classes.Add(new ClassAvailability(5, 0, 0));
+                    race.Classes.Add(new ClassAvailability(8, 0, 0));
+                    race.Classes.Add(new ClassAvailability(9, 0, 0));
+                    race.Classes.Add(new ClassAvailability(2, 0, 0));
+                    availableRaces.Add(race);
+
+                    race = new RaceClassAvailability();
+                    race.RaceID = 11;
+                    race.Classes.Add(new ClassAvailability(1, 0, 0));
+                    race.Classes.Add(new ClassAvailability(2, 0, 0));
+                    race.Classes.Add(new ClassAvailability(3, 0, 0));
+                    race.Classes.Add(new ClassAvailability(5, 0, 0));
+                    race.Classes.Add(new ClassAvailability(8, 0, 0));
+                    race.Classes.Add(new ClassAvailability(7, 0, 0));
+                    availableRaces.Add(race);
+                }
+
                 response.SuccessInfo.Value.AvailableClasses = availableRaces;
             }
 
