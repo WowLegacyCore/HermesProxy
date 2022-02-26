@@ -271,6 +271,8 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_KEEP_ALIVE:
                     break;
                 case Opcode.CMSG_LOG_DISCONNECT:
+                    uint reason = packet.ReadUInt32();
+                    Log.Print(LogType.Server, $"Client disconnected with reason {reason}.");
                     if (_connectType == ConnectionType.Realm &&
                         Global.CurrentSessionData.WorldClient != null)
                         Global.CurrentSessionData.WorldClient.Disconnect();
