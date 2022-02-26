@@ -115,6 +115,28 @@ namespace HermesProxy.World.Client
                 }
             }
 
+            if (updateObject.ObjectUpdates.Count == 0 &&
+                Global.CurrentSessionData.GameState.IsWaitingForNewWorld)
+                return;
+
+            int activePlayerUpdateIndex = -1;
+            for (int i = 0; i < updateObject.ObjectUpdates.Count; i++)
+            {
+                if (updateObject.ObjectUpdates[i].CreateData != null &&
+                    updateObject.ObjectUpdates[i].CreateData.ThisIsYou)
+                {
+                    activePlayerUpdateIndex = i;
+                    break;
+                }
+            }
+
+            if (activePlayerUpdateIndex > 0)
+            {
+                ObjectUpdate tmp = updateObject.ObjectUpdates[0];
+                updateObject.ObjectUpdates[0] = updateObject.ObjectUpdates[activePlayerUpdateIndex];
+                updateObject.ObjectUpdates[activePlayerUpdateIndex] = tmp;
+            }
+
             if (updateObject.ObjectUpdates.Count != 0 ||
                 updateObject.DestroyedGuids.Count != 0 ||
                 updateObject.OutOfRangeGuids.Count != 0)
@@ -1156,7 +1178,10 @@ namespace HermesProxy.World.Client
                 if (UNIT_FIELD_BYTES_1 >= 0 && updateMaskArray[UNIT_FIELD_BYTES_1])
                 {
                     updateData.UnitData.StandState = (byte)(updates[UNIT_FIELD_BYTES_1].UInt32Value & 0xFF);
-                    updateData.UnitData.PetLoyaltyIndex = (byte)((updates[UNIT_FIELD_BYTES_1].UInt32Value >> 8) & 0xFF);
+
+                    byte petLoyaltyIndex = (byte)((updates[UNIT_FIELD_BYTES_1].UInt32Value >> 8) & 0xFF);
+                    if (petLoyaltyIndex != 238)
+                        updateData.UnitData.PetLoyaltyIndex = petLoyaltyIndex;
 
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089))
                     {

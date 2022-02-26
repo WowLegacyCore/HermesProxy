@@ -64,6 +64,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
         void HandlePlayerLogin(PlayerLogin playerLogin)
         {
+            Global.CurrentSessionData.GameState.IsFirstEnterWorld = true;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());
             SendPacketToServer(packet);

@@ -103,6 +103,9 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOGIN_SET_TIME_SPEED)]
         void HandleLoginSetTimeSpeed(WorldPacket packet)
         {
+            if (!Global.CurrentSessionData.GameState.IsFirstEnterWorld)
+                return;
+
             LoginSetTimeSpeed login = new LoginSetTimeSpeed();
             login.ServerTime = packet.ReadUInt32();
             login.GameTime = login.ServerTime;

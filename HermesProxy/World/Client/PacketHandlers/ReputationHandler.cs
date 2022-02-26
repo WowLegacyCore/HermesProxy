@@ -13,6 +13,9 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INITIALIZE_FACTIONS)]
         void HandleInitializeFactions(WorldPacket packet)
         {
+            if (!Global.CurrentSessionData.GameState.IsFirstEnterWorld)
+                return;
+
             InitializeFactions factions = new InitializeFactions();
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i ++)

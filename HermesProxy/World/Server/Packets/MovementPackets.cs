@@ -447,4 +447,34 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 MoverGUID;
         public MovementInfo MoveInfo;
     }
+
+    class SuspendToken : ServerPacket
+    {
+        public SuspendToken() : base(Opcode.SMSG_SUSPEND_TOKEN, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteBits(Reason, 2);
+            _worldPacket.FlushBits();
+        }
+
+        public uint SequenceIndex = 1;
+        public uint Reason = 1;
+    }
+
+    class ResumeToken : ServerPacket
+    {
+        public ResumeToken() : base(Opcode.SMSG_RESUME_TOKEN, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteBits(Reason, 2);
+            _worldPacket.FlushBits();
+        }
+
+        public uint SequenceIndex = 1;
+        public uint Reason = 1;
+    }
 }

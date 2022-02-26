@@ -21,6 +21,8 @@ public static class Global
     }
     public class GameSessionData
     {
+        public bool IsWaitingForNewWorld;
+        public bool IsFirstEnterWorld;
         public bool IsInWorld;
         public uint? CurrentMapId;
         public uint LastEnteredAreaTrigger;

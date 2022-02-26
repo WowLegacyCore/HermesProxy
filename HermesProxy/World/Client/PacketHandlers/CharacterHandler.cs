@@ -219,6 +219,14 @@ namespace HermesProxy.World.Client
             SendPacketToClient(verify);
 
             Global.CurrentSessionData.GameState.IsInWorld = true;
+
+            WorldServerInfo info = new();
+            if (verify.MapID > 1)
+            {
+                info.DifficultyID = 1;
+                info.InstanceGroupSize = 5;
+            }
+            SendPacketToClient(info);
         }
 
         [PacketHandler(Opcode.SMSG_CHARACTER_LOGIN_FAILED)]

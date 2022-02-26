@@ -109,6 +109,13 @@ namespace HermesProxy.World.Client
             transfer.MapID = packet.ReadInt32();
             transfer.OldMapPosition = Vector3.Zero;
             SendPacketToClient(transfer);
+            Global.CurrentSessionData.GameState.IsFirstEnterWorld = false;
+            Global.CurrentSessionData.GameState.IsWaitingForNewWorld = true;
+
+            SuspendToken suspend = new();
+            suspend.SequenceIndex = 3;
+            suspend.Reason = 1;
+            SendPacketToClient(suspend);
         }
 
         [PacketHandler(Opcode.SMSG_TRANSFER_ABORTED)]
@@ -119,6 +126,7 @@ namespace HermesProxy.World.Client
             transfer.Reason = (TransferAbortReason)packet.ReadUInt8();
             transfer.Arg = packet.ReadUInt8();
             SendPacketToClient(transfer);
+            Global.CurrentSessionData.GameState.IsWaitingForNewWorld = false;
         }
 
         [PacketHandler(Opcode.SMSG_NEW_WORLD)]
@@ -129,7 +137,35 @@ namespace HermesProxy.World.Client
             teleport.Position = packet.ReadVector3();
             teleport.Orientation = packet.ReadFloat();
             teleport.Reason = 4;
-            SendPacketToClient(teleport);
+            Global.CurrentSessionData.GameState.IsFirstEnterWorld = false;
+
+            if (Global.CurrentSessionData.GameState.IsWaitingForNewWorld)
+            {
+                Global.CurrentSessionData.GameState.IsWaitingForNewWorld = false;
+                SendPacketToClient(teleport);
+                if (teleport.MapID > 1)
+                {
+                    UpdateLastInstance instance = new();
+                    instance.MapID = teleport.MapID;
+                    SendPacketToClient(instance);
+
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                        SendPacketToClient(new TimeSyncRequest());
+
+                    ResumeToken resume = new();
+                    resume.SequenceIndex = 3;
+                    resume.Reason = 1;
+                    SendPacketToClient(resume);
+                }
+
+                WorldServerInfo info = new();
+                if (teleport.MapID > 1)
+                {
+                    info.DifficultyID = 1;
+                    info.InstanceGroupSize = 5;
+                }
+                SendPacketToClient(info);
+            }
         }
 
         // for server controlled units

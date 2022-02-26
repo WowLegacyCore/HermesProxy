@@ -109,6 +109,8 @@ namespace HermesProxy.World.Server.Packets
                     CreateData.MoveInfo.PitchRate = CreateData.MoveInfo.TurnRate;
                 if (CreateData.MoveInfo.Flags.HasAnyFlag(MovementFlagModern.WalkMode) && (CreateData.MoveSpline != null))
                     CreateData.MoveInfo.Flags &= ~(uint)MovementFlagModern.WalkMode;
+                if (CreateData.MoveInfo.FlagsExtra == 0)
+                    CreateData.MoveInfo.FlagsExtra = 512;
                 if (CreateData.MoveInfo.Orientation < 0)
                     CreateData.MoveInfo.Orientation += (float)(Math.PI * 2f); 
             }
@@ -225,8 +227,6 @@ namespace HermesProxy.World.Server.Packets
                 }
                 if (ActivePlayerData.ModSpellPowerPercent == null)
                     ActivePlayerData.ModSpellPowerPercent = 1;
-                if (ActivePlayerData.LocalFlags == null)
-                    ActivePlayerData.LocalFlags = 8;
                 if (ActivePlayerData.NumBackpackSlots == null)
                     ActivePlayerData.NumBackpackSlots = 16;
                 if (ActivePlayerData.MultiActionBars == null)
