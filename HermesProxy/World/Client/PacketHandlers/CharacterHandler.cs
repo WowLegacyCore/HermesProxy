@@ -290,7 +290,9 @@ namespace HermesProxy.World.Client
             LogoutComplete logout = new LogoutComplete();
             SendPacketToClient(logout);
 
-            Global.CurrentSessionData.GameState.IsInWorld = false;
+            Global.CurrentSessionData.GameState = new();
+            Global.CurrentSessionData.InstanceSocket.CloseSocket();
+            Global.CurrentSessionData.InstanceSocket = null;
         }
 
         [PacketHandler(Opcode.SMSG_LOGOUT_CANCEL_ACK)]
