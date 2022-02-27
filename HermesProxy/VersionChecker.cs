@@ -190,6 +190,16 @@ namespace HermesProxy
             else
                 return (HitInfo)hitInfo;
         }
+
+        public static uint ConvertSpellCastResult(uint result)
+        {
+            if (AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                return (uint)Enum.Parse(typeof(SpellCastResultClassic), ((SpellCastResultWotLK)result).ToString());
+            else if (AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                return (uint)Enum.Parse(typeof(SpellCastResultClassic), ((SpellCastResultTBC)result).ToString());
+            else
+                return (uint)Enum.Parse(typeof(SpellCastResultClassic), ((SpellCastResultVanilla)result).ToString());
+        }
     }
 
     public static class ModernVersion

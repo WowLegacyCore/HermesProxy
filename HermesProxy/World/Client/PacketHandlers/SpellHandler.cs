@@ -99,20 +99,21 @@ namespace HermesProxy.World.Client
             failed.SpellID = spellId;
             failed.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
             failed.CastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
-            failed.Reason = packet.ReadUInt8();
-            switch (failed.Reason)
+            uint reason = packet.ReadUInt8();
+            failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
+            switch ((SpellCastResultVanilla)reason)
             {
-                case 94: // SPELL_FAILED_REQUIRES_SPELL_FOCUS
+                case SpellCastResultVanilla.RequiresSpellFocus: // SPELL_FAILED_REQUIRES_SPELL_FOCUS
                 {
                     failed.FailedArg1 = packet.ReadInt32(); // Required Spell Focus
                     break;
                 }
-                case 93: // SPELL_FAILED_REQUIRES_AREA
+                case SpellCastResultVanilla.RequiresArea: // SPELL_FAILED_REQUIRES_AREA
                 {
                     failed.FailedArg1 = packet.ReadInt32(); // Required Area
                     break;
                 }
-                case 25: // SPELL_FAILED_EQUIPPED_ITEM_CLASS
+                case SpellCastResultVanilla.EquippedItemClass: // SPELL_FAILED_EQUIPPED_ITEM_CLASS
                 {
                     failed.FailedArg1 = packet.ReadInt32(); // Equipped Item Class
                     failed.FailedArg2 = packet.ReadInt32(); // Equipped Item Sub Class Mask
@@ -137,7 +138,7 @@ namespace HermesProxy.World.Client
             uint spellVisual = GameData.GetSpellVisual(spellId);
             byte reason = 61;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                reason = packet.ReadUInt8();
+                reason = (byte)LegacyVersion.ConvertSpellCastResult(packet.ReadUInt8());
             WowGuid128 castId = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spellId, spellId + casterUnit.GetLow());
 
             SpellFailure spell = new SpellFailure();
