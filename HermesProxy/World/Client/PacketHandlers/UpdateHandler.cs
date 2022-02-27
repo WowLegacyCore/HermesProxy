@@ -60,8 +60,11 @@ namespace HermesProxy.World.Client
 
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.Values);
                         AuraUpdate auraUpdate = new AuraUpdate(guid, false);
-                        ReadValuesUpdateBlock(packet, guid, updateData, auraUpdate, i);
+                        PowerUpdate powerUpdate = new PowerUpdate(guid);
+                        ReadValuesUpdateBlock(packet, guid, updateData, auraUpdate, powerUpdate, i);
 
+                        if (powerUpdate.Powers.Count != 0)
+                            SendPacketToClient(powerUpdate);
                         updateObject.ObjectUpdates.Add(updateData);
                         if (auraUpdate.Auras.Count != 0)
                             auraUpdates.Add(auraUpdate);
@@ -181,15 +184,15 @@ namespace HermesProxy.World.Client
         {
             BitArray updateMaskArray = null;
             var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, true, updateData);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData);
         }
 
-        public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, int index)
+        public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, PowerUpdate powerUpdate, int index)
         {
             BitArray updateMaskArray = null;
             ObjectType type = guid.GetObjectType();
             var updates = ReadValuesUpdateBlock(packet, ref type, index, false, null, out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, false, updateData);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData);
         }
 
         private string GetIndexString(params object[] values)
@@ -808,7 +811,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        public void StoreObjectUpdate(WowGuid guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, bool isCreate, ObjectUpdate updateData)
+        public void StoreObjectUpdate(WowGuid guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
         {
             // Object Fields
             int OBJECT_FIELD_GUID = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_GUID);
@@ -1017,6 +1020,9 @@ namespace HermesProxy.World.Client
                     updateData.UnitData.SexId = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 16) & 0xFF);
                     updateData.UnitData.DisplayPower = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 24) & 0xFF);
 
+                    if (objectType == ObjectType.Unit)
+                        Global.CurrentSessionData.GameState.StoreCreatureClass(guid.GetEntry(), (Class)updateData.UnitData.ClassId);
+
                     //if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
                     //    updateData.UnitData.PlayerClassId = updateData.UnitData.ClassId;
                 }
@@ -1028,11 +1034,15 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_POWER1 + i])
                         {
+                            if (powerUpdate != null && guid == Global.CurrentSessionData.GameState.CurrentPlayerGuid)
+                                powerUpdate.Powers.Add(new PowerUpdatePower(updates[UNIT_FIELD_POWER1 + i].Int32Value, (byte)i));
+
                             Class classId = Class.None;
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
                                 classId = Global.CurrentSessionData.GameState.GetUnitClass(guid.To128());
+
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
                                 updateData.UnitData.Power[powerSlot] = updates[UNIT_FIELD_POWER1 + i].Int32Value;

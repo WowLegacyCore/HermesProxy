@@ -32,10 +32,18 @@ public static class Global
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
+        public Dictionary<uint, Class> CreatureClasses = new();
         public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
 
+        public void StoreCreatureClass(uint entry, Class classId)
+        {
+            if (CreatureClasses.ContainsKey(entry))
+                CreatureClasses[entry] = classId;
+            else
+                CreatureClasses.Add(entry, classId);
+        }
         public void SetItemBuyCount(uint itemId, uint buyCount)
         {
             if (ItemBuyCount.ContainsKey(itemId))
@@ -120,7 +128,8 @@ public static class Global
             if (CachedPlayers.ContainsKey(guid))
                 return CachedPlayers[guid].ClassId;
 
-            // TODO: Add Creature Data
+            if (CreatureClasses.ContainsKey(guid.GetEntry()))
+                return CreatureClasses[guid.GetEntry()];
 
             return Class.Warrior;
         }

@@ -303,4 +303,39 @@ namespace HermesProxy.World.Server.Packets
         public List<WowGuid128> DestroyedGuids = new List<WowGuid128>();
         public List<ObjectUpdate> ObjectUpdates = new List<ObjectUpdate>();
     }
+
+    public class PowerUpdate : ServerPacket
+    {
+        public PowerUpdate(WowGuid128 guid) : base(Opcode.SMSG_POWER_UPDATE)
+        {
+            Guid = guid;
+            Powers = new List<PowerUpdatePower>();
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+            _worldPacket.WriteInt32(Powers.Count);
+            foreach (var power in Powers)
+            {
+                _worldPacket.WriteInt32(power.Power);
+                _worldPacket.WriteUInt8(power.PowerType);
+            }
+        }
+
+        public WowGuid128 Guid;
+        public List<PowerUpdatePower> Powers;
+    }
+
+    public struct PowerUpdatePower
+    {
+        public PowerUpdatePower(int power, byte powerType)
+        {
+            Power = power;
+            PowerType = powerType;
+        }
+
+        public int Power;
+        public byte PowerType;
+    }
 }
