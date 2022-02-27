@@ -91,5 +91,12 @@ namespace HermesProxy.World.Server
 
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_CANCEL_AURA)]
+        void HandleCancelAura(CancelAura aura)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AURA);
+            packet.WriteUInt32(aura.SpellID);
+            SendPacketToServer(packet);
+        }
     }
 }

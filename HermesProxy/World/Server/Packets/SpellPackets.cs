@@ -134,6 +134,20 @@ namespace HermesProxy.World.Server.Packets
         public byte ConsumedCharges;
     }
 
+    class CancelAura : ClientPacket
+    {
+        public CancelAura(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellID = _worldPacket.ReadUInt32();
+            CasterGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public uint SpellID;
+        public WowGuid128 CasterGUID;
+    }
+
     public class AuraUpdate : ServerPacket
     {
         public AuraUpdate(WowGuid128 guid, bool all) : base(Opcode.SMSG_AURA_UPDATE, ConnectionType.Instance) 
