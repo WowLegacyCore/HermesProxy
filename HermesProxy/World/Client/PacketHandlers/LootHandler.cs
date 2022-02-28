@@ -59,5 +59,13 @@ namespace HermesProxy.World.Client
             loot.LootListID = packet.ReadUInt8();
             SendPacketToClient(loot);
         }
+        [PacketHandler(Opcode.SMSG_LOOT_CLEAR_MONEY)]
+        void HandleLootCelarMoney(WorldPacket packet)
+        {
+            CoinRemoved loot = new();
+            WowGuid128 owner = Global.CurrentSessionData.GameState.LastLootTargetGuid;
+            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)Global.CurrentSessionData.GameState.CurrentMapId, owner.GetEntry(), owner.GetLow());
+            SendPacketToClient(loot);
+        }
     }
 }

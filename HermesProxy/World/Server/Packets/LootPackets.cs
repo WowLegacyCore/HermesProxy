@@ -24,6 +24,18 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
+    class LootUnit : ClientPacket
+    {
+        public LootUnit(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Unit = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Unit;
+    }
+
     public class LootResponse : ServerPacket
     {
         public LootResponse() : base(Opcode.SMSG_LOOT_RESPONSE, ConnectionType.Instance) { }
@@ -124,6 +136,25 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 LootObj;
         public WowGuid128 Owner;
+    }
+
+    class LootMoney : ClientPacket
+    {
+        public LootMoney(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class CoinRemoved : ServerPacket
+    {
+        public CoinRemoved() : base(Opcode.SMSG_COIN_REMOVED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+        }
+
+        public WowGuid128 LootObj;
     }
 
     class LootItemPkt : ClientPacket

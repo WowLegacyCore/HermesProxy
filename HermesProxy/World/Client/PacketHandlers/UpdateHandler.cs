@@ -1227,7 +1227,10 @@ namespace HermesProxy.World.Client
                 int UNIT_DYNAMIC_FLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_DYNAMIC_FLAGS);
                 if (UNIT_DYNAMIC_FLAGS >= 0 && updateMaskArray[UNIT_DYNAMIC_FLAGS])
                 {
-                    updateData.ObjectData.DynamicFlags = updates[UNIT_DYNAMIC_FLAGS].UInt32Value;
+                    UnitDynamicFlagsLegacy flags = (UnitDynamicFlagsLegacy)(updates[UNIT_DYNAMIC_FLAGS].UInt32Value);
+                    if (flags.HasFlag(UnitDynamicFlagsLegacy.Tapped) && flags.HasFlag(UnitDynamicFlagsLegacy.TappedByPlayer))
+                        flags &= ~(UnitDynamicFlagsLegacy.Tapped | UnitDynamicFlagsLegacy.TappedByPlayer);
+                    updateData.ObjectData.DynamicFlags = (uint)flags.CastFlags<UnitDynamicFlagsModern>();
                 }
                 int UNIT_CHANNEL_SPELL = LegacyVersion.GetUpdateField(UnitField.UNIT_CHANNEL_SPELL);
                 if (UNIT_CHANNEL_SPELL >= 0 && updateMaskArray[UNIT_CHANNEL_SPELL])

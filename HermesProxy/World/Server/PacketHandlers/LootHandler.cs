@@ -27,5 +27,18 @@ namespace HermesProxy.World.Server
                 SendPacketToServer(packet);
             }
         }
+        [PacketHandler(Opcode.CMSG_LOOT_UNIT)]
+        void HandleLootUnit(LootUnit loot)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_LOOT_UNIT);
+            packet.WriteGuid(loot.Unit.To64());
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_LOOT_MONEY)]
+        void HandleLootMoney(LootMoney loot)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_LOOT_MONEY);
+            SendPacketToServer(packet);
+        }
     }
 }
