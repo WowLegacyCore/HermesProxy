@@ -47,6 +47,32 @@ namespace HermesProxy.World.Server.Packets
         public List<uint> FavoriteSpells = new(); // tradeskill recipes
     }
 
+    public class LearnedSpells : ServerPacket
+    {
+        public LearnedSpells() : base(Opcode.SMSG_LEARNED_SPELLS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Spells.Count);
+            _worldPacket.WriteInt32(FavoriteSpellID.Count);
+            _worldPacket.WriteUInt32(SpecializationID);
+
+            foreach (uint spell in Spells)
+                _worldPacket.WriteUInt32(spell);
+
+            foreach (int spell in FavoriteSpellID)
+                _worldPacket.WriteInt32(spell);
+
+            _worldPacket.WriteBit(SuppressMessaging);
+            _worldPacket.FlushBits();
+        }
+
+        public List<uint> Spells = new();
+        public List<int> FavoriteSpellID = new();
+        public uint SpecializationID;
+        public bool SuppressMessaging;
+    }
+
     public class SendUnlearnSpells : ServerPacket
     {
         public SendUnlearnSpells() : base(Opcode.SMSG_SEND_UNLEARN_SPELLS, ConnectionType.Instance) { }
@@ -58,6 +84,24 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteUInt32(spell);
         }
         public List<uint> Spells = new();
+    }
+
+    public class UnlearnedSpells : ServerPacket
+    {
+        public UnlearnedSpells() : base(Opcode.SMSG_UNLEARNED_SPELLS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Spells.Count);
+            foreach (uint spellId in Spells)
+                _worldPacket.WriteUInt32(spellId);
+
+            _worldPacket.WriteBit(SuppressMessaging);
+            _worldPacket.FlushBits();
+        }
+
+        public List<uint> Spells = new();
+        public bool SuppressMessaging;
     }
 
     public class SendSpellHistory : ServerPacket
@@ -307,6 +351,27 @@ namespace HermesProxy.World.Server.Packets
         }
     }
 
+    public class UseItem : ClientPacket
+    {
+        public byte PackSlot;
+        public byte Slot;
+        public WowGuid128 CastItem;
+        public SpellCastRequest Cast;
+
+        public UseItem(WorldPacket packet) : base(packet)
+        {
+            Cast = new SpellCastRequest();
+        }
+
+        public override void Read()
+        {
+            PackSlot = _worldPacket.ReadUInt8();
+            Slot = _worldPacket.ReadUInt8();
+            CastItem = _worldPacket.ReadPackedGuid128();
+            Cast.Read(_worldPacket);
+        }
+    }
+
     public class SpellCastRequest
     {
         public WowGuid128 CastID;
@@ -413,6 +478,20 @@ namespace HermesProxy.World.Server.Packets
             Slot = data.ReadInt32();
             Count = data.ReadInt32();
         }
+    }
+
+    public class CancelCast : ClientPacket
+    {
+        public CancelCast(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            CastID = _worldPacket.ReadPackedGuid128();
+            SpellID = _worldPacket.ReadUInt32();
+        }
+
+        public uint SpellID;
+        public WowGuid128 CastID;
     }
 
     class SpellPrepare : ServerPacket

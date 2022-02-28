@@ -67,6 +67,15 @@ namespace HermesProxy.World.Client
             }
         }
 
+        [PacketHandler(Opcode.SMSG_LEARNED_SPELL)]
+        void HandleLearnedSpell(WorldPacket packet)
+        {
+            LearnedSpells spells = new LearnedSpells();
+            uint spellId = packet.ReadUInt32();
+            spells.Spells.Add(spellId);
+            SendPacketToClient(spells);
+        }
+
         [PacketHandler(Opcode.SMSG_SEND_UNLEARN_SPELLS)]
         void HandleSendUnlearnSpells(WorldPacket packet)
         {
@@ -78,7 +87,19 @@ namespace HermesProxy.World.Client
                 spells.Spells.Add(spellId);
             }
             SendPacketToClient(spells);
-            SendPacketToClient(new SendUnlearnSpells());
+        }
+
+        [PacketHandler(Opcode.SMSG_UNLEARNED_SPELLS)]
+        void HandleUnlearnedSpells(WorldPacket packet)
+        {
+            UnlearnedSpells spells = new UnlearnedSpells();
+            uint spellId;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+                spellId = packet.ReadUInt32();
+            else
+                spellId = packet.ReadUInt16();
+            spells.Spells.Add(spellId);
+            SendPacketToClient(spells);
         }
 
         [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
@@ -103,17 +124,17 @@ namespace HermesProxy.World.Client
             failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
             switch ((SpellCastResultVanilla)reason)
             {
-                case SpellCastResultVanilla.RequiresSpellFocus: // SPELL_FAILED_REQUIRES_SPELL_FOCUS
+                case SpellCastResultVanilla.RequiresSpellFocus:
                 {
                     failed.FailedArg1 = packet.ReadInt32(); // Required Spell Focus
                     break;
                 }
-                case SpellCastResultVanilla.RequiresArea: // SPELL_FAILED_REQUIRES_AREA
+                case SpellCastResultVanilla.RequiresArea:
                 {
                     failed.FailedArg1 = packet.ReadInt32(); // Required Area
                     break;
                 }
-                case SpellCastResultVanilla.EquippedItemClass: // SPELL_FAILED_EQUIPPED_ITEM_CLASS
+                case SpellCastResultVanilla.EquippedItemClass:
                 {
                     failed.FailedArg1 = packet.ReadInt32(); // Equipped Item Class
                     failed.FailedArg2 = packet.ReadInt32(); // Equipped Item Sub Class Mask
