@@ -412,8 +412,8 @@ namespace HermesProxy.World.Client
             for (int i = 0; i < 8; i++)
             {
                 response.Probabilities[i] = packet.ReadFloat();
-                string maleText = packet.ReadCString();
-                string femaleText = packet.ReadCString();
+                string maleText = packet.ReadCString().TrimEnd().Replace("\0", "");
+                string femaleText = packet.ReadCString().TrimEnd().Replace("\0", "");
                 uint language = packet.ReadUInt32();
 
                 ushort[] emoteDelays = new ushort[3];

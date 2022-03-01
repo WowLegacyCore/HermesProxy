@@ -135,5 +135,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(aura.SpellID);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_LEARN_TALENT)]
+        void HandleLearnTalent(LearnTalent talent)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_LEARN_TALENT);
+            packet.WriteUInt32(talent.TalentID);
+            packet.WriteUInt32(talent.Rank);
+            SendPacketToServer(packet);
+        }
     }
 }

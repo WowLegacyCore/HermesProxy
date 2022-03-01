@@ -267,4 +267,114 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 Guid;
     }
+
+    public class TrainerList : ServerPacket
+    {
+        public TrainerList() : base(Opcode.SMSG_TRAINER_LIST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TrainerGUID);
+            _worldPacket.WriteInt32(TrainerType);
+            _worldPacket.WriteUInt32(TrainerID);
+
+            _worldPacket.WriteInt32(Spells.Count);
+            foreach (TrainerListSpell spell in Spells)
+            {
+                _worldPacket.WriteUInt32(spell.SpellID);
+                _worldPacket.WriteUInt32(spell.MoneyCost);
+                _worldPacket.WriteUInt32(spell.ReqSkillLine);
+                _worldPacket.WriteUInt32(spell.ReqSkillRank);
+
+                for (uint i = 0; i < 3; ++i)
+                    _worldPacket.WriteUInt32(spell.ReqAbility[i]);
+
+                _worldPacket.WriteUInt8((byte)spell.Usable);
+                _worldPacket.WriteUInt8(spell.ReqLevel);
+            }
+
+            _worldPacket.WriteBits(Greeting.GetByteCount(), 11);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(Greeting);
+        }
+
+        public WowGuid128 TrainerGUID;
+        public int TrainerType;
+        public uint TrainerID = 1;
+        public List<TrainerListSpell> Spells = new();
+        public string Greeting;
+    }
+
+    public class TrainerListSpell
+    {
+        public uint SpellID;
+        public uint MoneyCost;
+        public uint ReqSkillLine;
+        public uint ReqSkillRank;
+        public uint[] ReqAbility = new uint[3];
+        public TrainerSpellStateModern Usable;
+        public byte ReqLevel;
+    }
+
+    class TrainerBuySpell : ClientPacket
+    {
+        public TrainerBuySpell(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TrainerGUID = _worldPacket.ReadPackedGuid128();
+            TrainerID = _worldPacket.ReadUInt32();
+            SpellID = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 TrainerGUID;
+        public uint TrainerID;
+        public uint SpellID;
+    }
+
+    class TrainerBuyFailed : ServerPacket
+    {
+        public TrainerBuyFailed() : base(Opcode.SMSG_TRAINER_BUY_FAILED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TrainerGUID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(TrainerFailedReason);
+        }
+
+        public WowGuid128 TrainerGUID;
+        public uint SpellID;
+        public uint TrainerFailedReason;
+    }
+
+    class RespecWipeConfirm : ServerPacket
+    {
+        public RespecWipeConfirm() : base(Opcode.SMSG_RESPEC_WIPE_CONFIRM) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt8((sbyte)RespecType);
+            _worldPacket.WriteUInt32(Cost);
+            _worldPacket.WritePackedGuid128(TrainerGUID);
+        }
+
+        public SpecResetType RespecType = SpecResetType.Talents;
+        public uint Cost;
+        public WowGuid128 TrainerGUID;
+    }
+
+    class ConfirmRespecWipe : ClientPacket
+    {
+        public ConfirmRespecWipe(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TrainerGUID = _worldPacket.ReadPackedGuid128();
+            RespecType = (SpecResetType)_worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 TrainerGUID;
+        public SpecResetType RespecType;
+    }
 }

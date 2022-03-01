@@ -119,5 +119,69 @@ namespace HermesProxy.World.Client
             bank.Guid = packet.ReadGuid().To128();
             SendPacketToClient(bank);
         }
+
+        [PacketHandler(Opcode.SMSG_TRAINER_LIST)]
+        void HandleTrainerList(WorldPacket packet)
+        {
+            TrainerList trainer = new TrainerList();
+            trainer.TrainerGUID = packet.ReadGuid().To128();
+            trainer.TrainerID = trainer.TrainerGUID.GetEntry();
+            trainer.TrainerType = packet.ReadInt32();
+            int count = packet.ReadInt32();
+            for (int i = 0; i < count; ++i)
+            {
+                TrainerListSpell spell = new();
+                uint spellId = packet.ReadUInt32();
+                if (Framework.Settings.GetClientExpansionVersion() > 1 &&
+                    Framework.Settings.GetServerExpansionVersion() <= 1)
+                {
+                    // in vanilla the server sends learn spell with effect 36
+                    // in expansions the server sends the actual spell
+                    uint realSpellId = GameData.GetRealSpell(spellId);
+                    if (realSpellId != spellId)
+                    {
+                        Global.CurrentSessionData.GameState.StoreRealSpell(realSpellId, spellId);
+                        spellId = realSpellId;
+                    }
+                }
+                spell.SpellID = spellId;
+                TrainerSpellStateLegacy stateOld = (TrainerSpellStateLegacy)packet.ReadUInt8();
+                TrainerSpellStateModern stateNew = (TrainerSpellStateModern)Enum.Parse(typeof(TrainerSpellStateModern), stateOld.ToString());
+                spell.Usable = stateNew;
+                spell.MoneyCost = packet.ReadUInt32();
+                packet.ReadInt32(); // Profession Dialog
+                packet.ReadInt32(); // Profession Button
+                spell.ReqLevel = packet.ReadUInt8();
+                spell.ReqSkillLine = packet.ReadUInt32();
+                spell.ReqSkillRank = packet.ReadUInt32();
+                spell.ReqAbility[0] = packet.ReadUInt32();
+                spell.ReqAbility[1] = packet.ReadUInt32();
+                spell.ReqAbility[2] = packet.ReadUInt32();
+                trainer.Spells.Add(spell);
+            }
+            trainer.Greeting = packet.ReadCString();
+            SendPacketToClient(trainer);
+        }
+
+        [PacketHandler(Opcode.SMSG_TRAINER_BUY_FAILED)]
+        void HandleTrainerBuyFailed(WorldPacket packet)
+        {
+            TrainerBuyFailed buy = new();
+            buy.TrainerGUID = packet.ReadGuid().To128();
+            buy.SpellID = packet.ReadUInt32();
+            buy.TrainerFailedReason = packet.ReadUInt32();
+            SendPacketToClient(buy);
+            ChatPkt chat = new ChatPkt(ChatMessageTypeModern.System, 0, null, "", null, "", $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).", "", ChatFlags.None, 0);
+            SendPacketToClient(chat);
+        }
+
+        [PacketHandler(Opcode.MSG_TALENT_WIPE_CONFIRM)]
+        void HandleTalentWipeConfirm(WorldPacket packet)
+        {
+            RespecWipeConfirm respec = new();
+            respec.TrainerGUID = packet.ReadGuid().To128();
+            respec.Cost = packet.ReadUInt32();
+            SendPacketToClient(respec);
+        }
     }
 }

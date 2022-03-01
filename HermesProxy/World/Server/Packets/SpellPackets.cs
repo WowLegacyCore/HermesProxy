@@ -861,4 +861,18 @@ namespace HermesProxy.World.Server.Packets
             data.WritePackedGuid128(BeaconGUID);
         }
     }
+
+    class LearnTalent : ClientPacket
+    {
+        public LearnTalent(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TalentID = _worldPacket.ReadUInt32();
+            Rank = _worldPacket.ReadUInt16();
+        }
+
+        public uint TalentID;
+        public ushort Rank;
+    }
 }

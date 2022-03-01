@@ -15,6 +15,7 @@ namespace HermesProxy.World
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
+        public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
 
         public static ItemTemplate GetItemTemplate(uint entry)
         {
@@ -39,7 +40,13 @@ namespace HermesProxy.World
                 return visual;
             return 0;
         }
-
+        public static uint GetRealSpell(uint learnSpellId)
+        {
+            uint realSpellId;
+            if (LearnSpells.TryGetValue(learnSpellId, out realSpellId))
+                return realSpellId;
+            return learnSpellId;
+        }
         public static int GetTransportPeriod(int entry)
         {
             switch (entry)
@@ -78,8 +85,8 @@ namespace HermesProxy.World
         {
             foreach (var itr in BroadcastTextStore)
             {
-                if (itr.Value.MaleText == maleText &&
-                    itr.Value.FemaleText == femaleText &&
+                if (((!String.IsNullOrEmpty(maleText) && itr.Value.MaleText == maleText) ||
+                     (!String.IsNullOrEmpty(femaleText) && itr.Value.FemaleText == femaleText)) &&
                     itr.Value.Language == language &&
                     Enumerable.SequenceEqual(itr.Value.EmoteDelays, emoteDelays) &&
                     Enumerable.SequenceEqual(itr.Value.Emotes, emotes))
@@ -106,6 +113,7 @@ namespace HermesProxy.World
             LoadBroadcastTexts();
             LoadItemTemplates();
             LoadSpellVisuals();
+            LoadLearnSpells();
             Log.Print(LogType.Storage, "[GameData] Finished loading database.");
         }
         public static void LoadBroadcastTexts()
@@ -127,8 +135,8 @@ namespace HermesProxy.World
 
                     BroadcastText broadcastText = new BroadcastText();
                     broadcastText.Entry = UInt32.Parse(fields[0]);
-                    broadcastText.MaleText = fields[1].Replace("~", "\n");
-                    broadcastText.FemaleText = fields[2].Replace("~", "\n");
+                    broadcastText.MaleText = fields[1].TrimEnd().Replace("\0", "").Replace("~", "\n");
+                    broadcastText.FemaleText = fields[2].TrimEnd().Replace("\0", "").Replace("~", "\n");
                     broadcastText.Language = UInt32.Parse(fields[3]);
                     broadcastText.Emotes[0] = UInt16.Parse(fields[4]);
                     broadcastText.Emotes[1] = UInt16.Parse(fields[5]);
@@ -185,6 +193,31 @@ namespace HermesProxy.World
                     uint spellId = UInt32.Parse(fields[0]);
                     uint visualId = UInt32.Parse(fields[1]);
                     SpellVisuals.Add(spellId, visualId);
+                }
+            }
+        }
+
+        public static void LoadLearnSpells()
+        {
+            var path = $"CSV\\LearnSpells.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint learnSpellId = UInt32.Parse(fields[0]);
+                    uint realSpellId = UInt32.Parse(fields[1]);
+                    if (!LearnSpells.ContainsKey(learnSpellId))
+                        LearnSpells.Add(learnSpellId, realSpellId);
                 }
             }
         }

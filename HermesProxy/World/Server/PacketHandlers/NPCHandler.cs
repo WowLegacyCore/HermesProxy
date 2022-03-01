@@ -44,5 +44,29 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(bank.Guid.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_TRAINER_BUY_SPELL)]
+        void HandleTrainerBuySpell(TrainerBuySpell buy)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_TRAINER_BUY_SPELL);
+            packet.WriteGuid(buy.TrainerGUID.To64());
+            if (Framework.Settings.GetClientExpansionVersion() > 1 &&
+                Framework.Settings.GetServerExpansionVersion() <= 1)
+            {
+                // in vanilla the server sends learn spell with effect 36
+                // in expansions the server sends the actual spell
+                buy.SpellID = Global.CurrentSessionData.GameState.GetLearnSpellFromRealSpell(buy.SpellID);
+            }
+            packet.WriteUInt32(buy.SpellID);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_CONFIRM_RESPEC_WIPE)]
+        void HandleConfirmRespecWipe(ConfirmRespecWipe respec)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_TALENT_WIPE_CONFIRM);
+            packet.WriteGuid(respec.TrainerGUID.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

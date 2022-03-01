@@ -37,7 +37,22 @@ public static class Global
         public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
+        public Dictionary<uint, uint> RealSpellToLearnSpell = new();
 
+        public void StoreRealSpell(uint realSpellId, uint learnSpellId)
+        {
+            if (RealSpellToLearnSpell.ContainsKey(realSpellId))
+                RealSpellToLearnSpell[realSpellId] = learnSpellId;
+            else
+                RealSpellToLearnSpell.Add(realSpellId, learnSpellId);
+        }
+        public uint GetLearnSpellFromRealSpell(uint spellId)
+        {
+            if (RealSpellToLearnSpell.ContainsKey(spellId))
+                return RealSpellToLearnSpell[spellId];
+
+            return spellId;
+        }
         public void StoreCreatureClass(uint entry, Class classId)
         {
             if (CreatureClasses.ContainsKey(entry))
