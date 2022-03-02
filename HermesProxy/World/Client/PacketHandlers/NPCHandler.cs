@@ -46,18 +46,7 @@ namespace HermesProxy.World.Client
 
             for (uint i = 0; i < questsCount; i++)
             {
-                ClientGossipQuest quest = new ClientGossipQuest();
-                quest.QuestID = packet.ReadUInt32();
-                quest.QuestType = packet.ReadInt32();
-                quest.QuestLevel = packet.ReadInt32();
-
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    quest.QuestFlags = packet.ReadUInt32();
-
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    quest.Repeatable = packet.ReadBool();
-
-                quest.QuestTitle = packet.ReadCString();
+                ClientGossipQuest quest = ReadGossipQuestOption(packet);
                 gossip.GossipQuests.Add(quest);
             }
 

@@ -129,7 +129,7 @@ namespace HermesProxy.World.Server.Packets
     {
         public uint QuestID;
         public uint ContentTuningID;
-        public int QuestType;
+        public int QuestType; // 2 not taken, 4 taken
         public int QuestLevel;
         public int QuestMaxLevel = 255;
         public bool Repeatable;

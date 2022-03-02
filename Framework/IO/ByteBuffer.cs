@@ -260,6 +260,12 @@ namespace Framework.IO
             writeStream.Write(data);
         }
 
+        public void WriteBool(bool data)
+        {
+            FlushBits();
+            writeStream.Write(data);
+        }
+
         public void WriteUInt8(byte data)
         {
             FlushBits();

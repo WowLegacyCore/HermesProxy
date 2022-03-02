@@ -19,7 +19,7 @@ namespace HermesProxy.World.Enums
                     return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode.ToString());
                 case ClientVersionBuild.V1_14_0_40618:
                 case ClientVersionBuild.V2_5_2_40892:
-                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode.ToString());
+                    return FindOpcodeValueInEnum<V2_5_2_40892.Opcode>(opcode.ToString());
                 case ClientVersionBuild.V3_3_5a_12340:
                     return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode.ToString());
             }
@@ -36,7 +36,7 @@ namespace HermesProxy.World.Enums
                     return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode);
                 case ClientVersionBuild.V1_14_0_40618:
                 case ClientVersionBuild.V2_5_2_40892:
-                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode);
+                    return FindOpcodeValueInEnum<V2_5_2_40892.Opcode>(opcode);
                 case ClientVersionBuild.V3_3_5a_12340:
                     return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode);
             }
@@ -53,7 +53,7 @@ namespace HermesProxy.World.Enums
                     return FindOpcodeNameInEnum<V2_4_3_8606.Opcode>(opcode);
                 case ClientVersionBuild.V1_14_0_40618:
                 case ClientVersionBuild.V2_5_2_40892:
-                    return FindOpcodeNameInEnum<V2_5_2_39570.Opcode>(opcode);
+                    return FindOpcodeNameInEnum<V2_5_2_40892.Opcode>(opcode);
                 case ClientVersionBuild.V3_3_5a_12340:
                     return FindOpcodeNameInEnum<V3_3_5_12340.Opcode>(opcode);
             }

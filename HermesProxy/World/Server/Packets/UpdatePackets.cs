@@ -279,7 +279,7 @@ namespace HermesProxy.World.Server.Packets
                 switch (Framework.Settings.ClientBuild)
                 {
                     case ClientVersionBuild.V2_5_2_40892:
-                        Objects.Version.V2_5_2_39570.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_39570.ObjectUpdateBuilder(update);
+                        Objects.Version.V2_5_2_40892.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_40892.ObjectUpdateBuilder(update);
                         builder.WriteToPacket(data);
                         break;
                     default:

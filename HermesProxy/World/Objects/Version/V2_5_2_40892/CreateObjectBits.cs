@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HermesProxy.World.Objects.Version.V2_5_2_39570
+namespace HermesProxy.World.Objects.Version.V2_5_2_40892
 {
     public struct CreateObjectBits
     {
