@@ -131,5 +131,11 @@ namespace HermesProxy.World.Client
             attack.Reason = AttackSwingErr.CantAttack;
             SendPacketToClient(attack);
         }
+        [PacketHandler(Opcode.SMSG_CANCEL_COMBAT)]
+        void HandleCancelCombat(WorldPacket packet)
+        {
+            CancelCombat combat = new();
+            SendPacketToClient(combat);
+        }
     }
 }

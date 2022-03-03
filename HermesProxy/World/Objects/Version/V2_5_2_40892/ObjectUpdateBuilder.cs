@@ -73,7 +73,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             }
 
             if (m_updateData.CreateData == null &&
-                Global.CurrentSessionData.GameState.Objects.TryGetValue(updateData.Guid, out m_fields) &&
+                Global.CurrentSessionData.GameState.ObjectCacheModern.TryGetValue(updateData.Guid, out m_fields) &&
                 m_fields != null)
             {
                 m_fields.m_updateMask.Clear();
@@ -81,8 +81,8 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             else
             {
                 m_fields = new UpdateFieldsArray(size);
-                Global.CurrentSessionData.GameState.Objects.Remove(updateData.Guid);
-                Global.CurrentSessionData.GameState.Objects.Add(updateData.Guid, m_fields);
+                Global.CurrentSessionData.GameState.ObjectCacheModern.Remove(updateData.Guid);
+                Global.CurrentSessionData.GameState.ObjectCacheModern.Add(updateData.Guid, m_fields);
             }
         }
 

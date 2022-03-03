@@ -136,5 +136,31 @@ namespace HermesProxy.World.Client
                 SendPacketToClient(chat);
             }
         }
+
+        [PacketHandler(Opcode.MSG_CORPSE_QUERY)]
+        void HandleCorpseQuery(WorldPacket packet)
+        {
+            CorpseLocation corpse = new();
+            corpse.Valid = packet.ReadBool();
+            if (!corpse.Valid)
+                return;
+
+            corpse.MapID = packet.ReadInt32();
+            corpse.Position = packet.ReadVector3();
+            corpse.ActualMapID = packet.ReadInt32();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
+                packet.ReadInt32(); // Corpse Low GUID
+
+            corpse.Player = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            corpse.Transport = WowGuid128.Empty;
+            SendPacketToClient(corpse);
+        }
+        [PacketHandler(Opcode.SMSG_STAND_STATE_UPDATE)]
+        void HandleStandStateUpdate(WorldPacket packet)
+        {
+            StandStateUpdate state = new();
+            state.StandState = packet.ReadUInt8();
+            SendPacketToClient(state);
+        }
     }
 }

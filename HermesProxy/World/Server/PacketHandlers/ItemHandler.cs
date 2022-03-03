@@ -127,5 +127,15 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(slot);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_REPAIR_ITEM)]
+        void HandleRepairItem(RepairItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_REPAIR_ITEM);
+            packet.WriteGuid(item.VendorGUID.To64());
+            packet.WriteGuid(item.ItemGUID.To64());
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WriteBool(item.UseGuildBank);
+            SendPacketToServer(packet);
+        }
     }
 }

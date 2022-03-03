@@ -32,13 +32,29 @@ public static class Global
         public WowGuid128 LastLootTargetGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
-        public Dictionary<WowGuid128, UpdateFieldsArray> Objects = new();
+        public Dictionary<WowGuid128, Dictionary<int, UpdateField>> ObjectCacheLegacy = new();
+        public Dictionary<WowGuid128, UpdateFieldsArray> ObjectCacheModern = new();
+        public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
         public Dictionary<uint, Class> CreatureClasses = new();
         public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
 
+        public void StoreOriginalObjectType(WowGuid128 guid, ObjectType type)
+        {
+            if (OriginalObjectTypes.ContainsKey(guid))
+                OriginalObjectTypes[guid] = type;
+            else
+                OriginalObjectTypes.Add(guid, type);
+        }
+        public ObjectType GetOriginalObjectType(WowGuid128 guid)
+        {
+            if (OriginalObjectTypes.ContainsKey(guid))
+                return OriginalObjectTypes[guid];
+
+            return guid.GetObjectType();
+        }
         public void StoreRealSpell(uint realSpellId, uint learnSpellId)
         {
             if (RealSpellToLearnSpell.ContainsKey(realSpellId))
@@ -148,6 +164,22 @@ public static class Global
                 return CreatureClasses[guid.GetEntry()];
 
             return Class.Warrior;
+        }
+
+        public Dictionary<int, UpdateField> GetCachedObjectFieldsLegacy(WowGuid128 guid)
+        {
+            Dictionary<int, UpdateField> dict;
+            if (ObjectCacheLegacy.TryGetValue(guid, out dict))
+                return dict;
+            return null;
+        }
+
+        public UpdateFieldsArray GetCachedObjectFieldsModern(WowGuid128 guid)
+        {
+            UpdateFieldsArray array;
+            if (ObjectCacheModern.TryGetValue(guid, out array))
+                return array;
+            return null;
         }
     }
     public class LoginSessionData

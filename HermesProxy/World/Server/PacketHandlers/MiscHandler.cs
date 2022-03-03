@@ -41,5 +41,33 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(selection.TargetGUID.To64());
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_REPOP_REQUEST)]
+        void HandleRepopRequest(RepopRequest repop)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_REPOP_REQUEST);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WriteBool(repop.CheckInstance);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_QUERY_CORPSE_LOCATION_FROM_CLIENT)]
+        void HandleQueryCorpseLocationFromClient(QueryCorpseLocationFromClient query)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_CORPSE_QUERY);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_RECLAIM_CORPSE)]
+        void HandleReclaimCorpse(ReclaimCorpse corpse)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_RECLAIM_CORPSE);
+            packet.WriteGuid(corpse.CorpseGUID.To64());
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_STAND_STATE_CHANGE)]
+        void HandleStandStateChange(StandStateChange state)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_STAND_STATE_CHANGE);
+            packet.WriteUInt32(state.StandState);
+            SendPacketToServer(packet);
+        }
     }
 }

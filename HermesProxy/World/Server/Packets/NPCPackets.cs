@@ -405,4 +405,16 @@ namespace HermesProxy.World.Server.Packets
         public uint Unknown905;
         public string Name;
     }
+
+    public class SpiritHealerConfirm : ServerPacket
+    {
+        public SpiritHealerConfirm() : base(Opcode.SMSG_SPIRIT_HEALER_CONFIRM) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+        }
+
+        public WowGuid128 Guid;
+    }
 }

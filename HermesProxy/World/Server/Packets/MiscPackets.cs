@@ -329,4 +329,90 @@ namespace HermesProxy.World.Server.Packets
         public ulong? RestrictedAccountMaxMoney;
         public uint? InstanceGroupSize;
     }
+
+    public class RepopRequest : ClientPacket
+    {
+        public RepopRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            CheckInstance = _worldPacket.HasBit();
+        }
+
+        public bool CheckInstance;
+    }
+
+    public class QueryCorpseLocationFromClient : ClientPacket
+    {
+        public QueryCorpseLocationFromClient(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Player = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Player;
+    }
+
+    public class CorpseLocation : ServerPacket
+    {
+        public CorpseLocation() : base(Opcode.SMSG_CORPSE_LOCATION) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(Valid);
+            _worldPacket.FlushBits();
+
+            _worldPacket.WritePackedGuid128(Player);
+            _worldPacket.WriteInt32(ActualMapID);
+            _worldPacket.WriteVector3(Position);
+            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WritePackedGuid128(Transport);
+        }
+
+        public WowGuid128 Player;
+        public WowGuid128 Transport;
+        public Vector3 Position;
+        public int ActualMapID;
+        public int MapID;
+        public bool Valid;
+    }
+
+    public class ReclaimCorpse : ClientPacket
+    {
+        public ReclaimCorpse(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            CorpseGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 CorpseGUID;
+    }
+
+    public class StandStateChange : ClientPacket
+    {
+        public StandStateChange(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            StandState = _worldPacket.ReadUInt32();
+        }
+
+        public uint StandState;
+    }
+
+    public class StandStateUpdate : ServerPacket
+    {
+        public StandStateUpdate() : base(Opcode.SMSG_STAND_STATE_UPDATE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(AnimKitID);
+            _worldPacket.WriteUInt8(StandState);
+        }
+
+        public uint AnimKitID;
+        public byte StandState;
+    }
 }

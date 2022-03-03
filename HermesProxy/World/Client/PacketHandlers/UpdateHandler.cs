@@ -18,7 +18,8 @@ namespace HermesProxy.World.Client
         void HandleDestroyObject(WorldPacket packet)
         {
             WowGuid128 guid = packet.ReadGuid().To128();
-            Global.CurrentSessionData.GameState.Objects.Remove(guid);
+            Global.CurrentSessionData.GameState.ObjectCacheLegacy.Remove(guid);
+            Global.CurrentSessionData.GameState.ObjectCacheModern.Remove(guid);
 
             UpdateObject updateObject = new UpdateObject();
             updateObject.DestroyedGuids.Add(guid);
@@ -168,30 +169,36 @@ namespace HermesProxy.World.Client
             {
                 var guid = packet.ReadPackedGuid().To128();
                 PrintString($"Guid = {objCount}", index, j);
-                Global.CurrentSessionData.GameState.Objects.Remove(guid);
+                Global.CurrentSessionData.GameState.ObjectCacheLegacy.Remove(guid);
+                Global.CurrentSessionData.GameState.ObjectCacheModern.Remove(guid);
                 updateObject.OutOfRangeGuids.Add(guid);
             }
         }
 
-        private void ReadCreateObjectBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
+        private void ReadCreateObjectBlock(WorldPacket packet, WowGuid128 guid, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             updateData.CreateData.ObjectType = ObjectTypeConverter.Convert((ObjectTypeLegacy)packet.ReadUInt8());
+            Global.CurrentSessionData.GameState.StoreOriginalObjectType(guid, updateData.CreateData.ObjectType);
             ReadMovementUpdateBlock(packet, guid, updateData, index);
             ReadValuesUpdateBlockOnCreate(packet, guid, updateData.CreateData.ObjectType, updateData, auraUpdate, index);
         }
 
-        public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
+        public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid128 guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             BitArray updateMaskArray = null;
             var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData);
+            if (!Global.CurrentSessionData.GameState.ObjectCacheLegacy.ContainsKey(guid))
+                Global.CurrentSessionData.GameState.ObjectCacheLegacy.Add(guid, updates);
+            else
+                Global.CurrentSessionData.GameState.ObjectCacheLegacy[guid] = updates;
         }
 
-        public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid guid, ObjectUpdate updateData, AuraUpdate auraUpdate, PowerUpdate powerUpdate, int index)
+        public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid128 guid, ObjectUpdate updateData, AuraUpdate auraUpdate, PowerUpdate powerUpdate, int index)
         {
             BitArray updateMaskArray = null;
-            ObjectType type = guid.GetObjectType();
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, null, out updateMaskArray);
+            ObjectType type = Global.CurrentSessionData.GameState.GetOriginalObjectType(guid);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, Global.CurrentSessionData.GameState.GetCachedObjectFieldsLegacy(guid), out updateMaskArray);
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData);
         }
 
@@ -233,7 +240,7 @@ namespace HermesProxy.World.Client
 
             var mask = new BitArray(updateMask);
             outUpdateMaskArray = mask;
-            var dict = new Dictionary<int, UpdateField>();
+            var dict = oldValues != null ? oldValues : new Dictionary<int, UpdateField>();
 
             if (missingCreateObject)
             {
@@ -530,9 +537,15 @@ namespace HermesProxy.World.Client
                 }
 
                 if (!skipDictionary)
+                {
                     for (int k = 0; k < fieldData.Count; ++k)
+                    {
                         if (!dict.ContainsKey(start + k))
                             dict.Add(start + k, fieldData[k]);
+                        else
+                            dict[start + k] = fieldData[k];
+                    }
+                }  
             }
 
             return dict;
@@ -1384,7 +1397,7 @@ namespace HermesProxy.World.Client
                                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                                 {
                                     int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 4;
-                                    if (updateMaskArray[flagsIndex])
+                                    if (updates.ContainsKey(flagsIndex))
                                     {
                                         ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
                                         ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
@@ -1393,7 +1406,7 @@ namespace HermesProxy.World.Client
                                 else
                                 {
                                     int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 8;
-                                    if (updateMaskArray[flagsIndex])
+                                    if (updates.ContainsKey(flagsIndex))
                                     {
                                         ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 8) * 4)) & 0xF);
                                         ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
@@ -1401,12 +1414,16 @@ namespace HermesProxy.World.Client
                                 }
 
                                 int levelsIndex = UNIT_FIELD_AURALEVELS + i / 4;
-                                if (updateMaskArray[levelsIndex])
+                                if (updates.ContainsKey(levelsIndex))
                                     data.CastLevel = (ushort)((updates[levelsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+                                else
+                                    data.CastLevel = 0;
 
                                 int stacksIndex = UNIT_FIELD_AURAAPPLICATIONS + i / 4;
-                                if (updateMaskArray[stacksIndex])
+                                if (updates.ContainsKey(stacksIndex))
                                     data.Applications = (byte)((updates[stacksIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+                                else
+                                    data.Applications = 0;
 
                                 aura.AuraData = data;
                             }

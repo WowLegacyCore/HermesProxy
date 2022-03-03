@@ -185,5 +185,13 @@ namespace HermesProxy.World.Client
             respec.Cost = packet.ReadUInt32();
             SendPacketToClient(respec);
         }
+
+        [PacketHandler(Opcode.SMSG_SPIRIT_HEALER_CONFIRM)]
+        void HandleSpiritHealerConfirm(WorldPacket packet)
+        {
+            SpiritHealerConfirm confirm = new SpiritHealerConfirm();
+            confirm.Guid = packet.ReadGuid().To128();
+            SendPacketToClient(confirm);
+        }
     }
 }

@@ -506,4 +506,20 @@ namespace HermesProxy.World.Server.Packets
         public int Level;
         public WowGuid128[] Item = new WowGuid128[2];
     }
+
+    public class RepairItem : ClientPacket
+    {
+        public RepairItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            VendorGUID = _worldPacket.ReadPackedGuid128();
+            ItemGUID = _worldPacket.ReadPackedGuid128();
+            UseGuildBank = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 VendorGUID;
+        public WowGuid128 ItemGUID;
+        public bool UseGuildBank;
+    }
 }

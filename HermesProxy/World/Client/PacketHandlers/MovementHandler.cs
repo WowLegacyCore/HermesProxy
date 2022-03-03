@@ -395,6 +395,7 @@ namespace HermesProxy.World.Client
                     if (moveSpline != null)
                         moveSpline.SplinePoints.Add(vec);
                 }
+                moveSpline.SplineFlags |= SplineFlagModern.UncompressedPath;
             }
             else
             {

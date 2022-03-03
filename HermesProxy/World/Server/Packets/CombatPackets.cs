@@ -233,4 +233,25 @@ namespace HermesProxy.World.Server.Packets
         public int Amount;
         public int Cost;
     }
+
+    public class CancelCombat : ServerPacket
+    {
+        public CancelCombat() : base(Opcode.SMSG_CANCEL_COMBAT) { }
+
+        public override void Write() { }
+    }
+
+    public class SetSheathed : ClientPacket
+    {
+        public SetSheathed(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SheathState = _worldPacket.ReadInt32();
+            Animate = _worldPacket.HasBit();
+        }
+
+        public int SheathState;
+        public bool Animate = true;
+    }
 }

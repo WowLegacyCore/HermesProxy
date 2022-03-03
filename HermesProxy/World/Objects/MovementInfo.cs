@@ -97,17 +97,27 @@ namespace HermesProxy.World.Objects
         {
             MovementInfo info = this;
 
+            bool hasPitch;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                info.Flags = packet.ReadUInt32();
-            else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                info.Flags = (uint)(((MovementFlagTBC)packet.ReadUInt32()).CastFlags<MovementFlagWotLK>());
-            else
-                info.Flags = (uint)(((MovementFlagVanilla)packet.ReadUInt32()).CastFlags<MovementFlagWotLK>());
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                MovementFlagWotLK flags = (MovementFlagWotLK)packet.ReadUInt32();
+                info.Flags = (uint)flags;
                 info.FlagsExtra = packet.ReadUInt16();
+                hasPitch = flags.HasAnyFlag(MovementFlagWotLK.Swimming | MovementFlagWotLK.Flying) || info.FlagsExtra.HasAnyFlag(MovementFlagExtra.AlwaysAllowPitching);
+            }
             else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                MovementFlagTBC flags = (MovementFlagTBC)packet.ReadUInt32();
+                info.Flags = (uint)flags.CastFlags<MovementFlagWotLK>();
                 info.FlagsExtra = packet.ReadUInt8();
+                hasPitch = flags.HasAnyFlag(MovementFlagTBC.Swimming | MovementFlagTBC.Flying2);
+            }
+            else
+            {
+                MovementFlagVanilla flags = (MovementFlagVanilla)packet.ReadUInt32();
+                info.Flags = (uint)flags.CastFlags<MovementFlagWotLK>();
+                hasPitch = flags.HasAnyFlag(MovementFlagVanilla.Swimming);
+            }
 
             info.MoveTime = packet.ReadUInt32();
 
@@ -131,8 +141,7 @@ namespace HermesProxy.World.Objects
                     info.TransportTime2 = packet.ReadUInt32();
             }
 
-            if (info.Flags.HasAnyFlag(MovementFlagWotLK.Swimming | MovementFlagWotLK.Flying) ||
-                info.FlagsExtra.HasAnyFlag(MovementFlagExtra.AlwaysAllowPitching))
+            if (hasPitch)
                 info.SwimPitch = packet.ReadFloat();
 
             info.FallTime = packet.ReadUInt32();
