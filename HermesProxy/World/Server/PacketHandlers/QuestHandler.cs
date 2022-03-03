@@ -79,5 +79,30 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(hello.QuestGiverGUID.To64());
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_QUEST_GIVER_REQUEST_REWARD)]
+        void HandleQuestGiverRequestReward(QuestGiverRequestReward quest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_REQUEST_REWARD);
+            packet.WriteGuid(quest.QuestGiverGUID.To64());
+            packet.WriteUInt32(quest.QuestID);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD)]
+        void HandleQuestGiverChooseReward(QuestGiverChooseReward quest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD);
+            packet.WriteGuid(quest.QuestGiverGUID.To64());
+            packet.WriteUInt32(quest.QuestID);
+            packet.WriteUInt32(quest.Choice.Item.ItemID);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_QUEST_GIVER_COMPLETE_QUEST)]
+        void HandleQuestGiverCompleteQuest(QuestGiverCompleteQuest quest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_COMPLETE_QUEST);
+            packet.WriteGuid(quest.QuestGiverGUID.To64());
+            packet.WriteUInt32(quest.QuestID);
+            SendPacketToServer(packet);
+        }
     }
 }

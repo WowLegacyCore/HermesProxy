@@ -82,6 +82,16 @@ namespace Framework.GameMath
             Y = vector.Y;
             Z = vector.Z;
         }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector3"/> class using coordinates from a given <see cref="Vector2"/> instance.
+        /// </summary>
+        /// <param name="vector">A <see cref="Vector2"/> to get the coordinates from.</param>
+        public Vector3(Vector2 vector)
+        {
+            X = vector.X;
+            Y = vector.Y;
+            Z = 0.0f;
+        }
         #endregion
 
         #region Constants

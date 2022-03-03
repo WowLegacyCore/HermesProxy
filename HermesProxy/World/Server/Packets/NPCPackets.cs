@@ -377,4 +377,32 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 TrainerGUID;
         public SpecResetType RespecType;
     }
+
+    class GossipPOI : ServerPacket
+    {
+        public GossipPOI() : base(Opcode.SMSG_GOSSIP_POI) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(Id);
+            _worldPacket.WriteFloat(Pos.X);
+            _worldPacket.WriteFloat(Pos.Y);
+            _worldPacket.WriteFloat(Pos.Z);
+            _worldPacket.WriteUInt32(Icon);
+            _worldPacket.WriteUInt32(Importance);
+            _worldPacket.WriteUInt32(Unknown905);
+            _worldPacket.WriteBits(Flags, 14);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(Name);
+        }
+
+        public uint Id = 1;
+        public uint Flags;
+        public Vector3 Pos;
+        public uint Icon;
+        public uint Importance;
+        public uint Unknown905;
+        public string Name;
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Framework;
+using Framework.GameMath;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -58,6 +59,18 @@ namespace HermesProxy.World.Client
         {
             GossipComplete gossip = new GossipComplete();
             SendPacketToClient(gossip);
+        }
+
+        [PacketHandler(Opcode.SMSG_GOSSIP_POI)]
+        void HandleGossipPoi(WorldPacket packet)
+        {
+            GossipPOI poi = new();
+            poi.Flags = packet.ReadUInt32();
+            poi.Pos = new Vector3(packet.ReadVector2());
+            poi.Icon = packet.ReadUInt32();
+            poi.Importance = packet.ReadUInt32();
+            poi.Name = packet.ReadCString();
+            SendPacketToClient(poi);
         }
 
         [PacketHandler(Opcode.SMSG_BINDER_CONFIRM)]

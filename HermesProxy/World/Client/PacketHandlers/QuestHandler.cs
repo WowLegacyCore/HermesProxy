@@ -230,12 +230,109 @@ namespace HermesProxy.World.Client
                 packet.ReadUInt32(); // unknown meaning, mangos sends always 2
 
             // flags
-            quest.StatusFlags = packet.ReadUInt32();
+            uint statusFlags = packet.ReadUInt32();
+            if ((statusFlags & 3) != 0)
+                quest.StatusFlags = 223;
+            else
+                quest.StatusFlags = 219;
             packet.ReadUInt32(); // Unk flags 2
             packet.ReadUInt32(); // Unk flags 3
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.ReadUInt32(); // Unk flags 4
             SendPacketToClient(quest);
+        }
+
+        [PacketHandler(Opcode.SMSG_QUEST_GIVER_OFFER_REWARD_MESSAGE)]
+        void HandleQuestGiverOfferRewardMessage(WorldPacket packet)
+        {
+            QuestGiverOfferRewardMessage quest = new QuestGiverOfferRewardMessage();
+            quest.QuestData.QuestGiverGUID = packet.ReadGuid().To128();
+            quest.QuestData.QuestGiverCreatureID = quest.QuestData.QuestGiverGUID.GetEntry();
+            quest.QuestData.QuestID = packet.ReadUInt32();
+            quest.QuestTitle = packet.ReadCString();
+            quest.RewardText = packet.ReadCString();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
+                quest.QuestData.AutoLaunched = packet.ReadBool();
+            else
+                quest.QuestData.AutoLaunched = packet.ReadUInt32() != 0;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_3_11685))
+                quest.QuestData.QuestFlags[0] = packet.ReadUInt32();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                quest.QuestData.SuggestedPartyMembers = packet.ReadUInt32();
+
+            uint emotesCount = packet.ReadUInt32();
+            for (int i = 0; i < emotesCount; i++)
+            {
+                QuestDescEmote emote = new();
+                emote.Delay = packet.ReadUInt32();
+                emote.Type = packet.ReadUInt32();
+            }
+
+            ReadExtraQuestInfo(packet, quest.QuestData.Rewards, true);
+
+            SendPacketToClient(quest);
+        }
+
+        [PacketHandler(Opcode.SMSG_QUEST_GIVER_QUEST_COMPLETE)]
+        void HandleQuestGiverQuestComplete(WorldPacket packet)
+        {
+            QuestGiverQuestComplete quest = new QuestGiverQuestComplete();
+            quest.QuestID = packet.ReadUInt32();
+
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.ReadUInt32(); // mangos sends always 3
+
+            quest.XPReward = packet.ReadUInt32();
+            quest.MoneyReward = packet.ReadUInt32();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_3_0_7561))
+                packet.ReadInt32(); // Honor
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                packet.ReadInt32(); // Talents
+                packet.ReadInt32(); // Arena Points
+            }
+
+            uint itemId = 0;
+            uint itemCount = 0;
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                uint itemsCount = packet.ReadUInt32();
+                for (uint i = 0; i < itemsCount; ++i)
+                {
+                    uint itemId2 = packet.ReadUInt32();
+                    uint itemCount2 = packet.ReadUInt32();
+
+                    if (itemId2 != 0 && itemCount2 != 0)
+                    {
+                        itemId = itemId2;
+                        itemCount = itemCount2;
+                    }
+                }
+            }
+
+            quest.ItemReward.ItemID = itemId;
+            SendPacketToClient(quest);
+
+            DisplayToast toast = new();
+            toast.QuestID = quest.QuestID;
+            if (itemId != 0 && itemCount != 0)
+            {
+                toast.Quantity = 1;
+                toast.Type = 0;
+                toast.ItemReward.ItemID = itemId;
+                toast.ItemQuantity = itemCount;
+            }
+            else
+            {
+                toast.Quantity = 60;
+                toast.Type = 2;
+            }
+            SendPacketToClient(toast);
         }
     }
 }

@@ -456,4 +456,198 @@ namespace HermesProxy.World.Server.Packets
         public uint CurrencyID;
         public int Amount;
     }
+
+    public class QuestGiverRequestReward : ClientPacket
+    {
+        public QuestGiverRequestReward(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestGiverGUID = _worldPacket.ReadPackedGuid128();
+            QuestID = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 QuestGiverGUID;
+        public uint QuestID;
+    }
+
+    public class QuestGiverOfferRewardMessage : ServerPacket
+    {
+        public QuestGiverOfferRewardMessage() : base(Opcode.SMSG_QUEST_GIVER_OFFER_REWARD_MESSAGE) { }
+
+        public override void Write()
+        {
+            QuestData.Write(_worldPacket);
+            _worldPacket.WriteUInt32(QuestPackageID);
+            _worldPacket.WriteUInt32(PortraitGiver);
+            _worldPacket.WriteUInt32(PortraitGiverMount);
+            _worldPacket.WriteUInt32(PortraitGiverModelSceneID);
+            _worldPacket.WriteUInt32(PortraitTurnIn);
+
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
+            _worldPacket.WriteBits(RewardText.GetByteCount(), 12);
+            _worldPacket.WriteBits(PortraitGiverText.GetByteCount(), 10);
+            _worldPacket.WriteBits(PortraitGiverName.GetByteCount(), 8);
+            _worldPacket.WriteBits(PortraitTurnInText.GetByteCount(), 10);
+            _worldPacket.WriteBits(PortraitTurnInName.GetByteCount(), 8);
+
+            _worldPacket.WriteString(QuestTitle);
+            _worldPacket.WriteString(RewardText);
+            _worldPacket.WriteString(PortraitGiverText);
+            _worldPacket.WriteString(PortraitGiverName);
+            _worldPacket.WriteString(PortraitTurnInText);
+            _worldPacket.WriteString(PortraitTurnInName);
+        }
+
+        public uint PortraitTurnIn;
+        public uint PortraitGiver;
+        public uint PortraitGiverMount;
+        public uint PortraitGiverModelSceneID;
+        public string QuestTitle = "";
+        public string RewardText = "";
+        public string PortraitGiverText = "";
+        public string PortraitGiverName = "";
+        public string PortraitTurnInText = "";
+        public string PortraitTurnInName = "";
+        public QuestGiverOfferReward QuestData = new();
+        public uint QuestPackageID;
+    }
+
+    public class QuestGiverOfferReward
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(QuestGiverGUID);
+            data.WriteUInt32(QuestGiverCreatureID);
+            data.WriteUInt32(QuestID);
+            data.WriteUInt32(QuestFlags[0]); // Flags
+            data.WriteUInt32(QuestFlags[1]); // FlagsEx
+            data.WriteUInt32(SuggestedPartyMembers);
+
+            data.WriteInt32(Emotes.Count);
+            foreach (QuestDescEmote emote in Emotes)
+            {
+                data.WriteUInt32(emote.Type);
+                data.WriteUInt32(emote.Delay);
+            }
+
+            data.WriteBit(AutoLaunched);
+            data.WriteBit(false);   // Unused
+            data.FlushBits();
+
+            Rewards.Write(data);
+        }
+
+        public WowGuid128 QuestGiverGUID;
+        public uint QuestGiverCreatureID = 0;
+        public uint QuestID = 0;
+        public bool AutoLaunched = false;
+        public uint SuggestedPartyMembers = 0;
+        public QuestRewards Rewards = new();
+        public List<QuestDescEmote> Emotes = new();
+        public uint[] QuestFlags = new uint[2]; // Flags and FlagsEx
+    }
+
+    public class QuestGiverChooseReward : ClientPacket
+    {
+        public QuestGiverChooseReward(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestGiverGUID = _worldPacket.ReadPackedGuid128();
+            QuestID = _worldPacket.ReadUInt32();
+            Choice.Read(_worldPacket);
+        }
+
+        public WowGuid128 QuestGiverGUID;
+        public uint QuestID;
+        public QuestChoiceItem Choice = new();
+    }
+
+    public class QuestGiverQuestComplete : ServerPacket
+    {
+        public QuestGiverQuestComplete() : base(Opcode.SMSG_QUEST_GIVER_QUEST_COMPLETE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteUInt32(XPReward);
+            _worldPacket.WriteInt64(MoneyReward);
+            _worldPacket.WriteUInt32(SkillLineIDReward);
+            _worldPacket.WriteUInt32(NumSkillUpsReward);
+
+            _worldPacket.WriteBit(UseQuestReward);
+            _worldPacket.WriteBit(LaunchGossip);
+            _worldPacket.WriteBit(LaunchQuest);
+            _worldPacket.WriteBit(HideChatMessage);
+
+            ItemReward.Write(_worldPacket);
+        }
+
+        public uint QuestID;
+        public uint XPReward;
+        public long MoneyReward;
+        public uint SkillLineIDReward;
+        public uint NumSkillUpsReward;
+        public bool UseQuestReward;
+        public bool LaunchGossip;
+        public bool LaunchQuest = true;
+        public bool HideChatMessage;
+        public ItemInstance ItemReward = new();
+    }
+
+    public class DisplayToast : ServerPacket
+    {
+        public DisplayToast() : base(Opcode.SMSG_DISPLAY_TOAST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt64(Quantity);
+            _worldPacket.WriteUInt8(DisplayToastMethod);
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteBit(Mailed);
+            _worldPacket.WriteBits(Type, 2);
+
+            if (Type == 0)
+            {
+                _worldPacket.WriteBit(BonusRoll);
+                _worldPacket.FlushBits();
+                ItemReward.Write(_worldPacket);
+                _worldPacket.WriteUInt32(SpecializationID);
+                _worldPacket.WriteUInt32(ItemQuantity);
+            }
+            else
+                _worldPacket.FlushBits();
+
+            if (Type == 1)
+                _worldPacket.WriteUInt32(CurrencyID);
+        }
+
+        public ulong Quantity;
+        public byte DisplayToastMethod = 16;
+        public uint QuestID;
+        public bool Mailed;
+        public byte Type;
+        public bool BonusRoll;
+        public ItemInstance ItemReward = new();
+        public uint SpecializationID;
+        public uint ItemQuantity;
+        public uint CurrencyID;
+    }
+
+    public class QuestGiverCompleteQuest : ClientPacket
+    {
+        public QuestGiverCompleteQuest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestGiverGUID = _worldPacket.ReadPackedGuid128();
+            QuestID = _worldPacket.ReadUInt32();
+            FromScript = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 QuestGiverGUID; // NPC / GameObject guid for normal quest completion. Player guid for self-completed quests
+        public uint QuestID;
+        public bool FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
+    }
 }
