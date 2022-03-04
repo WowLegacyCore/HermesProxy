@@ -179,7 +179,8 @@ namespace HermesProxy.World.Client
                         received += receivedNow;
                     }
 
-                    HandlePacket(buffer, header.Opcode, header.Size);
+                    WorldPacket packet = new WorldPacket(buffer);
+                    HandlePacket(packet);
                 }
                 else
                 {
@@ -332,13 +333,10 @@ namespace HermesProxy.World.Client
             }
         }
 
-        private void HandlePacket(byte[] buffer, ushort opcode, ushort size)
+        private void HandlePacket(WorldPacket packet)
         {
-            WorldPacket packet = new WorldPacket(buffer);
-            System.Diagnostics.Trace.Assert(opcode == packet.GetOpcode());
-
             Opcode universalOpcode = packet.GetUniversalOpcode(false);
-            Log.Print(LogType.Debug, $"Received opcode {universalOpcode.ToString()} ({opcode}).");
+            Log.Print(LogType.Debug, $"Received opcode {universalOpcode.ToString()} ({packet.GetOpcode()}).");
 
             switch (universalOpcode)
             {

@@ -37,7 +37,7 @@ namespace HermesProxy.World
                     return ObjectType.Item;
                 case HighGuidType.GameObject:
                 case HighGuidType.Transport:
-                    //case HighGuidType.MOTransport: ??
+                case HighGuidType.MOTransport:
                     return ObjectType.GameObject;
                 case HighGuidType.Vehicle:
                 case HighGuidType.Creature:
@@ -48,6 +48,22 @@ namespace HermesProxy.World
                 default:
                     return ObjectType.Object;
             }
+        }
+
+        public bool IsPlayer()
+        {
+            switch (GetObjectType())
+            {
+                case ObjectType.Player:
+                case ObjectType.ActivePlayer:
+                    return true;
+            }
+            return false;
+        }
+
+        public bool IsCreature()
+        {
+            return GetObjectType() == ObjectType.Unit;
         }
 
         public static bool operator ==(WowGuid first, WowGuid other)

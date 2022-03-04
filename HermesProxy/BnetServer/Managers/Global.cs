@@ -21,10 +21,13 @@ public static class Global
     }
     public class GameSessionData
     {
+        public bool IsInTaxiFlight;
+        public bool IsWaitingForTaxiStart;
         public bool IsWaitingForNewWorld;
         public bool IsFirstEnterWorld;
         public bool IsInWorld;
         public uint? CurrentMapId;
+        public uint CurrentTaxiNode;
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
         public uint LastClientCastId;

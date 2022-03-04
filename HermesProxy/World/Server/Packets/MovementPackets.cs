@@ -477,4 +477,19 @@ namespace HermesProxy.World.Server.Packets
         public uint SequenceIndex = 1;
         public uint Reason = 1;
     }
+
+    public class ControlUpdate : ServerPacket
+    {
+        public ControlUpdate() : base(Opcode.SMSG_CONTROL_UPDATE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+            _worldPacket.WriteBit(HasControl);
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 Guid;
+        public bool HasControl;
+    }
 }

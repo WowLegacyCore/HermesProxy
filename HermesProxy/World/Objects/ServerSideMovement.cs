@@ -23,8 +23,6 @@ namespace HermesProxy.World.Objects
         public Vector3 FinalFacingSpot;
         public WowGuid128 FinalFacingGuid;
         public WowGuid128 TransportGuid;
-        public uint TransportId;
-        public string TransportType = "";
         public sbyte TransportSeat;
         public List<Vector3> SplinePoints = new();
     }

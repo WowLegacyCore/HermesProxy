@@ -83,11 +83,32 @@ namespace HermesProxy.World.Client
             SendPacketToClient(knockback);
         }
 
+        [PacketHandler(Opcode.SMSG_CONTROL_UPDATE)]
+        void HandleControlUpdate(WorldPacket packet)
+        {
+            ControlUpdate control = new ControlUpdate();
+            control.Guid = packet.ReadPackedGuid().To128();
+            control.HasControl = packet.ReadBool();
+            SendPacketToClient(control);
+        }
+
         [PacketHandler(Opcode.MSG_MOVE_TELEPORT_ACK)]
         void HandleMoveTeleportAck(WorldPacket packet)
         {
+            WowGuid128 guid = packet.ReadPackedGuid().To128();
+
+            if (Global.CurrentSessionData.GameState.IsInTaxiFlight &&
+                Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid)
+            {
+                ControlUpdate control = new ControlUpdate();
+                control.Guid = guid;
+                control.HasControl = true;
+                SendPacketToClient(control);
+                Global.CurrentSessionData.GameState.IsInTaxiFlight = false;
+            }
+
             MoveTeleport teleport = new MoveTeleport();
-            teleport.MoverGUID = packet.ReadPackedGuid().To128();
+            teleport.MoverGUID = guid;
             teleport.MoveCounter = packet.ReadUInt32();
             MovementInfo moveInfo = new();
             moveInfo.ReadMovementInfoLegacy(packet);
@@ -291,11 +312,8 @@ namespace HermesProxy.World.Client
                 var opc = pkt.ReadUInt16();
                 var data = pkt.ReadBytes((uint)(size - 2));
 
-                if (size < 21)
-                    return;
-
                 var pkt2 = new WorldPacket(opc, data);
-                HandleMonsterMove(pkt2);
+                HandlePacket(pkt2);
             }
         }
 
@@ -309,11 +327,8 @@ namespace HermesProxy.World.Client
                 packet.ReadBool(); // "Toggle AnimTierInTrans"
 
             moveSpline.StartPosition = packet.ReadVector3();
-
             moveSpline.SplineId = packet.ReadUInt32();
-
             SplineTypeLegacy type = (SplineTypeLegacy)packet.ReadUInt8();
-
             switch (type)
             {
                 case SplineTypeLegacy.FacingSpot:
@@ -346,12 +361,14 @@ namespace HermesProxy.World.Client
             bool hasAnimTier;
             bool hasTrajectory;
             bool hasCatmullRom;
+            bool hasTaxiFlightFlags;
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 var splineFlags = (SplineFlagVanilla)packet.ReadUInt32();
                 hasAnimTier = false;
                 hasTrajectory = false;
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagVanilla.Flying);
+                hasTaxiFlightFlags = splineFlags == (SplineFlagVanilla.Runmode | SplineFlagVanilla.Flying);
                 moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
             else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -360,6 +377,7 @@ namespace HermesProxy.World.Client
                 hasAnimTier = false;
                 hasTrajectory = false;
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagTBC.Flying);
+                hasTaxiFlightFlags = splineFlags == (SplineFlagTBC.Runmode | SplineFlagTBC.Flying);
                 moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
             else
@@ -368,6 +386,7 @@ namespace HermesProxy.World.Client
                 hasAnimTier = splineFlags.HasAnyFlag(SplineFlagWotLK.AnimationTier);
                 hasTrajectory = splineFlags.HasAnyFlag(SplineFlagWotLK.Trajectory);
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagWotLK.Flying | SplineFlagWotLK.CatmullRom);
+                hasTaxiFlightFlags = splineFlags == (SplineFlagWotLK.WalkMode | SplineFlagWotLK.Flying);
                 moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
 
@@ -392,6 +411,7 @@ namespace HermesProxy.World.Client
                 for (var i = 0; i < moveSpline.SplineCount; i++)
                 {
                     Vector3 vec = packet.ReadVector3();
+
                     if (moveSpline != null)
                         moveSpline.SplinePoints.Add(vec);
                 }
@@ -416,8 +436,58 @@ namespace HermesProxy.World.Client
                 }
             }
 
+            if (hasTaxiFlightFlags &&
+                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart &&
+                Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid)
+            {
+                // Exact sequence of packets from sniff.
+                // Client instantly teleports to destination if anything is left out.
+
+                ServerSideMovement stopSpline = new();
+                stopSpline.StartPosition = moveSpline.StartPosition;
+                stopSpline.SplineId = moveSpline.SplineId - 2;
+                MonsterMove moveStop = new MonsterMove(guid, stopSpline);
+                SendPacketToClient(moveStop);
+
+                ControlUpdate update = new();
+                update.Guid = guid;
+                update.HasControl = false;
+                SendPacketToClient(update);
+
+                stopSpline.SplineId = moveSpline.SplineId - 1;
+                moveStop = new MonsterMove(guid, stopSpline);
+                SendPacketToClient(moveStop);
+
+                update = new();
+                update.Guid = guid;
+                update.HasControl = false;
+                SendPacketToClient(update);
+
+                moveSpline.SplineFlags = SplineFlagModern.Flying |
+                                         SplineFlagModern.CatmullRom |
+                                         SplineFlagModern.CanSwim |
+                                         SplineFlagModern.UncompressedPath |
+                                         SplineFlagModern.Unknown5 |
+                                         SplineFlagModern.Steering |
+                                         SplineFlagModern.Unknown10;
+
+                if (!hasCatmullRom && moveSpline.EndPosition != Vector3.Zero)
+                    moveSpline.SplinePoints.Add(moveSpline.EndPosition);
+            }
+
             MonsterMove monsterMove = new MonsterMove(guid, moveSpline);
             SendPacketToClient(monsterMove);
+
+            if (hasTaxiFlightFlags &&
+                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart &&
+                Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid)
+            {
+                ActivateTaxiReplyPkt taxi = new();
+                taxi.Reply = ActivateTaxiReply.Ok;
+                SendPacketToClient(taxi);
+                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart = false;
+                Global.CurrentSessionData.GameState.IsInTaxiFlight = true;
+            }
         }
     }
 }
