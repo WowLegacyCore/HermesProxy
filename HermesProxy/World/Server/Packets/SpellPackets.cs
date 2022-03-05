@@ -192,6 +192,25 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 CasterGUID;
     }
 
+    class CancelAutoRepeatSpell : ClientPacket
+    {
+        public CancelAutoRepeatSpell(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class CancelAutoRepeat : ServerPacket
+    {
+        public CancelAutoRepeat() : base(Opcode.SMSG_CANCEL_AUTO_REPEAT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+        }
+
+        public WowGuid128 Guid;
+    }
+
     public class AuraUpdate : ServerPacket
     {
         public AuraUpdate(WowGuid128 guid, bool all) : base(Opcode.SMSG_AURA_UPDATE, ConnectionType.Instance) 

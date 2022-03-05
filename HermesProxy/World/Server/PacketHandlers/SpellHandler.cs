@@ -135,6 +135,12 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(aura.SpellID);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL)]
+        void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell aura)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
+            SendPacketToServer(packet);
+        }
         [PacketHandler(Opcode.CMSG_LEARN_TALENT)]
         void HandleLearnTalent(LearnTalent talent)
         {

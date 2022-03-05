@@ -1140,9 +1140,19 @@ namespace HermesProxy.World.Client
                         updateData.UnitData.Flags = (uint)(vanillaFlags.CastFlags<UnitFlags>());
 
                         if (vanillaFlags.HasAnyFlag(UnitFlagsVanilla.PetRename))
-                            updateData.UnitData.PetFlags |= (byte)PetFlags.CanBeRenamed;
+                        {
+                            if (updateData.UnitData.PetFlags == null)
+                                updateData.UnitData.PetFlags = (byte)PetFlags.CanBeRenamed;
+                            else
+                                updateData.UnitData.PetFlags |= (byte)PetFlags.CanBeRenamed;
+                        }
                         if (vanillaFlags.HasAnyFlag(UnitFlagsVanilla.PetAbandon))
-                            updateData.UnitData.PetFlags |= (byte)PetFlags.CanBeAbandoned;
+                        {
+                            if (updateData.UnitData.PetFlags == null)
+                                updateData.UnitData.PetFlags = (byte)PetFlags.CanBeAbandoned;
+                            else
+                                updateData.UnitData.PetFlags |= (byte)PetFlags.CanBeAbandoned;
+                        }
                     }
                     else
                     {

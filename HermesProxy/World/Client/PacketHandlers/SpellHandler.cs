@@ -403,5 +403,16 @@ namespace HermesProxy.World.Client
 
             return dbdata;
         }
+
+        [PacketHandler(Opcode.SMSG_CANCEL_AUTO_REPEAT)]
+        void HandleCancelAutoRepeat(WorldPacket packet)
+        {
+            CancelAutoRepeat cancel = new CancelAutoRepeat();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                cancel.Guid = packet.ReadPackedGuid().To128();
+            else
+                cancel.Guid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            SendPacketToClient(cancel);
+        }
     }
 }

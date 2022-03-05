@@ -20,6 +20,7 @@ using Framework.Constants;
 using Framework.GameMath;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
@@ -124,5 +125,55 @@ namespace HermesProxy.World.Server.Packets
         public uint Action;
         public WowGuid128 TargetGUID;
         public Vector3 ActionPosition;
+    }
+
+    class PetRename : ClientPacket
+    {
+        public PetRename(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            RenameData.PetGUID = _worldPacket.ReadPackedGuid128();
+            RenameData.PetNumber = _worldPacket.ReadInt32();
+
+            uint nameLen = _worldPacket.ReadBits<uint>(8);
+
+            RenameData.HasDeclinedNames = _worldPacket.HasBit();
+            if (RenameData.HasDeclinedNames)
+            {
+                RenameData.DeclinedNames = new DeclinedName();
+                uint[] count = new uint[PlayerConst.MaxDeclinedNameCases];
+                for (int i = 0; i < PlayerConst.MaxDeclinedNameCases; i++)
+                    count[i] = _worldPacket.ReadBits<uint>(7);
+
+                for (int i = 0; i < PlayerConst.MaxDeclinedNameCases; i++)
+                    RenameData.DeclinedNames.name[i] = _worldPacket.ReadString(count[i]);
+            }
+
+            RenameData.NewName = _worldPacket.ReadString(nameLen);
+        }
+
+        public PetRenameData RenameData;
+    }
+
+    struct PetRenameData
+    {
+        public WowGuid128 PetGUID;
+        public int PetNumber;
+        public string NewName;
+        public bool HasDeclinedNames;
+        public DeclinedName DeclinedNames;
+    }
+
+    class PetAbandon : ClientPacket
+    {
+        public PetAbandon(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 PetGUID;
     }
 }
