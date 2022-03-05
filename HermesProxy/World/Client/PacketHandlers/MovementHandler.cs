@@ -313,6 +313,7 @@ namespace HermesProxy.World.Client
                 var data = pkt.ReadBytes((uint)(size - 2));
 
                 var pkt2 = new WorldPacket(opc, data);
+                pkt2.SetReceiveTime(pkt.GetReceivedTime());
                 HandlePacket(pkt2);
             }
         }
@@ -436,9 +437,12 @@ namespace HermesProxy.World.Client
                 }
             }
 
-            if (hasTaxiFlightFlags &&
-                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart &&
-                Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid)
+            bool isTaxiFlight = (hasTaxiFlightFlags &&
+                                (Global.CurrentSessionData.GameState.IsWaitingForTaxiStart ||
+                                 Global.CurrentSessionData.GameState.CurrentPlayerCreateTime == packet.GetReceivedTime()) &&
+                                 Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid);
+
+            if (isTaxiFlight)
             {
                 // Exact sequence of packets from sniff.
                 // Client instantly teleports to destination if anything is left out.
@@ -478,14 +482,15 @@ namespace HermesProxy.World.Client
             MonsterMove monsterMove = new MonsterMove(guid, moveSpline);
             SendPacketToClient(monsterMove);
 
-            if (hasTaxiFlightFlags &&
-                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart &&
-                Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid)
+            if (isTaxiFlight)
             {
-                ActivateTaxiReplyPkt taxi = new();
-                taxi.Reply = ActivateTaxiReply.Ok;
-                SendPacketToClient(taxi);
-                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart = false;
+                if (Global.CurrentSessionData.GameState.IsWaitingForTaxiStart)
+                {
+                    ActivateTaxiReplyPkt taxi = new();
+                    taxi.Reply = ActivateTaxiReply.Ok;
+                    SendPacketToClient(taxi);
+                    Global.CurrentSessionData.GameState.IsWaitingForTaxiStart = false;
+                }
                 Global.CurrentSessionData.GameState.IsInTaxiFlight = true;
             }
         }

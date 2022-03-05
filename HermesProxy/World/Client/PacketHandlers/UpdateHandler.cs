@@ -561,8 +561,12 @@ namespace HermesProxy.World.Client
             else
                 flags = (UpdateFlag)packet.ReadUInt8();
 
-            if (flags.HasAnyFlag(UpdateFlag.Self) && updateData != null)
-                updateData.CreateData.ThisIsYou = true;
+            if (flags.HasAnyFlag(UpdateFlag.Self))
+            {
+                if (updateData != null)
+                    updateData.CreateData.ThisIsYou = true;
+                Global.CurrentSessionData.GameState.CurrentPlayerCreateTime = packet.GetReceivedTime();
+            }
 
             if (flags.HasAnyFlag(UpdateFlag.Living))
             {
@@ -640,12 +644,14 @@ namespace HermesProxy.World.Client
                         monsterMove.TransportGuid = moveInfo.TransportGuid;
                     monsterMove.TransportSeat = moveInfo.TransportSeat;
 
+                    bool hasTaxiFlightFlags;
                     monsterMove.SplineFlags = SplineFlagModern.None;
                     monsterMove.SplineType = SplineTypeModern.None;
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     {
                         SplineFlagWotLK splineFlags = (SplineFlagWotLK)packet.ReadUInt32();
                         monsterMove.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+                        hasTaxiFlightFlags = splineFlags == (SplineFlagWotLK.WalkMode | SplineFlagWotLK.Flying);
 
                         if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalTarget))
                         {
@@ -667,6 +673,7 @@ namespace HermesProxy.World.Client
                     {
                         SplineFlagTBC splineFlags = (SplineFlagTBC)packet.ReadUInt32();
                         monsterMove.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+                        hasTaxiFlightFlags = splineFlags == (SplineFlagTBC.Runmode | SplineFlagTBC.Flying);
 
                         if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalTarget))
                         {
@@ -688,6 +695,7 @@ namespace HermesProxy.World.Client
                     {
                         SplineFlagVanilla splineFlags = (SplineFlagVanilla)packet.ReadUInt32();
                         monsterMove.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+                        hasTaxiFlightFlags = splineFlags == (SplineFlagVanilla.Runmode | SplineFlagVanilla.Flying);
 
                         if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalTarget))
                         {
@@ -706,10 +714,22 @@ namespace HermesProxy.World.Client
                         }
                     }
 
+                    if (hasTaxiFlightFlags && guid.IsPlayer() &&
+                        flags.HasAnyFlag(UpdateFlag.Self))
+                    {
+                        monsterMove.SplineFlags = SplineFlagModern.Flying |
+                                                  SplineFlagModern.CatmullRom |
+                                                  SplineFlagModern.CanSwim |
+                                                  SplineFlagModern.UncompressedPath |
+                                                  SplineFlagModern.Unknown5 |
+                                                  SplineFlagModern.Steering |
+                                                  SplineFlagModern.Unknown10;
+                    }
+
                     monsterMove.SplineTime = packet.ReadUInt32();
                     monsterMove.SplineTimeFull = packet.ReadUInt32();
                     monsterMove.SplineId = packet.ReadUInt32();
-
+                    
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                     {
                         packet.ReadFloat(); // Spline Duration Multiplier

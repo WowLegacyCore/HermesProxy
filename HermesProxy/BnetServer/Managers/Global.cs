@@ -30,6 +30,7 @@ public static class Global
         public uint CurrentTaxiNode;
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
+        public long CurrentPlayerCreateTime;
         public uint LastClientCastId;
         public WowGuid128 LastClientCastGuid;
         public WowGuid128 LastLootTargetGuid;

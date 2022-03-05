@@ -225,6 +225,7 @@ namespace HermesProxy.World
 
             // Cannot use "using" here
             var pkt = new WorldPacket(GetOpcode(), newarr);
+            pkt.SetReceiveTime(GetReceivedTime());
             return pkt;
         }
 
@@ -301,11 +302,11 @@ namespace HermesProxy.World
             return Opcodes.GetUniversalOpcode(GetOpcode(), isModern ? Framework.Settings.ClientBuild : Framework.Settings.ServerBuild);
         }
 
-        public DateTime GetReceivedTime() { return m_receivedTime; }
-        public void SetReceiveTime(DateTime receivedTime) { m_receivedTime = receivedTime; }
+        public long GetReceivedTime() { return m_receivedTime; }
+        public void SetReceiveTime(long receivedTime) { m_receivedTime = receivedTime; }
 
         uint opcode;
-        DateTime m_receivedTime; // only set for a specific set of opcodes, for performance reasons.
+        long m_receivedTime;
     }
 
     public class PacketHeader
