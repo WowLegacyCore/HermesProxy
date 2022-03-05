@@ -102,6 +102,27 @@ namespace HermesProxy.World.Client
             SendPacketToClient(spells);
         }
 
+        [PacketHandler(Opcode.SMSG_PET_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandlePetCastFailed(WorldPacket packet)
+        {
+            uint spellId = packet.ReadUInt32();
+            var status = packet.ReadUInt8();
+            if (status != 2)
+                return;
+
+            SpellPrepare prepare = new();
+            prepare.ClientCastID = WowGuid128.Empty;
+            prepare.ServerCastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spellId, spellId);
+            SendPacketToClient(prepare);
+
+            PetCastFailed spell = new PetCastFailed();
+            spell.CastID = prepare.ServerCastID;
+            spell.SpellID = spellId;
+            uint reason = packet.ReadUInt8();
+            spell.Reason = LegacyVersion.ConvertSpellCastResult(reason);
+            SendPacketToClient(spell);
+        }
+
         [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleCastFailed(WorldPacket packet)
         {

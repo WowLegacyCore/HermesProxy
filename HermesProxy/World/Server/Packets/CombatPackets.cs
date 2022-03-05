@@ -254,4 +254,18 @@ namespace HermesProxy.World.Server.Packets
         public int SheathState;
         public bool Animate = true;
     }
+
+    public class AIReaction : ServerPacket
+    {
+        public AIReaction() : base(Opcode.SMSG_AI_REACTION, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WriteUInt32(Reaction);
+        }
+
+        public WowGuid128 UnitGUID;
+        public uint Reaction;
+    }
 }

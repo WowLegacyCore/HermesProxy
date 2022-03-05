@@ -48,5 +48,13 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(queryText.Guid.To64());
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_QUERY_PET_NAME)]
+        void HandleQueryPetName(QueryPetName queryName)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_PET_NAME);
+            packet.WriteUInt32(queryName.UnitGUID.GetEntry());
+            packet.WriteGuid(queryName.UnitGUID.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

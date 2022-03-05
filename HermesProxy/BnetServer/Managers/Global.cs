@@ -45,6 +45,16 @@ public static class Global
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
 
+        public WowGuid128 GetPetGuidByNumber(uint petNumber)
+        {
+            foreach (var itr in ObjectCacheModern)
+            {
+                if (itr.Key.GetHighType() == HighGuidType.Pet &&
+                    itr.Key.GetEntry() == petNumber)
+                    return itr.Key;
+            }
+            return null;
+        }
         public void StoreOriginalObjectType(WowGuid128 guid, ObjectType type)
         {
             if (OriginalObjectTypes.ContainsKey(guid))

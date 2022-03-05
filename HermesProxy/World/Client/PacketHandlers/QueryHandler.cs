@@ -1,4 +1,5 @@
 ﻿using Framework;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -433,6 +434,44 @@ namespace HermesProxy.World.Client
                     response.BroadcastTextID[i] = GameData.GetBroadcastTextId(maleText, femaleText, language, emoteDelays, emotes);
             }
 
+            SendPacketToClient(response);
+        }
+        [PacketHandler(Opcode.SMSG_QUERY_PET_NAME_RESPONSE)]
+        void HandleQueryPetNameResponse(WorldPacket packet)
+        {
+            uint petNumber = packet.ReadUInt32();
+            WowGuid128 guid = Global.CurrentSessionData.GameState.GetPetGuidByNumber(petNumber);
+            if (guid == null)
+            {
+                Log.Print(LogType.Error, $"Pet name query response for unknown pet {petNumber}!");
+                return;
+            }
+
+            QueryPetNameResponse response = new QueryPetNameResponse();
+            response.UnitGUID = guid;
+            response.Name = packet.ReadCString();
+            if (response.Name.Length == 0)
+            {
+                response.Allow = false;
+                packet.ReadBytes(7); // 0s
+                return;
+            }
+
+            response.Allow = true;
+            response.Timestamp = packet.ReadUInt32();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                var declined = packet.ReadBool();
+
+                const int maxDeclinedNameCases = 5;
+
+                if (declined)
+                {
+                    for (var i = 0; i < maxDeclinedNameCases; i++)
+                        response.DeclinedNames.name[i] = packet.ReadCString();
+                }
+            }
             SendPacketToClient(response);
         }
     }

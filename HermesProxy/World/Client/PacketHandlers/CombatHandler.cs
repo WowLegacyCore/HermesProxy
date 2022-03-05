@@ -137,5 +137,13 @@ namespace HermesProxy.World.Client
             CancelCombat combat = new();
             SendPacketToClient(combat);
         }
+        [PacketHandler(Opcode.SMSG_AI_REACTION)]
+        void HandleAIReaction(WorldPacket packet)
+        {
+            AIReaction reaction = new();
+            reaction.UnitGUID = packet.ReadGuid().To128();
+            reaction.Reaction = packet.ReadUInt32();
+            SendPacketToClient(reaction);
+        }
     }
 }

@@ -25,6 +25,54 @@ using Framework.IO;
 
 namespace HermesProxy.World.Server.Packets
 {
+    class QueryPetName : ClientPacket
+    {
+        public QueryPetName(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            UnitGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 UnitGUID;
+    }
+
+    class QueryPetNameResponse : ServerPacket
+    {
+        public QueryPetNameResponse() : base(Opcode.SMSG_QUERY_PET_NAME_RESPONSE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WriteBit(Allow);
+
+            if (Allow)
+            {
+                _worldPacket.WriteBits(Name.GetByteCount(), 8);
+                _worldPacket.WriteBit(HasDeclined);
+
+                for (byte i = 0; i < PlayerConst.MaxDeclinedNameCases; ++i)
+                    _worldPacket.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
+
+                for (byte i = 0; i < PlayerConst.MaxDeclinedNameCases; ++i)
+                    _worldPacket.WriteString(DeclinedNames.name[i]);
+
+                _worldPacket.WriteInt64(Timestamp);
+                _worldPacket.WriteString(Name);
+            }
+
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 UnitGUID;
+        public bool Allow;
+
+        public bool HasDeclined;
+        public DeclinedName DeclinedNames = new();
+        public long Timestamp;
+        public string Name = "";
+    }
+
     public class QueryPlayerName : ClientPacket
     {
         public QueryPlayerName(WorldPacket packet) : base(packet) { }

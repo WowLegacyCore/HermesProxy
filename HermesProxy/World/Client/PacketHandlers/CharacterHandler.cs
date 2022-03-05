@@ -301,5 +301,22 @@ namespace HermesProxy.World.Client
             LogoutCancelAck logout = new LogoutCancelAck();
             SendPacketToClient(logout);
         }
+
+        [PacketHandler(Opcode.SMSG_LOG_XP_GAIN)]
+        void HandleLogXPGain(WorldPacket packet)
+        {
+            LogXPGain log = new();
+            log.Victim = packet.ReadGuid().To128();
+            log.Original = packet.ReadInt32();
+            log.Reason = (PlayerLogXPReason)packet.ReadUInt8();
+            if (log.Reason == PlayerLogXPReason.Kill)
+            {
+                log.Amount = packet.ReadInt32();
+                log.GroupBonus = packet.ReadFloat();
+            }
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                log.RAFBonus = packet.ReadUInt8();
+            SendPacketToClient(log);
+        }
     }
 }

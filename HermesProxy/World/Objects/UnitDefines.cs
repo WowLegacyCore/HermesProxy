@@ -80,4 +80,12 @@ namespace HermesProxy.World.Objects
         Female = 1,
         None   = 2
     }
+
+    public enum ReactStates
+    {
+        Passive    = 0,
+        Defensive  = 1,
+        Aggressive = 2,
+        Assist     = 3
+    }
 }
