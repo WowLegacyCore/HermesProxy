@@ -29,5 +29,51 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 SendPacketToClient(new TimeSyncRequest());
         }
+
+        [PacketHandler(Opcode.SMSG_SET_FACTION_STANDING)]
+        void HandleSetFactionStanding(WorldPacket packet)
+        {
+            SetFactionStanding standing = new();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089))
+                packet.ReadFloat(); // Reputation loss
+
+            bool showVisual = true;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                showVisual = packet.ReadBool();
+            standing.ShowVisual = showVisual;
+
+            var count = packet.ReadInt32();
+            for (var i = 0; i < count; i++)
+            {
+                FactionStandingData faction = new();
+                faction.Index = packet.ReadInt32();
+                faction.Standing = packet.ReadInt32();
+                standing.Factions.Add(faction);
+            }
+            SendPacketToClient(standing);
+        }
+
+        [PacketHandler(Opcode.SMSG_SET_FORCED_REACTIONS)]
+        void HandleSetForcedReaction(WorldPacket packet)
+        {
+            SetForcedReactions reactions = new();
+            var count = packet.ReadInt32();
+            for (var i = 0; i < count; i++)
+            {
+                ForcedReaction reaction = new();
+                reaction.Faction = packet.ReadInt32();
+                reaction.Reaction = packet.ReadInt32();
+                reactions.Reactions.Add(reaction);
+            }
+            SendPacketToClient(reactions);
+        }
+
+        [PacketHandler(Opcode.SMSG_SET_FACTION_VISIBLE)]
+        void HandleSetFactionVisible(WorldPacket packet)
+        {
+            SetFactionVisible faction = new(true);
+            faction.FactionIndex = packet.ReadUInt32();
+            SendPacketToClient(faction);
+        }
     }
 }

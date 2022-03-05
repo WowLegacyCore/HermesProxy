@@ -109,10 +109,13 @@ namespace HermesProxy.World.Client
             var status = packet.ReadUInt8();
             if (status != 2)
             {
-                SpellPrepare prepare = new();
-                prepare.ClientCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
-                prepare.ServerCastID = WowGuid128.Empty;
-                SendPacketToClient(prepare);
+                if (Global.CurrentSessionData.GameState.LastClientCastGuid != null)
+                {
+                    SpellPrepare prepare = new();
+                    prepare.ClientCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+                    prepare.ServerCastID = WowGuid128.Empty;
+                    SendPacketToClient(prepare);
+                }
                 return;
             }
 
