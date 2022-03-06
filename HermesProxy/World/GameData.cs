@@ -109,12 +109,12 @@ namespace HermesProxy.World
         // Loading code
         public static void LoadEverything()
         {
-            Log.Print(LogType.Storage, "[GameData] Loading database...");
+            Log.Print(LogType.Storage, "Loading data files...");
             LoadBroadcastTexts();
             LoadItemTemplates();
             LoadSpellVisuals();
             LoadLearnSpells();
-            Log.Print(LogType.Storage, "[GameData] Finished loading database.");
+            Log.Print(LogType.Storage, "Finished loading data.");
         }
         public static void LoadBroadcastTexts()
         {

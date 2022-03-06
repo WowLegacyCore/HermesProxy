@@ -415,4 +415,18 @@ namespace HermesProxy.World.Server.Packets
         public uint AnimKitID;
         public byte StandState;
     }
+
+    public class ExplorationExperience : ServerPacket
+    {
+        public ExplorationExperience() : base(Opcode.SMSG_EXPLORATION_EXPERIENCE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(AreaID);
+            _worldPacket.WriteUInt32(Experience);
+        }
+
+        public uint AreaID;
+        public uint Experience;
+    }
 }

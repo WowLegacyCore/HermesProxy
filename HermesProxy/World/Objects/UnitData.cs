@@ -134,5 +134,8 @@ namespace HermesProxy.World.Objects
         public int? LooksLikeCreatureID;
         public int? LookAtControllerID;
         public WowGuid128 GuildGUID;
+
+        // Dynamic Fields
+        public WowGuid128 ChannelObject;
     }
 }

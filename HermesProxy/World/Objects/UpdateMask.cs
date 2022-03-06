@@ -75,8 +75,8 @@ namespace HermesProxy.World.Objects
         public override void AppendToPacket(ByteBuffer data)
         {
             data.WriteUInt16((ushort)DynamicFieldChangeType);
-            if (ValueCount != 0)
-                data.WriteInt32(ValueCount);
+            if (ValueCount != null)
+                data.WriteInt32((int)ValueCount);
 
             var maskArray = new byte[_blockCount << 2];
 
@@ -85,7 +85,7 @@ namespace HermesProxy.World.Objects
         }
 
         public uint DynamicFieldChangeType;
-        public int ValueCount;
+        public int? ValueCount;
     }
 
     public enum DynamicFieldChangeType

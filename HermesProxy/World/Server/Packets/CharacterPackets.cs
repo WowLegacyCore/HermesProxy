@@ -483,7 +483,55 @@ namespace HermesProxy.World.Server.Packets
         public int Original;
         public PlayerLogXPReason Reason;
         public int Amount;
-        public float GroupBonus;
+        public float GroupBonus = 1;
         public byte RAFBonus; // 1 - 300% of normal XP; 2 - 150% of normal XP
+    }
+
+    public class RequestPlayedTime : ClientPacket
+    {
+        public RequestPlayedTime(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TriggerScriptEvent = _worldPacket.HasBit();
+        }
+
+        public bool TriggerScriptEvent;
+    }
+
+    public class PlayedTime : ServerPacket
+    {
+        public PlayedTime() : base(Opcode.SMSG_PLAYED_TIME, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(TotalTime);
+            _worldPacket.WriteUInt32(LevelTime);
+            _worldPacket.WriteBit(TriggerEvent);
+            _worldPacket.FlushBits();
+        }
+
+        public uint TotalTime;
+        public uint LevelTime;
+        public bool TriggerEvent;
+    }
+
+    class TogglePvP : ClientPacket
+    {
+        public TogglePvP(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class SetPvP : ClientPacket
+    {
+        public SetPvP(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Enable = _worldPacket.HasBit();
+        }
+
+        public bool Enable;
     }
 }

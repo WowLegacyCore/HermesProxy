@@ -1,6 +1,7 @@
 ﻿using Framework.Collections;
 using Framework.IO;
 using Framework.Logging;
+using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -249,6 +250,94 @@ namespace HermesProxy.World.Objects
                 m_updateValues[(int)index].UnsignedValue &= ~((uint)oldFlag << (offset * 8));
                 m_updateMask.SetBit((int)index);
             }
+        }
+    }
+
+    public class DynamicUpdateFieldsArray
+    {
+        public DynamicUpdateFieldsArray(uint size, UpdateTypeModern updateType)
+        {
+            ValuesCount = size;
+            m_updateType = updateType;
+            m_updateMask = new UpdateMask(size);
+            m_fieldBuffer = new();
+        }
+        uint ValuesCount;
+        UpdateTypeModern m_updateType;
+        UpdateMask m_updateMask;
+        ByteBuffer m_fieldBuffer;
+
+        public void WriteToPacket(ByteBuffer buffer)
+        {
+            m_updateMask.AppendToPacket(buffer);
+            buffer.WriteBytes(m_fieldBuffer);
+        }
+
+        public void SetUpdateField(int index, uint[] values, DynamicFieldChangeType changeType)
+        {
+            var valueBuffer = new ByteBuffer();
+            m_updateMask.SetBit(index);
+
+            var arrayMask = new DynamicUpdateMask((uint)values.Length);
+            arrayMask.EncodeDynamicFieldChangeType(changeType, m_updateType);
+            if (m_updateType == UpdateTypeModern.Values && changeType == DynamicFieldChangeType.ValueAndSizeChanged)
+            {
+                arrayMask.ValueCount = values.Length;
+                arrayMask.SetCount(values.Length);
+            } 
+
+            for (var v = 0; v < values.Length; ++v)
+            {
+                arrayMask.SetBit(v);
+                valueBuffer.WriteUInt32(values[v]);
+            }
+
+            arrayMask.AppendToPacket(m_fieldBuffer);
+            m_fieldBuffer.WriteBytes(valueBuffer);
+        }
+
+        public void SetUpdateField<T>(object index, T value, DynamicFieldChangeType changeType) where T : new()
+        {
+            if (value is int intValue)
+            {
+                uint[] values = new uint[1];
+                UpdateValues union = new();
+                union.SignedValue = intValue;
+                values[0] = union.UnsignedValue;
+                SetUpdateField((int)index, values, changeType);
+            }
+            else if (value is uint uintValue)
+            {
+                uint[] values = new uint[1];
+                values[0] = uintValue;
+                SetUpdateField((int)index, values, changeType);
+            }
+            else if (value is float floatValue)
+            {
+                uint[] values = new uint[1];
+                UpdateValues union = new();
+                union.FloatValue = floatValue;
+                values[0] = union.UnsignedValue;
+                SetUpdateField((int)index, values, changeType);
+            }
+            else if (value is ulong ulongValue)
+            {
+                uint[] values = new uint[2];
+                values[0] = MathFunctions.Pair64_LoPart(ulongValue);
+                values[1] = MathFunctions.Pair64_HiPart(ulongValue);
+                SetUpdateField((int)index, values, changeType);
+            }
+            else if (value is WowGuid128 guid)
+            {
+                uint[] values = new uint[4];
+                values[0] = MathFunctions.Pair64_LoPart(guid.GetLowValue());
+                values[1] = MathFunctions.Pair64_HiPart(guid.GetLowValue());
+                values[2] = MathFunctions.Pair64_LoPart(guid.GetHighValue());
+                values[3] = MathFunctions.Pair64_HiPart(guid.GetHighValue());
+                SetUpdateField((int)index, values, changeType);
+            }
+            else
+                throw new Exception($"Unhandled type {typeof(T).ToString()} in SetUpdateField!");
         }
     }
 }

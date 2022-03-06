@@ -29,48 +29,59 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             m_objectType = ObjectTypeConverter.ConvertToBCC(objectType);
             m_objectTypeMask = Enums.ObjectTypeMask.Object;
 
-            uint size;
+            uint fieldsSize;
+            uint dynamicFieldsSize;
             switch (m_objectType)
             {
                 case Enums.ObjectTypeBCC.Item:
-                    size = (uint)ItemField.ITEM_END;
+                    fieldsSize = (uint)ItemField.ITEM_END;
+                    dynamicFieldsSize = (uint)ItemDynamicField.ITEM_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Item;
                     break;
                 case Enums.ObjectTypeBCC.Container:
-                    size = (uint)ContainerField.CONTAINER_END;
+                    fieldsSize = (uint)ContainerField.CONTAINER_END;
+                    dynamicFieldsSize = (uint)ContainerDynamicField.CONTAINER_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Item;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Container;
                     break;
                 case Enums.ObjectTypeBCC.Unit:
-                    size = (uint)UnitField.UNIT_END;
+                    fieldsSize = (uint)UnitField.UNIT_END;
+                    dynamicFieldsSize = (uint)UnitDynamicField.UNIT_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Unit;
                     break;
                 case Enums.ObjectTypeBCC.Player:
-                    size = (uint)PlayerField.PLAYER_END;
+                    fieldsSize = (uint)PlayerField.PLAYER_END;
+                    dynamicFieldsSize = (uint)PlayerDynamicField.PLAYER_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Unit;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Player;
                     break;
                 case Enums.ObjectTypeBCC.ActivePlayer:
-                    size = (uint)ActivePlayerField.ACTIVE_PLAYER_END;
+                    fieldsSize = (uint)ActivePlayerField.ACTIVE_PLAYER_END;
+                    dynamicFieldsSize = (uint)ActivePlayerDynamicField.ACTIVE_PLAYER_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Unit;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Player;
                     m_objectTypeMask |= Enums.ObjectTypeMask.ActivePlayer;
                     break;
                 case Enums.ObjectTypeBCC.GameObject:
-                    size = (uint)GameObjectField.GAMEOBJECT_END;
+                    fieldsSize = (uint)GameObjectField.GAMEOBJECT_END;
+                    dynamicFieldsSize = (uint)GameObjectDynamicField.GAMEOBJECT_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.GameObject;
                     break;
                 case Enums.ObjectTypeBCC.DynamicObject:
-                    size = (uint)DynamicObjectField.DYNAMICOBJECT_END;
+                    fieldsSize = (uint)DynamicObjectField.DYNAMICOBJECT_END;
+                    dynamicFieldsSize = (uint)DynamicObjectDynamicField.DYNAMICOBJECT_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.DynamicObject;
                     break;
                 case Enums.ObjectTypeBCC.Corpse:
-                    size = (uint)CorpseField.CORPSE_END;
+                    fieldsSize = (uint)CorpseField.CORPSE_END;
+                    dynamicFieldsSize = (uint)CorpseDynamicField.CORPSE_DYNAMIC_END;
                     m_objectTypeMask |= Enums.ObjectTypeMask.Corpse;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unsupported object type!");
             }
+
+            m_dynamicFields = new(dynamicFieldsSize, m_updateData.Type);
 
             if (m_updateData.CreateData == null &&
                 Global.CurrentSessionData.GameState.ObjectCacheModern.TryGetValue(updateData.Guid, out m_fields) &&
@@ -80,7 +91,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             }
             else
             {
-                m_fields = new UpdateFieldsArray(size);
+                m_fields = new UpdateFieldsArray(fieldsSize);
                 Global.CurrentSessionData.GameState.ObjectCacheModern.Remove(updateData.Guid);
                 Global.CurrentSessionData.GameState.ObjectCacheModern.Add(updateData.Guid, m_fields);
             }
@@ -89,6 +100,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
         protected bool m_alreadyWritten;
         protected ObjectUpdate m_updateData;
         protected UpdateFieldsArray m_fields;
+        protected DynamicUpdateFieldsArray m_dynamicFields;
         protected Enums.ObjectTypeBCC m_objectType;
         protected Enums.ObjectTypeMask m_objectTypeMask;
         protected CreateObjectBits m_createBits;
@@ -131,9 +143,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
 
         public void BuildDynamicValuesUpdate(WorldPacket packet)
         {
-            uint valueCount = (uint)PlayerDynamicField.PLAYER_DYNAMIC_END;
-            var updateMask = new UpdateMask(valueCount);
-            updateMask.AppendToPacket(packet);
+            m_dynamicFields.WriteToPacket(packet);
         }
 
         public void BuildMovementUpdate(WorldPacket data)
@@ -1059,6 +1069,10 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                     m_fields.SetUpdateField<int>(UnitField.UNIT_FIELD_LOOK_AT_CONTROLLER_ID, (int)unitData.LookAtControllerID);
                 if (unitData.GuildGUID != null)
                     m_fields.SetUpdateField<WowGuid128>(UnitField.UNIT_FIELD_GUILD_GUID, unitData.GuildGUID);
+
+                // Dynamic Fields
+                if (unitData.ChannelObject != null)
+                    m_dynamicFields.SetUpdateField<WowGuid128>(UnitDynamicField.UNIT_DYNAMIC_FIELD_CHANNEL_OBJECTS, unitData.ChannelObject, DynamicFieldChangeType.ValueAndSizeChanged);
             }
 
             PlayerData playerData = m_updateData.PlayerData;

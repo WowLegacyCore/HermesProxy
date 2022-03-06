@@ -1,4 +1,5 @@
 ﻿using Framework.Constants;
+using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -82,6 +83,30 @@ namespace HermesProxy.World.Server
         void HandleLogoutCancel(LogoutRequest logoutRequest)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_LOGOUT_CANCEL);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_REQUEST_PLAYED_TIME)]
+        void HandleRequestPlayedTime(RequestPlayedTime played)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_REQUEST_PLAYED_TIME);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteBool(played.TriggerScriptEvent);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_TOGGLE_PVP)]
+        void HandleTogglePvP(TogglePvP pvp)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_TOGGLE_PVP);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SET_PVP)]
+        void HandleTogglePvP(SetPvP pvp)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_TOGGLE_PVP);
+            packet.WriteBool(pvp.Enable);
             SendPacketToServer(packet);
         }
     }

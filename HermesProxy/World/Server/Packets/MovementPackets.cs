@@ -492,4 +492,16 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 Guid;
         public bool HasControl;
     }
+
+    public class SetActiveMover : ClientPacket
+    {
+        public SetActiveMover(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MoverGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 MoverGUID;
+    }
 }

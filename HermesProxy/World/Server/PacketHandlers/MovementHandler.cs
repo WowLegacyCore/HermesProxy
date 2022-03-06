@@ -148,5 +148,13 @@ namespace HermesProxy.World.Server
             movementAck.Ack.MoveInfo.WriteMovementInfoLegacy(packet);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_SET_ACTIVE_MOVER)]
+        void HandleMoveTeleportAck(SetActiveMover move)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTIVE_MOVER);
+            packet.WriteGuid(move.MoverGUID.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

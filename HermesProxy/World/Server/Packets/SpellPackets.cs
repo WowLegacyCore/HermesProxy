@@ -914,4 +914,335 @@ namespace HermesProxy.World.Server.Packets
         public uint TalentID;
         public ushort Rank;
     }
+
+    public class SpellCooldownPkt : ServerPacket
+    {
+        public SpellCooldownPkt() : base(Opcode.SMSG_SPELL_COOLDOWN, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Caster);
+            _worldPacket.WriteUInt8(Flags);
+            _worldPacket.WriteInt32(SpellCooldowns.Count);
+            foreach (var cd in SpellCooldowns)
+                cd.Write(_worldPacket);
+        }
+
+        public List<SpellCooldownStruct> SpellCooldowns = new();
+        public WowGuid128 Caster;
+        public byte Flags;
+    }
+
+    public class SpellCooldownStruct
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(SpellID);
+            data.WriteUInt32(ForcedCooldown);
+            data.WriteFloat(ModRate);
+        }
+
+        public uint SpellID;
+        public uint ForcedCooldown;
+        public float ModRate = 1.0f;
+    }
+
+    public class CooldownEvent : ServerPacket
+    {
+        public CooldownEvent() : base(Opcode.SMSG_COOLDOWN_EVENT, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteBit(IsPet);
+            _worldPacket.FlushBits();
+        }
+
+        public bool IsPet;
+        public uint SpellID;
+    }
+
+    public class ClearCooldown : ServerPacket
+    {
+        public ClearCooldown() : base(Opcode.SMSG_CLEAR_COOLDOWN, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteBit(ClearOnHold);
+            _worldPacket.WriteBit(IsPet);
+            _worldPacket.FlushBits();
+        }
+
+        public bool IsPet;
+        public uint SpellID;
+        public bool ClearOnHold;
+    }
+
+    public class CooldownCheat : ServerPacket
+    {
+        public CooldownCheat() : base(Opcode.SMSG_COOLDOWN_CHEAT, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+        }
+
+        public WowGuid128 Guid;
+    }
+
+    class SpellNonMeleeDamageLog : ServerPacket
+    {
+        public SpellNonMeleeDamageLog() : base(Opcode.SMSG_SPELL_NON_MELEE_DAMAGE_LOG, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TargetGUID);
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WritePackedGuid128(CastID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+            _worldPacket.WriteInt32(Damage);
+            _worldPacket.WriteInt32(OriginalDamage);
+            _worldPacket.WriteInt32(Overkill);
+            _worldPacket.WriteUInt8(SchoolMask);
+            _worldPacket.WriteInt32(Absorbed);
+            _worldPacket.WriteInt32(Resisted);
+            _worldPacket.WriteInt32(ShieldBlock);
+
+            _worldPacket.WriteBit(Periodic);
+            _worldPacket.WriteBits((uint)Flags, 7);
+            _worldPacket.WriteBit(false); // Debug info
+
+            _worldPacket.WriteBit(LogData != null);
+            _worldPacket.WriteBit(ContentTuning != null);
+            _worldPacket.FlushBits();
+
+            if (LogData != null)
+                LogData.Write(_worldPacket);
+
+            if (ContentTuning != null)
+                ContentTuning.Write(_worldPacket);
+        }
+
+        public WowGuid128 TargetGUID;
+        public WowGuid128 CasterGUID;
+        public WowGuid128 CastID;
+        public uint SpellID;
+        public uint SpellXSpellVisualID;
+        public int Damage;
+        public int OriginalDamage;
+        public int Overkill = -1;
+        public byte SchoolMask;
+        public int ShieldBlock;
+        public int Resisted;
+        public bool Periodic;
+        public int Absorbed;
+        public SpellHitType Flags;
+        public SpellCastLogData LogData;
+        public ContentTuningParams ContentTuning;
+    }
+
+    class SpellHealLog : ServerPacket
+    {
+        public SpellHealLog() : base(Opcode.SMSG_SPELL_HEAL_LOG, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TargetGUID);
+            _worldPacket.WritePackedGuid128(CasterGUID);
+
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(HealAmount);
+            _worldPacket.WriteInt32(OriginalHealAmount);
+            _worldPacket.WriteUInt32(OverHeal);
+            _worldPacket.WriteUInt32(Absorbed);
+
+            _worldPacket.WriteBit(Crit);
+
+            _worldPacket.WriteBit(CritRollMade.HasValue);
+            _worldPacket.WriteBit(CritRollNeeded.HasValue);
+            _worldPacket.WriteBit(LogData != null);
+            _worldPacket.WriteBit(ContentTuning != null);
+            _worldPacket.FlushBits();
+
+            if (LogData != null)
+                LogData.Write(_worldPacket);
+
+            if (CritRollMade.HasValue)
+                _worldPacket.WriteFloat(CritRollMade.Value);
+
+            if (CritRollNeeded.HasValue)
+                _worldPacket.WriteFloat(CritRollNeeded.Value);
+
+            if (ContentTuning != null)
+                ContentTuning.Write(_worldPacket);
+        }
+
+        public WowGuid128 CasterGUID;
+        public WowGuid128 TargetGUID;
+        public uint SpellID;
+        public int HealAmount;
+        public int OriginalHealAmount;
+        public uint OverHeal;
+        public uint Absorbed;
+        public bool Crit;
+        public float? CritRollMade;
+        public float? CritRollNeeded;
+        public SpellCastLogData LogData;
+        public ContentTuningParams ContentTuning;
+    }
+
+    public class SpellDelayed : ServerPacket
+    {
+        public SpellDelayed() : base(Opcode.SMSG_SPELL_DELAYED, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteInt32(Delay);
+        }
+
+        public WowGuid128 CasterGUID;
+        public int Delay;
+    }
+
+    public class SpellChannelStart : ServerPacket
+    {
+        public SpellChannelStart() : base(Opcode.SMSG_SPELL_CHANNEL_START, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellXSpellVisualID);
+            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteBit(InterruptImmunities != null);
+            _worldPacket.WriteBit(HealPrediction != null);
+            _worldPacket.FlushBits();
+
+            if (InterruptImmunities != null)
+                InterruptImmunities.Write(_worldPacket);
+
+            if (HealPrediction != null)
+                HealPrediction.Write(_worldPacket);
+        }
+
+        public WowGuid128 CasterGUID;
+        public uint SpellID;
+        public uint SpellXSpellVisualID;
+        public uint Duration;
+        public SpellChannelStartInterruptImmunities InterruptImmunities;
+        public SpellTargetedHealPrediction HealPrediction;
+    }
+
+    public class SpellChannelStartInterruptImmunities
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(SchoolImmunities);
+            data.WriteInt32(Immunities);
+        }
+
+        public int SchoolImmunities;
+        public int Immunities;
+    }
+
+    public class SpellTargetedHealPrediction
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(TargetGUID);
+            Predict.Write(data);
+        }
+
+        public WowGuid128 TargetGUID;
+        public SpellHealPrediction Predict;
+    }
+
+    public class SpellChannelUpdate : ServerPacket
+    {
+        public SpellChannelUpdate() : base(Opcode.SMSG_SPELL_CHANNEL_UPDATE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteInt32(TimeRemaining);
+        }
+
+        public WowGuid128 CasterGUID;
+        public int TimeRemaining;
+    }
+
+    class SpellPeriodicAuraLog : ServerPacket
+    {
+        public SpellPeriodicAuraLog() : base(Opcode.SMSG_SPELL_PERIODIC_AURA_LOG, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TargetGUID);
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(Effects.Count);
+            _worldPacket.WriteBit(LogData != null);
+            _worldPacket.FlushBits();
+
+            foreach (var effect in Effects)
+                effect.Write(_worldPacket);
+
+            if (LogData != null)
+                LogData.Write(_worldPacket);
+        }
+
+        public WowGuid128 TargetGUID;
+        public WowGuid128 CasterGUID;
+        public uint SpellID;
+        public SpellCastLogData LogData;
+        public List<SpellLogEffect> Effects = new();
+
+        public class PeriodicalAuraLogEffectDebugInfo
+        {
+            public float CritRollMade { get; set; }
+            public float CritRollNeeded { get; set; }
+        }
+
+        public class SpellLogEffect
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt32(Effect);
+                data.WriteInt32(Amount);
+                data.WriteInt32(OriginalDamage);
+                data.WriteUInt32(OverHealOrKill);
+                data.WriteUInt32(SchoolMaskOrPower);
+                data.WriteUInt32(AbsorbedOrAmplitude);
+                data.WriteUInt32(Resisted);
+
+                data.WriteBit(Crit);
+                data.WriteBit(DebugInfo != null);
+                data.WriteBit(ContentTuning != null);
+                data.FlushBits();
+
+                if (ContentTuning != null)
+                    ContentTuning.Write(data);
+
+                if (DebugInfo != null)
+                {
+                    data.WriteFloat(DebugInfo.CritRollMade);
+                    data.WriteFloat(DebugInfo.CritRollNeeded);
+                }
+            }
+
+            public uint Effect;
+            public int Amount;
+            public int OriginalDamage;
+            public uint OverHealOrKill;
+            public uint SchoolMaskOrPower;
+            public uint AbsorbedOrAmplitude;
+            public uint Resisted;
+            public bool Crit;
+            public PeriodicalAuraLogEffectDebugInfo DebugInfo;
+            public ContentTuningParams ContentTuning;
+        }
+    }
 }

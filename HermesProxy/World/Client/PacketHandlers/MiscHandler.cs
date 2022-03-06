@@ -162,5 +162,13 @@ namespace HermesProxy.World.Client
             state.StandState = packet.ReadUInt8();
             SendPacketToClient(state);
         }
+        [PacketHandler(Opcode.SMSG_EXPLORATION_EXPERIENCE)]
+        void HandleExplorationExperience(WorldPacket packet)
+        {
+            ExplorationExperience explore = new();
+            explore.AreaID = packet.ReadUInt32();
+            explore.Experience = packet.ReadUInt32();
+            SendPacketToClient(explore);
+        }
     }
 }

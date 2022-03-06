@@ -318,5 +318,18 @@ namespace HermesProxy.World.Client
                 log.RAFBonus = packet.ReadUInt8();
             SendPacketToClient(log);
         }
+
+        [PacketHandler(Opcode.SMSG_PLAYED_TIME)]
+        void HandlePlayedTime(WorldPacket packet)
+        {
+            PlayedTime played = new();
+            played.TotalTime = packet.ReadUInt32();
+            played.LevelTime = packet.ReadUInt32();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                played.TriggerEvent = packet.ReadBool();
+            else
+                played.TriggerEvent = true;
+            SendPacketToClient(played);
+        }
     }
 }

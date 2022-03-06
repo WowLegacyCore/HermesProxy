@@ -126,17 +126,17 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleCastFailed(WorldPacket packet)
         {
+            if (Global.CurrentSessionData.GameState.LastClientCastGuid == null)
+                return;
+
             int spellId = packet.ReadInt32();
             var status = packet.ReadUInt8();
             if (status != 2)
             {
-                if (Global.CurrentSessionData.GameState.LastClientCastGuid != null)
-                {
-                    SpellPrepare prepare = new();
-                    prepare.ClientCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
-                    prepare.ServerCastID = WowGuid128.Empty;
-                    SendPacketToClient(prepare);
-                }
+                SpellPrepare prepare = new();
+                prepare.ClientCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+                prepare.ServerCastID = WowGuid128.Empty;
+                SendPacketToClient(prepare);
                 return;
             }
 
@@ -413,6 +413,265 @@ namespace HermesProxy.World.Client
             else
                 cancel.Guid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
             SendPacketToClient(cancel);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_COOLDOWN)]
+        void HandleSpellCooldown(WorldPacket packet)
+        {
+            SpellCooldownPkt cooldown = new();
+            cooldown.Caster = packet.ReadGuid().To128();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                cooldown.Flags = packet.ReadUInt8();
+            while (packet.CanRead())
+            {
+                SpellCooldownStruct cd = new();
+                cd.SpellID = packet.ReadUInt32();
+                cd.ForcedCooldown = packet.ReadUInt32();
+            }
+            SendPacketToClient(cooldown);
+        }
+
+        [PacketHandler(Opcode.SMSG_COOLDOWN_EVENT)]
+        void HandleCooldownEvent(WorldPacket packet)
+        {
+            CooldownEvent cooldown = new();
+            cooldown.SpellID = packet.ReadUInt32();
+            WowGuid guid = packet.ReadGuid();
+            cooldown.IsPet = guid.GetHighType() == HighGuidType.Pet;
+            SendPacketToClient(cooldown);
+        }
+
+        [PacketHandler(Opcode.SMSG_CLEAR_COOLDOWN)]
+        void HandleClearCooldown(WorldPacket packet)
+        {
+            ClearCooldown cooldown = new();
+            cooldown.SpellID = packet.ReadUInt32();
+            WowGuid guid = packet.ReadGuid();
+            cooldown.IsPet = guid.GetHighType() == HighGuidType.Pet;
+            SendPacketToClient(cooldown);
+        }
+
+        [PacketHandler(Opcode.SMSG_COOLDOWN_CHEAT)]
+        void HandleCooldownCheat(WorldPacket packet)
+        {
+            CooldownCheat cooldown = new();
+            cooldown.Guid = packet.ReadGuid().To128();
+            SendPacketToClient(cooldown);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_NON_MELEE_DAMAGE_LOG)]
+        void HandleSpellNonMeleeDamageLog(WorldPacket packet)
+        {
+            SpellNonMeleeDamageLog spell = new();
+            spell.TargetGUID = packet.ReadPackedGuid().To128();
+            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.SpellID = packet.ReadUInt32();
+            spell.SpellXSpellVisualID = GameData.GetSpellVisual(spell.SpellID);
+
+            if (Global.CurrentSessionData.GameState.LastClientCastId == spell.SpellID &&
+                Global.CurrentSessionData.GameState.LastClientCastGuid != null)
+                spell.CastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+            else
+                spell.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spell.SpellID, spell.SpellID + spell.CasterGUID.GetLow());
+
+            spell.Damage = packet.ReadInt32();
+            spell.OriginalDamage = spell.Damage;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_3_9183))
+                spell.Overkill = packet.ReadInt32();
+            else
+                spell.Overkill = -1;
+
+            byte school = packet.ReadUInt8();
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                school = (byte)(1u << school);
+
+            spell.SchoolMask = school;
+            spell.Absorbed = packet.ReadInt32();
+            spell.Resisted = packet.ReadInt32();
+            spell.Periodic = packet.ReadBool();
+            packet.ReadUInt8(); // unused
+            spell.ShieldBlock = packet.ReadInt32();
+            spell.Flags = (SpellHitType)packet.ReadUInt32();
+
+            bool debugOutput = packet.ReadBool();
+            if (debugOutput)
+            {
+                if (!spell.Flags.HasAnyFlag(SpellHitType.Split))
+                {
+                    if (spell.Flags.HasAnyFlag(SpellHitType.CritDebug))
+                    {
+                        packet.ReadFloat(); // roll
+                        packet.ReadFloat(); // needed
+                    }
+
+                    if (spell.Flags.HasAnyFlag(SpellHitType.HitDebug))
+                    {
+                        packet.ReadFloat(); // roll
+                        packet.ReadFloat(); // needed
+                    }
+
+                    if (spell.Flags.HasAnyFlag(SpellHitType.AttackTableDebug))
+                    {
+                        packet.ReadFloat(); // miss chance
+                        packet.ReadFloat(); // dodge chance
+                        packet.ReadFloat(); // parry chance
+                        packet.ReadFloat(); // block chance
+                        packet.ReadFloat(); // glance chance
+                        packet.ReadFloat(); // crush chance
+                    }
+                }
+            }
+
+            SendPacketToClient(spell);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_HEAL_LOG)]
+        void HandleSpellHealLog(WorldPacket packet)
+        {
+            SpellHealLog spell = new();
+            spell.TargetGUID = packet.ReadPackedGuid().To128();
+            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.SpellID = packet.ReadUInt32();
+            spell.HealAmount = packet.ReadInt32();
+            spell.OriginalHealAmount = spell.HealAmount;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_3_9183))
+                spell.OverHeal = packet.ReadUInt32();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                spell.Absorbed = packet.ReadUInt32();
+
+            spell.Crit = packet.ReadBool();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                bool debugOutput = packet.ReadBool();
+                if (debugOutput)
+                {
+                    spell.CritRollMade = packet.ReadFloat();
+                    spell.CritRollNeeded = packet.ReadFloat();
+                }
+            }
+
+            SendPacketToClient(spell);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_PERIODIC_AURA_LOG)]
+        void HandleSpellPeriodicAuraLog(WorldPacket packet)
+        {
+            SpellPeriodicAuraLog spell = new();
+            spell.TargetGUID = packet.ReadPackedGuid().To128();
+            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.SpellID = packet.ReadUInt32();
+
+            var count = packet.ReadInt32();
+            for (var i = 0; i < count; i++)
+            {
+                var aura = (AuraType)packet.ReadUInt32();
+                switch (aura)
+                {
+                    case AuraType.PeriodicDamage:
+                    case AuraType.PeriodicDamagePercent:
+                    {
+                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                        effect.Effect = (uint)aura;
+                        effect.Amount = packet.ReadInt32();
+                        effect.OriginalDamage = effect.Amount;
+
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                            effect.OverHealOrKill = packet.ReadUInt32();
+
+                        uint school = packet.ReadUInt32();
+                        if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                            school = (1u << (byte)school);
+
+                        effect.SchoolMaskOrPower = school;
+                        effect.AbsorbedOrAmplitude = packet.ReadUInt32();
+                        effect.Resisted = packet.ReadUInt32();
+
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
+                            effect.Crit = packet.ReadBool();
+
+                        spell.Effects.Add(effect);
+                        break;
+                    }
+                    case AuraType.PeriodicHeal:
+                    case AuraType.ObsModHealth:
+                    {
+                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                        effect.Effect = (uint)aura;
+                        effect.Amount = packet.ReadInt32();
+                        effect.OriginalDamage = effect.Amount;
+
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                            effect.OverHealOrKill = packet.ReadUInt32();
+
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
+                            // no idea when this was added exactly
+                            effect.AbsorbedOrAmplitude = packet.ReadUInt32();
+
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
+                            effect.Crit = packet.ReadBool();
+
+                        spell.Effects.Add(effect);
+                        break;
+                    }
+                    case AuraType.ObsModPower:
+                    case AuraType.PeriodicEnergize:
+                    {
+                        packet.ReadInt32(); // Power type
+                        packet.ReadUInt32(); // Amount
+                        break;
+                    }
+                    case AuraType.PeriodicManaLeech:
+                    {
+                        packet.ReadInt32(); // Power type
+                        packet.ReadUInt32(); // Amount
+                        packet.ReadFloat(); // Gain multiplier
+                        break;
+                    }
+                }
+            }
+            SendPacketToClient(spell);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_DELAYED)]
+        void HandleSpellDelayed(WorldPacket packet)
+        {
+            SpellDelayed delay = new();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                delay.CasterGUID = packet.ReadPackedGuid().To128();
+            else
+                delay.CasterGUID = packet.ReadGuid().To128();
+            delay.Delay = packet.ReadInt32();
+            SendPacketToClient(delay);
+        }
+
+        [PacketHandler(Opcode.MSG_CHANNEL_START)]
+        void HandleSpellChannelStart(WorldPacket packet)
+        {
+            SpellChannelStart channel = new();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                channel.CasterGUID = packet.ReadPackedGuid().To128();
+            else
+                channel.CasterGUID = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            channel.SpellID = packet.ReadUInt32();
+            channel.SpellXSpellVisualID = GameData.GetSpellVisual(channel.SpellID);
+            channel.Duration = packet.ReadUInt32();
+            SendPacketToClient(channel);
+        }
+
+        [PacketHandler(Opcode.MSG_CHANNEL_UPDATE)]
+        void HandleSpellChannelUpdate(WorldPacket packet)
+        {
+            SpellChannelUpdate channel = new();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                channel.CasterGUID = packet.ReadPackedGuid().To128();
+            else
+                channel.CasterGUID = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            channel.TimeRemaining = packet.ReadInt32();
+            SendPacketToClient(channel);
         }
     }
 }

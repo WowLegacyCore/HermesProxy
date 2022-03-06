@@ -1024,6 +1024,11 @@ namespace HermesProxy.World.Client
                 {
                     updateData.UnitData.Target = GetGuidValue(updates, UnitField.UNIT_FIELD_TARGET).To128();
                 }
+                int UNIT_FIELD_CHANNEL_OBJECT = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_CHANNEL_OBJECT);
+                if (UNIT_FIELD_CHANNEL_OBJECT >= 0 && updateMaskArray[UNIT_FIELD_CHANNEL_OBJECT])
+                {
+                    updateData.UnitData.ChannelObject = GetGuidValue(updates, UnitField.UNIT_FIELD_CHANNEL_OBJECT).To128();
+                }
                 int UNIT_FIELD_HEALTH = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_HEALTH);
                 if (UNIT_FIELD_HEALTH >= 0 && updateMaskArray[UNIT_FIELD_HEALTH])
                 {
@@ -1161,7 +1166,13 @@ namespace HermesProxy.World.Client
 
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) &&
                         updateData.UnitData.Flags.HasAnyFlag(UnitFlags.Pvp))
-                        updateData.UnitData.PvpFlags |= (byte)PvPFlags.PvP;
+                    {
+                        if (updateData.UnitData.PvpFlags == null)
+                            updateData.UnitData.PvpFlags = (byte)PvPFlags.PvP;
+                        else
+                            updateData.UnitData.PvpFlags |= (byte)PvPFlags.PvP;
+                    }
+                        
                 }
                 int UNIT_FIELD_AURASTATE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURASTATE);
                 if (UNIT_FIELD_AURASTATE >= 0 && updateMaskArray[UNIT_FIELD_AURASTATE])
