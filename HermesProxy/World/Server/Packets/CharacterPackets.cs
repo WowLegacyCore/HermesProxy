@@ -534,4 +534,32 @@ namespace HermesProxy.World.Server.Packets
 
         public bool Enable;
     }
+
+    public class SetActionButton : ClientPacket
+    {
+        public SetActionButton(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Action = _worldPacket.ReadUInt16();
+            Type = _worldPacket.ReadUInt16();
+            Index = _worldPacket.ReadUInt8();
+        }
+
+        public ushort Action;
+        public ushort Type;
+        public byte Index;
+    }
+
+    public class SetActionBarToggles : ClientPacket
+    {
+        public SetActionBarToggles(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Mask = _worldPacket.ReadUInt8();
+        }
+
+        public byte Mask;
+    }
 }

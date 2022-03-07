@@ -109,5 +109,23 @@ namespace HermesProxy.World.Server
             packet.WriteBool(pvp.Enable);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_SET_ACTION_BUTTON)]
+        void HandleSetActionButton(SetActionButton button)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTION_BUTTON);
+            packet.WriteUInt8(button.Index);
+            packet.WriteUInt16(button.Action);
+            packet.WriteUInt16(button.Type);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SET_ACTION_BAR_TOGGLES)]
+        void HandleSetActionBarToggles(SetActionBarToggles bars)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTION_BAR_TOGGLES);
+            packet.WriteUInt8(bars.Mask);
+            SendPacketToServer(packet);
+        }
     }
 }

@@ -17,28 +17,6 @@
 
 namespace Framework.Constants
 {
-    public enum AccountDataTypes
-    {
-        GlobalConfigCache = 0x00,
-        PerCharacterConfigCache = 0x01,
-        GlobalBindingsCache = 0x02,
-        PerCharacterBindingsCache = 0x03,
-        GlobalMacrosCache = 0x04,
-        PerCharacterMacrosCache = 0x05,
-        PerCharacterLayoutCache = 0x06,
-        PerCharacterChatCache = 0x07,
-        GlobalTtsCache = 8,
-        PerCharacterTtsCache = 9,
-        GlobalFlaggedCache = 10,
-        PerCharacterFlaggedCache = 11,
-
-        Max = 12,
-
-        AllAccountDataCacheMask = 0xFFF,
-        GlobalCacheMask = 0x515,
-        PerCharacterCacheMask = 0xAEA
-    }
-
     public enum TutorialAction
     {
         Update = 0,

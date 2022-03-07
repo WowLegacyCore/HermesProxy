@@ -22,16 +22,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ACCOUNT_DATA_TIMES)]
         void HandleAccountDataTimes(WorldPacket packet)
         {
-            AccountDataTimes accountData = new AccountDataTimes();
-            accountData.PlayerGuid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
-            accountData.ServerTime = Time.UnixTime;
-
-            int count = (Settings.GetClientExpansionVersion() == 1) ? 10 : 8;
-            accountData.AccountTimes = new long[count];
-            for (int i = 0; i < count; i++)
-                accountData.AccountTimes[i] = 0;
-
-            SendPacketToClient(accountData);
+            Global.CurrentSessionData.RealmSocket.SendAccountDataTimes();
 
             // These packets don't exist in Vanilla and we must send them here.
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))

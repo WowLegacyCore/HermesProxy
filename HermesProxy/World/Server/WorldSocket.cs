@@ -65,6 +65,7 @@ namespace HermesProxy.World.Server
 
         ZLib.z_stream _compressionStream;
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
+        AccountDataManager _accountDataMgr;
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -681,6 +682,7 @@ namespace HermesProxy.World.Server
                 SendFeatureSystemStatusGlueScreen();
                 SendClientCacheVersion(0);
                 SendBnetConnectionState(1);
+                _accountDataMgr = new AccountDataManager(Global.CurrentSessionData.Username, RealmManager.Instance.GetRealm(_realmId).Name);
                 Global.CurrentSessionData.RealmSocket = this;
             }
             else
@@ -990,6 +992,25 @@ namespace HermesProxy.World.Server
             }
 
             SendPacket(new Pong(ping.Serial));
+        }
+
+        public void SendAccountDataTimes()
+        {
+            System.Diagnostics.Trace.Assert(_connectType == ConnectionType.Realm);
+
+            WowGuid128 guid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            _accountDataMgr.LoadAllData(guid);
+
+            AccountDataTimes accountData = new AccountDataTimes();
+            accountData.PlayerGuid = guid;
+            accountData.ServerTime = Time.UnixTime;
+
+            int count = ModernVersion.GetAccountDataCount();
+            accountData.AccountTimes = new long[count];
+            for (int i = 0; i < count; i++)
+                accountData.AccountTimes[i] = _accountDataMgr.Data[i] != null ? _accountDataMgr.Data[i].Timestamp : 0;
+
+            SendPacket(accountData);
         }
 
         public void InitializePacketHandlers()

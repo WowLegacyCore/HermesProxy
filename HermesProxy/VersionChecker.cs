@@ -357,6 +357,12 @@ namespace HermesProxy
             return Build < build;
         }
 
+        public static int GetAccountDataCount()
+        {
+            int count = (Settings.GetClientExpansionVersion() == 1) ? 10 : 8;
+            return count;
+        }
+
         public static byte AdjustInventorySlot(byte slot)
         {
             byte offset = 0;
