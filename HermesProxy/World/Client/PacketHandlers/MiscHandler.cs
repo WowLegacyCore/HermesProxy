@@ -164,6 +164,14 @@ namespace HermesProxy.World.Client
             SendPacketToClient(explore);
         }
 
+        [PacketHandler(Opcode.SMSG_PLAY_MUSIC)]
+        void HandlePlayMusic(WorldPacket packet)
+        {
+            PlayMusic music = new();
+            music.SoundEntryID = packet.ReadUInt32();
+            SendPacketToClient(music);
+        }
+
         [PacketHandler(Opcode.SMSG_PLAY_SOUND)]
         void HandlePlaySound(WorldPacket packet)
         {
@@ -181,6 +189,14 @@ namespace HermesProxy.World.Client
             sound.SourceObjectGUID = packet.ReadGuid().To128();
             sound.TargetObjectGUID = sound.SourceObjectGUID;
             SendPacketToClient(sound);
+        }
+
+        [PacketHandler(Opcode.SMSG_TRIGGER_CINEMATIC)]
+        void HandleTriggerCinematic(WorldPacket packet)
+        {
+            TriggerCinematic cinematic = new();
+            cinematic.CinematicID = packet.ReadUInt32();
+            SendPacketToClient(cinematic);
         }
     }
 }

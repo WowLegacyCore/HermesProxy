@@ -430,6 +430,18 @@ namespace HermesProxy.World.Server.Packets
         public uint Experience;
     }
 
+    public class PlayMusic : ServerPacket
+    {
+        public PlayMusic() : base(Opcode.SMSG_PLAY_MUSIC) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SoundEntryID);
+        }
+
+        public uint SoundEntryID;
+    }
+
     class PlaySound : ServerPacket
     {
         public PlaySound() : base(Opcode.SMSG_PLAY_SOUND) { }
@@ -462,5 +474,24 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 TargetObjectGUID;
         public Vector3 Position = new();
         public int BroadcastTextID;
+    }
+
+    public class TriggerCinematic : ServerPacket
+    {
+        public TriggerCinematic() : base(Opcode.SMSG_TRIGGER_CINEMATIC) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(CinematicID);
+        }
+
+        public uint CinematicID;
+    }
+
+    class ClientCinematicPkt : ClientPacket
+    {
+        public ClientCinematicPkt(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
     }
 }

@@ -711,5 +711,14 @@ namespace HermesProxy.World.Client
             damage.Resisted = packet.ReadInt32();
             SendPacketToClient(damage);
         }
+
+        [PacketHandler(Opcode.SMSG_PLAY_SPELL_VISUAL)]
+        void HandlePlaySpellVisualKit(WorldPacket packet)
+        {
+            PlaySpellVisualKit spell = new();
+            spell.Unit = packet.ReadGuid().To128();
+            spell.KitRecID = packet.ReadUInt32();
+            SendPacketToClient(spell);
+        }
     }
 }

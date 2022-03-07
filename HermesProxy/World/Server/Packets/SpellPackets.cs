@@ -1305,4 +1305,25 @@ namespace HermesProxy.World.Server.Packets
         public int Absorbed;
         public SpellCastLogData LogData;
     }
+
+    class PlaySpellVisualKit : ServerPacket
+    {
+        public PlaySpellVisualKit() : base(Opcode.SMSG_PLAY_SPELL_VISUAL_KIT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Unit);
+            _worldPacket.WriteUInt32(KitRecID);
+            _worldPacket.WriteUInt32(KitType);
+            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteBit(MountedVisual);
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 Unit;
+        public uint KitRecID;
+        public uint KitType;
+        public uint Duration;
+        public bool MountedVisual = false;
+    }
 }

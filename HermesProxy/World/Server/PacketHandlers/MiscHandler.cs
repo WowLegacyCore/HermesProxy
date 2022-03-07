@@ -69,5 +69,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(state.StandState);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_OPENING_CINEMATIC)]
+        [PacketHandler(Opcode.CMSG_NEXT_CINEMATIC_CAMERA)]
+        [PacketHandler(Opcode.CMSG_COMPLETE_CINEMATIC)]
+        void HandleCinematicPacket(ClientCinematicPkt cinematic)
+        {
+            WorldPacket packet = new WorldPacket(cinematic.GetUniversalOpcode());
+            SendPacketToServer(packet);
+        }
     }
 }
