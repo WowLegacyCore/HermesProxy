@@ -429,4 +429,38 @@ namespace HermesProxy.World.Server.Packets
         public uint AreaID;
         public uint Experience;
     }
+
+    class PlaySound : ServerPacket
+    {
+        public PlaySound() : base(Opcode.SMSG_PLAY_SOUND) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SoundEntryID);
+            _worldPacket.WritePackedGuid128(SourceObjectGuid);
+        }
+
+        public uint SoundEntryID;
+        public WowGuid128 SourceObjectGuid;
+    }
+
+    class PlayObjectSound : ServerPacket
+    {
+        public PlayObjectSound() : base(Opcode.SMSG_PLAY_OBJECT_SOUND) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(SoundEntryID);
+            _worldPacket.WritePackedGuid128(SourceObjectGUID);
+            _worldPacket.WritePackedGuid128(TargetObjectGUID);
+            _worldPacket.WriteVector3(Position);
+            _worldPacket.WriteInt32(BroadcastTextID);
+        }
+
+        public uint SoundEntryID;
+        public WowGuid128 SourceObjectGUID;
+        public WowGuid128 TargetObjectGUID;
+        public Vector3 Position = new();
+        public int BroadcastTextID;
+    }
 }

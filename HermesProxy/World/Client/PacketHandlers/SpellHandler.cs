@@ -673,5 +673,43 @@ namespace HermesProxy.World.Client
             channel.TimeRemaining = packet.ReadInt32();
             SendPacketToClient(channel);
         }
+
+        [PacketHandler(Opcode.SMSG_SPELL_DAMAGE_SHIELD)]
+        void HandleSpellDamageShield(WorldPacket packet)
+        {
+            SpellDamageShield spell = new();
+            spell.VictimGUID = packet.ReadGuid().To128();
+            spell.CasterGUID = packet.ReadGuid().To128();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                spell.SpellID = packet.ReadUInt32();
+            else
+                spell.SpellID = 7294; // Retribution Aura
+
+            spell.Damage = packet.ReadInt32();
+            spell.OriginalDamage = spell.Damage;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                spell.OverKill = packet.ReadUInt32();
+
+            uint school = packet.ReadUInt32();
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                school = (1u << (byte)school);
+
+            spell.SchoolMask = school;
+            SendPacketToClient(spell);
+        }
+
+        [PacketHandler(Opcode.SMSG_ENVIRONMENTAL_DAMAGE_LOG)]
+        void HandleEnvironmentalDamageLog(WorldPacket packet)
+        {
+            EnvironmentalDamageLog damage = new();
+            damage.Victim = packet.ReadGuid().To128();
+            damage.Type = (EnvironmentalDamage)packet.ReadUInt8();
+            damage.Amount = packet.ReadInt32();
+            damage.Absorbed = packet.ReadInt32();
+            damage.Resisted = packet.ReadInt32();
+            SendPacketToClient(damage);
+        }
     }
 }

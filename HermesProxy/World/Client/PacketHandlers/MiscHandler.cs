@@ -146,6 +146,7 @@ namespace HermesProxy.World.Client
             corpse.Transport = WowGuid128.Empty;
             SendPacketToClient(corpse);
         }
+
         [PacketHandler(Opcode.SMSG_STAND_STATE_UPDATE)]
         void HandleStandStateUpdate(WorldPacket packet)
         {
@@ -153,6 +154,7 @@ namespace HermesProxy.World.Client
             state.StandState = packet.ReadUInt8();
             SendPacketToClient(state);
         }
+
         [PacketHandler(Opcode.SMSG_EXPLORATION_EXPERIENCE)]
         void HandleExplorationExperience(WorldPacket packet)
         {
@@ -160,6 +162,25 @@ namespace HermesProxy.World.Client
             explore.AreaID = packet.ReadUInt32();
             explore.Experience = packet.ReadUInt32();
             SendPacketToClient(explore);
+        }
+
+        [PacketHandler(Opcode.SMSG_PLAY_SOUND)]
+        void HandlePlaySound(WorldPacket packet)
+        {
+            PlaySound sound = new();
+            sound.SoundEntryID = packet.ReadUInt32();
+            sound.SourceObjectGuid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            SendPacketToClient(sound);
+        }
+
+        [PacketHandler(Opcode.SMSG_PLAY_OBJECT_SOUND)]
+        void HandlePlayObjectSound(WorldPacket packet)
+        {
+            PlayObjectSound sound = new();
+            sound.SoundEntryID = packet.ReadUInt32();
+            sound.SourceObjectGUID = packet.ReadGuid().To128();
+            sound.TargetObjectGUID = sound.SourceObjectGUID;
+            SendPacketToClient(sound);
         }
     }
 }
