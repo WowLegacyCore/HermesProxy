@@ -145,5 +145,13 @@ namespace HermesProxy.World.Client
             reaction.Reaction = packet.ReadUInt32();
             SendPacketToClient(reaction);
         }
+        [PacketHandler(Opcode.SMSG_PARTY_KILL_LOG)]
+        void HandlePartyKillLog(WorldPacket packet)
+        {
+            PartyKillLog log = new();
+            log.Player = packet.ReadGuid().To128();
+            log.Victim = packet.ReadGuid().To128();
+            SendPacketToClient(log);
+        }
     }
 }

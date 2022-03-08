@@ -77,5 +77,13 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(cinematic.GetUniversalOpcode());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_FAR_SIGHT)]
+        void HandleFarSight(FarSight sight)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_FAR_SIGHT);
+            packet.WriteBool(sight.Enable);
+            SendPacketToServer(packet);
+        }
     }
 }

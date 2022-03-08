@@ -504,4 +504,20 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 MoverGUID;
     }
+    class MoveSplineDone : ClientPacket
+    {
+        public MoveSplineDone(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+            MoveInfo = new();
+            MoveInfo.ReadMovementInfoModern(_worldPacket);
+            SplineID = _worldPacket.ReadInt32();
+        }
+
+        public WowGuid128 Guid;
+        public MovementInfo MoveInfo;
+        public int SplineID;
+    }
 }

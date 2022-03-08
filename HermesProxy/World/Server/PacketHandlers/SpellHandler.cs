@@ -128,6 +128,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(cast.SpellID);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_CANCEL_CHANNELLING)]
+        void HandleCancelChannelling(CancelChannelling cast)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CHANNELLING);
+            packet.WriteInt32(cast.SpellID);
+            SendPacketToServer(packet);
+        }
         [PacketHandler(Opcode.CMSG_CANCEL_AURA)]
         void HandleCancelAura(CancelAura aura)
         {

@@ -150,10 +150,23 @@ namespace HermesProxy.World.Server
         }
 
         [PacketHandler(Opcode.CMSG_SET_ACTIVE_MOVER)]
-        void HandleMoveTeleportAck(SetActiveMover move)
+        void HandleMoveSetActiveMover(SetActiveMover move)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTIVE_MOVER);
             packet.WriteGuid(move.MoverGUID.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_MOVE_SPLINE_DONE)]
+        void HandleMoveSplineDone(MoveSplineDone movement)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_SPLINE_DONE);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                packet.WritePackedGuid(movement.Guid.To64());
+            movement.MoveInfo.WriteMovementInfoLegacy(packet);
+            packet.WriteInt32(movement.SplineID);
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WriteFloat(0); // Spline Type
             SendPacketToServer(packet);
         }
     }

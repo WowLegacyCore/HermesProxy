@@ -494,4 +494,16 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Read() { }
     }
+
+    class FarSight : ClientPacket
+    {
+        public FarSight(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Enable = _worldPacket.HasBit();
+        }
+
+        public bool Enable;
+    }
 }

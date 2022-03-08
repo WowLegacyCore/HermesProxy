@@ -513,6 +513,21 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 CastID;
     }
 
+    class CancelChannelling : ClientPacket
+    {
+        public CancelChannelling(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellID = _worldPacket.ReadInt32();
+            Reason = _worldPacket.ReadInt32();
+        }
+
+        public int SpellID;
+        public int Reason;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
+                                 // does not match SpellCastResult enum
+    }
+
     class SpellPrepare : ServerPacket
     {
         public SpellPrepare() : base(Opcode.SMSG_SPELL_PREPARE) { }
