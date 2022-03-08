@@ -23,18 +23,18 @@ namespace HermesProxy.World.Server
 {
     public class WorldSocketManager : SocketManager<WorldSocket>
     {
-        public override bool StartNetwork(string bindIp, int port, int threadCount)
+        public override bool StartNetwork(string bindIp, int realmPort, int threadCount = 1)
         {
             _tcpNoDelay = true;
 
             // -1 means use default
             _socketSendBufferSize = -1;
 
-            if (!base.StartNetwork(bindIp, port, threadCount))
+            if (!base.StartNetwork(bindIp, realmPort, threadCount))
                 return false;
 
             _instanceAcceptor = new AsyncAcceptor();
-            if (!_instanceAcceptor.Start(bindIp, 8086))
+            if (!_instanceAcceptor.Start(bindIp, Framework.Settings.InstancePort))
             {
                 Log.Print(LogType.Error, "StartNetwork failed to start instance AsyncAcceptor");
                 return false;

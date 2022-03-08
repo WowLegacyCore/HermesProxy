@@ -45,7 +45,7 @@ namespace HermesProxy
             string bindIp = "0.0.0.0";
 
             var restSocketServer = new SocketManager<RestSession>();
-            int restPort = 8081;
+            int restPort = Framework.Settings.RestPort;
             if (restPort < 0 || restPort > 0xFFFF)
             {
                 Log.Print(LogType.Network, $"Specified login service port ({restPort}) out of allowed range (1-65535), defaulting to 8081");
@@ -67,7 +67,7 @@ namespace HermesProxy
 
             var sessionSocketServer = new SocketManager<Session>();
             // Start the listening port (acceptor) for auth connections
-            int bnPort = 1119;
+            int bnPort = Framework.Settings.BNetPort;
             if (bnPort < 0 || bnPort > 0xFFFF)
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({bnPort}) out of allowed range (1-65535)");
@@ -77,27 +77,36 @@ namespace HermesProxy
             Log.Print(LogType.Server, $"BNet Listening on {bindIp}:{bnPort}...");
             if (!sessionSocketServer.StartNetwork(bindIp, bnPort))
             {
-                Log.Print(LogType.Network, "Failed to start BnetServer Network");
+                Log.Print(LogType.Network, "Failed to start BNet socket manager");
                 ExitNow();
             }
 
             // Launch the worldserver listener socket
-            int worldPort = 8085;
-            string worldListener = "0.0.0.0";
-
-            int networkThreads = 1;
-            if (networkThreads <= 0)
+            int worldPort = Framework.Settings.RealmPort;
+            if (worldPort < 0 || worldPort > 0xFFFF)
             {
-                Log.Print(LogType.Server, "Network.Threads must be greater than 0");
+                Log.Print(LogType.Server, $"Specified Realm port ({worldPort}) out of allowed range (1-65535)");
                 ExitNow();
-                return;
             }
 
-            Log.Print(LogType.Server, $"World Listening on {worldListener}:{worldPort}...");
-            var WorldSocketMgr = new WorldSocketManager();
-            if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
+            int instancePort = Framework.Settings.InstancePort;
+            if (instancePort < 0 || instancePort > 0xFFFF)
             {
-                Log.Print(LogType.Network, "Failed to start Realm Network");
+                Log.Print(LogType.Server, $"Specified Instance port ({instancePort}) out of allowed range (1-65535)");
+                ExitNow();
+            }
+
+            if (worldPort == instancePort)
+            {
+                Log.Print(LogType.Server, $"Realm and Instance sockets cannot use the same port");
+                ExitNow();
+            }
+
+            Log.Print(LogType.Server, $"World Listening on {bindIp}:{worldPort}...");
+            var worldSocketMgr = new WorldSocketManager();
+            if (!worldSocketMgr.StartNetwork(bindIp, worldPort))
+            {
+                Log.Print(LogType.Network, "Failed to start World socket manager");
                 ExitNow();
             }
         }

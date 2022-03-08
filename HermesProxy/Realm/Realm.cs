@@ -33,7 +33,7 @@ public class Realm : IEquatable<Realm>
     public IPEndPoint GetAddressForClient(IPAddress clientAddr)
     {
         IPAddress realmIp = IPAddress.Parse("127.0.0.1");
-        IPEndPoint endpoint = new IPEndPoint(realmIp, 8085);
+        IPEndPoint endpoint = new IPEndPoint(realmIp, Framework.Settings.RealmPort);
 
         // Return external IP
         return endpoint;

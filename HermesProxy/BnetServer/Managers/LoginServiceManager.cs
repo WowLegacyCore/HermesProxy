@@ -32,7 +32,7 @@ namespace BNetServer
 
         public void Initialize()
         {
-            int port = 8081;
+            int port = Framework.Settings.RestPort;
             if (port < 0 || port > 0xFFFF)
             {
                 Log.Print(LogType.Error, $"Specified login service port ({port}) out of allowed range (1-65535), defaulting to 8081");

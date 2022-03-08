@@ -622,7 +622,7 @@ namespace HermesProxy.World.Server
             ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;
             connectTo.Serial = serial;
-            connectTo.Payload.Port = (ushort)8086;
+            connectTo.Payload.Port = (ushort)Framework.Settings.InstancePort;
             connectTo.Con = (byte)ConnectionType.Instance;
 
             if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)

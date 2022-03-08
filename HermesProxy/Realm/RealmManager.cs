@@ -36,7 +36,7 @@ public class RealmManager : Singleton<RealmManager>
     {
         LoadBuildInfo();
 
-        AddRealm(1, "Sandbox", "127.0.0.1", 8085, RealmType.PVP, RealmFlags.Recommended, 1, 1);
+        AddRealm(1, "Sandbox", "127.0.0.1", (ushort)Framework.Settings.RealmPort, RealmType.PVP, RealmFlags.Recommended, 1, 1);
     }
 
     void LoadBuildInfo()
@@ -286,7 +286,7 @@ public class RealmManager : Singleton<RealmManager>
 
             var address = new Address();
             address.Ip = realm.GetAddressForClient(clientAddress).Address.ToString();
-            address.Port = 8085;
+            address.Port = Framework.Settings.RealmPort;
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);
 
