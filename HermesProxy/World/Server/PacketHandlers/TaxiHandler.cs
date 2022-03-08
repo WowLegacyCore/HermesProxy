@@ -33,10 +33,10 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_ACTIVATE_TAXI);
             packet.WriteGuid(taxi.FlightMaster.To64());
-            packet.WriteUInt32(Global.CurrentSessionData.GameState.CurrentTaxiNode);
+            packet.WriteUInt32(GetSession().GameState.CurrentTaxiNode);
             packet.WriteUInt32(taxi.Node);
             SendPacketToServer(packet);
-            Global.CurrentSessionData.GameState.IsWaitingForTaxiStart = true;
+            GetSession().GameState.IsWaitingForTaxiStart = true;
         }
     }
 }

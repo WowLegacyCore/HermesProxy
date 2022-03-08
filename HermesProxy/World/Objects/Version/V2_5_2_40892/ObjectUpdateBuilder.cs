@@ -12,10 +12,11 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
 {
     public class ObjectUpdateBuilder
     {
-        public ObjectUpdateBuilder(ObjectUpdate updateData)
+        public ObjectUpdateBuilder(ObjectUpdate updateData, GameSessionData gameState)
         {
             m_alreadyWritten = false;
             m_updateData = updateData;
+            m_gameState = gameState;
 
             Enums.ObjectType objectType = updateData.Guid.GetObjectType();
             if (updateData.CreateData != null)
@@ -24,7 +25,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                 if (updateData.CreateData.ThisIsYou)
                     objectType = Enums.ObjectType.ActivePlayer;
             }
-            if (objectType == Enums.ObjectType.Player && Global.CurrentSessionData.GameState.CurrentPlayerGuid == updateData.Guid)
+            if (objectType == Enums.ObjectType.Player && m_gameState.CurrentPlayerGuid == updateData.Guid)
                 objectType = Enums.ObjectType.ActivePlayer;
             m_objectType = ObjectTypeConverter.ConvertToBCC(objectType);
             m_objectTypeMask = Enums.ObjectTypeMask.Object;
@@ -84,7 +85,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             m_dynamicFields = new(dynamicFieldsSize, m_updateData.Type);
 
             if (m_updateData.CreateData == null &&
-                Global.CurrentSessionData.GameState.ObjectCacheModern.TryGetValue(updateData.Guid, out m_fields) &&
+                m_gameState.ObjectCacheModern.TryGetValue(updateData.Guid, out m_fields) &&
                 m_fields != null)
             {
                 m_fields.m_updateMask.Clear();
@@ -92,8 +93,8 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             else
             {
                 m_fields = new UpdateFieldsArray(fieldsSize);
-                Global.CurrentSessionData.GameState.ObjectCacheModern.Remove(updateData.Guid);
-                Global.CurrentSessionData.GameState.ObjectCacheModern.Add(updateData.Guid, m_fields);
+                m_gameState.ObjectCacheModern.Remove(updateData.Guid);
+                m_gameState.ObjectCacheModern.Add(updateData.Guid, m_fields);
             }
         }
 
@@ -104,6 +105,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
         protected Enums.ObjectTypeBCC m_objectType;
         protected Enums.ObjectTypeMask m_objectTypeMask;
         protected CreateObjectBits m_createBits;
+        protected GameSessionData m_gameState;
 
         public void WriteToPacket(WorldPacket packet)
         {
@@ -541,7 +543,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
             {
                 bool hasSceneInstanceIDs = false;
                 bool hasRuneState = false;
-                bool hasActionButtons = Global.CurrentSessionData.GameState.ActionButtons.Count != 0;
+                bool hasActionButtons = m_gameState.ActionButtons.Count != 0;
 
                 data.WriteBit(hasSceneInstanceIDs);
                 data.WriteBit(hasRuneState);
@@ -572,7 +574,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                 if (hasActionButtons)
                 {
                     for (int i = 0; i < 132; i++)
-                        data.WriteInt32(Global.CurrentSessionData.GameState.ActionButtons[i]);
+                        data.WriteInt32(m_gameState.ActionButtons[i]);
                 }
             }
 

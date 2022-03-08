@@ -48,24 +48,24 @@ namespace HermesProxy.World.Server
         void HandleLoadScreen(LoadingScreenNotify loadingScreenNotify)
         {
             if (loadingScreenNotify.MapID >= 0)
-                Global.CurrentSessionData.GameState.CurrentMapId = loadingScreenNotify.MapID;
+                GetSession().GameState.CurrentMapId = loadingScreenNotify.MapID;
         }
 
         [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAME)]
         void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
-            if (Global.CurrentSessionData.GameState.CurrentPlayerGuid == null)
-                Global.CurrentSessionData.GameState.CurrentPlayerGuid = queryPlayerName.Player;
+            if (GetSession().GameState.CurrentPlayerGuid == null)
+                GetSession().GameState.CurrentPlayerGuid = queryPlayerName.Player;
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
             packet.WriteGuid(queryPlayerName.Player.To64());
-            SendPacketToServer(packet, Global.CurrentSessionData.GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+            SendPacketToServer(packet, GetSession().GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
         }
 
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
         void HandlePlayerLogin(PlayerLogin playerLogin)
         {
-            Global.CurrentSessionData.GameState.IsFirstEnterWorld = true;
+            GetSession().GameState.IsFirstEnterWorld = true;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());
             SendPacketToServer(packet);

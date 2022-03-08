@@ -440,7 +440,7 @@ namespace HermesProxy.World.Client
         void HandleQueryPetNameResponse(WorldPacket packet)
         {
             uint petNumber = packet.ReadUInt32();
-            WowGuid128 guid = Global.CurrentSessionData.GameState.GetPetGuidByNumber(petNumber);
+            WowGuid128 guid = GetSession().GameState.GetPetGuidByNumber(petNumber);
             if (guid == null)
             {
                 Log.Print(LogType.Error, $"Pet name query response for unknown pet {petNumber}!");

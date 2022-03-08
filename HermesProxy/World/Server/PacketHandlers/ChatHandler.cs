@@ -41,36 +41,36 @@ namespace HermesProxy.World.Server
         void HandleChatMessageAFK(ChatMessageAFK afk)
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Afk, 0, afk.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Afk, 0, afk.Text, "", "");
             else
-                Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Afk, 0, afk.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Afk, 0, afk.Text, "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_DND)]
         void HandleChatMessageDND(ChatMessageDND dnd)
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, dnd.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, dnd.Text, "", "");
             else
-                Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, dnd.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, dnd.Text, "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_CHANNEL)]
         void HandleChatMessageChannel(ChatMessageChannel channel)
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, channel.Text, channel.Target, "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, channel.Text, channel.Target, "");
             else
-                Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, channel.Text, channel.Target, "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, channel.Text, channel.Target, "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_WHISPER)]
         void HandleChatMessageWhisper(ChatMessageWhisper whisper)
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
             else
-                Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_GUILD)]
@@ -119,12 +119,12 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 ChatMessageTypeWotLK chatMsg = (ChatMessageTypeWotLK)Enum.Parse(typeof(ChatMessageTypeWotLK), type.ToString());
-                Global.CurrentSessionData.WorldClient.SendMessageChatWotLK(chatMsg, packet.Language, packet.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(chatMsg, packet.Language, packet.Text, "", "");
             }
             else
             {
                 ChatMessageTypeVanilla chatMsg = (ChatMessageTypeVanilla)Enum.Parse(typeof(ChatMessageTypeVanilla), type.ToString());
-                Global.CurrentSessionData.WorldClient.SendMessageChatVanilla(chatMsg, packet.Language, packet.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(chatMsg, packet.Language, packet.Text, "", "");
             }
         }
 

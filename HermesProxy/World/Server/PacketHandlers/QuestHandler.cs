@@ -58,7 +58,7 @@ namespace HermesProxy.World.Server
                 if (UNIT_NPC_FLAGS < 0)
                     return;
 
-                foreach (var obj in Global.CurrentSessionData.GameState.ObjectCacheModern)
+                foreach (var obj in GetSession().GameState.ObjectCacheModern)
                 {
                     if (obj.Key.GetObjectType() != ObjectType.Unit)
                         continue;

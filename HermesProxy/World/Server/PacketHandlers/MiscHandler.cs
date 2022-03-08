@@ -28,7 +28,7 @@ namespace HermesProxy.World.Server
             if (at.Entered == false)
                 return;
 
-            Global.CurrentSessionData.GameState.LastEnteredAreaTrigger = at.AreaTriggerID;
+            GetSession().GameState.LastEnteredAreaTrigger = at.AreaTriggerID;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_AREA_TRIGGER);
             packet.WriteUInt32(at.AreaTriggerID);
             SendPacketToServer(packet);

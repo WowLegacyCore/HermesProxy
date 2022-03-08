@@ -76,8 +76,8 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAST_SPELL)]
         void HandleCastSpell(CastSpell cast)
         {
-            Global.CurrentSessionData.GameState.LastClientCastId = cast.Cast.SpellID;
-            Global.CurrentSessionData.GameState.LastClientCastGuid = cast.Cast.CastID;
+            GetSession().GameState.LastClientCastId = cast.Cast.SpellID;
+            GetSession().GameState.LastClientCastGuid = cast.Cast.CastID;
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CAST_SPELL);
@@ -102,8 +102,8 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_USE_ITEM)]
         void HandleUseItem(UseItem use)
         {
-            Global.CurrentSessionData.GameState.LastClientCastId = use.Cast.SpellID;
-            Global.CurrentSessionData.GameState.LastClientCastGuid = use.Cast.CastID;
+            GetSession().GameState.LastClientCastId = use.Cast.SpellID;
+            GetSession().GameState.LastClientCastGuid = use.Cast.CastID;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_USE_ITEM);
             byte containerSlot = use.PackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.PackSlot) : use.PackSlot;
             byte slot = use.PackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.Slot) : use.Slot;

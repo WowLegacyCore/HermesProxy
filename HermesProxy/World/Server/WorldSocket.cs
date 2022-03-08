@@ -66,6 +66,7 @@ namespace HermesProxy.World.Server
         ZLib.z_stream _compressionStream;
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         AccountDataManager _accountDataMgr;
+        GlobalSessionData _globalSession;
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -88,6 +89,11 @@ namespace HermesProxy.World.Server
             _compressionStream = null;
 
             base.Dispose();
+        }
+
+        public GlobalSessionData GetSession()
+        {
+            return _globalSession;
         }
 
         public override void Accept()
@@ -255,8 +261,8 @@ namespace HermesProxy.World.Server
                     Ping ping = new(packet);
                     ping.Read();
                     if (_connectType == ConnectionType.Realm &&
-                        Global.CurrentSessionData.WorldClient != null)
-                        Global.CurrentSessionData.WorldClient.SendPing(ping.Serial, ping.Latency);
+                        GetSession().WorldClient != null)
+                        GetSession().WorldClient.SendPing(ping.Serial, ping.Latency);
                     HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
@@ -275,12 +281,12 @@ namespace HermesProxy.World.Server
                     uint reason = packet.ReadUInt32();
                     Log.Print(LogType.Server, $"Client disconnected with reason {reason}.");
                     if (_connectType == ConnectionType.Realm &&
-                        Global.CurrentSessionData.WorldClient != null)
-                        Global.CurrentSessionData.WorldClient.Disconnect();
-                    if (Global.CurrentSessionData.ModernSniff != null)
+                        GetSession().WorldClient != null)
+                        GetSession().WorldClient.Disconnect();
+                    if (GetSession().ModernSniff != null)
                     {
-                        Global.CurrentSessionData.ModernSniff.CloseFile();
-                        Global.CurrentSessionData.ModernSniff = null;
+                        GetSession().ModernSniff.CloseFile();
+                        GetSession().ModernSniff = null;
                     }
                     break;
                 case Opcode.CMSG_ENABLE_NAGLE:
@@ -314,7 +320,7 @@ namespace HermesProxy.World.Server
 
         private void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
         {
-            Global.CurrentSessionData.WorldClient.SendPacketToServer(packet, delayUntilOpcode);
+            GetSession().WorldClient.SendPacketToServer(packet, delayUntilOpcode);
         }
 
         public PacketHandler GetHandler(Opcode opcode)
@@ -331,7 +337,8 @@ namespace HermesProxy.World.Server
             }
 
             packet.WritePacketData();
-            packet.LogPacket();
+            if (GetSession() != null)
+                packet.LogPacket(ref GetSession().ModernSniff);
 
             var data = packet.GetData();
             Opcode universalOpcode = packet.GetUniversalOpcode();
@@ -426,37 +433,36 @@ namespace HermesProxy.World.Server
 
         void HandleAuthSession(AuthSession authSession)
         {
+            _globalSession = Global.SessionsByName[authSession.RealmJoinTicket];
             HandleAuthSessionCallback(authSession);
         }
 
         void HandleAuthSessionCallback(AuthSession authSession)
         {
-            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(Global.CurrentSessionData.Build);
+            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(GetSession().Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
-                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.CurrentSessionData.Build} ({GetRemoteIpAddress()}).");
+                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {GetSession().Build} ({GetRemoteIpAddress()}).");
                 CloseSocket();
-                Global.CurrentSessionData.OnDisconnect();
+                GetSession().OnDisconnect();
                 return;
             }
-
-            AccountInfo account = new();
 
             // For hook purposes, we get Remoteaddress at this point.
             var address = GetRemoteIpAddress();
 
             Sha256 digestKeyHash = new();
-            digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
-            if (account.game.OS == "Wn64")
+            digestKeyHash.Process(GetSession().SessionKey, GetSession().SessionKey.Length);
+            if (GetSession().OS == "Wn64")
                 digestKeyHash.Finish(buildInfo.Win64AuthSeed);
-            else if (account.game.OS == "Mc64")
+            else if (GetSession().OS == "Mc64")
                 digestKeyHash.Finish(buildInfo.Mac64AuthSeed);
             else
             {
-                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Unknown OS for account: {account.game.Id} ('{authSession.RealmJoinTicket}') address: {address}");
+                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Unknown OS for account: {GetSession().GameAccountInfo.Id} ('{authSession.RealmJoinTicket}') address: {address}");
                 CloseSocket();
-                Global.CurrentSessionData.OnDisconnect();
+                GetSession().OnDisconnect();
                 return;
             }
 
@@ -468,14 +474,14 @@ namespace HermesProxy.World.Server
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
             {
-                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Authentication failed for account: {account.game.Id} ('{authSession.RealmJoinTicket}') address: {address}");
+                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Authentication failed for account: {GetSession().GameAccountInfo.Id} ('{authSession.RealmJoinTicket}') address: {address}");
                 CloseSocket();
-                Global.CurrentSessionData.OnDisconnect();
+                GetSession().OnDisconnect();
                 return;
             }
 
             Sha256 keyData = new();
-            keyData.Finish(account.game.SessionKey);
+            keyData.Finish(GetSession().SessionKey);
 
             HmacSha256 sessionKeyHmac = new(keyData.Digest);
             sessionKeyHmac.Process(_serverChallenge, 16);
@@ -506,7 +512,7 @@ namespace HermesProxy.World.Server
             //stmt.AddValue(1, account.game.Id);
             //DB.Login.Execute(stmt);
 
-            Global.CurrentSessionData.SessionKey = _sessionKey;
+            GetSession().SessionKey = _sessionKey;
 
             Log.Print(LogType.Server, $"WorldSocket:HandleAuthSession: Client '{authSession.RealmJoinTicket}' authenticated successfully from {address}.");
 
@@ -517,13 +523,13 @@ namespace HermesProxy.World.Server
             //DB.Login.Execute(stmt);
 
             _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
-            Global.CurrentSessionData.WorldClient = new HermesProxy.World.Client.WorldClient();
-            if (!Global.CurrentSessionData.WorldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId), this))
+            GetSession().WorldClient = new HermesProxy.World.Client.WorldClient();
+            if (!GetSession().WorldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId), GetSession()))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
                 Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
                 CloseSocket();
-                Global.CurrentSessionData.OnDisconnect();
+                GetSession().OnDisconnect();
                 return;
             }
 
@@ -570,9 +576,11 @@ namespace HermesProxy.World.Server
             ConnectToKey key = new();
             _key = key.Raw = authSession.Key;
 
+            _globalSession = Global.SessionsByKey[_key];
+
             uint accountId = key.AccountId;
-            string login = Global.CurrentSessionData.AccountInfo.Login;
-            _sessionKey = Global.CurrentSessionData.SessionKey;
+            string login = GetSession().AccountInfo.Login;
+            _sessionKey = GetSession().SessionKey;
 
             HmacSha256 hmac = new(_sessionKey);
             hmac.Process(BitConverter.GetBytes(authSession.Key), 8);
@@ -603,9 +611,11 @@ namespace HermesProxy.World.Server
         {
             var instanceAddress = GetRemoteIpAddress();
 
-            _instanceConnectKey.AccountId = Global.CurrentSessionData.AccountInfo.Id;
+            _instanceConnectKey.AccountId = GetSession().AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
+
+            Global.AddNewSessionByKey(_instanceConnectKey.Raw, GetSession());
 
             ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;
@@ -682,14 +692,14 @@ namespace HermesProxy.World.Server
                 SendFeatureSystemStatusGlueScreen();
                 SendClientCacheVersion(0);
                 SendBnetConnectionState(1);
-                _accountDataMgr = new AccountDataManager(Global.CurrentSessionData.Username, RealmManager.Instance.GetRealm(_realmId).Name);
-                Global.CurrentSessionData.RealmSocket = this;
+                _accountDataMgr = new AccountDataManager(GetSession().Username, RealmManager.Instance.GetRealm(_realmId).Name);
+                GetSession().RealmSocket = this;
             }
             else
             {
                 Log.Print(LogType.Server, "Client has connected to the instance server.");
                 SendPacket(new ResumeComms(ConnectionType.Instance));
-                Global.CurrentSessionData.InstanceSocket = this;
+                GetSession().InstanceSocket = this;
             }
         }
 
@@ -932,7 +942,7 @@ namespace HermesProxy.World.Server
             features.QuickJoinConfig.ThrottleDfBestPriority = 80;
 
             features.Squelch.IsSquelched = false;
-            features.Squelch.BnetAccountGuid = WowGuid128.Create(HighGuidType703.BNetAccount, Global.CurrentSessionData.AccountInfo.Id);
+            features.Squelch.BnetAccountGuid = WowGuid128.Create(HighGuidType703.BNetAccount, GetSession().AccountInfo.Id);
             features.Squelch.GuildGuid = WowGuid128.Empty;
 
             features.EuropaTicketSystemStatus.Value.TicketsEnabled = true;
@@ -998,7 +1008,7 @@ namespace HermesProxy.World.Server
         {
             System.Diagnostics.Trace.Assert(_connectType == ConnectionType.Realm);
 
-            WowGuid128 guid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
             _accountDataMgr.LoadAllData(guid);
 
             AccountDataTimes accountData = new AccountDataTimes();
@@ -1066,7 +1076,7 @@ namespace HermesProxy.World.Server
                     return;
 
                 using var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet);
-                clientPacket.LogPacket();
+                clientPacket.LogPacket(ref session.GetSession().ModernSniff);
                 clientPacket.Read();
                 methodCaller(session, clientPacket);
             }
@@ -1083,37 +1093,6 @@ namespace HermesProxy.World.Server
 
             Action<WorldSocket, ClientPacket> methodCaller;
             Type packetType;
-        }
-    }
-
-    class AccountInfo
-    {
-        public AccountInfo()
-        {
-            game.Id = Global.CurrentSessionData.GameAccountInfo.Id;
-            game.SessionKey = Global.CurrentSessionData.SessionKey;
-            battleNet.Locale = Global.CurrentSessionData.Locale.ToEnum<Locale>();
-            game.OS = Global.CurrentSessionData.OS;
-            battleNet.Id = Global.CurrentSessionData.AccountInfo.Id;
-
-            if (battleNet.Locale >= Locale.Total)
-                battleNet.Locale = Locale.enUS;
-        }
-
-        public BattleNet battleNet;
-        public Game game;
-
-        public struct BattleNet
-        {
-            public uint Id;
-            public Locale Locale;
-        }
-
-        public struct Game
-        {
-            public uint Id;
-            public byte[] SessionKey;
-            public string OS;
         }
     }
 

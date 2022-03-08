@@ -28,7 +28,7 @@ namespace HermesProxy.World.Client
             {
                 taxi.WindowInfo = new();
                 taxi.WindowInfo.UnitGUID = packet.ReadGuid().To128();
-                taxi.WindowInfo.CurrentNode = Global.CurrentSessionData.GameState.CurrentTaxiNode = packet.ReadUInt32();
+                taxi.WindowInfo.CurrentNode = GetSession().GameState.CurrentTaxiNode = packet.ReadUInt32();
             }
             while (packet.CanRead())
             {
@@ -54,7 +54,7 @@ namespace HermesProxy.World.Client
                 ActivateTaxiReplyPkt taxi = new();
                 taxi.Reply = reply;
                 SendPacketToClient(taxi);
-                Global.CurrentSessionData.GameState.IsWaitingForTaxiStart = false;
+                GetSession().GameState.IsWaitingForTaxiStart = false;
             }
         }
     }

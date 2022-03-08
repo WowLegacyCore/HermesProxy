@@ -16,7 +16,7 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_BUY_ITEM);
             packet.WriteGuid(item.VendorGUID.To64());
             packet.WriteUInt32(item.Item.ItemID);
-            uint quantity = item.Quantity / Global.CurrentSessionData.GameState.GetItemBuyCount(item.Item.ItemID);
+            uint quantity = item.Quantity / GetSession().GameState.GetItemBuyCount(item.Item.ItemID);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
             {
                 packet.WriteUInt32(item.Slot);

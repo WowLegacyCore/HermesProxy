@@ -24,7 +24,7 @@ namespace HermesProxy.World.Client
         Realm _realm;
         LegacyWorldCrypt _worldCrypt;
         Dictionary<Opcode, Action<WorldPacket>> _packetHandlers;
-        WorldSocket _modernSocket;
+        GlobalSessionData _globalSession;
         System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
 
         // packet order is not always the same as new client, sometimes we need to delay packet until another one
@@ -36,12 +36,17 @@ namespace HermesProxy.World.Client
             InitializePacketHandlers();
         }
 
-        public bool ConnectToWorldServer(Realm realm, WorldSocket modernSocket)
+        public GlobalSessionData GetSession()
+        {
+            return _globalSession;
+        }
+
+        public bool ConnectToWorldServer(Realm realm, GlobalSessionData globalSession)
         {
             _worldCrypt = null;
             _realm = realm;
-            _modernSocket = modernSocket;
-            _username = Global.CurrentSessionData.Username;
+            _globalSession = globalSession;
+            _username = globalSession.Username;
             _isSuccessful = null;
             _delayedPacketsToServer = new Dictionary<Opcode, List<WorldPacket>>();
             _delayedPacketsToClient = new Dictionary<Opcode, List<ServerPacket>>();
@@ -90,8 +95,8 @@ namespace HermesProxy.World.Client
             _clientSocket.Shutdown(SocketShutdown.Both);
             _clientSocket.Disconnect(false);
 
-            if (Global.CurrentSessionData.WorldClient == this)
-                Global.CurrentSessionData.WorldClient = null;
+            if (GetSession().WorldClient == this)
+                GetSession().WorldClient = null;
         }
 
         public bool IsConnected()
@@ -130,7 +135,7 @@ namespace HermesProxy.World.Client
                     if (_isSuccessful == null)
                         _isSuccessful = false;
                     else
-                        Global.CurrentSessionData.OnDisconnect();
+                        GetSession().OnDisconnect();
                     return;
                 }
 
@@ -140,7 +145,7 @@ namespace HermesProxy.World.Client
                     if (_isSuccessful == null)
                         _isSuccessful = false;
                     else
-                        Global.CurrentSessionData.OnDisconnect();
+                        GetSession().OnDisconnect();
                     return;
                 }
 
@@ -202,7 +207,7 @@ namespace HermesProxy.World.Client
                 else
                 {
                     Disconnect();
-                    Global.CurrentSessionData.OnDisconnect();
+                    GetSession().OnDisconnect();
                 }
             }
         }
@@ -276,15 +281,15 @@ namespace HermesProxy.World.Client
 
         private void SendPacketToClientDirect(ServerPacket packet)
         {
-            if (packet.GetConnection() == Framework.Constants.ConnectionType.Realm)
+            if (packet.GetConnection() == ConnectionType.Realm)
             {
-                Global.CurrentSessionData.RealmSocket.SendPacket(packet);
+                GetSession().RealmSocket.SendPacket(packet);
             }
             else
             {
                 // block these packets until connected to instance
-                while (Global.CurrentSessionData.InstanceSocket == null) { };
-                Global.CurrentSessionData.InstanceSocket.SendPacket(packet);
+                while (GetSession().InstanceSocket == null) { };
+                GetSession().InstanceSocket.SendPacket(packet);
             }
         }
 

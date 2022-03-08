@@ -76,9 +76,6 @@ namespace BNetServer.Networking
                 }
             }
 
-            Global.CurrentSessionData.Username = login;
-            Global.CurrentSessionData.Password = password;
-
             if (HermesProxy.Auth.AuthClient.ConnectToAuthServer(login, password))
             {
                 string loginTicket = "";
@@ -89,9 +86,33 @@ namespace BNetServer.Networking
                     byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
                     loginTicket = "TC-" + ticket.ToHexString();
                 }
-                Global.CurrentSessionData.LoginTicket = loginTicket;
-                loginResult.LoginTicket = loginTicket;
 
+                HermesProxy.GlobalSessionData globalSession = new();
+                globalSession.LoginTicket = loginTicket;
+                globalSession.Username = login;
+                globalSession.Password = password;
+
+                // We pass OS, Build and Locale in Path from HandleLogon
+                string str = request.Path;
+                str = str.Replace("/bnetserver/login/", "");
+                str = str.Substring(0, str.IndexOf("/"));
+                globalSession.OS = str;
+                str = request.Path;
+                str = str.Replace("/bnetserver/login/", "");
+                str = str.Substring(str.IndexOf('/') + 1);
+                str = str.Substring(0, str.IndexOf("/"));
+                globalSession.Build = UInt32.Parse(str);
+                str = request.Path;
+                str = str.Replace("/bnetserver/login/", "");
+                str = str.Substring(str.IndexOf('/') + 1);
+                str = str.Substring(str.IndexOf('/') + 1);
+                str = str.Substring(0, str.IndexOf("/"));
+                globalSession.Locale = str;
+
+                Global.AddNewSessionByName(login, globalSession);
+                Global.AddNewSessionByTicket(loginTicket, globalSession);
+
+                loginResult.LoginTicket = loginTicket;
                 loginResult.AuthenticationState = "DONE";
                 SendResponse(HttpCode.Ok, loginResult);
             }

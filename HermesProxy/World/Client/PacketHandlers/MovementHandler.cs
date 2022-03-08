@@ -97,14 +97,14 @@ namespace HermesProxy.World.Client
         {
             WowGuid128 guid = packet.ReadPackedGuid().To128();
 
-            if (Global.CurrentSessionData.GameState.IsInTaxiFlight &&
-                Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid)
+            if (GetSession().GameState.IsInTaxiFlight &&
+                GetSession().GameState.CurrentPlayerGuid == guid)
             {
                 ControlUpdate control = new ControlUpdate();
                 control.Guid = guid;
                 control.HasControl = true;
                 SendPacketToClient(control);
-                Global.CurrentSessionData.GameState.IsInTaxiFlight = false;
+                GetSession().GameState.IsInTaxiFlight = false;
             }
 
             MoveTeleport teleport = new MoveTeleport();
@@ -130,8 +130,8 @@ namespace HermesProxy.World.Client
             transfer.MapID = packet.ReadInt32();
             transfer.OldMapPosition = Vector3.Zero;
             SendPacketToClient(transfer);
-            Global.CurrentSessionData.GameState.IsFirstEnterWorld = false;
-            Global.CurrentSessionData.GameState.IsWaitingForNewWorld = true;
+            GetSession().GameState.IsFirstEnterWorld = false;
+            GetSession().GameState.IsWaitingForNewWorld = true;
 
             SuspendToken suspend = new();
             suspend.SequenceIndex = 3;
@@ -147,22 +147,22 @@ namespace HermesProxy.World.Client
             transfer.Reason = (TransferAbortReason)packet.ReadUInt8();
             transfer.Arg = packet.ReadUInt8();
             SendPacketToClient(transfer);
-            Global.CurrentSessionData.GameState.IsWaitingForNewWorld = false;
+            GetSession().GameState.IsWaitingForNewWorld = false;
         }
 
         [PacketHandler(Opcode.SMSG_NEW_WORLD)]
         void HandleNewWorld(WorldPacket packet)
         {
             NewWorld teleport = new NewWorld();
-            Global.CurrentSessionData.GameState.CurrentMapId = teleport.MapID = packet.ReadUInt32();
+            GetSession().GameState.CurrentMapId = teleport.MapID = packet.ReadUInt32();
             teleport.Position = packet.ReadVector3();
             teleport.Orientation = packet.ReadFloat();
             teleport.Reason = 4;
-            Global.CurrentSessionData.GameState.IsFirstEnterWorld = false;
+            GetSession().GameState.IsFirstEnterWorld = false;
 
-            if (Global.CurrentSessionData.GameState.IsWaitingForNewWorld)
+            if (GetSession().GameState.IsWaitingForNewWorld)
             {
-                Global.CurrentSessionData.GameState.IsWaitingForNewWorld = false;
+                GetSession().GameState.IsWaitingForNewWorld = false;
                 SendPacketToClient(teleport);
                 if (teleport.MapID > 1)
                 {
@@ -438,9 +438,9 @@ namespace HermesProxy.World.Client
             }
 
             bool isTaxiFlight = (hasTaxiFlightFlags &&
-                                (Global.CurrentSessionData.GameState.IsWaitingForTaxiStart ||
-                                 Global.CurrentSessionData.GameState.CurrentPlayerCreateTime == packet.GetReceivedTime()) &&
-                                 Global.CurrentSessionData.GameState.CurrentPlayerGuid == guid);
+                                (GetSession().GameState.IsWaitingForTaxiStart ||
+                                 GetSession().GameState.CurrentPlayerCreateTime == packet.GetReceivedTime()) &&
+                                 GetSession().GameState.CurrentPlayerGuid == guid);
 
             if (isTaxiFlight)
             {
@@ -484,14 +484,14 @@ namespace HermesProxy.World.Client
 
             if (isTaxiFlight)
             {
-                if (Global.CurrentSessionData.GameState.IsWaitingForTaxiStart)
+                if (GetSession().GameState.IsWaitingForTaxiStart)
                 {
                     ActivateTaxiReplyPkt taxi = new();
                     taxi.Reply = ActivateTaxiReply.Ok;
                     SendPacketToClient(taxi);
-                    Global.CurrentSessionData.GameState.IsWaitingForTaxiStart = false;
+                    GetSession().GameState.IsWaitingForTaxiStart = false;
                 }
-                Global.CurrentSessionData.GameState.IsInTaxiFlight = true;
+                GetSession().GameState.IsInTaxiFlight = true;
             }
         }
     }

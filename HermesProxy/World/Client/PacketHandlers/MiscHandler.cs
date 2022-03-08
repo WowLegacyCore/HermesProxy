@@ -22,15 +22,15 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ACCOUNT_DATA_TIMES)]
         void HandleAccountDataTimes(WorldPacket packet)
         {
-            Global.CurrentSessionData.RealmSocket.SendAccountDataTimes();
+            GetSession().RealmSocket.SendAccountDataTimes();
 
             // These packets don't exist in Vanilla and we must send them here.
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                Global.CurrentSessionData.RealmSocket.SendFeatureSystemStatus();
-                Global.CurrentSessionData.RealmSocket.SendMotd();
-                Global.CurrentSessionData.RealmSocket.SendSetTimeZoneInformation();
-                Global.CurrentSessionData.RealmSocket.SendSeasonInfo();
+                GetSession().RealmSocket.SendFeatureSystemStatus();
+                GetSession().RealmSocket.SendMotd();
+                GetSession().RealmSocket.SendSetTimeZoneInformation();
+                GetSession().RealmSocket.SendSeasonInfo();
             }
         }
 
@@ -94,7 +94,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOGIN_SET_TIME_SPEED)]
         void HandleLoginSetTimeSpeed(WorldPacket packet)
         {
-            if (!Global.CurrentSessionData.GameState.IsFirstEnterWorld)
+            if (!GetSession().GameState.IsFirstEnterWorld)
                 return;
 
             LoginSetTimeSpeed login = new LoginSetTimeSpeed();
@@ -115,15 +115,15 @@ namespace HermesProxy.World.Client
             uint length = packet.ReadUInt32();
             string message = packet.ReadString(length);
 
-            if (Global.CurrentSessionData.GameState.LastEnteredAreaTrigger != 0)
+            if (GetSession().GameState.LastEnteredAreaTrigger != 0)
             {
                 AreaTriggerMessage denied = new AreaTriggerMessage();
-                denied.AreaTriggerID = Global.CurrentSessionData.GameState.LastEnteredAreaTrigger;
+                denied.AreaTriggerID = GetSession().GameState.LastEnteredAreaTrigger;
                 SendPacketToClient(denied);
             }
             else
             {
-                ChatPkt chat = new ChatPkt(ChatMessageTypeModern.System, 0, null, "", null, "", message, "", ChatFlags.None, 0);
+                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", message, "", ChatFlags.None, 0);
                 SendPacketToClient(chat);
             }
         }
@@ -142,7 +142,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
                 packet.ReadInt32(); // Corpse Low GUID
 
-            corpse.Player = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            corpse.Player = GetSession().GameState.CurrentPlayerGuid;
             corpse.Transport = WowGuid128.Empty;
             SendPacketToClient(corpse);
         }
@@ -177,7 +177,7 @@ namespace HermesProxy.World.Client
         {
             PlaySound sound = new();
             sound.SoundEntryID = packet.ReadUInt32();
-            sound.SourceObjectGuid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+            sound.SourceObjectGuid = GetSession().GameState.CurrentPlayerGuid;
             SendPacketToClient(sound);
         }
 

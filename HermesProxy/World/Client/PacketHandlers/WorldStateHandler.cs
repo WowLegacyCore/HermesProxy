@@ -15,7 +15,7 @@ namespace HermesProxy.World.Client
         {
             InitWorldStates states = new InitWorldStates();
             states.MapID = packet.ReadUInt32();
-            Global.CurrentSessionData.GameState.CurrentMapId = states.MapID;
+            GetSession().GameState.CurrentMapId = states.MapID;
             states.AreaID = packet.ReadUInt32();
             states.SubareaID = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_1_0_6692) ? packet.ReadUInt32() : states.AreaID;
 

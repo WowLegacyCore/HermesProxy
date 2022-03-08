@@ -38,7 +38,7 @@ namespace BNetServer.Networking
 
             if (request.Options.FieldGameLevelInfo)
             {
-                var gameAccountInfo = accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State = new GameAccountState();
@@ -58,7 +58,7 @@ namespace BNetServer.Networking
 
                 response.State.GameStatus = new GameStatus();
 
-                var gameAccountInfo = accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;

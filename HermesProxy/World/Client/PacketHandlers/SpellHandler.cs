@@ -112,7 +112,7 @@ namespace HermesProxy.World.Client
 
             SpellPrepare prepare = new();
             prepare.ClientCastID = WowGuid128.Empty;
-            prepare.ServerCastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spellId, spellId);
+            prepare.ServerCastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spellId, spellId);
             SendPacketToClient(prepare);
 
             PetCastFailed spell = new PetCastFailed();
@@ -126,7 +126,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleCastFailed(WorldPacket packet)
         {
-            if (Global.CurrentSessionData.GameState.LastClientCastGuid == null)
+            if (GetSession().GameState.LastClientCastGuid == null)
                 return;
 
             int spellId = packet.ReadInt32();
@@ -134,7 +134,7 @@ namespace HermesProxy.World.Client
             if (status != 2)
             {
                 SpellPrepare prepare = new();
-                prepare.ClientCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+                prepare.ClientCastID = GetSession().GameState.LastClientCastGuid;
                 prepare.ServerCastID = WowGuid128.Empty;
                 SendPacketToClient(prepare);
                 return;
@@ -143,7 +143,7 @@ namespace HermesProxy.World.Client
             CastFailed failed = new();
             failed.SpellID = spellId;
             failed.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
-            failed.CastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+            failed.CastID = GetSession().GameState.LastClientCastGuid;
             uint reason = packet.ReadUInt8();
             failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
             switch ((SpellCastResultVanilla)reason)
@@ -184,7 +184,7 @@ namespace HermesProxy.World.Client
             byte reason = 61;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 reason = (byte)LegacyVersion.ConvertSpellCastResult(packet.ReadUInt8());
-            WowGuid128 castId = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spellId, spellId + casterUnit.GetLow());
+            WowGuid128 castId = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spellId, spellId + casterUnit.GetLow());
 
             SpellFailure spell = new SpellFailure();
             spell.CasterUnit = casterUnit;
@@ -207,7 +207,7 @@ namespace HermesProxy.World.Client
         void HandleSpellStart(WorldPacket packet)
         {
             SpellStart spell = new SpellStart();
-            spell.Cast = HandleSpellStart(packet, false);
+            spell.Cast = HandleSpellStartOrGo(packet, false);
             SendPacketToClient(spell);
         }
 
@@ -215,11 +215,11 @@ namespace HermesProxy.World.Client
         void HandleSpellGo(WorldPacket packet)
         {
             SpellGo spell = new SpellGo();
-            spell.Cast = HandleSpellStart(packet, true);
+            spell.Cast = HandleSpellStartOrGo(packet, true);
             SendPacketToClient(spell);
         }
 
-        public static SpellCastData HandleSpellStart(WorldPacket packet, bool isSpellGo)
+        SpellCastData HandleSpellStartOrGo(WorldPacket packet, bool isSpellGo)
         {
             SpellCastData dbdata = new SpellCastData();
             
@@ -231,13 +231,13 @@ namespace HermesProxy.World.Client
 
             dbdata.SpellID = packet.ReadInt32();
             dbdata.SpellXSpellVisualID = GameData.GetSpellVisual((uint)dbdata.SpellID);
-            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, (uint)dbdata.SpellID, (ulong)dbdata.SpellID + dbdata.CasterUnit.GetLow());
+            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, (uint)dbdata.SpellID, (ulong)dbdata.SpellID + dbdata.CasterUnit.GetLow());
 
-            if (Global.CurrentSessionData.GameState.CurrentPlayerGuid == dbdata.CasterUnit &&
-                Global.CurrentSessionData.GameState.LastClientCastId == dbdata.SpellID &&
-                Global.CurrentSessionData.GameState.LastClientCastGuid != null)
+            if (GetSession().GameState.CurrentPlayerGuid == dbdata.CasterUnit &&
+                GetSession().GameState.LastClientCastId == dbdata.SpellID &&
+                GetSession().GameState.LastClientCastGuid != null)
             {
-                dbdata.OriginalCastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+                dbdata.OriginalCastID = GetSession().GameState.LastClientCastGuid;
             }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) && LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) && !isSpellGo)
@@ -411,7 +411,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 cancel.Guid = packet.ReadPackedGuid().To128();
             else
-                cancel.Guid = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+                cancel.Guid = GetSession().GameState.CurrentPlayerGuid;
             SendPacketToClient(cancel);
         }
 
@@ -468,11 +468,11 @@ namespace HermesProxy.World.Client
             spell.SpellID = packet.ReadUInt32();
             spell.SpellXSpellVisualID = GameData.GetSpellVisual(spell.SpellID);
 
-            if (Global.CurrentSessionData.GameState.LastClientCastId == spell.SpellID &&
-                Global.CurrentSessionData.GameState.LastClientCastGuid != null)
-                spell.CastID = Global.CurrentSessionData.GameState.LastClientCastGuid;
+            if (GetSession().GameState.LastClientCastId == spell.SpellID &&
+                GetSession().GameState.LastClientCastGuid != null)
+                spell.CastID = GetSession().GameState.LastClientCastGuid;
             else
-                spell.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)Global.CurrentSessionData.GameState.CurrentMapId, spell.SpellID, spell.SpellID + spell.CasterGUID.GetLow());
+                spell.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spell.SpellID, spell.SpellID + spell.CasterGUID.GetLow());
 
             spell.Damage = packet.ReadInt32();
             spell.OriginalDamage = spell.Damage;
@@ -655,7 +655,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 channel.CasterGUID = packet.ReadPackedGuid().To128();
             else
-                channel.CasterGUID = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+                channel.CasterGUID = GetSession().GameState.CurrentPlayerGuid;
             channel.SpellID = packet.ReadUInt32();
             channel.SpellXSpellVisualID = GameData.GetSpellVisual(channel.SpellID);
             channel.Duration = packet.ReadUInt32();
@@ -669,7 +669,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 channel.CasterGUID = packet.ReadPackedGuid().To128();
             else
-                channel.CasterGUID = Global.CurrentSessionData.GameState.CurrentPlayerGuid;
+                channel.CasterGUID = GetSession().GameState.CurrentPlayerGuid;
             channel.TimeRemaining = packet.ReadInt32();
             SendPacketToClient(channel);
         }

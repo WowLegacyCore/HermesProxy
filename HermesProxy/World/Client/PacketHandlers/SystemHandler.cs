@@ -13,7 +13,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FEATURE_SYSTEM_STATUS)]
         void HandleFeatureSystemStatus(WorldPacket packet)
         {
-            Global.CurrentSessionData.RealmSocket.SendFeatureSystemStatus();
+            GetSession().RealmSocket.SendFeatureSystemStatus();
         }
 
         // Handlers for SMSG opcodes coming the legacy world server
@@ -29,8 +29,8 @@ namespace HermesProxy.World.Client
             // These packets don't exist in old clients (for vanilla servers we send them after account data times along with others).
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                Global.CurrentSessionData.RealmSocket.SendSetTimeZoneInformation();
-                Global.CurrentSessionData.RealmSocket.SendSeasonInfo();
+                GetSession().RealmSocket.SendSetTimeZoneInformation();
+                GetSession().RealmSocket.SendSeasonInfo();
             }
         }
     }

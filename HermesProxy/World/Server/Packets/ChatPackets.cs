@@ -180,24 +180,24 @@ namespace HermesProxy.World.Server.Packets
 
     public class ChatPkt : ServerPacket
     {
-        public ChatPkt(ChatMessageTypeModern chatType, uint language, WowGuid128 sender, string senderName, WowGuid128 receiver, string receiverName, string message, string channelName, ChatFlags chatFlags, uint achievementId = 0) : base(Opcode.SMSG_CHAT)
+        public ChatPkt(GlobalSessionData globalSession, ChatMessageTypeModern chatType, uint language, WowGuid128 sender, string senderName, WowGuid128 receiver, string receiverName, string message, string channelName, ChatFlags chatFlags, uint achievementId = 0) : base(Opcode.SMSG_CHAT)
         {
             SlashCmd = chatType;
             _Language = language;
 
             SenderGUID = sender != null ? sender : WowGuid128.Empty;
             if (String.IsNullOrEmpty(senderName) && sender != null)
-                SenderName = Global.CurrentSessionData.GameState.GetPlayerName(sender);
+                SenderName = globalSession.GameState.GetPlayerName(sender);
             else
                 SenderName = senderName;
 
-            SenderAccountGUID = sender != null ? Global.CurrentSessionData.GameState.GetGameAccountGuidForPlayer(sender) : WowGuid128.Empty;
+            SenderAccountGUID = sender != null ? globalSession.GetGameAccountGuidForPlayer(sender) : WowGuid128.Empty;
             SenderGuildGUID = WowGuid128.Empty;
             PartyGUID = WowGuid128.Empty;
 
             TargetGUID = receiver != null ? receiver : WowGuid128.Empty;
             if (String.IsNullOrEmpty(receiverName) && receiver != null)
-                TargetName = Global.CurrentSessionData.GameState.GetPlayerName(receiver);
+                TargetName = globalSession.GameState.GetPlayerName(receiver);
             else
                 TargetName = receiverName;
 
@@ -205,8 +205,8 @@ namespace HermesProxy.World.Server.Packets
             ChatText = message;
             Channel = channelName;
             AchievementID = achievementId;
-            SenderVirtualAddress = Global.CurrentSessionData.RealmId.GetAddress();
-            TargetVirtualAddress = Global.CurrentSessionData.RealmId.GetAddress();
+            SenderVirtualAddress = globalSession.RealmId.GetAddress();
+            TargetVirtualAddress = globalSession.RealmId.GetAddress();
         }
         public override void Write()
         {

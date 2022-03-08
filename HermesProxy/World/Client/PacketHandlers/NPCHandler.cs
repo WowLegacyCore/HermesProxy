@@ -107,7 +107,7 @@ namespace HermesProxy.World.Client
                 vendorItem.StackCount = packet.ReadUInt32();
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     vendorItem.ExtendedCostID = packet.ReadInt32();
-                Global.CurrentSessionData.GameState.SetItemBuyCount(vendorItem.Item.ItemID, vendorItem.StackCount);
+                GetSession().GameState.SetItemBuyCount(vendorItem.Item.ItemID, vendorItem.StackCount);
                 vendor.Items.Add(vendorItem);
             }
 
@@ -142,7 +142,7 @@ namespace HermesProxy.World.Client
                     uint realSpellId = GameData.GetRealSpell(spellId);
                     if (realSpellId != spellId)
                     {
-                        Global.CurrentSessionData.GameState.StoreRealSpell(realSpellId, spellId);
+                        GetSession().GameState.StoreRealSpell(realSpellId, spellId);
                         spellId = realSpellId;
                     }
                 }
@@ -173,7 +173,7 @@ namespace HermesProxy.World.Client
             buy.SpellID = packet.ReadUInt32();
             buy.TrainerFailedReason = packet.ReadUInt32();
             SendPacketToClient(buy);
-            ChatPkt chat = new ChatPkt(ChatMessageTypeModern.System, 0, null, "", null, "", $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).", "", ChatFlags.None, 0);
+            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).", "", ChatFlags.None, 0);
             SendPacketToClient(chat);
         }
 

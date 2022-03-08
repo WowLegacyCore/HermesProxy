@@ -39,10 +39,11 @@ namespace HermesProxy.World.Server.Packets
     }
     public class ObjectUpdate
     {
-        public ObjectUpdate(WowGuid128 guid, UpdateTypeModern type)
+        public ObjectUpdate(WowGuid128 guid, UpdateTypeModern type, GlobalSessionData globalSession)
         {
             Type = type;
             Guid = guid;
+            GlobalSession = globalSession;
             ObjectData = new ObjectData();
 
             switch (type)
@@ -83,6 +84,7 @@ namespace HermesProxy.World.Server.Packets
 
         public UpdateTypeModern Type;
         public WowGuid128 Guid;
+        public GlobalSessionData GlobalSession;
         public CreateObjectData CreateData;
         public ObjectData ObjectData;
         public ItemData ItemData;
@@ -150,7 +152,7 @@ namespace HermesProxy.World.Server.Packets
                 if (CorpseData.ClassId == null)
                 {
                     if (CorpseData.Owner != null)
-                        CorpseData.ClassId = (byte)Global.CurrentSessionData.GameState.GetUnitClass(CorpseData.Owner);
+                        CorpseData.ClassId = (byte)GlobalSession.GameState.GetUnitClass(CorpseData.Owner);
                     else
                         CorpseData.ClassId = 1;
                 }
@@ -190,12 +192,12 @@ namespace HermesProxy.World.Server.Packets
                 if (PlayerData.WowAccount == null)
                 {
                     if (CreateData.ThisIsYou == true)
-                        PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Global.CurrentSessionData.GameAccountInfo.Id);
+                        PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, GlobalSession.GameAccountInfo.Id);
                     else
                         PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Guid.GetLow());
                 }
                 if (PlayerData.VirtualPlayerRealm == null)
-                    PlayerData.VirtualPlayerRealm = Global.CurrentSessionData.RealmId.GetAddress();
+                    PlayerData.VirtualPlayerRealm = GlobalSession.RealmId.GetAddress();
                 if (PlayerData.HonorLevel == null)
                     PlayerData.HonorLevel = 1;
                 if (PlayerData.AvgItemLevel[3] == null)
@@ -249,12 +251,15 @@ namespace HermesProxy.World.Server.Packets
     
     public class UpdateObject : ServerPacket
     {
-        public UpdateObject() : base(Opcode.SMSG_UPDATE_OBJECT, ConnectionType.Instance) { }
+        public UpdateObject(GameSessionData gameState) : base(Opcode.SMSG_UPDATE_OBJECT, ConnectionType.Instance)
+        {
+            _gameState = gameState;
+        }
 
         public override void Write()
         {
             NumObjUpdates = (uint)ObjectUpdates.Count;
-            MapID = (ushort)Global.CurrentSessionData.GameState.CurrentMapId;
+            MapID = (ushort)_gameState.CurrentMapId;
 
             _worldPacket.WriteUInt32(NumObjUpdates);
             _worldPacket.WriteUInt16(MapID);
@@ -279,7 +284,7 @@ namespace HermesProxy.World.Server.Packets
                 switch (Framework.Settings.ClientBuild)
                 {
                     case ClientVersionBuild.V2_5_2_40892:
-                        Objects.Version.V2_5_2_40892.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_40892.ObjectUpdateBuilder(update);
+                        Objects.Version.V2_5_2_40892.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_40892.ObjectUpdateBuilder(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
                     default:
@@ -295,6 +300,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBytes(Data);
         }
 
+        GameSessionData _gameState;
         public uint NumObjUpdates;
         public ushort MapID;
         public byte[] Data;

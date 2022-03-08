@@ -200,11 +200,11 @@ namespace HermesProxy.World
             if (type == HighGuidType703.Transport)
                 return new WowGuid128((ulong)type << 58 | (counter << 38), 0);
             else
-                return new WowGuid128((ulong)type << 58 | (ulong)Global.CurrentSessionData.RealmId.Index << 42, counter);
+                return new WowGuid128((ulong)type << 58 | (ulong)1 /*realmId*/ << 42, counter);
         }
         static WowGuid128 MapSpecificCreate(HighGuidType703 type, byte subType, ushort mapId, uint serverId, uint entry, ulong counter)
         {
-            return new WowGuid128((((ulong)type << 58) | ((ulong)(Global.CurrentSessionData.RealmId.Index & 0x1FFF) << 42) | ((ulong)(mapId & 0x1FFF) << 29) | ((ulong)(entry & 0x7FFFFF) << 6) | ((ulong)subType & 0x3F)),
+            return new WowGuid128((((ulong)type << 58) | ((ulong)(1 /*realmId*/ & 0x1FFF) << 42) | ((ulong)(mapId & 0x1FFF) << 29) | ((ulong)(entry & 0x7FFFFF) << 6) | ((ulong)subType & 0x3F)),
                 (((ulong)(serverId & 0xFFFFFF) << 40) | (counter & 0xFFFFFFFFFF)));
         }
 

@@ -15,6 +15,7 @@ namespace HermesProxy.World.Objects
         List<WowGuid128> destroyGUIDs = new();
         List<WowGuid128> outOfRangeGUIDs = new();
         ByteBuffer data = new();
+        GameSessionData gameState;
 
         public UpdateData(uint mapId)
         {
@@ -44,7 +45,7 @@ namespace HermesProxy.World.Objects
 
         public bool BuildPacket(out UpdateObject packet)
         {
-            packet = new UpdateObject();
+            packet = new UpdateObject(gameState);
 
             packet.NumObjUpdates = BlockCount;
             packet.MapID = (ushort)MapId;

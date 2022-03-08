@@ -51,13 +51,13 @@ namespace HermesProxy.World.Client
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                         packet.ReadInt32(); // unk
 
-                    Global.CurrentSessionData.GameState.SetChannelId(channelName, channelId);
+                    GetSession().GameState.SetChannelId(channelName, channelId);
 
                     ChannelNotifyJoined joined = new ChannelNotifyJoined();
                     joined.Channel = channelName;
                     joined.ChannelFlags = flags;
                     joined.ChatChannelID = channelId;
-                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)Global.CurrentSessionData.GameState.CurrentMapId, 1, (ulong)channelId);
+                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, 1, (ulong)channelId);
                     SendPacketToClient(joined);
 
                     break;
@@ -73,7 +73,7 @@ namespace HermesProxy.World.Client
                     }
                     else
                     {
-                        left.ChatChannelID = Global.CurrentSessionData.GameState.ChannelIds[channelName];
+                        left.ChatChannelID = GetSession().GameState.ChannelIds[channelName];
                         left.Suspended = false;
                     }
                     SendPacketToClient(left);
@@ -174,7 +174,7 @@ namespace HermesProxy.World.Client
             ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
 
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
-            ChatPkt chat = new ChatPkt(chatTypeModern, language, sender, senderName, receiver, "", text, channelName, chatFlags);
+            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, language, sender, senderName, receiver, "", text, channelName, chatFlags);
             SendPacketToClient(chat);
         }
 
@@ -274,7 +274,7 @@ namespace HermesProxy.World.Client
                 achievementId = packet.ReadUInt32();
 
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
-            ChatPkt chat = new ChatPkt(chatTypeModern, language, sender, senderName, receiver, receiverName, text, channelName, chatFlags, achievementId);
+            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, language, sender, senderName, receiver, receiverName, text, channelName, chatFlags, achievementId);
             SendPacketToClient(chat);
         }
 
@@ -365,12 +365,12 @@ namespace HermesProxy.World.Client
         {
             STextEmote emote = new STextEmote();
             emote.SourceGUID = packet.ReadGuid().To128();
-            emote.SourceAccountGUID = Global.CurrentSessionData.GameState.GetGameAccountGuidForPlayer(emote.SourceGUID);
+            emote.SourceAccountGUID = GetSession().GetGameAccountGuidForPlayer(emote.SourceGUID);
             emote.EmoteID = packet.ReadInt32();
             emote.SoundIndex = packet.ReadInt32();
             uint nameLength = packet.ReadUInt32();
             string targetName = packet.ReadString(nameLength);
-            WowGuid128 targetGuid = Global.CurrentSessionData.GameState.GetPlayerGuidByName(targetName);
+            WowGuid128 targetGuid = GetSession().GameState.GetPlayerGuidByName(targetName);
             emote.TargetGUID = targetGuid != null ? targetGuid : emote.SourceGUID;
             SendPacketToClient(emote);
         }

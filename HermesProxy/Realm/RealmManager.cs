@@ -269,10 +269,10 @@ public class RealmManager : Singleton<RealmManager>
         return Json.Deflate("JSONRealmListUpdates", realmList);
     }
 
-    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
+    public BattlenetRpcErrorCode JoinRealm(HermesProxy.GlobalSessionData globalSession, uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
-        Global.CurrentSessionData.RealmId = new RealmId(realmAddress);
-        Realm realm = GetRealm(Global.CurrentSessionData.RealmId);
+        globalSession.RealmId = new RealmId(realmAddress);
+        Realm realm = GetRealm(globalSession.RealmId);
         if (realm != null)
         {
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
@@ -302,8 +302,8 @@ public class RealmManager : Singleton<RealmManager>
             stmt.AddValue(4, accountName);
             DB.Login.DirectExecute(stmt);
             */
-            Global.CurrentSessionData.SessionKey = keyData;
-            Global.CurrentSessionData.OS = os;
+            globalSession.SessionKey = keyData;
+            globalSession.OS = os;
 
             Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmJoinTicket";

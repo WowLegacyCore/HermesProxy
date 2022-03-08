@@ -35,15 +35,11 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadLocale;
             }
 
-            Global.CurrentSessionData.Locale = locale = logonRequest.Locale;
-            Global.CurrentSessionData.OS = os = logonRequest.Platform;
-            Global.CurrentSessionData.Build = build = (uint)logonRequest.ApplicationVersion;
-
             var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";            
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
+            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/{logonRequest.Platform}/{logonRequest.ApplicationVersion}/{logonRequest.Locale}/");
 
             SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
@@ -52,49 +48,27 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AuthenticationService, 7)]
         BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
-            accountInfo = new AccountInfo();
-            Global.CurrentSessionData.AccountInfo = accountInfo;
+            globalSession = Global.SessionsByTicket[verifyWebCredentialsRequest.WebCredentials.ToStringUtf8()];
+            globalSession.AccountInfo = new AccountInfo(globalSession.Username);
 
-            if (accountInfo.LoginTicketExpiry < Time.UnixTime)
+            if (globalSession.AccountInfo.LoginTicketExpiry < Time.UnixTime)
             {
                 return BattlenetRpcErrorCode.TimedOut;
             }
 
             string ip_address = GetRemoteIpEndPoint().ToString();
 
-            // If the IP is 'locked', check that the player comes indeed from the correct IP address
-            if (accountInfo.IsLockedToIP)
-            {
-                Log.Print(LogType.Debug, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is locked to IP: {accountInfo.LastIP} is logging in from IP: {ip_address}");
-
-                if (accountInfo.LastIP != ip_address)
-                    return BattlenetRpcErrorCode.RiskAccountLocked;
-            }
-            else
-            {
-                Log.Print(LogType.Debug, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is not locked to ip");
-                if (accountInfo.LockCountry.IsEmpty() || accountInfo.LockCountry == "00")
-                    Log.Print(LogType.Debug, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is not locked to country");
-                else if (!accountInfo.LockCountry.IsEmpty() && !ipCountry.IsEmpty())
-                {
-                    Log.Print(LogType.Debug, $"Session.HandleVerifyWebCredentials: Account: {accountInfo.Login} is locked to Country: {accountInfo.LockCountry} player Country: {ipCountry}");
-
-                    if (ipCountry != accountInfo.LockCountry)
-                        return BattlenetRpcErrorCode.RiskAccountLocked;
-                }
-            }
-
             // If the account is banned, reject the logon attempt
-            if (accountInfo.IsBanned)
+            if (globalSession.AccountInfo.IsBanned)
             {
-                if (accountInfo.IsPermanenetlyBanned)
+                if (globalSession.AccountInfo.IsPermanenetlyBanned)
                 {
-                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Banned account {accountInfo.Login} tried to login!");
+                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Banned account {globalSession.AccountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountBanned;
                 }
                 else
                 {
-                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Temporarily banned account {accountInfo.Login} tried to login!");
+                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Temporarily banned account {globalSession.AccountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountSuspended;
                 }
             }
@@ -102,9 +76,9 @@ namespace BNetServer.Networking
             LogonResult logonResult = new();
             logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
-            logonResult.AccountId.Low = accountInfo.Id;
+            logonResult.AccountId.Low = globalSession.AccountInfo.Id;
             logonResult.AccountId.High = 0x100000000000000;
-            foreach (var pair in accountInfo.GameAccounts)
+            foreach (var pair in globalSession.AccountInfo.GameAccounts)
             {
                 EntityId gameAccountId = new();
                 gameAccountId.Low = pair.Value.Id;
@@ -112,11 +86,8 @@ namespace BNetServer.Networking
                 logonResult.GameAccountId.Add(gameAccountId);
             }
 
-            if (!ipCountry.IsEmpty())
-                logonResult.GeoipCountry = ipCountry;
-
-            Global.CurrentSessionData.SessionKey = new byte[64].GenerateRandomKey(64);
-            logonResult.SessionKey = ByteString.CopyFrom(Global.CurrentSessionData.SessionKey);
+            globalSession.SessionKey = new byte[64].GenerateRandomKey(64);
+            logonResult.SessionKey = ByteString.CopyFrom(globalSession.SessionKey);
 
             authed = true;
 

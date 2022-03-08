@@ -13,7 +13,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INITIALIZE_FACTIONS)]
         void HandleInitializeFactions(WorldPacket packet)
         {
-            if (!Global.CurrentSessionData.GameState.IsFirstEnterWorld)
+            if (!GetSession().GameState.IsFirstEnterWorld)
                 return;
 
             InitializeFactions factions = new InitializeFactions();

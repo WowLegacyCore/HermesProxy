@@ -55,7 +55,7 @@ namespace HermesProxy.World.Server
             {
                 // in vanilla the server sends learn spell with effect 36
                 // in expansions the server sends the actual spell
-                buy.SpellID = Global.CurrentSessionData.GameState.GetLearnSpellFromRealSpell(buy.SpellID);
+                buy.SpellID = GetSession().GameState.GetLearnSpellFromRealSpell(buy.SpellID);
             }
             packet.WriteUInt32(buy.SpellID);
             SendPacketToServer(packet);

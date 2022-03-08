@@ -8,6 +8,7 @@ using Framework.Logging;
 using Framework.Networking;
 using Framework.Realm;
 using Google.Protobuf;
+using HermesProxy;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -16,13 +17,7 @@ namespace BNetServer.Networking
 {
     partial class Session : SSLSocket
     {
-        AccountInfo accountInfo;
-        GameAccountInfo gameAccountInfo;
-
-        string locale;
-        string os;
-        uint build;
-        string ipCountry = "";
+        GlobalSessionData globalSession;
 
         byte[] clientSecret;
         bool authed;
@@ -39,7 +34,7 @@ namespace BNetServer.Networking
         public override void Accept()
         {
             string ipAddress = GetRemoteIpEndPoint().ToString();
-            Log.Print(LogType.Server, $"{GetClientInfo()} Connection Accepted.");
+            Log.Print(LogType.Server, $"Accepting connection from {ipAddress}.");
             AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
         }
 
@@ -152,11 +147,11 @@ namespace BNetServer.Networking
         public string GetClientInfo()
         {
             string stream = '[' + GetRemoteIpEndPoint().ToString();
-            if (accountInfo != null && !accountInfo.Login.IsEmpty())
-                stream += ", Account: " + accountInfo.Login;
+            if (globalSession.AccountInfo != null && !globalSession.AccountInfo.Login.IsEmpty())
+                stream += ", Account: " + globalSession.AccountInfo.Login;
 
-            if (gameAccountInfo != null)
-                stream += ", Game account: " + gameAccountInfo.Name;
+            if (globalSession.GameAccountInfo != null)
+                stream += ", Game account: " + globalSession.GameAccountInfo.Name;
 
             stream += ']';
 
@@ -168,28 +163,22 @@ namespace BNetServer.Networking
     {   
         public uint Id;
         public string Login;
-        public bool IsLockedToIP;
-        public string LockCountry;
-        public string LastIP;
         public uint LoginTicketExpiry;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
 
         public Dictionary<uint, GameAccountInfo> GameAccounts;
 
-        public AccountInfo()
+        public AccountInfo(string name)
         {
             Id = 1;
-            Login = Global.CurrentSessionData.Username;
-            IsLockedToIP = false;
-            LockCountry = "";
-            LastIP = "127.0.0.1";
+            Login = name;
             LoginTicketExpiry = (uint)(Time.UnixTime + 10000);
             IsBanned = false;
             IsPermanenetlyBanned = false;
 
             GameAccounts = new Dictionary<uint, GameAccountInfo>();
-            var account = new GameAccountInfo();
+            var account = new GameAccountInfo(name);
             GameAccounts[1] = account;
         }
     }
@@ -206,10 +195,10 @@ namespace BNetServer.Networking
         public Dictionary<uint, byte> CharacterCounts;
         public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
 
-        public GameAccountInfo()
+        public GameAccountInfo(string name)
         {
             Id = 1;
-            Name = Global.CurrentSessionData.Username;
+            Name = name;
             UnbanDate = 0;
             IsPermanenetlyBanned = false;
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;

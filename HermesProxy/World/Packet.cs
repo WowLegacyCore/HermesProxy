@@ -45,14 +45,14 @@ namespace HermesProxy.World
             return Opcodes.GetUniversalOpcode(GetOpcode(), Framework.Settings.ClientBuild);
         }
 
-        public void LogPacket()
+        public void LogPacket(ref SniffFile sniffFile)
         {
-            if (Global.CurrentSessionData.ModernSniff == null)
+            if (sniffFile == null)
             {
-                Global.CurrentSessionData.ModernSniff = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
-                Global.CurrentSessionData.ModernSniff.WriteHeader();
+                sniffFile = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
+                sniffFile.WriteHeader();
             }
-            Global.CurrentSessionData.ModernSniff.WritePacket(GetOpcode(), true, _worldPacket.GetData());
+            sniffFile.WritePacket(GetOpcode(), true, _worldPacket.GetData());
         }
 
         protected WorldPacket _worldPacket;
@@ -98,14 +98,14 @@ namespace HermesProxy.World
             return buffer;
         }
 
-        public void LogPacket()
+        public void LogPacket(ref SniffFile sniffFile)
         {
-            if (Global.CurrentSessionData.ModernSniff == null)
+            if (sniffFile == null)
             {
-                Global.CurrentSessionData.ModernSniff = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
-                Global.CurrentSessionData.ModernSniff.WriteHeader();
+                sniffFile = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
+                sniffFile.WriteHeader();
             }
-            Global.CurrentSessionData.ModernSniff.WritePacket(GetOpcode(), false, GetData());
+            sniffFile.WritePacket(GetOpcode(), false, GetData());
         }
 
         public abstract void Write();
