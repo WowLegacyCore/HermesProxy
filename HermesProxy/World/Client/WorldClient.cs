@@ -408,7 +408,7 @@ namespace HermesProxy.World.Client
                 BitConverter.GetBytes(zero),
                 BitConverter.GetBytes(clientSeed),
                 BitConverter.GetBytes(serverSeed),
-                Auth.AuthClient.GetSessionKey()
+                GetSession().AuthClient.GetSessionKey()
             );
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTH_SESSION);
@@ -439,7 +439,7 @@ namespace HermesProxy.World.Client
 
             SendPacket(packet);
 
-            InitializeEncryption(Auth.AuthClient.GetSessionKey());
+            InitializeEncryption(GetSession().AuthClient.GetSessionKey());
         }
 
         private void HandleAuthResponse(WorldPacket packet)

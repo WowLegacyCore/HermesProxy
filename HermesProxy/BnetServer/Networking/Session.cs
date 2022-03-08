@@ -17,18 +17,18 @@ namespace BNetServer.Networking
 {
     partial class Session : SSLSocket
     {
-        GlobalSessionData globalSession;
+        GlobalSessionData _globalSession;
 
-        byte[] clientSecret;
-        bool authed;
-        uint requestToken;
+        byte[] _clientSecret;
+        bool _authed;
+        uint _requestToken;
 
-        Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
+        Dictionary<uint, Action<CodedInputStream>> _responseCallbacks;
 
         public Session(Socket socket) : base(socket)
         {
-            clientSecret = new byte[32];
-            responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
+            _clientSecret = new byte[32];
+            _responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         }
 
         public override void Accept()
@@ -73,11 +73,11 @@ namespace BNetServer.Networking
                 }
                 else
                 {
-                    var handler = responseCallbacks.LookupByKey(header.Token);
+                    var handler = _responseCallbacks.LookupByKey(header.Token);
                     if (handler != null)
                     {
                         handler(stream);
-                        responseCallbacks.Remove(header.Token);
+                        _responseCallbacks.Remove(header.Token);
                     }
                 }
             }
@@ -121,7 +121,7 @@ namespace BNetServer.Networking
             header.ServiceHash = serviceHash;
             header.MethodId = methodId;
             header.Size = (uint)request.CalculateSize();
-            header.Token = requestToken++;
+            header.Token = _requestToken++;
 
             ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
@@ -147,11 +147,11 @@ namespace BNetServer.Networking
         public string GetClientInfo()
         {
             string stream = '[' + GetRemoteIpEndPoint().ToString();
-            if (globalSession.AccountInfo != null && !globalSession.AccountInfo.Login.IsEmpty())
-                stream += ", Account: " + globalSession.AccountInfo.Login;
+            if (_globalSession.AccountInfo != null && !_globalSession.AccountInfo.Login.IsEmpty())
+                stream += ", Account: " + _globalSession.AccountInfo.Login;
 
-            if (globalSession.GameAccountInfo != null)
-                stream += ", Game account: " + globalSession.GameAccountInfo.Name;
+            if (_globalSession.GameAccountInfo != null)
+                stream += ", Game account: " + _globalSession.GameAccountInfo.Name;
 
             stream += ']';
 

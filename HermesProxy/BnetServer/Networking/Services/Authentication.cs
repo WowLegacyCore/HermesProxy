@@ -48,10 +48,10 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AuthenticationService, 7)]
         BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
-            globalSession = Global.SessionsByTicket[verifyWebCredentialsRequest.WebCredentials.ToStringUtf8()];
-            globalSession.AccountInfo = new AccountInfo(globalSession.Username);
+            _globalSession = Global.SessionsByTicket[verifyWebCredentialsRequest.WebCredentials.ToStringUtf8()];
+            _globalSession.AccountInfo = new AccountInfo(_globalSession.Username);
 
-            if (globalSession.AccountInfo.LoginTicketExpiry < Time.UnixTime)
+            if (_globalSession.AccountInfo.LoginTicketExpiry < Time.UnixTime)
             {
                 return BattlenetRpcErrorCode.TimedOut;
             }
@@ -59,16 +59,16 @@ namespace BNetServer.Networking
             string ip_address = GetRemoteIpEndPoint().ToString();
 
             // If the account is banned, reject the logon attempt
-            if (globalSession.AccountInfo.IsBanned)
+            if (_globalSession.AccountInfo.IsBanned)
             {
-                if (globalSession.AccountInfo.IsPermanenetlyBanned)
+                if (_globalSession.AccountInfo.IsPermanenetlyBanned)
                 {
-                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Banned account {globalSession.AccountInfo.Login} tried to login!");
+                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Banned account {_globalSession.AccountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountBanned;
                 }
                 else
                 {
-                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Temporarily banned account {globalSession.AccountInfo.Login} tried to login!");
+                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Temporarily banned account {_globalSession.AccountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountSuspended;
                 }
             }
@@ -76,9 +76,9 @@ namespace BNetServer.Networking
             LogonResult logonResult = new();
             logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
-            logonResult.AccountId.Low = globalSession.AccountInfo.Id;
+            logonResult.AccountId.Low = _globalSession.AccountInfo.Id;
             logonResult.AccountId.High = 0x100000000000000;
-            foreach (var pair in globalSession.AccountInfo.GameAccounts)
+            foreach (var pair in _globalSession.AccountInfo.GameAccounts)
             {
                 EntityId gameAccountId = new();
                 gameAccountId.Low = pair.Value.Id;
@@ -86,10 +86,10 @@ namespace BNetServer.Networking
                 logonResult.GameAccountId.Add(gameAccountId);
             }
 
-            globalSession.SessionKey = new byte[64].GenerateRandomKey(64);
-            logonResult.SessionKey = ByteString.CopyFrom(globalSession.SessionKey);
+            _globalSession.SessionKey = new byte[64].GenerateRandomKey(64);
+            logonResult.SessionKey = ByteString.CopyFrom(_globalSession.SessionKey);
 
-            authed = true;
+            _authed = true;
 
             SendRequest((uint)OriginalHash.AuthenticationListener, 5, logonResult);
             return BattlenetRpcErrorCode.Ok;

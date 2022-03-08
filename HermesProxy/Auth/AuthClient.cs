@@ -13,18 +13,18 @@ using Framework.Logging;
 
 namespace HermesProxy.Auth
 {
-    public static class AuthClient
+    public class AuthClient
     {
-        static Socket _clientSocket;
-        static bool? _isSuccessful = null;
-        static byte[] _passwordHash;
-        static BigInteger _key;
-        static byte[] _m2;
-        static bool _hasRealmList;
-        static string _username;
-        static string _password;
+        Socket _clientSocket;
+        bool? _isSuccessful = null;
+        byte[] _passwordHash;
+        BigInteger _key;
+        byte[] _m2;
+        bool _hasRealmList;
+        string _username;
+        string _password;
 
-        public static bool ConnectToAuthServer(string username, string password)
+        public bool ConnectToAuthServer(string username, string password)
         {
             _username = username;
             _password = password;
@@ -55,7 +55,7 @@ namespace HermesProxy.Auth
             return (bool)_isSuccessful;
         }
 
-        public static void Disconnect()
+        public void Disconnect()
         {
             if (!IsConnected())
                 return;
@@ -64,17 +64,17 @@ namespace HermesProxy.Auth
             _clientSocket.Disconnect(false);
         }
 
-        public static bool IsConnected()
+        public bool IsConnected()
         {
             return _clientSocket != null && _clientSocket.Connected;
         }
 
-        public static byte[] GetSessionKey()
+        public byte[] GetSessionKey()
         {
             return _key.ToCleanByteArray();
         }
 
-        private static void ConnectCallback(IAsyncResult AR)
+        private void ConnectCallback(IAsyncResult AR)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        private static void ReceiveCallback(IAsyncResult AR)
+        private void ReceiveCallback(IAsyncResult AR)
         {
             try
             {
@@ -124,7 +124,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        private static void SendCallback(IAsyncResult AR)
+        private void SendCallback(IAsyncResult AR)
         {
             try
             {
@@ -137,7 +137,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        private static void SendPacket(ByteBuffer packet)
+        private void SendPacket(ByteBuffer packet)
         {
             try
             {
@@ -150,7 +150,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        private static void HandlePacket(byte[] buffer, int size)
+        private void HandlePacket(byte[] buffer, int size)
         {
             ByteBuffer packet = new ByteBuffer(buffer);
             AuthCommand opcode = (AuthCommand)packet.ReadUInt8();
@@ -174,7 +174,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        private static void SendLogonChallenge()
+        private void SendLogonChallenge()
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
@@ -198,7 +198,7 @@ namespace HermesProxy.Auth
             SendPacket(buffer);
         }
 
-        private static void HandleLogonChallenge(ByteBuffer packet)
+        private void HandleLogonChallenge(ByteBuffer packet)
         {
             byte unk2 = packet.ReadUInt8();
             AuthResult error = (AuthResult)packet.ReadUInt8();
@@ -355,7 +355,7 @@ namespace HermesProxy.Auth
             SendLogonProof(A.ToCleanByteArray(), m1Hash, new byte[20]);
         }
 
-        private static void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
+        private void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_PROOF);
@@ -367,7 +367,7 @@ namespace HermesProxy.Auth
             SendPacket(buffer);
         }
 
-        private static void HandleLogonProof(ByteBuffer packet)
+        private void HandleLogonProof(ByteBuffer packet)
         {
             AuthResult error = (AuthResult)packet.ReadUInt8();
             if (error != AuthResult.SUCCESS)
@@ -415,7 +415,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        public static void RequestRealmListAndWait()
+        public void RequestRealmListAndWait()
         {
             SendRealmListRequest();
             while (!_hasRealmList && IsConnected())
@@ -423,7 +423,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        private static void SendRealmListRequest()
+        private void SendRealmListRequest()
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.REALM_LIST);
@@ -432,7 +432,7 @@ namespace HermesProxy.Auth
             SendPacket(buffer);
         }
 
-        private static void HandleRealmList(ByteBuffer packet)
+        private void HandleRealmList(ByteBuffer packet)
         {
             packet.ReadUInt16(); // packet size
             packet.ReadUInt32(); // unused

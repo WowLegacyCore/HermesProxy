@@ -76,7 +76,9 @@ namespace BNetServer.Networking
                 }
             }
 
-            if (HermesProxy.Auth.AuthClient.ConnectToAuthServer(login, password))
+            HermesProxy.GlobalSessionData globalSession = new();
+            globalSession.AuthClient = new();
+            if (globalSession.AuthClient.ConnectToAuthServer(login, password))
             {
                 string loginTicket = "";
                 uint loginTicketExpiry = (uint)(Time.UnixTime + 3600);
@@ -87,7 +89,6 @@ namespace BNetServer.Networking
                     loginTicket = "TC-" + ticket.ToHexString();
                 }
 
-                HermesProxy.GlobalSessionData globalSession = new();
                 globalSession.LoginTicket = loginTicket;
                 globalSession.Username = login;
                 globalSession.Password = password;

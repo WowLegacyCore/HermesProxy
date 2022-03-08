@@ -35,7 +35,8 @@ namespace BNetServer.Networking
         [Service(OriginalHash.ConnectionService, 7)]
         BattlenetRpcErrorCode HandleRequestDisconnect(DisconnectRequest request)
         {
-            HermesProxy.Auth.AuthClient.Disconnect();
+            if (_globalSession != null && _globalSession.AuthClient != null)
+                _globalSession.AuthClient.Disconnect();
 
             var disconnectNotification = new DisconnectNotification();
             disconnectNotification.ErrorCode = request.ErrorCode;

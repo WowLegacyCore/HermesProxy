@@ -12,7 +12,7 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AccountService, 30)]
         BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
         {
-            if (!authed)
+            if (!_authed)
                 return BattlenetRpcErrorCode.Denied;
 
             if (request.Options.FieldPrivacyInfo)
@@ -33,12 +33,12 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AccountService, 31)]
         BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
         {
-            if (!authed)
+            if (!_authed)
                 return BattlenetRpcErrorCode.Denied;
 
             if (request.Options.FieldGameLevelInfo)
             {
-                var gameAccountInfo = globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = _globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State = new GameAccountState();
@@ -58,7 +58,7 @@ namespace BNetServer.Networking
 
                 response.State.GameStatus = new GameStatus();
 
-                var gameAccountInfo = globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = _globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;

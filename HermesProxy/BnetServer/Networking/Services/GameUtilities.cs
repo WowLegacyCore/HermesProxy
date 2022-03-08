@@ -27,7 +27,7 @@ namespace BNetServer.Networking
         [Service(OriginalHash.GameUtilitiesService, 1)]
         BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
         {
-            if (!authed)
+            if (!_authed)
                 return BattlenetRpcErrorCode.Denied;
 
             Bgs.Protocol.Attribute command = null;
@@ -62,7 +62,7 @@ namespace BNetServer.Networking
         [Service(OriginalHash.GameUtilitiesService, 10)]
         BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
-            if (!authed)
+            if (!_authed)
                 return BattlenetRpcErrorCode.Denied;
 
             if (request.AttributeKey == $"Command_RealmListRequest_v1_{GetCommandEndingForVersion()}")
@@ -80,17 +80,17 @@ namespace BNetServer.Networking
             if (identity != null)
             {
                 var realmListTicketIdentity = Json.CreateObject<RealmListTicketIdentity>(identity.BlobValue.ToStringUtf8(), true);
-                var gameAccount = globalSession.AccountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
+                var gameAccount = _globalSession.AccountInfo.GameAccounts.LookupByKey(realmListTicketIdentity.GameAccountId);
                 if (gameAccount != null)
-                    globalSession.GameAccountInfo = gameAccount;
+                    _globalSession.GameAccountInfo = gameAccount;
             }
 
-            if (globalSession.GameAccountInfo == null)
+            if (_globalSession.GameAccountInfo == null)
                 return BattlenetRpcErrorCode.UtilServerInvalidIdentityArgs;
 
-            if (globalSession.GameAccountInfo.IsPermanenetlyBanned)
+            if (_globalSession.GameAccountInfo.IsPermanenetlyBanned)
                 return BattlenetRpcErrorCode.GameAccountBanned;
-            else if (globalSession.GameAccountInfo.IsBanned)
+            else if (_globalSession.GameAccountInfo.IsBanned)
                 return BattlenetRpcErrorCode.GameAccountSuspended;
 
             bool clientInfoOk = false;
@@ -101,7 +101,7 @@ namespace BNetServer.Networking
                 clientInfoOk = true;
                 int i = 0;
                 foreach (byte b in realmListTicketClientInformation.Info.Secret)
-                    clientSecret[i++] = b;
+                    _clientSecret[i++] = b;
             }
 
             if (!clientInfoOk)
@@ -131,10 +131,10 @@ namespace BNetServer.Networking
             Variant subRegion = Params.LookupByKey($"Command_LastCharPlayedRequest_v1_{GetCommandEndingForVersion()}");
             if (subRegion != null)
             {
-                var lastPlayerChar = globalSession.GameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
+                var lastPlayerChar = _globalSession.GameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
                 if (lastPlayerChar != null)
                 {
-                    var compressed = Global.RealmMgr.GetRealmEntryJSON(lastPlayerChar.RealmId, globalSession.Build);
+                    var compressed = Global.RealmMgr.GetRealmEntryJSON(lastPlayerChar.RealmId, _globalSession.Build);
                     if (compressed.Length == 0)
                         return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
@@ -171,20 +171,20 @@ namespace BNetServer.Networking
 
         BattlenetRpcErrorCode GetRealmList(Dictionary<string, Variant> Params, ClientResponse response)
         {
-            if (globalSession.GameAccountInfo == null)
+            if (_globalSession.GameAccountInfo == null)
                 return BattlenetRpcErrorCode.UserServerBadWowAccount;
 
-            if (!HermesProxy.Auth.AuthClient.IsConnected())
+            if (!_globalSession.AuthClient.IsConnected())
                 return BattlenetRpcErrorCode.UtilServerMissingRealmList;
 
-            HermesProxy.Auth.AuthClient.RequestRealmListAndWait();
+            _globalSession.AuthClient.RequestRealmListAndWait();
 
             string subRegionId = "";
             Variant subRegion = Params.LookupByKey($"Command_RealmListRequest_v1_{GetCommandEndingForVersion()}");
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
 
-            var compressed = Global.RealmMgr.GetRealmList(globalSession.Build, subRegionId);
+            var compressed = Global.RealmMgr.GetRealmList(_globalSession.Build, subRegionId);
             if (compressed.Length == 0)
                 return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
@@ -195,7 +195,7 @@ namespace BNetServer.Networking
             response.Attribute.Add(attribute);
 
             var realmCharacterCounts = new RealmCharacterCountList();
-            foreach (var characterCount in globalSession.GameAccountInfo.CharacterCounts)
+            foreach (var characterCount in _globalSession.GameAccountInfo.CharacterCounts)
             {
                 var countEntry = new RealmCharacterCountEntry();
                 countEntry.WowRealmAddress = (int)characterCount.Key;
@@ -217,7 +217,7 @@ namespace BNetServer.Networking
         {
             Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
-                return Global.RealmMgr.JoinRealm(globalSession, (uint)realmAddress.UintValue, globalSession.Build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), globalSession.Locale), globalSession.OS, globalSession.GameAccountInfo.Name, response);
+                return Global.RealmMgr.JoinRealm(_globalSession, (uint)realmAddress.UintValue, _globalSession.Build, GetRemoteIpEndPoint().Address, _clientSecret, _globalSession.GameAccountInfo.Name, response);
 
             return BattlenetRpcErrorCode.WowServicesInvalidJoinTicket;
         }

@@ -1,13 +1,10 @@
-﻿using HermesProxy.World;
+﻿using HermesProxy.Auth;
+using HermesProxy.World;
 using HermesProxy.World.Client;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy
 {
@@ -196,6 +193,7 @@ namespace HermesProxy
         public GameSessionData GameState = new();
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;
+        public AuthClient AuthClient;
         public WorldClient WorldClient;
         public SniffFile ModernSniff;
 
@@ -217,8 +215,11 @@ namespace HermesProxy
 
         public void OnDisconnect()
         {
-            HermesProxy.Auth.AuthClient.Disconnect();
-
+            if (AuthClient != null)
+            {
+                AuthClient.Disconnect();
+                AuthClient = null;
+            }
             if (WorldClient != null)
             {
                 WorldClient.Disconnect();
