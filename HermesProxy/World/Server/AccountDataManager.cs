@@ -107,6 +107,8 @@ namespace HermesProxy.World.Server
 
         public void SaveData(WowGuid128 guid, long timestamp, uint type, uint uncompressedSize, byte[] compressedData)
         {
+            if (compressedData == null)
+                return;
             if (Data[type] == null)
                 Data[type] = new();
 

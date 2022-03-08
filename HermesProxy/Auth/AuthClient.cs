@@ -23,11 +23,13 @@ namespace HermesProxy.Auth
         bool _hasRealmList;
         string _username;
         string _password;
+        string _locale;
 
-        public bool ConnectToAuthServer(string username, string password)
+        public bool ConnectToAuthServer(string username, string password, string locale)
         {
             _username = username;
             _password = password;
+            _locale = locale;
 
             _isSuccessful = null;
             _hasRealmList = false;
@@ -182,15 +184,15 @@ namespace HermesProxy.Auth
             buffer.WriteUInt16((UInt16)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
             buffer.WriteUInt8(0);
-            buffer.WriteUInt8(Settings.GetServerExpansionVersion());
-            buffer.WriteUInt8(Settings.GetServerMajorPatchVersion());
-            buffer.WriteUInt8(Settings.GetServerMinorPatchVersion());
+            buffer.WriteUInt8(LegacyVersion.GetExpansionVersion());
+            buffer.WriteUInt8(LegacyVersion.GetMajorPatchVersion());
+            buffer.WriteUInt8(LegacyVersion.GetMinorPatchVersion());
             buffer.WriteUInt16((ushort)Settings.ServerBuild);
             buffer.WriteBytes(Encoding.ASCII.GetBytes("68x"));
             buffer.WriteUInt8(0);
             buffer.WriteBytes(Encoding.ASCII.GetBytes("niW"));
             buffer.WriteUInt8(0);
-            buffer.WriteBytes(Encoding.ASCII.GetBytes("SUne"));
+            buffer.WriteBytes(Encoding.ASCII.GetBytes(_locale.Reverse()));
             buffer.WriteUInt32((uint)0x3c);
             buffer.WriteUInt32(0); // IP
             buffer.WriteUInt8((byte)_username.Length);

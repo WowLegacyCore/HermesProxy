@@ -77,8 +77,26 @@ namespace BNetServer.Networking
             }
 
             HermesProxy.GlobalSessionData globalSession = new();
+
+            // We pass OS, Build and Locale in Path from HandleLogon
+            string str = request.Path;
+            str = str.Replace("/bnetserver/login/", "");
+            str = str.Substring(0, str.IndexOf("/"));
+            globalSession.OS = str;
+            str = request.Path;
+            str = str.Replace("/bnetserver/login/", "");
+            str = str.Substring(str.IndexOf('/') + 1);
+            str = str.Substring(0, str.IndexOf("/"));
+            globalSession.Build = UInt32.Parse(str);
+            str = request.Path;
+            str = str.Replace("/bnetserver/login/", "");
+            str = str.Substring(str.IndexOf('/') + 1);
+            str = str.Substring(str.IndexOf('/') + 1);
+            str = str.Substring(0, str.IndexOf("/"));
+            globalSession.Locale = str;
+
             globalSession.AuthClient = new();
-            if (globalSession.AuthClient.ConnectToAuthServer(login, password))
+            if (globalSession.AuthClient.ConnectToAuthServer(login, password, globalSession.Locale))
             {
                 string loginTicket = "";
                 uint loginTicketExpiry = (uint)(Time.UnixTime + 3600);
@@ -92,24 +110,6 @@ namespace BNetServer.Networking
                 globalSession.LoginTicket = loginTicket;
                 globalSession.Username = login;
                 globalSession.Password = password;
-
-                // We pass OS, Build and Locale in Path from HandleLogon
-                string str = request.Path;
-                str = str.Replace("/bnetserver/login/", "");
-                str = str.Substring(0, str.IndexOf("/"));
-                globalSession.OS = str;
-                str = request.Path;
-                str = str.Replace("/bnetserver/login/", "");
-                str = str.Substring(str.IndexOf('/') + 1);
-                str = str.Substring(0, str.IndexOf("/"));
-                globalSession.Build = UInt32.Parse(str);
-                str = request.Path;
-                str = str.Replace("/bnetserver/login/", "");
-                str = str.Substring(str.IndexOf('/') + 1);
-                str = str.Substring(str.IndexOf('/') + 1);
-                str = str.Substring(0, str.IndexOf("/"));
-                globalSession.Locale = str;
-
                 Global.AddNewSessionByName(login, globalSession);
                 Global.AddNewSessionByTicket(loginTicket, globalSession);
 

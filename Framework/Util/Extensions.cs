@@ -98,15 +98,6 @@ namespace System
             return subArray;
         }
 
-        public static byte[] ToCString(this string str)
-        {
-            byte[] utf8StringBytes = Encoding.UTF8.GetBytes(str);
-            byte[] data = new byte[utf8StringBytes.Length + 1];
-            Array.Copy(utf8StringBytes, data, utf8StringBytes.Length);
-            data[data.Length - 1] = 0;
-            return data;
-        }
-
         public static IEnumerable<T> GetAttributes<T>(this MemberInfo member, bool inherit)
             where T : Attribute
         {
@@ -159,24 +150,6 @@ namespace System
                 return byteArray.Reverse().Aggregate("", (current, b) => current + b.ToString("X2"));
             else
                 return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
-        }
-        
-        public static byte[] ToByteArray(this string str)
-        {
-            str = str.Replace(" ", String.Empty);
-
-            var res = new byte[str.Length / 2];
-            for (int i = 0; i < res.Length; ++i)
-            {
-                string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
-                res[i] = Convert.ToByte(temp, 16);
-            }
-            return res;
-        }
-
-        public static byte[] ToByteArray(this string value, char separator)
-        {
-            return Array.ConvertAll(value.Split(separator), byte.Parse);
         }
 
         static uint LeftRotate(this uint value, int shiftCount)
@@ -325,6 +298,40 @@ namespace System
                 return default;
 
             return value;
+        }
+
+        public static string Reverse(this string str)
+        {
+            char[] charArray = str.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
+        public static byte[] ToCString(this string str)
+        {
+            byte[] utf8StringBytes = Encoding.UTF8.GetBytes(str);
+            byte[] data = new byte[utf8StringBytes.Length + 1];
+            Array.Copy(utf8StringBytes, data, utf8StringBytes.Length);
+            data[data.Length - 1] = 0;
+            return data;
+        }
+
+        public static byte[] ToByteArray(this string str)
+        {
+            str = str.Replace(" ", String.Empty);
+
+            var res = new byte[str.Length / 2];
+            for (int i = 0; i < res.Length; ++i)
+            {
+                string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
+                res[i] = Convert.ToByte(temp, 16);
+            }
+            return res;
+        }
+
+        public static byte[] ToByteArray(this string value, char separator)
+        {
+            return Array.ConvertAll(value.Split(separator), byte.Parse);
         }
 
         public static string ConvertFormatSyntax(this string str)

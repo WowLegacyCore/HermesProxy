@@ -8,6 +8,7 @@ using Framework.Logging;
 using Framework.Serialization;
 using Framework.Web;
 using Google.Protobuf;
+using HermesProxy;
 using System;
 using System.Collections.Generic;
 
@@ -17,9 +18,9 @@ namespace BNetServer.Networking
     {
         string GetCommandEndingForVersion()
         {
-            if (Framework.Settings.GetClientExpansionVersion() == 1)
+            if (ModernVersion.GetExpansionVersion() == 1)
                 return "c1";
-            if (Framework.Settings.GetClientExpansionVersion() == 2)
+            if (ModernVersion.GetExpansionVersion() == 2)
                 return "bcc1";
             return "b9";
         }

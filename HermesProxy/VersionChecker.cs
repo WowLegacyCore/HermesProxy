@@ -150,6 +150,29 @@ namespace HermesProxy
 
         public static string VersionString => Build.ToString();
 
+        public static byte GetExpansionVersion()
+        {
+            string str = VersionString;
+            str = str.Replace("V", "");
+            str = str.Substring(0, str.IndexOf("_"));
+            return (byte)UInt32.Parse(str);
+        }
+        public static byte GetMajorPatchVersion()
+        {
+            string str = VersionString;
+            str = str.Substring(str.IndexOf('_') + 1);
+            str = str.Substring(0, str.IndexOf("_"));
+            return (byte)UInt32.Parse(str);
+        }
+        public static byte GetMinorPatchVersion()
+        {
+            string str = VersionString;
+            str = str.Substring(str.IndexOf('_') + 1);
+            str = str.Substring(str.IndexOf('_') + 1);
+            str = str.Substring(0, str.IndexOf("_"));
+            return (byte)UInt32.Parse(str);
+        }
+
         public static bool InVersion(ClientVersionBuild build1, ClientVersionBuild build2)
         {
             return AddedInVersion(build1) && RemovedInVersion(build2);
@@ -342,6 +365,29 @@ namespace HermesProxy
 
         public static string VersionString => Build.ToString();
 
+        public static byte GetExpansionVersion()
+        {
+            string str = VersionString;
+            str = str.Replace("V", "");
+            str = str.Substring(0, str.IndexOf("_"));
+            return (byte)UInt32.Parse(str);
+        }
+        public static byte GetMajorPatchVersion()
+        {
+            string str = VersionString;
+            str = str.Substring(str.IndexOf('_') + 1);
+            str = str.Substring(0, str.IndexOf("_"));
+            return (byte)UInt32.Parse(str);
+        }
+        public static byte GetMinorPatchVersion()
+        {
+            string str = VersionString;
+            str = str.Substring(str.IndexOf('_') + 1);
+            str = str.Substring(str.IndexOf('_') + 1);
+            str = str.Substring(0, str.IndexOf("_"));
+            return (byte)UInt32.Parse(str);
+        }
+
         public static bool InVersion(ClientVersionBuild build1, ClientVersionBuild build2)
         {
             return AddedInVersion(build1) && RemovedInVersion(build2);
@@ -359,7 +405,7 @@ namespace HermesProxy
 
         public static int GetAccountDataCount()
         {
-            int count = (Settings.GetClientExpansionVersion() == 1) ? 10 : 8;
+            int count = (GetExpansionVersion() == 1) ? 10 : 8;
             return count;
         }
 

@@ -806,8 +806,8 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(8, 0, 0));
                 availableRaces.Add(race);
 
-                if (Framework.Settings.GetClientExpansionVersion() >= 2 &&
-                    Framework.Settings.GetServerExpansionVersion() >= 2)
+                if (ModernVersion.GetExpansionVersion() >= 2 &&
+                    LegacyVersion.GetExpansionVersion() >= 2)
                 {
                     race = new RaceClassAvailability();
                     race.RaceID = 10;

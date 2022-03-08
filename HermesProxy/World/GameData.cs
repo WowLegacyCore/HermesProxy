@@ -118,7 +118,7 @@ namespace HermesProxy.World
         }
         public static void LoadBroadcastTexts()
         {
-            var path = $"CSV\\BroadcastTexts{Settings.GetClientExpansionVersion()}.csv";
+            var path = $"CSV\\BroadcastTexts{ModernVersion.GetExpansionVersion()}.csv";
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
@@ -150,7 +150,7 @@ namespace HermesProxy.World
         }
         public static void LoadItemTemplates()
         {
-            var path = $"CSV\\Items{Settings.GetClientExpansionVersion()}.csv";
+            var path = $"CSV\\Items{ModernVersion.GetExpansionVersion()}.csv";
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
@@ -175,7 +175,7 @@ namespace HermesProxy.World
         }
         public static void LoadSpellVisuals()
         {
-            var path = $"CSV\\SpellVisuals{Settings.GetClientExpansionVersion()}.csv";
+            var path = $"CSV\\SpellVisuals{ModernVersion.GetExpansionVersion()}.csv";
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };

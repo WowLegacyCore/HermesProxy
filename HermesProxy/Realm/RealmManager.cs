@@ -26,6 +26,7 @@ using System.Timers;
 using System.Collections.Concurrent;
 using Framework.Realm;
 using Framework.Logging;
+using HermesProxy;
 
 public class RealmManager : Singleton<RealmManager>
 {
@@ -41,15 +42,16 @@ public class RealmManager : Singleton<RealmManager>
     void LoadBuildInfo()
     {
         RealmBuildInfo build = new RealmBuildInfo();
-        build.MajorVersion = Framework.Settings.GetClientExpansionVersion();
-        build.MinorVersion = Framework.Settings.GetClientMajorPatchVersion();
-        build.BugfixVersion = Framework.Settings.GetClientMinorPatchVersion();
+        build.MajorVersion = ModernVersion.GetExpansionVersion();
+        build.MinorVersion = ModernVersion.GetMajorPatchVersion();
+        build.BugfixVersion = ModernVersion.GetMinorPatchVersion();
+
         string hotfixVersion = "";
         if (!hotfixVersion.IsEmpty() && hotfixVersion.Length < build.HotfixVersion.Length)
             build.HotfixVersion = hotfixVersion.ToCharArray();
 
         build.Build = (uint)Framework.Settings.ClientBuild;
-        string win64AuthSeedHexStr = "179D3DC3235629D07113A9B3867F97A7";
+        string win64AuthSeedHexStr = Framework.Settings.ClientSeed;
         if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
             build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 

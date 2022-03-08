@@ -105,8 +105,8 @@ namespace HermesProxy.World.Client
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(6, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(7, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(8, true, false, false));
-            if (Framework.Settings.GetClientExpansionVersion() >= 2 &&
-                Framework.Settings.GetServerExpansionVersion() >= 2)
+            if (ModernVersion.GetExpansionVersion() >= 2 &&
+                LegacyVersion.GetExpansionVersion() >= 2)
             {
                 charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(10, true, false, false));
                 charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(11, true, false, false));
