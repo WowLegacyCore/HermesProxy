@@ -23,6 +23,12 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
+            if (logonRequest.ApplicationVersion != HermesProxy.ModernVersion.BuildInt)
+            {
+                Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with wrong game version (using {logonRequest.ApplicationVersion})!");
+                return BattlenetRpcErrorCode.BadProgram;
+            }
+
             if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64")
             {
                 Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in from an unsupported platform (using {logonRequest.Platform})!");

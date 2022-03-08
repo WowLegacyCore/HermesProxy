@@ -39,7 +39,7 @@ namespace HermesProxy.Auth
 
             try
             {
-                Log.Print(LogType.Server, "Connecting to auth server...");
+                Log.Print(LogType.Network, "Connecting to auth server...");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), 3724);
@@ -170,7 +170,7 @@ namespace HermesProxy.Auth
                     HandleRealmList(packet);
                     break;
                 default:
-                    Log.Print(LogType.Error, "Unsupported opcode!");
+                    Log.Print(LogType.Error, $"No handler for opcode {opcode}!");
                     _isSuccessful = false;
                     break;
             }
@@ -412,7 +412,7 @@ namespace HermesProxy.Auth
             }
             else
             {
-                Log.Print(LogType.Server, "Authentication succeeded!");
+                Log.Print(LogType.Network, "Authentication succeeded!");
                 _isSuccessful = true;
             }
         }
@@ -449,7 +449,7 @@ namespace HermesProxy.Auth
                 realmsCount = packet.ReadUInt16();
             }
 
-            Log.Print(LogType.Server, $"Received {realmsCount} realms.");
+            Log.Print(LogType.Network, $"Received {realmsCount} realms.");
             List<RealmInfo> realmList = new List<RealmInfo>();
 
             for (ushort i = 0; i < realmsCount; i++)

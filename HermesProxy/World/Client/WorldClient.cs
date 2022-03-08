@@ -53,7 +53,7 @@ namespace HermesProxy.World.Client
 
             try
             {
-                Log.Print(LogType.Server, "Connecting to world server...");
+                Log.Print(LogType.Network, "Connecting to world server...");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(realm.ExternalAddress, realm.Port);
@@ -108,7 +108,7 @@ namespace HermesProxy.World.Client
         {
             try
             {
-                Log.Print(LogType.Debug, "Connection established!");
+                Log.Print(LogType.Network, "Connection established!");
 
                 _clientSocket.EndConnect(AR);
                 _clientSocket.ReceiveBufferSize = 65535;
@@ -342,7 +342,7 @@ namespace HermesProxy.World.Client
         private void HandlePacket(WorldPacket packet)
         {
             Opcode universalOpcode = packet.GetUniversalOpcode(false);
-            Log.Print(LogType.Debug, $"Received opcode {universalOpcode.ToString()} ({packet.GetOpcode()}).");
+            Log.Print(LogType.Debug, $"Received opcode {universalOpcode} ({packet.GetOpcode()}).");
 
             switch (universalOpcode)
             {
@@ -351,9 +351,6 @@ namespace HermesProxy.World.Client
                     break;
                 case Opcode.SMSG_AUTH_RESPONSE:
                     HandleAuthResponse(packet);
-                    break;
-                case Opcode.SMSG_WARDEN_DATA:
-                    Log.Print(LogType.Error, "Server has warden enabled! You may get disconnected in a few seconds.");
                     break;
                 case Opcode.SMSG_PONG:
                 case Opcode.SMSG_ADDON_INFO:
@@ -365,7 +362,7 @@ namespace HermesProxy.World.Client
                     }
                     else
                     {
-                        Log.Print(LogType.Error, "Unsupported opcode!");
+                        Log.Print(LogType.Warn, $"No handler for opcode {universalOpcode} ({packet.GetOpcode()})");
                         if (_isSuccessful == null)
                             _isSuccessful = false;
                     }
@@ -461,12 +458,12 @@ namespace HermesProxy.World.Client
 
             if (result == AuthResult.AUTH_OK)
             {
-                Log.Print(LogType.Server, "Authentication succeeded!");
+                Log.Print(LogType.Network, "Authentication succeeded!");
                 _isSuccessful = true;
             }
             else
             {
-                Log.Print(LogType.Server, "Authentication failed!");
+                Log.Print(LogType.Network, "Authentication failed!");
                 _isSuccessful = false;
             }
         }

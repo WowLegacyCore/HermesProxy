@@ -20,8 +20,6 @@ namespace HermesProxy.World.Client
 
             string channelName = packet.ReadCString();
 
-            Console.WriteLine("Notify " + type + " channel " + channelName);
-
             switch (type)
             {
                 case ChatNotify.PlayerAlreadyMember:

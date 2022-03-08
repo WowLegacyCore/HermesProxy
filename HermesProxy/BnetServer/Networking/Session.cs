@@ -147,11 +147,15 @@ namespace BNetServer.Networking
         public string GetClientInfo()
         {
             string stream = '[' + GetRemoteIpEndPoint().ToString();
-            if (_globalSession.AccountInfo != null && !_globalSession.AccountInfo.Login.IsEmpty())
-                stream += ", Account: " + _globalSession.AccountInfo.Login;
 
-            if (_globalSession.GameAccountInfo != null)
-                stream += ", Game account: " + _globalSession.GameAccountInfo.Name;
+            if (_globalSession != null)
+            {
+                if (_globalSession.AccountInfo != null && !_globalSession.AccountInfo.Login.IsEmpty())
+                    stream += ", Account: " + _globalSession.AccountInfo.Login;
+
+                if (_globalSession.GameAccountInfo != null)
+                    stream += ", Game account: " + _globalSession.GameAccountInfo.Name;
+            }
 
             stream += ']';
 

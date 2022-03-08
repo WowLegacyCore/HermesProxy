@@ -247,7 +247,7 @@ namespace HermesProxy.World.Server
 
             Opcode opcode = packet.GetUniversalOpcode(true);
 
-            Log.Print(LogType.Network, $"Received opcode {opcode.ToString()} ({packet.GetOpcode()}).");
+            Log.Print(LogType.Debug, $"Received opcode {opcode.ToString()} ({packet.GetOpcode()}).");
 
             if (opcode != Opcode.CMSG_HOTFIX_REQUEST && !header.IsValidSize())
             {
@@ -316,6 +316,8 @@ namespace HermesProxy.World.Server
             var handler = GetHandler(packet.GetUniversalOpcode(true));
             if (handler != null)
                 handler.Invoke(this, packet);
+            else
+                Log.Print(LogType.Warn, $"No handler for opcode {packet.GetUniversalOpcode(true)} ({packet.GetOpcode()})");
         }
 
         private void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
@@ -344,7 +346,7 @@ namespace HermesProxy.World.Server
             Opcode universalOpcode = packet.GetUniversalOpcode();
             ushort opcode = (ushort)packet.GetOpcode();
 
-            Log.Print(LogType.Network, $"Sending opcode {universalOpcode.ToString()} ({(uint)opcode}).");
+            Log.Print(LogType.Debug, $"Sending opcode {universalOpcode} ({(uint)opcode}).");
 
             ByteBuffer buffer = new();
 
@@ -1033,10 +1035,7 @@ namespace HermesProxy.World.Server
                         continue;
 
                     if (msgAttr.Opcode == Opcode.MSG_NULL_ACTION)
-                    {
-                        Log.Print(LogType.Error, $"Opcode {msgAttr.Opcode} does not have a value");
                         continue;
-                    }
 
                     if (_clientPacketTable.ContainsKey(msgAttr.Opcode))
                     {

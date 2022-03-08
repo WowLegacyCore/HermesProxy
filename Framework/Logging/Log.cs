@@ -50,6 +50,9 @@ namespace Framework.Logging
                     if (!logQueue.TryTake(out var msg))
                         continue;
 
+                    if (msg.Type == LogType.Debug && !Framework.Settings.DebugOutput)
+                        continue;
+
                     Console.Write($"{DateTime.Now:H:mm:ss} |");
 
                     Console.ForegroundColor = LogToColorType[msg.Type].Color;
