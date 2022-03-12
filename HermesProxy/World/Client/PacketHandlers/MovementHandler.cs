@@ -127,7 +127,7 @@ namespace HermesProxy.World.Client
         void HandleTransferPending(WorldPacket packet)
         {
             TransferPending transfer = new TransferPending();
-            transfer.MapID = packet.ReadInt32();
+            transfer.MapID = GetSession().GameState.PendingTransferMapId = packet.ReadUInt32();
             transfer.OldMapPosition = Vector3.Zero;
             SendPacketToClient(transfer);
             GetSession().GameState.IsFirstEnterWorld = false;
@@ -143,9 +143,23 @@ namespace HermesProxy.World.Client
         void HandleTransferAborted(WorldPacket packet)
         {
             TransferAborted transfer = new TransferAborted();
-            transfer.MapID = packet.ReadUInt32();
-            transfer.Reason = (TransferAbortReason)packet.ReadUInt8();
-            transfer.Arg = packet.ReadUInt8();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                transfer.MapID = packet.ReadUInt32();
+            else
+                transfer.MapID = GetSession().GameState.PendingTransferMapId;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                transfer.Reason = (TransferAbortReasonModern)packet.ReadUInt8();
+            else
+            {
+                TransferAbortReasonLegacy legacyReason = (TransferAbortReasonLegacy)packet.ReadUInt8();
+                transfer.Reason = (TransferAbortReasonModern)Enum.Parse(typeof(TransferAbortReasonModern), legacyReason.ToString());
+            }
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                transfer.Arg = packet.ReadUInt8();
+
             SendPacketToClient(transfer);
             GetSession().GameState.IsWaitingForNewWorld = false;
         }

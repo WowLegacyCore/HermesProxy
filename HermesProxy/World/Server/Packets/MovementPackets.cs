@@ -223,7 +223,7 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteVector3(OldMapPosition);
             _worldPacket.WriteBit(Ship != null);
             _worldPacket.WriteBit(TransferSpellID.HasValue);
@@ -240,7 +240,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.FlushBits();
         }
 
-        public int MapID = -1;
+        public uint MapID;
         public Vector3 OldMapPosition;
         public ShipTransferPending Ship;
         public int? TransferSpellID;
@@ -260,15 +260,15 @@ namespace HermesProxy.World.Server.Packets
         {
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt8(Arg);
-            _worldPacket.WriteUInt32(MapDifficultyXConditionID);
-            _worldPacket.WriteBits(Reason, 5);
+            _worldPacket.WriteInt32(MapDifficultyXConditionID);
+            _worldPacket.WriteBits(Reason, 6);
             _worldPacket.FlushBits();
         }
 
         public uint MapID;
         public byte Arg;
-        public uint MapDifficultyXConditionID;
-        public TransferAbortReason Reason;
+        public int MapDifficultyXConditionID = -6;
+        public TransferAbortReasonModern Reason;
     }
 
     public class NewWorld : ServerPacket

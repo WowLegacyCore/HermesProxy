@@ -25,6 +25,7 @@ namespace HermesProxy
         public bool IsInWorld;
         public uint? CurrentMapId;
         public uint CurrentTaxiNode;
+        public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
