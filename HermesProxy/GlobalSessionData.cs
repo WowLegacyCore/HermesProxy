@@ -28,6 +28,7 @@ namespace HermesProxy
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
+        public uint LastWhoRequestId;
         public uint LastClientCastId;
         public WowGuid128 LastClientCastGuid;
         public WowGuid128 LastLootTargetGuid;
@@ -196,6 +197,17 @@ namespace HermesProxy
         public AuthClient AuthClient;
         public WorldClient WorldClient;
         public SniffFile ModernSniff;
+        public Dictionary<string, WowGuid128> Guilds;
+
+        public WowGuid128 GetGuildGuid(string name)
+        {
+            if (Guilds.ContainsKey(name))
+                return Guilds[name];
+
+            WowGuid128 guid = WowGuid128.Create(HighGuidType703.Guild, (ulong)(Guilds.Count + 1));
+            Guilds.Add(name, guid);
+            return guid;
+        }
 
         public WowGuid128 GetGameAccountGuidForPlayer(WowGuid128 playerGuid)
         {

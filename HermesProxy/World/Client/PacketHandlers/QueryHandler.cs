@@ -474,5 +474,40 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(response);
         }
+        [PacketHandler(Opcode.SMSG_WHO)]
+        void HandleWhoResponse(WorldPacket packet)
+        {
+            WhoResponsePkt response = new WhoResponsePkt();
+            response.RequestID = GetSession().GameState.LastWhoRequestId;
+            var count = packet.ReadUInt32();
+            packet.ReadUInt32(); // Online count
+            for (var i = 0; i < count; ++i)
+            {
+                WhoEntry player = new();
+                player.PlayerData.Name = packet.ReadCString();
+                player.GuildName = packet.ReadCString();
+                player.PlayerData.Level = (byte)packet.ReadUInt32();
+                player.PlayerData.ClassID = (Class)packet.ReadUInt32();
+                player.PlayerData.RaceID = (Race)packet.ReadUInt32();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    player.PlayerData.Sex = (Gender)packet.ReadUInt8();
+                player.AreaID = packet.ReadInt32();
+
+                player.PlayerData.GuidActual = GetSession().GameState.GetPlayerGuidByName(player.PlayerData.Name);
+                if (player.PlayerData.GuidActual == null)
+                    player.PlayerData.GuidActual = WowGuid128.Create(HighGuidType703.Player, 20000 + count);
+                player.PlayerData.AccountID = GetSession().GetGameAccountGuidForPlayer(player.PlayerData.GuidActual);
+                player.PlayerData.BnetAccountID = GetSession().GetBnetAccountGuidForPlayer(player.PlayerData.GuidActual);
+                player.PlayerData.VirtualRealmAddress = GetSession().RealmId.GetAddress();
+
+                if (!String.IsNullOrEmpty(player.GuildName))
+                {
+                    player.GuildGUID = GetSession().GetGuildGuid(player.GuildName);
+                    player.GuildVirtualRealmAddress = player.PlayerData.VirtualRealmAddress;
+                }
+                response.Players.Add(player);
+            }
+            SendPacketToClient(response);
+        }
     }
 }
