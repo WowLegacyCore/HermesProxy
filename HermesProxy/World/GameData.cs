@@ -16,6 +16,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
+        public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
 
         public static ItemTemplate GetItemTemplate(uint entry)
         {
@@ -46,6 +47,22 @@ namespace HermesProxy.World
             if (LearnSpells.TryGetValue(learnSpellId, out realSpellId))
                 return realSpellId;
             return learnSpellId;
+        }
+        public static uint GetGemFromEnchantId(uint enchantId)
+        {
+            uint itemId;
+            if (Gems.TryGetValue(enchantId, out itemId))
+                return itemId;
+            return 0;
+        }
+        public static uint GetEnchantIdFromGem(uint itemId)
+        {
+            foreach (var itr in Gems)
+            {
+                if (itr.Value == itemId)
+                    return itr.Key;
+            }
+            return 0;
         }
         public static int GetTransportPeriod(int entry)
         {
@@ -114,6 +131,7 @@ namespace HermesProxy.World
             LoadItemTemplates();
             LoadSpellVisuals();
             LoadLearnSpells();
+            LoadGems();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
         public static void LoadBroadcastTexts()
@@ -218,6 +236,33 @@ namespace HermesProxy.World
                     uint realSpellId = UInt32.Parse(fields[1]);
                     if (!LearnSpells.ContainsKey(learnSpellId))
                         LearnSpells.Add(learnSpellId, realSpellId);
+                }
+            }
+        }
+
+        public static void LoadGems()
+        {
+            if (ModernVersion.GetExpansionVersion() <= 1)
+                return;
+
+            var path = $"CSV\\Gems{ModernVersion.GetExpansionVersion()}.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint enchantId = UInt32.Parse(fields[0]);
+                    uint itemId = UInt32.Parse(fields[1]);
+                    Gems.Add(enchantId, itemId);
                 }
             }
         }

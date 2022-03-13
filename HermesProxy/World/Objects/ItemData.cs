@@ -33,5 +33,8 @@ namespace HermesProxy.World.Objects
         public int? Context;
         public ulong? ArtifactXP;
         public uint? ItemAppearanceModID;
+
+        // Dynamic Fields
+        public bool HasGemsUpdate;
     }
 }

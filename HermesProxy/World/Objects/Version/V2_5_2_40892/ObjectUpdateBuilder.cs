@@ -747,6 +747,17 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                     m_fields.SetUpdateField<ulong>(ItemField.ITEM_FIELD_ARTIFACT_XP, (ulong)itemData.ArtifactXP);
                 if (itemData.ItemAppearanceModID != null)
                     m_fields.SetUpdateField<uint>(ItemField.ITEM_FIELD_APPEARANCE_MOD_ID, (uint)itemData.ItemAppearanceModID);
+
+                // Dynamic Fields
+                if (itemData.HasGemsUpdate)
+                {
+                    uint[] fields = new uint[30];
+                    uint[] gems = m_gameState.GetGemsForItem(m_updateData.Guid);
+                    fields[0] = (uint)gems[0];
+                    fields[10] = (uint)gems[1];
+                    fields[20] = (uint)gems[2];
+                    m_dynamicFields.SetUpdateField((int)ItemDynamicField.ITEM_DYNAMIC_FIELD_GEMS, fields, DynamicFieldChangeType.ValueAndSizeChanged);
+                }
             }
 
             ContainerData containerData = m_updateData.ContainerData;

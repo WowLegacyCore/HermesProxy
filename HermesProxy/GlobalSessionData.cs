@@ -38,12 +38,36 @@ namespace HermesProxy
         public Dictionary<WowGuid128, Dictionary<int, UpdateField>> ObjectCacheLegacy = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> ObjectCacheModern = new();
         public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
+        public Dictionary<WowGuid128, uint[]> ItemGems = new();
         public Dictionary<uint, Class> CreatureClasses = new();
         public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
 
+        public uint[] GetGemsForItem(WowGuid128 guid)
+        {
+            if (ItemGems.ContainsKey(guid))
+                return ItemGems[guid];
+            return null;
+        }
+        public void SaveGemsForItem(WowGuid128 guid, uint?[] gems)
+        {
+            uint[] existing;
+            if (ItemGems.ContainsKey(guid))
+                existing = ItemGems[guid];
+            else
+            {
+                existing = new uint[ItemConst.MaxGemSockets];
+                ItemGems.Add(guid, existing);
+            }
+
+            for (int i = 0; i < ItemConst.MaxGemSockets; i++)
+            {
+                if (gems[i] != null)
+                    existing[i] = (uint)gems[i];
+            }
+        }
         public WowGuid128 GetPetGuidByNumber(uint petNumber)
         {
             foreach (var itr in ObjectCacheModern)

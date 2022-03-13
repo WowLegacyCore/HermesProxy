@@ -6,6 +6,40 @@ using System.Threading.Tasks;
 
 namespace HermesProxy.World.Enums
 {
+    public struct ItemConst
+    {
+        public const int MaxDamages = 2;                           // changed in 3.1.0
+        public const int MaxGemSockets = 3;
+        public const int MaxSpells = 5;
+        public const int MaxStats = 10;
+        public const int MaxBagSize = 36;
+        public const byte NullBag = 0;
+        public const byte NullSlot = 255;
+        public const int MaxOutfitItems = 24;
+        public const int MaxItemExtCostItems = 5;
+        public const int MaxItemExtCostCurrencies = 5;
+        public const int MaxItemEnchantmentEffects = 3;
+        public const int MaxProtoSpells = 5;
+        public const int MaxEquipmentSetIndex = 20;
+
+        public const int MaxItemSubclassTotal = 21;
+
+        public const int MaxItemSetItems = 17;
+        public const int MaxItemSetSpells = 8;
+
+        public static uint[] ItemQualityColors =
+        {
+            0xff9d9d9d, // GREY
+            0xffffffff, // WHITE
+            0xff1eff00, // GREEN
+            0xff0070dd, // BLUE
+            0xffa335ee, // PURPLE
+            0xffff8000, // ORANGE
+            0xffe6cc80, // LIGHT YELLOW
+            0xffe6cc80  // LIGHT YELLOW
+        };
+    }
+
     public enum ItemModifier
     {
         TransmogAppearanceAllSpecs = 0,

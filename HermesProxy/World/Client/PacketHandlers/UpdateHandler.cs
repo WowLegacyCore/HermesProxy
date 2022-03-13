@@ -844,7 +844,7 @@ namespace HermesProxy.World.Client
             }
         }
 
-        public void StoreObjectUpdate(WowGuid guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
+        public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
         {
             // Object Fields
             int OBJECT_FIELD_GUID = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_GUID);
@@ -916,35 +916,94 @@ namespace HermesProxy.World.Client
                 int ITEM_FIELD_ENCHANTMENT = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_ENCHANTMENT);
                 if (ITEM_FIELD_ENCHANTMENT >= 0)
                 {
-                    int enchantSlotsCount = 7;
                     int sizePerEntry = 3;
-                    for (int i = 0; i < enchantSlotsCount; i++)
+
+                    Func<int, ItemEnchantment> ReadEnchantData = delegate (int slot)
                     {
-                        int idIndex = ITEM_FIELD_ENCHANTMENT + i * sizePerEntry;
+                        ItemEnchantment enchantment = null;
+                        int idIndex = ITEM_FIELD_ENCHANTMENT + slot * sizePerEntry;
                         int durationIndex = idIndex + 1;
                         int chargesIndex = durationIndex + 1;
                         if (updateMaskArray[idIndex])
                         {
-                            if (updateData.ItemData.Enchantment[i] == null)
-                                updateData.ItemData.Enchantment[i] = new ItemEnchantment();
+                            if (enchantment == null)
+                                enchantment = new ItemEnchantment();
 
-                            updateData.ItemData.Enchantment[i].ID = updates[idIndex].Int32Value;
+                            enchantment.ID = updates[idIndex].Int32Value;
                         }
                         if (updateMaskArray[durationIndex])
                         {
-                            if (updateData.ItemData.Enchantment[i] == null)
-                                updateData.ItemData.Enchantment[i] = new ItemEnchantment();
+                            if (enchantment == null)
+                                enchantment = new ItemEnchantment();
 
-                            updateData.ItemData.Enchantment[i].Duration = updates[durationIndex].UInt32Value;
+                            enchantment.Duration = updates[durationIndex].UInt32Value;
                         }
                         if (updateMaskArray[chargesIndex])
                         {
-                            if (updateData.ItemData.Enchantment[i] == null)
-                                updateData.ItemData.Enchantment[i] = new ItemEnchantment();
+                            if (enchantment == null)
+                                enchantment = new ItemEnchantment();
 
-                            updateData.ItemData.Enchantment[i].Charges = (ushort)updates[chargesIndex].UInt32Value;
+                            enchantment.Charges = (ushort)updates[chargesIndex].UInt32Value;
+                        }
+                        return enchantment;
+                    };
+
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    {
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Perm] = ReadEnchantData(Enums.Vanilla.EnchantmentSlot.Perm);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Temp] = ReadEnchantData(Enums.Vanilla.EnchantmentSlot.Temp);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop0] = ReadEnchantData(Enums.Vanilla.EnchantmentSlot.Prop0);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop1] = ReadEnchantData(Enums.Vanilla.EnchantmentSlot.Prop1);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop2] = ReadEnchantData(Enums.Vanilla.EnchantmentSlot.Prop2);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop3] = ReadEnchantData(Enums.Vanilla.EnchantmentSlot.Prop3);
+                    }
+                    else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    {
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Perm] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Perm);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Temp] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Temp);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Sock1] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Sock1);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Sock2] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Sock2);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Sock3] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Sock3);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Bonus] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Bonus);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop0] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Prop0);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop1] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Prop1);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop2] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Prop2);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop3] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Prop3);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop4] = ReadEnchantData(Enums.TBC.EnchantmentSlot.Prop4);
+
+                    }
+                    else
+                    {
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Perm] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Perm);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Temp] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Temp);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Sock1] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Sock1);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Sock2] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Sock2);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Sock3] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Sock3);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Bonus] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Bonus);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prismatic] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Prismatic);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop0] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Prop0);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop1] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Prop1);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop2] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Prop2);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop3] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Prop3);
+                        updateData.ItemData.Enchantment[Enums.Classic.EnchantmentSlot.Prop4] = ReadEnchantData(Enums.WotLK.EnchantmentSlot.Prop4);
+                    }
+
+                    uint?[] gems = new uint?[ItemConst.MaxGemSockets];
+                    for (int i = 0; i < ItemConst.MaxGemSockets; i++)
+                    {
+                        int slot = Enums.Classic.EnchantmentSlot.Sock1 + i;
+                        if (updateData.ItemData.Enchantment[slot] != null && updateData.ItemData.Enchantment[slot].ID != null)
+                        {
+                            uint itemId = GameData.GetGemFromEnchantId((uint)updateData.ItemData.Enchantment[slot].ID);
+                            if (itemId != 0 || updateData.ItemData.Enchantment[slot].ID == 0)
+                            {
+                                gems[i] = itemId;
+                                updateData.ItemData.HasGemsUpdate = true;
+                            }
                         }
                     }
+                    if (updateData.ItemData.HasGemsUpdate)
+                        GetSession().GameState.SaveGemsForItem(guid, gems);
                 }
                 int ITEM_FIELD_PROPERTY_SEED = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_PROPERTY_SEED);
                 if (ITEM_FIELD_PROPERTY_SEED >= 0 && updateMaskArray[ITEM_FIELD_PROPERTY_SEED])

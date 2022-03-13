@@ -522,4 +522,31 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 ItemGUID;
         public bool UseGuildBank;
     }
+
+    class SocketGems : ClientPacket
+    {
+        public SocketGems(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ItemGuid = _worldPacket.ReadPackedGuid128();
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
+                Gems[i] = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 ItemGuid;
+        public WowGuid128[] Gems = new WowGuid128[ItemConst.MaxGemSockets];
+    }
+
+    class SocketGemsSuccess : ServerPacket
+    {
+        public SocketGemsSuccess() : base(Opcode.SMSG_SOCKET_GEMS_SUCCESS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(ItemGuid);
+        }
+
+        public WowGuid128 ItemGuid;
+    }
 }

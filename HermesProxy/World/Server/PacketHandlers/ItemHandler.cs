@@ -137,5 +137,19 @@ namespace HermesProxy.World.Server
                 packet.WriteBool(item.UseGuildBank);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_SOCKET_GEMS)]
+        void HandleSocketGems(SocketGems gems)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SOCKET_GEMS);
+            packet.WriteGuid(gems.ItemGuid.To64());
+            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
+                packet.WriteGuid(gems.Gems[i].To64());
+            SendPacketToServer(packet);
+
+            // Packet does not exist in old clients.
+            SocketGemsSuccess success = new SocketGemsSuccess();
+            success.ItemGuid = gems.ItemGuid;
+            SendPacket(success);
+        }
     }
 }
