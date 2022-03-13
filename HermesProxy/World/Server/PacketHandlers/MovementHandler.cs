@@ -89,7 +89,7 @@ namespace HermesProxy.World.Server
         void HandleMoveForceSpeedChangeAck(MovementSpeedAck speed)
         {
             WorldPacket packet = new WorldPacket(speed.GetUniversalOpcode());
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.WritePackedGuid(speed.MoverGUID.To64());
             else
                 packet.WriteGuid(speed.MoverGUID.To64());

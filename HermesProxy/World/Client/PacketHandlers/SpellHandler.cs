@@ -146,26 +146,40 @@ namespace HermesProxy.World.Client
             failed.CastID = GetSession().GameState.LastClientCastGuid;
             uint reason = packet.ReadUInt8();
             failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
-            switch ((SpellCastResultVanilla)reason)
-            {
-                case SpellCastResultVanilla.RequiresSpellFocus:
-                {
-                    failed.FailedArg1 = packet.ReadInt32(); // Required Spell Focus
-                    break;
-                }
-                case SpellCastResultVanilla.RequiresArea:
-                {
-                    failed.FailedArg1 = packet.ReadInt32(); // Required Area
-                    break;
-                }
-                case SpellCastResultVanilla.EquippedItemClass:
-                {
-                    failed.FailedArg1 = packet.ReadInt32(); // Equipped Item Class
-                    failed.FailedArg2 = packet.ReadInt32(); // Equipped Item Sub Class Mask
-                    packet.ReadUInt32(); // Equipped Item Inventory Type Mask
-                    break;
-                }
-            }
+            if (packet.CanRead())
+                failed.FailedArg1 = packet.ReadInt32();
+            if (packet.CanRead())
+                failed.FailedArg2 = packet.ReadInt32();
+            SendPacketToClient(failed);
+        }
+
+        [PacketHandler(Opcode.SMSG_PET_CAST_FAILED, ClientVersionBuild.V2_0_1_6180)]
+        [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.V2_0_1_6180)]
+        void HandleCastFailedTBC(WorldPacket packet)
+        {
+            if (GetSession().GameState.LastClientCastGuid == null)
+                return;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.ReadUInt8(); // cast count
+
+            CastFailed failed = new();
+            failed.SpellID = packet.ReadInt32();
+            failed.SpellXSpellVisualID = GameData.GetSpellVisual((uint)failed.SpellID);
+            uint reason = packet.ReadUInt8();
+            failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
+
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_CAST_FAILED &&
+                LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.ReadUInt8(); // cast count
+
+            failed.CastID = GetSession().GameState.LastClientCastGuid;
+            
+            if (packet.CanRead())
+                failed.FailedArg1 = packet.ReadInt32();
+            if (packet.CanRead())
+                failed.FailedArg2 = packet.ReadInt32();
+
             SendPacketToClient(failed);
         }
 
@@ -208,6 +222,21 @@ namespace HermesProxy.World.Client
         {
             SpellStart spell = new SpellStart();
             spell.Cast = HandleSpellStartOrGo(packet, false);
+
+
+            // In TBC+ the server does not send SMSG_CAST_RESULT on success
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) &&
+                spell.Cast.OriginalCastID != null && spell.Cast.CastID != null)
+            {
+                SpellPrepare prepare = new();
+                prepare.ClientCastID = spell.Cast.OriginalCastID;
+                prepare.ServerCastID = spell.Cast.CastID;
+                SendPacketToClient(prepare);
+
+                GetSession().GameState.LastClientCastId = 0;
+                GetSession().GameState.LastClientCastGuid = null;
+            }
+
             SendPacketToClient(spell);
         }
 

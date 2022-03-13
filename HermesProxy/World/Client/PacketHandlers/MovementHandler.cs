@@ -240,6 +240,11 @@ namespace HermesProxy.World.Client
             MoveSetSpeed speed = new MoveSetSpeed(universalOpcode);
             speed.MoverGUID = packet.ReadPackedGuid().To128();
             speed.MoveCounter = packet.ReadUInt32();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) &&
+                packet.GetUniversalOpcode(false) == Opcode.SMSG_FORCE_RUN_SPEED_CHANGE)
+                packet.ReadUInt8(); // unk byte
+
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
         }
