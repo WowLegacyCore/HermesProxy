@@ -258,6 +258,48 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 GuildGUID;
     }
 
+    public class GuildRanks : ServerPacket
+    {
+        public GuildRanks() : base(Opcode.SMSG_GUILD_RANKS) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Ranks.Count);
+
+            Ranks.ForEach(p => p.Write(_worldPacket));
+        }
+
+        public List<GuildRankData> Ranks = new List<GuildRankData>();
+    }
+
+    public class GuildRankData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(RankID);
+            data.WriteUInt32(RankOrder);
+            data.WriteUInt32(Flags);
+            data.WriteInt32(WithdrawGoldLimit);
+
+            for (byte i = 0; i < GuildConst.MaxBankTabs; i++)
+            {
+                data.WriteUInt32(TabFlags[i]);
+                data.WriteUInt32(TabWithdrawItemLimit[i]);
+            }
+
+            data.WriteBits(RankName.GetByteCount(), 7);
+            data.WriteString(RankName);
+        }
+
+        public byte RankID;
+        public uint RankOrder;
+        public uint Flags;
+        public int WithdrawGoldLimit;
+        public string RankName;
+        public uint[] TabFlags = new uint[GuildConst.MaxBankTabs];
+        public uint[] TabWithdrawItemLimit = new uint[GuildConst.MaxBankTabs];
+    }
+
     public class GuildSendRankChange : ServerPacket
     {
         public GuildSendRankChange() : base(Opcode.SMSG_GUILD_SEND_RANK_CHANGE) { }
@@ -455,5 +497,292 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public int Tab;
+    }
+
+    public class GuildUpdateMotdText : ClientPacket
+    {
+        public GuildUpdateMotdText(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint textLen = _worldPacket.ReadBits<uint>(11);
+            MotdText = _worldPacket.ReadString(textLen);
+        }
+
+        public string MotdText;
+    }
+
+    public class GuildUpdateInfoText : ClientPacket
+    {
+        public GuildUpdateInfoText(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint textLen = _worldPacket.ReadBits<uint>(11);
+            InfoText = _worldPacket.ReadString(textLen);
+        }
+
+        public string InfoText;
+    }
+
+    public class GuildSetMemberNote : ClientPacket
+    {
+        public GuildSetMemberNote(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            NoteeGUID = _worldPacket.ReadPackedGuid128();
+
+            uint noteLen = _worldPacket.ReadBits<uint>(8);
+            IsPublic = _worldPacket.HasBit();
+
+            Note = _worldPacket.ReadString(noteLen);
+        }
+
+        public WowGuid128 NoteeGUID;
+        public bool IsPublic;          // 0 == Officer, 1 == Public
+        public string Note;
+    }
+
+    public class GuildPromoteMember : ClientPacket
+    {
+        public GuildPromoteMember(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Promotee = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Promotee;
+    }
+
+    public class GuildDemoteMember : ClientPacket
+    {
+        public GuildDemoteMember(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Demotee = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Demotee;
+    }
+
+    public class GuildOfficerRemoveMember : ClientPacket
+    {
+        public GuildOfficerRemoveMember(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Removee = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Removee;
+    }
+
+    public class GuildInviteByName : ClientPacket
+    {
+        public GuildInviteByName(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint nameLen = _worldPacket.ReadBits<uint>(9);
+            Name = _worldPacket.ReadString(nameLen);
+        }
+
+        public string Name;
+    }
+
+    public class GuildInvite : ServerPacket
+    {
+        public GuildInvite() : base(Opcode.SMSG_GUILD_INVITE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
+            _worldPacket.WriteBits(GuildName.GetByteCount(), 7);
+            _worldPacket.WriteBits(OldGuildName.GetByteCount(), 7);
+
+            _worldPacket.WriteUInt32(InviterVirtualRealmAddress);
+            _worldPacket.WriteUInt32(GuildVirtualRealmAddress);
+            _worldPacket.WritePackedGuid128(GuildGUID);
+            _worldPacket.WriteUInt32(OldGuildVirtualRealmAddress);
+            _worldPacket.WritePackedGuid128(OldGuildGUID);
+            _worldPacket.WriteUInt32(EmblemStyle);
+            _worldPacket.WriteUInt32(EmblemColor);
+            _worldPacket.WriteUInt32(BorderStyle);
+            _worldPacket.WriteUInt32(BorderColor);
+            _worldPacket.WriteUInt32(BackgroundColor);
+            _worldPacket.WriteInt32(AchievementPoints);
+
+            _worldPacket.WriteString(InviterName);
+            _worldPacket.WriteString(GuildName);
+            _worldPacket.WriteString(OldGuildName);
+        }
+
+        public WowGuid128 GuildGUID;
+        public WowGuid128 OldGuildGUID = WowGuid128.Empty;
+        public uint EmblemColor;
+        public uint EmblemStyle;
+        public uint BorderStyle;
+        public uint BorderColor;
+        public uint BackgroundColor;
+        public int AchievementPoints = -1;
+        public uint GuildVirtualRealmAddress;
+        public uint OldGuildVirtualRealmAddress;
+        public uint InviterVirtualRealmAddress;
+        public string InviterName;
+        public string GuildName;
+        public string OldGuildName = "";
+    }
+
+    public class AcceptGuildInvite : ClientPacket
+    {
+        public AcceptGuildInvite(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class DeclineGuildInvite : ClientPacket
+    {
+        public DeclineGuildInvite(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class GuildSetRankPermissions : ClientPacket
+    {
+        public GuildSetRankPermissions(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            RankID = _worldPacket.ReadUInt32();
+            RankOrder = _worldPacket.ReadUInt32();
+            Flags = _worldPacket.ReadUInt32();
+            WithdrawGoldLimit = _worldPacket.ReadInt32();
+
+            for (byte i = 0; i < GuildConst.MaxBankTabs; i++)
+            {
+                TabFlags[i] = _worldPacket.ReadUInt32();
+                TabWithdrawItemLimit[i] = _worldPacket.ReadUInt32();
+            }
+
+            OldFlags = _worldPacket.ReadUInt32();
+
+            _worldPacket.ResetBitPos();
+            uint rankNameLen = _worldPacket.ReadBits<uint>(7);
+            RankName = _worldPacket.ReadString(rankNameLen);
+        }
+
+        public uint RankID;
+        public uint RankOrder;
+        public int WithdrawGoldLimit;
+        public uint Flags;
+        public uint OldFlags;
+        public uint[] TabFlags = new uint[GuildConst.MaxBankTabs];
+        public uint[] TabWithdrawItemLimit = new uint[GuildConst.MaxBankTabs];
+        public string RankName;
+    }
+
+    public class GuildAddRank : ClientPacket
+    {
+        public GuildAddRank(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            _worldPacket.ResetBitPos();
+
+            RankOrder = _worldPacket.ReadInt32();
+            Name = _worldPacket.ReadString(nameLen);
+        }
+
+        public string Name;
+        public int RankOrder;
+    }
+
+    public class GuildDeleteRank : ClientPacket
+    {
+        public GuildDeleteRank(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            RankOrder = _worldPacket.ReadInt32();
+        }
+
+        public int RankOrder;
+    }
+
+    public class GuildSetGuildMaster : ClientPacket
+    {
+        public GuildSetGuildMaster(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint nameLen = _worldPacket.ReadBits<uint>(9);
+            NewMasterName = _worldPacket.ReadString(nameLen);
+        }
+
+        public string NewMasterName;
+    }
+
+    public class GuildLeave : ClientPacket
+    {
+        public GuildLeave(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class GuildDelete : ClientPacket
+    {
+        public GuildDelete(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class PlayerTabardVendorActivate : ServerPacket
+    {
+        public PlayerTabardVendorActivate() : base(Opcode.SMSG_PLAYER_TABARD_VENDOR_ACTIVATE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(DesignerGUID);
+        }
+
+        public WowGuid128 DesignerGUID;
+    }
+
+    public class SaveGuildEmblem : ClientPacket
+    {
+        public SaveGuildEmblem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            DesignerGUID = _worldPacket.ReadPackedGuid128();
+            EmblemStyle = _worldPacket.ReadUInt32();
+            EmblemColor = _worldPacket.ReadUInt32();
+            BorderStyle = _worldPacket.ReadUInt32();
+            BorderColor = _worldPacket.ReadUInt32();
+            BackgroundColor = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 DesignerGUID;
+        public uint EmblemStyle;
+        public uint EmblemColor;
+        public uint BorderStyle;
+        public uint BorderColor;
+        public uint BackgroundColor;
+    }
+
+    public class PlayerSaveGuildEmblem : ServerPacket
+    {
+        public PlayerSaveGuildEmblem() : base(Opcode.SMSG_PLAYER_SAVE_GUILD_EMBLEM) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32((uint)Error);
+        }
+
+        public GuildEmblemError Error;
     }
 }

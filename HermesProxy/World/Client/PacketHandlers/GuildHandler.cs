@@ -196,6 +196,8 @@ namespace HermesProxy.World.Client
             guild.Info.VirtualRealmAddress = GetSession().RealmId.GetAddress();
 
             guild.Info.GuildName = packet.ReadCString();
+            GetSession().StoreGuildGuidAndName(guild.GuildGUID, guild.Info.GuildName);
+
             List<string> ranks = new List<string>();
             for (uint i = 0; i < 10; i++)
             {
@@ -221,32 +223,74 @@ namespace HermesProxy.World.Client
             SendPacketToClient(guild);
         }
 
+        [PacketHandler(Opcode.SMSG_GUILD_INFO)]
+        void HandleGuildInfo(WorldPacket packet)
+        {
+            packet.ReadCString(); // Guild Name
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                GetSession().GameState.CurrentGuildCreateTime = packet.ReadPackedTime();
+            else
+            {
+                int day = packet.ReadInt32();
+                int month = packet.ReadInt32();
+                int year = packet.ReadInt32();
+
+                DateTime date = new DateTime(year, month, day);
+                GetSession().GameState.CurrentGuildCreateTime = (uint)Time.DateTimeToUnixTime(date);
+            }
+
+            packet.ReadUInt32(); // Players Count
+
+            GetSession().GameState.CurrentGuildNumAccounts = packet.ReadUInt32();
+        }
+
         [PacketHandler(Opcode.SMSG_GUILD_ROSTER)]
         void HandleGuildRoster(WorldPacket packet)
         {
             GuildRoster guild = new();
             var membersCount = packet.ReadUInt32();
-            guild.NumAccounts = membersCount;
+
+            if (GetSession().GameState.CurrentGuildNumAccounts != 0)
+                guild.NumAccounts = GetSession().GameState.CurrentGuildNumAccounts;
+            else
+                guild.NumAccounts = membersCount;
+
             guild.WelcomeText = packet.ReadCString();
             guild.InfoText = packet.ReadCString();
-            guild.CreateDate = (uint)Time.UnixTime;
+
+            if (GetSession().GameState.CurrentGuildCreateTime != 0)
+                guild.CreateDate = GetSession().GameState.CurrentGuildCreateTime;
+            else
+                guild.CreateDate = (uint)Time.UnixTime;
 
             var ranksCount = packet.ReadInt32();
-            for (var i = 0; i < ranksCount; i++)
+            if (ranksCount > 0)
             {
-                packet.ReadUInt32(); // GuildRankRightsFlag
-
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                GuildRanks ranks = new GuildRanks();
+                for (byte i = 0; i < ranksCount; i++)
                 {
-                    packet.ReadInt32(); // Money Per Day
+                    GuildRankData rank = new GuildRankData();
+                    rank.RankID = i;
+                    rank.RankOrder = i;
+                    rank.RankName = GetSession().GetGuildRankNameById(GetSession().GameState.GetPlayerGuildId(GetSession().GameState.CurrentPlayerGuid), i);
+                    rank.Flags = packet.ReadUInt32();
 
-                    for (var j = 0; j < 6; j++)
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     {
-                        packet.ReadUInt32(); // GuildBankRightsFlag
-                        packet.ReadInt32(); // Tab Slots
+                        rank.WithdrawGoldLimit = packet.ReadInt32();
+
+                        for (var j = 0; j < GuildConst.MaxBankTabs; j++)
+                        {
+                            rank.TabFlags[j] = packet.ReadUInt32();
+                            rank.TabWithdrawItemLimit[j] = packet.ReadUInt32();
+                        }
                     }
+                    ranks.Ranks.Add(rank);
                 }
+                SendPacketToClient(ranks);
             }
+            
 
             for (var i = 0; i < membersCount; i++)
             {
@@ -274,6 +318,34 @@ namespace HermesProxy.World.Client
                 guild.MemberData.Add(member);
             }
             SendPacketToClient(guild);
+        }
+
+        [PacketHandler(Opcode.SMSG_GUILD_INVITE)]
+        void HandleGuildInvite(WorldPacket packet)
+        {
+            GuildInvite invite = new();
+            invite.InviterName = packet.ReadCString();
+            invite.InviterVirtualRealmAddress = GetSession().RealmId.GetAddress();
+            invite.GuildName = packet.ReadCString();
+            invite.GuildVirtualRealmAddress = GetSession().RealmId.GetAddress();
+            invite.GuildGUID = GetSession().GetGuildGuid(invite.GuildName);
+            SendPacketToClient(invite);
+        }
+
+        [PacketHandler(Opcode.MSG_TABARDVENDOR_ACTIVATE)]
+        void HandleTabardVendorActivate(WorldPacket packet)
+        {
+            PlayerTabardVendorActivate activate = new();
+            activate.DesignerGUID = packet.ReadGuid().To128();
+            SendPacketToClient(activate);
+        }
+
+        [PacketHandler(Opcode.MSG_SAVE_GUILD_EMBLEM)]
+        void HandleSaveGuildEmblem(WorldPacket packet)
+        {
+            PlayerSaveGuildEmblem emblem = new();
+            emblem.Error = (GuildEmblemError)packet.ReadUInt32();
+            SendPacketToClient(emblem);
         }
     }
 }

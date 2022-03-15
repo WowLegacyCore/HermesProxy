@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace HermesProxy.World.Enums
 {
+    public class GuildConst
+    {
+        public const int MaxBankTabs = 6;
+    }
+
     public enum GuildCommandType
     {
         CreateGuild = 0,
@@ -107,5 +112,15 @@ namespace HermesProxy.World.Enums
         BankMoneyUpdate = 17,
         BankMoneyWithdraw = 18,
         BankTextChanged = 19
+    }
+
+    public enum GuildEmblemError
+    {
+        Success = 0,
+        InvalidTabardColors = 1,
+        NoGuild = 2,
+        NotGuildMaster = 3,
+        NotEnoughMoney = 4,
+        InvalidVendor = 5
     }
 }

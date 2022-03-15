@@ -29,6 +29,8 @@ namespace HermesProxy
         public uint LastEnteredAreaTrigger;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
+        public uint CurrentGuildCreateTime;
+        public uint CurrentGuildNumAccounts;
         public uint LastWhoRequestId;
         public uint LastClientCastId;
         public WowGuid128 LastClientCastGuid;
@@ -257,6 +259,20 @@ namespace HermesProxy
                 }
             }
             return 0;
+        }
+        public string GetGuildRankNameById(uint guildId, byte rankId)
+        {
+            if (GuildRanks.ContainsKey(guildId))
+                return GuildRanks[guildId][rankId];
+
+            return $"Rank {rankId}";
+        }
+        public void StoreGuildGuidAndName(WowGuid128 guid, string name)
+        {
+            if (GuildsByName.ContainsKey(name))
+                GuildsByName[name] = guid;
+            else
+                GuildsByName.Add(name, guid);
         }
         public WowGuid128 GetGuildGuid(string name)
         {
