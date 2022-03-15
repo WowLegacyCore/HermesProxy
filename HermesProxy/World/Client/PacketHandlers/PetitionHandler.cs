@@ -97,5 +97,35 @@ namespace HermesProxy.World.Client
             petition.NewGuildName = packet.ReadCString();
             SendPacketToClient(petition);
         }
+
+        [PacketHandler(Opcode.MSG_PETITION_DECLINE)]
+        void HandlePetitionDecline(WorldPacket packet)
+        {
+            WowGuid128 guid = packet.ReadGuid().To128();
+            string name = GetSession().GameState.GetPlayerName(guid);
+            if (!String.IsNullOrEmpty(name))
+            {
+                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", $"{name} has declined your guild invitation.", "", ChatFlags.None, 0);
+                SendPacketToClient(chat);
+            }
+        }
+
+        [PacketHandler(Opcode.SMSG_PETITION_SIGN_RESULTS)]
+        void HandlePetitionSignResults(WorldPacket packet)
+        {
+            PetitionSignResults petition = new();
+            petition.Item = packet.ReadGuid().To128();
+            petition.Player = packet.ReadGuid().To128();
+            petition.Error = (PetitionSignResult)packet.ReadUInt32();
+            SendPacketToClient(petition);
+        }
+
+        [PacketHandler(Opcode.SMSG_TURN_IN_PETITION_RESULT)]
+        void HandleTurnInPetitionResult(WorldPacket packet)
+        {
+            TurnInPetitionResult petition = new();
+            petition.Result = (PetitionTurnResult)packet.ReadUInt32();
+            SendPacketToClient(petition);
+        }
     }
 }

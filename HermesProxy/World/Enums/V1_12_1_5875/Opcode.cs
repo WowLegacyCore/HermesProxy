@@ -255,7 +255,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         CMSG_QUERY_PETITION                                   = 0x1C6,
         CMSG_PETITION_SHOW_LIST                               = 0x1BB,
         CMSG_PETITION_SHOW_SIGNATURES                         = 0x1BE,
-        CMSG_PETITION_SIGN                                    = 0x1C0,
+        CMSG_SIGN_PETITION                                    = 0x1C0,
         CMSG_PET_ABANDON                                      = 0x176,
         CMSG_PET_ACTION                                       = 0x175,
         CMSG_PET_CANCEL_AURA                                  = 0x26B,

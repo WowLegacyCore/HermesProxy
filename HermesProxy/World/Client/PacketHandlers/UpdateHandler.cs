@@ -1550,6 +1550,7 @@ namespace HermesProxy.World.Client
                 int PLAYER_GUILDID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILDID);
                 if (PLAYER_GUILDID >= 0 && updateMaskArray[PLAYER_GUILDID])
                 {
+                    GetSession().GameState.StorePlayerGuildId(guid, updates[PLAYER_GUILDID].UInt32Value);
                     updateData.UnitData.GuildGUID = WowGuid128.Create(HighGuidType703.Guild, updates[PLAYER_GUILDID].UInt32Value);
                 }
                 int PLAYER_GUILDRANK = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILDRANK);

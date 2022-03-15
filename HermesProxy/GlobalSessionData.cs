@@ -35,6 +35,7 @@ namespace HermesProxy
         public WowGuid128 LastLootTargetGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
+        public Dictionary<WowGuid128, uint> PlayerGuildIds = new();
         public Dictionary<WowGuid128, Dictionary<int, UpdateField>> ObjectCacheLegacy = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> ObjectCacheModern = new();
         public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
@@ -45,6 +46,19 @@ namespace HermesProxy
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
 
+        public void StorePlayerGuildId(WowGuid128 guid, uint guildId)
+        {
+            if (PlayerGuildIds.ContainsKey(guid))
+                PlayerGuildIds[guid] = guildId;
+            else
+                PlayerGuildIds.Add(guid, guildId);
+        }
+        public uint GetPlayerGuildId(WowGuid128 guid)
+        {
+            if (PlayerGuildIds.ContainsKey(guid))
+                return PlayerGuildIds[guid];
+            return 0;
+        }
         public uint[] GetGemsForItem(WowGuid128 guid)
         {
             if (ItemGems.ContainsKey(guid))
@@ -222,15 +236,35 @@ namespace HermesProxy
         public AuthClient AuthClient;
         public WorldClient WorldClient;
         public SniffFile ModernSniff;
-        public Dictionary<string, WowGuid128> Guilds;
+        public Dictionary<string, WowGuid128> GuildsByName = new();
+        public Dictionary<uint, List<string>> GuildRanks = new();
 
+        public void StoreGuildRankNames(uint guildId, List<string> ranks)
+        {
+            if (GuildRanks.ContainsKey(guildId))
+                GuildRanks[guildId] = ranks;
+            else
+                GuildRanks.Add(guildId, ranks);
+        }
+        public uint GetGuildRankIdByName(uint guildId, string name)
+        {
+            if (GuildRanks.ContainsKey(guildId))
+            {
+                for (int i = 0; i < GuildRanks[guildId].Count; i++)
+                {
+                    if (GuildRanks[guildId][i] == name)
+                        return (uint)i;
+                }
+            }
+            return 0;
+        }
         public WowGuid128 GetGuildGuid(string name)
         {
-            if (Guilds.ContainsKey(name))
-                return Guilds[name];
+            if (GuildsByName.ContainsKey(name))
+                return GuildsByName[name];
 
-            WowGuid128 guid = WowGuid128.Create(HighGuidType703.Guild, (ulong)(Guilds.Count + 1));
-            Guilds.Add(name, guid);
+            WowGuid128 guid = WowGuid128.Create(HighGuidType703.Guild, (ulong)(GuildsByName.Count + 1));
+            GuildsByName.Add(name, guid);
             return guid;
         }
 

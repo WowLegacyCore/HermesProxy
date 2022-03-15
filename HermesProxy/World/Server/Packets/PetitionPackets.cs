@@ -244,4 +244,73 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 TargetPlayer;
         public WowGuid128 ItemGUID;
     }
+
+    public class DeclinePetition : ClientPacket
+    {
+        public DeclinePetition(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetitionGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 PetitionGUID;
+    }
+
+    public class SignPetition : ClientPacket
+    {
+        public SignPetition(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetitionGUID = _worldPacket.ReadPackedGuid128();
+            Choice = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 PetitionGUID;
+        public byte Choice;
+    }
+
+    public class PetitionSignResults : ServerPacket
+    {
+        public PetitionSignResults() : base(Opcode.SMSG_PETITION_SIGN_RESULTS) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Item);
+            _worldPacket.WritePackedGuid128(Player);
+
+            _worldPacket.WriteBits(Error, 4);
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 Item;
+        public WowGuid128 Player;
+        public PetitionSignResult Error = 0;
+    }
+
+    public class TurnInPetition : ClientPacket
+    {
+        public TurnInPetition(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Item = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Item;
+    }
+
+    public class TurnInPetitionResult : ServerPacket
+    {
+        public TurnInPetitionResult() : base(Opcode.SMSG_TURN_IN_PETITION_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Result, 4);
+            _worldPacket.FlushBits();
+        }
+
+        public PetitionTurnResult Result = 0;
+    }
 }

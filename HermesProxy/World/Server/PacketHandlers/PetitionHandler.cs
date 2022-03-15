@@ -71,5 +71,31 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(petition.TargetPlayer.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_DECLINE_PETITION)]
+        void HandleDeclinePetition(DeclinePetition petition)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_PETITION_DECLINE);
+            packet.WriteGuid(petition.PetitionGUID.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SIGN_PETITION)]
+        void HandleSignPetition(SignPetition petition)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SIGN_PETITION);
+            packet.WriteGuid(petition.PetitionGUID.To64());
+            packet.WriteUInt8(petition.Choice);
+            SendPacketToServer(packet);
+            System.Console.WriteLine("Signing " + petition.PetitionGUID.ToString());
+        }
+
+        [PacketHandler(Opcode.CMSG_TURN_IN_PETITION)]
+        void HandleTurnInPetition(TurnInPetition petition)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_TURN_IN_PETITION);
+            packet.WriteGuid(petition.Item.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

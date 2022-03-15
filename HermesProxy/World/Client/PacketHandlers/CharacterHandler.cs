@@ -50,6 +50,7 @@ namespace HermesProxy.World.Client
                 char1.MapId = packet.ReadUInt32();
                 char1.PreloadPos = packet.ReadVector3();
                 uint guildId = packet.ReadUInt32();
+                GetSession().GameState.StorePlayerGuildId(char1.Guid, guildId);
                 char1.GuildGuid = WowGuid128.Create(HighGuidType703.Guild, guildId);
                 char1.Flags = (CharacterFlags)packet.ReadUInt32();
 
@@ -207,7 +208,6 @@ namespace HermesProxy.World.Client
             response.Data.IsDeleted = false;
             response.Data.AccountID = GetSession().GetGameAccountGuidForPlayer(response.Player);
             response.Data.BnetAccountID = GetSession().GetBnetAccountGuidForPlayer(response.Player);
-            response.Data.GuidActual = WowGuid128.Empty;
             response.Data.VirtualRealmAddress = GetSession().RealmId.GetAddress();
             SendPacketToClient(response);
         }
