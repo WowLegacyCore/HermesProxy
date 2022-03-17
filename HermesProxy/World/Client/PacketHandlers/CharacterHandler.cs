@@ -328,8 +328,24 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 played.TriggerEvent = packet.ReadBool();
             else
-                played.TriggerEvent = true;
+                played.TriggerEvent = GetSession().GameState.ShowPlayedTime;
             SendPacketToClient(played);
+        }
+
+        [PacketHandler(Opcode.SMSG_LEVEL_UP_INFO)]
+        void HandleLevelUpInfo(WorldPacket packet)
+        {
+            LevelUpInfo info = new LevelUpInfo();
+            info.Level = packet.ReadInt32();
+            info.HealthDelta = packet.ReadInt32();
+
+            for (var i = 0; i < LegacyVersion.GetPowersCount(); i++)
+                info.PowerDelta[i] = packet.ReadInt32();
+
+            for (var i = 0; i < 5; i++)
+                info.StatDelta[i] = packet.ReadInt32();
+
+            SendPacketToClient(info);
         }
     }
 }

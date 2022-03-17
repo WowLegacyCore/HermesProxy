@@ -1158,9 +1158,17 @@ namespace HermesProxy.World.Client
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
                                 classId = GetSession().GameState.GetUnitClass(guid.To128());
+
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
                                 updateData.UnitData.MaxPower[powerSlot] = updates[UNIT_FIELD_MAXPOWER1 + i].Int32Value;
+
+                            if (i == (byte)PowerType.Energy)
+                            {
+                                powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, PowerType.ComboPoints);
+                                if (powerSlot >= 0)
+                                    updateData.UnitData.MaxPower[powerSlot] = 5;
+                            }
                         }
                     }
                 }
@@ -1974,7 +1982,11 @@ namespace HermesProxy.World.Client
                         classId = GetSession().GameState.GetUnitClass(guid.To128());
                     sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, PowerType.ComboPoints);
                     if (powerSlot >= 0)
+                    {
+                        if (powerUpdate != null && guid == GetSession().GameState.CurrentPlayerGuid)
+                            powerUpdate.Powers.Add(new PowerUpdatePower(comboPoints, (byte)PowerType.ComboPoints));
                         updateData.UnitData.Power[powerSlot] = comboPoints;
+                    } 
 
                     updateData.ActivePlayerData.MultiActionBars = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 16) & 0xFF);
                     updateData.ActivePlayerData.LifetimeMaxRank = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 24) & 0xFF);

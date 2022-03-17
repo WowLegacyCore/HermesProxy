@@ -34,5 +34,14 @@ namespace HermesProxy.World.Client
             SendPacketToClient(new SetupCurrency());
             SendPacketToClient(new AllAccountCriteria());
         }
+
+        [PacketHandler(Opcode.SMSG_UPDATE_WORLD_STATE)]
+        void HandleUpdateWorldState(WorldPacket packet)
+        {
+            UpdateWorldState update = new UpdateWorldState();
+            update.VariableID = packet.ReadUInt32();
+            update.Value = packet.ReadInt32();
+            SendPacketToClient(update);
+        }
     }
 }

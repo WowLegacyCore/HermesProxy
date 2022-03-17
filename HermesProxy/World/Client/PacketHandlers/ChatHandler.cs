@@ -372,5 +372,31 @@ namespace HermesProxy.World.Client
             emote.TargetGUID = targetGuid != null ? targetGuid : emote.SourceGUID;
             SendPacketToClient(emote);
         }
+
+        [PacketHandler(Opcode.SMSG_PRINT_NOTIFICATION)]
+        void HandlePrintNotification(WorldPacket packet)
+        {
+            PrintNotification notify = new PrintNotification();
+            notify.NotifyText = packet.ReadCString();
+            SendPacketToClient(notify);
+        }
+
+        [PacketHandler(Opcode.SMSG_CHAT_PLAYER_NOTFOUND)]
+        void HandleChatPlayerNotFound(WorldPacket packet)
+        {
+            ChatPlayerNotfound error = new ChatPlayerNotfound();
+            error.Name = packet.ReadCString();
+            SendPacketToClient(error);
+        }
+
+        [PacketHandler(Opcode.SMSG_DEFENSE_MESSAGE)]
+        void HandleDefenseMessage(WorldPacket packet)
+        {
+            DefenseMessage message = new DefenseMessage();
+            message.ZoneID = packet.ReadUInt32();
+            packet.ReadUInt32(); // message length
+            message.MessageText = packet.ReadCString();
+            SendPacketToClient(message);
+        }
     }
 }

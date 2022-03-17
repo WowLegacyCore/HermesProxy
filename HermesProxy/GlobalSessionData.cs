@@ -18,6 +18,7 @@ namespace HermesProxy
     }
     public class GameSessionData
     {
+        public bool ShowPlayedTime;
         public bool IsInTaxiFlight;
         public bool IsWaitingForTaxiStart;
         public bool IsWaitingForNewWorld;

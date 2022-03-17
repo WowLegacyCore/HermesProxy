@@ -93,6 +93,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.WriteBool(played.TriggerScriptEvent);
             SendPacketToServer(packet);
+            GetSession().GameState.ShowPlayedTime = played.TriggerScriptEvent;
         }
 
         [PacketHandler(Opcode.CMSG_TOGGLE_PVP)]

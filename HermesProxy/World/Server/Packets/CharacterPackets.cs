@@ -562,4 +562,31 @@ namespace HermesProxy.World.Server.Packets
 
         public byte Mask;
     }
+
+    public class LevelUpInfo : ServerPacket
+    {
+        public LevelUpInfo() : base(Opcode.SMSG_LEVEL_UP_INFO) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Level);
+            _worldPacket.WriteInt32(HealthDelta);
+
+            foreach (int power in PowerDelta)
+                _worldPacket.WriteInt32(power);
+
+            foreach (int stat in StatDelta)
+                _worldPacket.WriteInt32(stat);
+
+            _worldPacket.WriteInt32(NumNewTalents);
+            _worldPacket.WriteInt32(NumNewPvpTalentSlots);
+        }
+
+        public int Level = 0;
+        public int HealthDelta = 0;
+        public int[] PowerDelta = new int[6];
+        public int[] StatDelta = new int[5];
+        public int NumNewTalents;
+        public int NumNewPvpTalentSlots;
+    }
 }

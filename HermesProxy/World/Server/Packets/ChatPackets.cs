@@ -328,4 +328,46 @@ namespace HermesProxy.World.Server.Packets
         public int SoundIndex = -1;
         public int EmoteID;
     }
+
+    public class PrintNotification : ServerPacket
+    {
+        public PrintNotification() : base(Opcode.SMSG_PRINT_NOTIFICATION) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(NotifyText.GetByteCount(), 12);
+            _worldPacket.WriteString(NotifyText);
+        }
+
+        public string NotifyText;
+    }
+
+    class ChatPlayerNotfound : ServerPacket
+    {
+        public ChatPlayerNotfound() : base(Opcode.SMSG_CHAT_PLAYER_NOTFOUND) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
+            _worldPacket.WriteString(Name);
+        }
+
+        public string Name;
+    }
+
+    class DefenseMessage : ServerPacket
+    {
+        public DefenseMessage() : base(Opcode.SMSG_DEFENSE_MESSAGE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(ZoneID);
+            _worldPacket.WriteBits(MessageText.GetByteCount(), 12);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(MessageText);
+        }
+
+        public uint ZoneID;
+        public string MessageText = "";
+    }
 }

@@ -16,6 +16,6 @@ namespace HermesProxy.World.Enums
         Happiness                     = 4,            // UNIT_FIELD_POWER5
         Rune                          = 5,            // UNIT_FIELD_POWER6
         RunicPower                    = 6,            // UNIT_FIELD_POWER7
-        ComboPoints                   = 100,          // not real, so we know to set PLAYER_FIELD_BYTES,1
+        ComboPoints                   = 14,           // not real, so we know to set PLAYER_FIELD_BYTES,1
     };
 }
