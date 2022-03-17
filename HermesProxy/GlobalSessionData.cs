@@ -48,6 +48,7 @@ namespace HermesProxy
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
+        public Dictionary<uint, ArenaTeamData> ArenaTeams = new();
 
         public void StorePlayerGuildId(WowGuid128 guid, uint guildId)
         {
@@ -220,6 +221,22 @@ namespace HermesProxy
                 return array;
             return null;
         }
+    }
+    public class ArenaTeamData
+    {
+        public string Name;
+        public uint TeamSize;
+        public uint WeekPlayed;
+        public uint WeekWins;
+        public uint SeasonPlayed;
+        public uint SeasonWins;
+        public uint Rating;
+        public uint Rank;
+        public uint BackgroundColor;
+        public uint EmblemStyle;
+        public uint EmblemColor;
+        public uint BorderStyle;
+        public uint BorderColor;
     }
     public class GlobalSessionData
     {

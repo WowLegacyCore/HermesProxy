@@ -122,11 +122,31 @@ namespace HermesProxy.World.Server.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid128(Unit);
-            _worldPacket.WriteUInt32(Price);
+            _worldPacket.WriteInt32(Petitions.Count);
+            foreach (var petition in Petitions)
+                petition.Write(_worldPacket);
         }
 
         public WowGuid128 Unit;
-        public uint Price = 0;
+        public List<PetitionEntry> Petitions = new();
+    }
+
+    public struct PetitionEntry
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Index);
+            data.WriteUInt32(CharterCost);
+            data.WriteUInt32(CharterEntry);
+            data.WriteUInt32(IsArena);
+            data.WriteUInt32(RequiredSignatures);
+        }
+
+        public uint Index;
+        public uint CharterCost;
+        public uint CharterEntry;
+        public uint IsArena;
+        public uint RequiredSignatures;
     }
 
     public class PetitionBuy : ClientPacket
@@ -137,12 +157,12 @@ namespace HermesProxy.World.Server.Packets
         {
             uint titleLen = _worldPacket.ReadBits<uint>(7);
             Unit = _worldPacket.ReadPackedGuid128();
-            Unk = _worldPacket.ReadUInt32();
+            Index = _worldPacket.ReadUInt32();
             Title = _worldPacket.ReadString(titleLen);
         }
 
         public WowGuid128 Unit;
-        public uint Unk;
+        public uint Index;
         public string Title;
     }
 
@@ -296,9 +316,23 @@ namespace HermesProxy.World.Server.Packets
         public override void Read()
         {
             Item = _worldPacket.ReadPackedGuid128();
+
+            if (_worldPacket.CanRead())
+            {
+                BackgroundColor = _worldPacket.ReadUInt32();
+                EmblemStyle = _worldPacket.ReadUInt32();
+                EmblemColor = _worldPacket.ReadUInt32();
+                BorderStyle = _worldPacket.ReadUInt32();
+                BorderColor = _worldPacket.ReadUInt32();
+            }
         }
 
         public WowGuid128 Item;
+        public uint BackgroundColor;
+        public uint EmblemStyle;
+        public uint EmblemColor;
+        public uint BorderStyle;
+        public uint BorderColor;
     }
 
     public class TurnInPetitionResult : ServerPacket

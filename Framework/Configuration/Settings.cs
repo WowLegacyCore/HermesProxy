@@ -17,6 +17,6 @@ namespace Framework
         public static readonly int BNetPort = Conf.GetInt("BNetPort", 1119);
         public static readonly int RealmPort = Conf.GetInt("RealmPort", 8085);
         public static readonly int InstancePort = Conf.GetInt("InstancePort", 8086);
-        public static readonly bool DebugOutput = Conf.GetBoolean("DebutOutput", false);
+        public static readonly bool DebugOutput = Conf.GetBoolean("DebugOutput", false);
     }
 }

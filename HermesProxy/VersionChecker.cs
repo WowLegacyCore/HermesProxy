@@ -513,5 +513,19 @@ namespace HermesProxy
                     activeFlags |= 4;
             }
         }
+
+        public static uint GetArenaTeamSizeFromIndex(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return 2;
+                case 1:
+                    return 3;
+                case 2:
+                    return 5;
+            }
+            return 0;
+        }
     }
 }

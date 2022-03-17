@@ -14,20 +14,29 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PETITION_SHOW_LIST)]
         void HandlePetitionShowList(WorldPacket packet)
         {
-            ServerPetitionShowList petition = new();
-            petition.Unit = packet.ReadGuid().To128();
-            var counter = packet.ReadUInt8();
-            for (var i = 0; i < counter; i++)
+            ServerPetitionShowList petitions = new();
+            petitions.Unit = packet.ReadGuid().To128();
+            var count = packet.ReadUInt8();
+            for (var i = 0; i < count; i++)
             {
-                packet.ReadUInt32(); // Index
-                packet.ReadUInt32(); // Charter Entry
+                PetitionEntry petition = new PetitionEntry();
+                petition.Index = packet.ReadUInt32(); 
+                petition.CharterEntry = packet.ReadUInt32();
                 packet.ReadUInt32(); // Charter Display
-                petition.Price = packet.ReadUInt32();
-                packet.ReadUInt32(); // Unk
+                petition.CharterCost = packet.ReadUInt32();
+
+                if (packet.ReadUInt32() != 0)
+                    petition.IsArena = 1;
+
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    packet.ReadUInt32(); // Required signs
+                    petition.RequiredSignatures = packet.ReadUInt32(); // Required signs
+                else
+                    petition.RequiredSignatures = 9;
+
+                petitions.Petitions.Add(petition);
+
             }
-            SendPacketToClient(petition);
+            SendPacketToClient(petitions);
         }
 
         [PacketHandler(Opcode.SMSG_PETITION_SHOW_SIGNATURES)]
