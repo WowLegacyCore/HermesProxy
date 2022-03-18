@@ -2168,8 +2168,14 @@ namespace HermesProxy.World.Client
                 int GAMEOBJECT_DYN_FLAGS = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DYN_FLAGS);
                 if (GAMEOBJECT_DYN_FLAGS >= 0 && updateMaskArray[GAMEOBJECT_DYN_FLAGS])
                 {
-                    uint oldValue = updateData.ObjectData.DynamicFlags != null ? (uint)updateData.ObjectData.DynamicFlags : 0;
-                    updateData.ObjectData.DynamicFlags = (oldValue | (updates[GAMEOBJECT_DYN_FLAGS].UInt32Value & 0xFFFF));
+                    uint oldValue = 0;
+                    if (updateData.ObjectData.DynamicFlags != null)
+                        oldValue = (uint)updateData.ObjectData.DynamicFlags;
+                    else if (!guid.IsTransport())
+                        oldValue = 4294901760;
+
+                    GameObjectDynamicFlagsLegacy flags = (GameObjectDynamicFlagsLegacy)(updates[GAMEOBJECT_DYN_FLAGS].UInt32Value);
+                    updateData.ObjectData.DynamicFlags = (oldValue | (uint)flags.CastFlags<GameObjectDynamicFlagsModern>());
                 }
                 int GAMEOBJECT_FACTION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FACTION);
                 if (GAMEOBJECT_FACTION >= 0 && updateMaskArray[GAMEOBJECT_FACTION])

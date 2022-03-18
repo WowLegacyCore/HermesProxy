@@ -50,6 +50,17 @@ namespace HermesProxy.World
             }
         }
 
+        public bool IsTransport()
+        {
+            switch (GetHighType())
+            {
+                case HighGuidType.Transport:
+                case HighGuidType.MOTransport:
+                    return true;
+            }
+            return false;
+        }
+
         public bool IsPlayer()
         {
             switch (GetObjectType())
