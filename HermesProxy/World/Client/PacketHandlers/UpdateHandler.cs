@@ -882,8 +882,8 @@ namespace HermesProxy.World.Client
                     questLog.StateFlags = updates[index + stateOffset].UInt32Value;
             }
             if (progressOffset != -1 &&
-                (updateMaskArray != null && updateMaskArray[index + progressOffset]) ||
-                (updateMaskArray == null && updates.ContainsKey(index + progressOffset)))
+               ((updateMaskArray != null && updateMaskArray[index + progressOffset]) ||
+               (updateMaskArray == null && updates.ContainsKey(index + progressOffset))))
             {
                 if (questLog == null)
                     questLog = new QuestLog();
