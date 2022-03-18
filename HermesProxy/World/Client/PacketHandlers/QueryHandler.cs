@@ -27,8 +27,8 @@ namespace HermesProxy.World.Client
             }
 
             response.Allow = true;
-            response.Info = new QuestInfo();
-            QuestInfo quest = response.Info;
+            response.Info = new QuestTemplate();
+            QuestTemplate quest = response.Info;
 
             quest.QuestID = response.QuestID;
             quest.QuestType = packet.ReadInt32();

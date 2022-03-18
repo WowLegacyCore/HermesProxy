@@ -21,7 +21,7 @@ namespace HermesProxy.World
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
-        public static Dictionary<uint, QuestInfo> QuestTemplates = new Dictionary<uint, QuestInfo>();
+        public static Dictionary<uint, QuestTemplate> QuestTemplates = new Dictionary<uint, QuestTemplate>();
         public static Dictionary<uint, string> ItemNames = new Dictionary<uint, string>();
 
         public static void StoreItemName(uint entry, string name)
@@ -38,16 +38,16 @@ namespace HermesProxy.World
                 return data;
             return "";
         }
-        public static void StoreQuestTemplate(uint entry, QuestInfo template)
+        public static void StoreQuestTemplate(uint entry, QuestTemplate template)
         {
             if (QuestTemplates.ContainsKey(entry))
                 QuestTemplates[entry] = template;
             else
                 QuestTemplates.Add(entry, template);
         }
-        public static QuestInfo GetQuestTemplate(uint entry)
+        public static QuestTemplate GetQuestTemplate(uint entry)
         {
-            QuestInfo data;
+            QuestTemplate data;
             if (QuestTemplates.TryGetValue(entry, out data))
                 return data;
             return null;

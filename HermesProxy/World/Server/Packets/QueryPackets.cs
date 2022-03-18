@@ -320,7 +320,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public bool Allow;
-        public QuestInfo Info;
+        public QuestTemplate Info;
         public uint QuestID;
     }
 

@@ -367,6 +367,7 @@ namespace HermesProxy.World.Client
                 query.WriteUInt32(itemId);
                 query.WriteGuid(WowGuid64.Empty);
                 SendPacket(query);
+                return;
             }
 
             QuestObjective objective = GameData.GetQuestObjectiveForItem(itemId);

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace HermesProxy.World.Objects
 {
-    public class QuestInfo
+    public class QuestTemplate
     {
-        public QuestInfo()
+        public QuestTemplate()
         {
             LogTitle = "";
             LogDescription = "";
