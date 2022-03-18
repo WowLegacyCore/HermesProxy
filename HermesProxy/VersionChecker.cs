@@ -233,6 +233,11 @@ namespace HermesProxy
             else
                 return (QuestGiverStatusModern)Enum.Parse(typeof(QuestGiverStatusModern), ((QuestGiverStatusVanilla)status).ToString());
         }
+
+        public static int GetQuestLogSize()
+        {
+            return AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 25 : 20;  // 2.0.0.5849 Alpha
+        }
     }
 
     public static class ModernVersion

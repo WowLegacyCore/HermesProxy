@@ -844,6 +844,67 @@ namespace HermesProxy.World.Client
             }
         }
 
+        public QuestLog ReadQuestLogEntry(int i, BitArray updateMaskArray, Dictionary<int, UpdateField> updates)
+        {
+            int PLAYER_QUEST_LOG_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_QUEST_LOG_1_1);
+            int sizePerEntry = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) ? 4 : 3;
+            int stateOffset = 1;
+            int progressOffset = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) ? 2 : -1;
+            int timerOffset = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) ? 3 : 2;
+            QuestLog questLog = null;
+
+            int index = PLAYER_QUEST_LOG_1_1 + i * sizePerEntry;
+            if ((updateMaskArray != null && updateMaskArray[index]) ||
+                (updateMaskArray == null && updates.ContainsKey(index)))
+            {
+                if (questLog == null)
+                    questLog = new QuestLog();
+
+                questLog.QuestID = updates[index].Int32Value;
+            }
+            if ((updateMaskArray != null && updateMaskArray[index + stateOffset]) ||
+                (updateMaskArray == null && updates.ContainsKey(index + stateOffset)))
+            {
+                if (questLog == null)
+                    questLog = new QuestLog();
+
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_4_0_8089))
+                {
+                    // first 3 bytes are objective progress, each counter is 6 bits long, total 4 counters
+                    uint rawValue = updates[index + stateOffset].UInt32Value;
+                    questLog.ObjectiveProgress[0] = (byte)(rawValue & 0x3F);
+                    questLog.ObjectiveProgress[1] = (byte)((rawValue & (0x3F << 6)) >> 6);
+                    questLog.ObjectiveProgress[2] = (byte)((rawValue & (0x3F << 12)) >> 12);
+                    questLog.ObjectiveProgress[3] = (byte)((rawValue & (0x3F << 18)) >> 18);
+                    questLog.StateFlags = ((rawValue >> 24) & 0xFF);
+                }
+                else
+                    questLog.StateFlags = updates[index + stateOffset].UInt32Value;
+            }
+            if (progressOffset != -1 &&
+                (updateMaskArray != null && updateMaskArray[index + progressOffset]) ||
+                (updateMaskArray == null && updates.ContainsKey(index + progressOffset)))
+            {
+                if (questLog == null)
+                    questLog = new QuestLog();
+
+                questLog.ObjectiveProgress[0] = (byte)(updates[index + progressOffset].UInt32Value & 0xFF);
+                questLog.ObjectiveProgress[1] = (byte)((updates[index + progressOffset].UInt32Value >> 8) & 0xFF);
+                questLog.ObjectiveProgress[2] = (byte)((updates[index + progressOffset].UInt32Value >> 16) & 0xFF);
+                questLog.ObjectiveProgress[3] = (byte)((updates[index + progressOffset].UInt32Value >> 24) & 0xFF);
+            }
+            if ((updateMaskArray != null && updateMaskArray[index + timerOffset]) ||
+                (updateMaskArray == null && updates.ContainsKey(index + timerOffset)))
+            {
+                if (questLog == null)
+                    questLog = new QuestLog();
+
+                questLog.EndTime = updates[index + timerOffset].UInt32Value;
+            }
+
+            return questLog;
+        }
+
         public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
         {
             // Object Fields
@@ -1575,53 +1636,10 @@ namespace HermesProxy.World.Client
                 int PLAYER_QUEST_LOG_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_QUEST_LOG_1_1);
                 if (PLAYER_QUEST_LOG_1_1 >= 0)
                 {
-                    int sizePerEntry = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) ? 4 : 3;
-                    int stateOffset = 1;
-                    int progressOffset = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) ? 2 : -1;
-                    int timerOffset = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) ? 3 : 2;
-                    int questsCount = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 25 : 20; // 2.0.0.5849 Alpha
+                    int questsCount = LegacyVersion.GetQuestLogSize();
                     for (int i = 0; i < questsCount; i++)
                     {
-                        int index = PLAYER_QUEST_LOG_1_1 + i * sizePerEntry;
-                        if (updateMaskArray[index])
-                        {
-                            if (updateData.PlayerData.QuestLog[i] == null)
-                                updateData.PlayerData.QuestLog[i] = new QuestLog();
-
-                            updateData.PlayerData.QuestLog[i].QuestID = updates[index].Int32Value;
-                        }
-                        if (updateMaskArray[index + stateOffset])
-                        {
-                            if (updateData.PlayerData.QuestLog[i] == null)
-                                updateData.PlayerData.QuestLog[i] = new QuestLog();
-
-                            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_4_0_8089))
-                            {
-                                // first 3 bytes are objective progress, each counter is 6 bits long, total 4 counters
-                                uint rawValue = updates[index + stateOffset].UInt32Value;
-                                updateData.PlayerData.QuestLog[i].ObjectiveProgress[0] = (byte)(rawValue & 0x3F);
-                                updateData.PlayerData.QuestLog[i].ObjectiveProgress[1] = (byte)((rawValue & (0x3F << 6)) >> 6);
-                                updateData.PlayerData.QuestLog[i].ObjectiveProgress[2] = (byte)((rawValue & (0x3F << 12)) >> 12);
-                                updateData.PlayerData.QuestLog[i].ObjectiveProgress[3] = (byte)((rawValue & (0x3F << 18)) >> 18);
-                                updateData.PlayerData.QuestLog[i].StateFlags = ((rawValue >> 24) & 0xFF);
-                            }
-                            else
-                                updateData.PlayerData.QuestLog[i].StateFlags = updates[index + stateOffset].UInt32Value;
-                        }
-                        if (progressOffset != -1 && updateMaskArray[index + progressOffset])
-                        {
-                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[0] = (byte)(updates[index + progressOffset].UInt32Value & 0xFF);
-                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[1] = (byte)((updates[index + progressOffset].UInt32Value >> 8) & 0xFF);
-                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[2] = (byte)((updates[index + progressOffset].UInt32Value >> 16) & 0xFF);
-                            updateData.PlayerData.QuestLog[i].ObjectiveProgress[3] = (byte)((updates[index + progressOffset].UInt32Value >> 24) & 0xFF);
-                        }
-                        if (updateMaskArray[index + timerOffset])
-                        {
-                            if (updateData.PlayerData.QuestLog[i] == null)
-                                updateData.PlayerData.QuestLog[i] = new QuestLog();
-
-                            updateData.PlayerData.QuestLog[i].EndTime = updates[index + timerOffset].UInt32Value;
-                        }
+                        updateData.PlayerData.QuestLog[i] = ReadQuestLogEntry(i, updateMaskArray, updates);
                     }
                 }
                 int PLAYER_VISIBLE_ITEM_1_0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_0);

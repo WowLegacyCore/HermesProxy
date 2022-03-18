@@ -5,19 +5,80 @@ using System.Text;
 using System.Threading.Tasks;
 using Framework;
 using Framework.Logging;
+using HermesProxy.World.Objects;
 using Microsoft.VisualBasic.FileIO;
 
 namespace HermesProxy.World
 {
     public static class GameData
     {
-        // Storages
+        // From CSV
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
 
+        // From Server
+        public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
+        public static Dictionary<uint, QuestInfo> QuestTemplates = new Dictionary<uint, QuestInfo>();
+        public static Dictionary<uint, string> ItemNames = new Dictionary<uint, string>();
+
+        public static void StoreItemName(uint entry, string name)
+        {
+            if (ItemNames.ContainsKey(entry))
+                ItemNames[entry] = name;
+            else
+                ItemNames.Add(entry, name);
+        }
+        public static string GetItemName(uint entry)
+        {
+            string data;
+            if (ItemNames.TryGetValue(entry, out data))
+                return data;
+            return "";
+        }
+        public static void StoreQuestTemplate(uint entry, QuestInfo template)
+        {
+            if (QuestTemplates.ContainsKey(entry))
+                QuestTemplates[entry] = template;
+            else
+                QuestTemplates.Add(entry, template);
+        }
+        public static QuestInfo GetQuestTemplate(uint entry)
+        {
+            QuestInfo data;
+            if (QuestTemplates.TryGetValue(entry, out data))
+                return data;
+            return null;
+        }
+        public static QuestObjective GetQuestObjectiveForItem(uint entry)
+        {
+            foreach (var quest in QuestTemplates)
+            {
+                foreach (var objective in quest.Value.Objectives)
+                {
+                    if (objective.ObjectID == entry &&
+                        objective.Type == QuestObjectiveType.Item)
+                        return objective;
+                }
+            }
+            return null;
+        }
+        public static void StoreCreatureTemplate(uint entry, CreatureTemplate template)
+        {
+            if (CreatureTemplates.ContainsKey(entry))
+                CreatureTemplates[entry] = template;
+            else
+                CreatureTemplates.Add(entry, template);
+        }
+        public static CreatureTemplate GetCreatureTemplate(uint entry)
+        {
+            CreatureTemplate data;
+            if (CreatureTemplates.TryGetValue(entry, out data))
+                return data;
+            return null;
+        }
         public static ItemTemplate GetItemTemplate(uint entry)
         {
             ItemTemplate data;

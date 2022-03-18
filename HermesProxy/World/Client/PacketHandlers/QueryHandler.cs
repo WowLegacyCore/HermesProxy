@@ -243,6 +243,7 @@ namespace HermesProxy.World.Client
             quest.AcceptedSoundKitID = 890;
             quest.CompleteSoundKitID = 878;
 
+            GameData.StoreQuestTemplate(response.QuestID, quest);
             SendPacketToClient(response);
         }
 
@@ -260,8 +261,8 @@ namespace HermesProxy.World.Client
             }
 
             response.Allow = true;
-            response.Stats = new CreatureStats();
-            CreatureStats creature = response.Stats;
+            response.Stats = new CreatureTemplate();
+            CreatureTemplate creature = response.Stats;
 
             for (int i = 0; i < 4; i++)
                 creature.Name[i] = packet.ReadCString();
@@ -329,6 +330,7 @@ namespace HermesProxy.World.Client
             creature.MovementInfoID = 1693;
             creature.Class = 1;
 
+            GameData.CreatureTemplates.Add(response.CreatureID, creature);
             SendPacketToClient(response);
         }
         [PacketHandler(Opcode.SMSG_QUERY_GAME_OBJECT_RESPONSE)]
@@ -473,6 +475,15 @@ namespace HermesProxy.World.Client
                 }
             }
             SendPacketToClient(response);
+        }
+        [PacketHandler(Opcode.SMSG_ITEM_NAME_QUERY_RESPONSE)]
+        void HandleItemNameQueryResponse(WorldPacket packet)
+        {
+            uint entry = packet.ReadUInt32();
+            string name = packet.ReadCString();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.ReadUInt32(); // Inventory Type
+            GameData.StoreItemName(entry, name);
         }
         [PacketHandler(Opcode.SMSG_WHO)]
         void HandleWhoResponse(WorldPacket packet)

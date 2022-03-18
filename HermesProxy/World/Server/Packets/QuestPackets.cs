@@ -650,4 +650,30 @@ namespace HermesProxy.World.Server.Packets
         public uint QuestID;
         public bool FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
     }
+
+    class QuestGiverQuestFailed : ServerPacket
+    {
+        public QuestGiverQuestFailed() : base(Opcode.SMSG_QUEST_GIVER_QUEST_FAILED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteUInt32((uint)Reason);
+        }
+
+        public uint QuestID;
+        public InventoryResult Reason;
+    }
+
+    class QuestUpdateStatus : ServerPacket
+    {
+        public QuestUpdateStatus(Opcode opcode) : base(opcode) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+        }
+
+        public uint QuestID;
+    }
 }

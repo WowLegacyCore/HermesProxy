@@ -334,5 +334,88 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(toast);
         }
+
+        [PacketHandler(Opcode.SMSG_QUEST_GIVER_QUEST_FAILED)]
+        void HandleQuestGiverQuestFailed(WorldPacket packet)
+        {
+            QuestGiverQuestFailed quest = new QuestGiverQuestFailed();
+            quest.QuestID = packet.ReadUInt32();
+            quest.Reason = (InventoryResult)packet.ReadUInt32();
+            SendPacketToClient(quest);
+        }
+
+        [PacketHandler(Opcode.SMSG_QUEST_UPDATE_COMPLETE)]
+        [PacketHandler(Opcode.SMSG_QUEST_UPDATE_FAILED)]
+        [PacketHandler(Opcode.SMSG_QUEST_UPDATE_FAILED_TIMER)]
+        void HandleQuestUpdateStatus(WorldPacket packet)
+        {
+            QuestUpdateStatus quest = new QuestUpdateStatus(packet.GetUniversalOpcode(false));
+            quest.QuestID = packet.ReadUInt32();
+            SendPacketToClient(quest);
+        }
+
+        [PacketHandler(Opcode.SMSG_QUEST_UPDATE_ADD_ITEM)]
+        void HandleQuestUpdateAddItem(WorldPacket packet)
+        {
+            uint itemId = packet.ReadUInt32();
+            uint count = packet.ReadUInt32();
+
+            string name = GameData.GetItemName(itemId);
+            if (String.IsNullOrEmpty(name))
+            {
+                WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
+                query.WriteUInt32(itemId);
+                query.WriteGuid(WowGuid64.Empty);
+                SendPacket(query);
+            }
+
+            QuestObjective objective = GameData.GetQuestObjectiveForItem(itemId);
+            if (objective == null)
+                return;
+
+            short? currentCount = null;
+            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
+            int questsCount = LegacyVersion.GetQuestLogSize();
+            for (int i = 0; i < questsCount; i++)
+            {
+                QuestLog logEntry = ReadQuestLogEntry(i, null, updateFields);
+                if (logEntry == null)
+                    continue;
+                if (logEntry.QuestID != objective.QuestID)
+                    continue;
+                currentCount = logEntry.ObjectiveProgress[objective.StorageIndex];
+            }
+            if (currentCount == null)
+                return;
+
+            PrintNotification notify = new PrintNotification();
+            notify.NotifyText = "|cffffd000" + name + ": " + (count + currentCount) + "/" + objective.Amount;
+            SendPacketToClient(notify);
+        }
+
+        [PacketHandler(Opcode.SMSG_QUEST_UPDATE_ADD_KILL)]
+        void HandleQuestUpdateAddKill(WorldPacket packet)
+        {
+            uint questId = packet.ReadUInt32();
+            uint creatureId = packet.ReadUInt32();
+            uint count = packet.ReadUInt32();
+            uint required = packet.ReadUInt32();
+            WowGuid64 guid = packet.ReadGuid();
+
+            CreatureTemplate template = GameData.GetCreatureTemplate(creatureId);
+            if (template != null)
+            {
+                PrintNotification notify = new PrintNotification();
+                notify.NotifyText = "|cffffd000" + template.Name[0] + " slain: " + count + "/" + required;
+                SendPacketToClient(notify);
+            }
+            else
+            {
+                WorldPacket query = new WorldPacket(Opcode.CMSG_QUERY_CREATURE);
+                query.WriteUInt32(creatureId);
+                query.WriteGuid(guid);
+                SendPacket(query);
+            }
+        }
     }
 }
