@@ -749,5 +749,34 @@ namespace HermesProxy.World.Client
             spell.KitRecID = packet.ReadUInt32();
             SendPacketToClient(spell);
         }
+
+        [PacketHandler(Opcode.SMSG_UPDATE_AURA_DURATION)]
+        void HandleUpdateAuraDuration(WorldPacket packet)
+        {
+            byte slot = packet.ReadUInt8();
+            int duration = packet.ReadInt32();
+            GetSession().GameState.StoreAuraDuration(slot, duration);
+            if (duration <= 0)
+                return;
+
+            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
+            if (updateFields == null)
+                return;
+
+            AuraInfo aura = new AuraInfo();
+            aura.Slot = slot;
+            aura.AuraData = ReadAuraSlot(slot, GetSession().GameState.CurrentPlayerGuid, updateFields);
+            if (aura.AuraData == null)
+                return;
+
+            aura.AuraData.Flags |= AuraFlagsModern.Duration;
+            aura.AuraData.Duration = duration;
+            aura.AuraData.Remaining = duration;
+
+            Console.WriteLine("Sending update slot " + slot);
+            AuraUpdate update = new AuraUpdate(GetSession().GameState.CurrentPlayerGuid, false);
+            update.Auras.Add(aura);
+            SendPacketToClient(update);
+        }
     }
 }

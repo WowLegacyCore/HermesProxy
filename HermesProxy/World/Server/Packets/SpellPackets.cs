@@ -230,8 +230,8 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public bool UpdateAll;
-        public WowGuid128 UnitGUID;
         public List<AuraInfo> Auras = new();
+        public WowGuid128 UnitGUID;
     }
 
     public struct AuraInfo

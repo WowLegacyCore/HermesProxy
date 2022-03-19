@@ -85,5 +85,12 @@ namespace HermesProxy.World.Server
             packet.WriteBool(sight.Enable);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_MOUNT_SPECIAL_ANIM)]
+        void HandleMountSpecialAnim(MountSpecial mount)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_MOUNT_SPECIAL_ANIM);
+            SendPacketToServer(packet);
+        }
     }
 }

@@ -37,6 +37,29 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_LIST)]
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_OWNER)]
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_ANNOUNCEMENTS)]
+
+        void HandleChatChannelCommand(ChannelCommand command)
+        {
+            WorldPacket packet = new WorldPacket(command.GetUniversalOpcode());
+            packet.WriteCString(command.ChannelName);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_DECLINE_INVITE)]
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_DISPLAY_LIST)]
+        void HandleChatChannelCommandTBC(ChannelCommand command)
+        {
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                return;
+
+            WorldPacket packet = new WorldPacket(command.GetUniversalOpcode());
+            packet.WriteCString(command.ChannelName);
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_AFK)]
         void HandleChatMessageAFK(ChatMessageAFK afk)
         {
@@ -71,6 +94,15 @@ namespace HermesProxy.World.Server
                 GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
             else
                 GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_EMOTE)]
+        void HandleChatMessageWhisper(ChatMessageEmote emote)
+        {
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Emote, 0, emote.Text, "", "");
+            else
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Emote, 0, emote.Text, "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_GUILD)]

@@ -238,6 +238,11 @@ namespace HermesProxy
         {
             return AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 25 : 20;  // 2.0.0.5849 Alpha
         }
+
+        public static int GetAuraSlotsCount()
+        {
+            return AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 56 : 48;
+        }
     }
 
     public static class ModernVersion

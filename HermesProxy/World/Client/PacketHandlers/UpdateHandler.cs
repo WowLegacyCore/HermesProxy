@@ -905,6 +905,56 @@ namespace HermesProxy.World.Client
             return questLog;
         }
 
+        public AuraDataInfo ReadAuraSlot(byte i, WowGuid128 guid, Dictionary<int, UpdateField> updates)
+        {
+            int UNIT_FIELD_AURA = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURA);
+            int UNIT_FIELD_AURAFLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURAFLAGS);
+            int UNIT_FIELD_AURALEVELS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURALEVELS);
+            int UNIT_FIELD_AURAAPPLICATIONS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURAAPPLICATIONS);
+
+            int spellId = updates[UNIT_FIELD_AURA + i].Int32Value;
+            if (spellId == 0)
+                return null;
+
+            AuraDataInfo data = new AuraDataInfo();
+            data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Objects.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetLow());
+            data.SpellID = spellId;
+            data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 4;
+                if (updates.ContainsKey(flagsIndex))
+                {
+                    ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+                    ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
+                }
+            }
+            else
+            {
+                int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 8;
+                if (updates.ContainsKey(flagsIndex))
+                {
+                    ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 8) * 4)) & 0xF);
+                    ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
+                }
+            }
+
+            int levelsIndex = UNIT_FIELD_AURALEVELS + i / 4;
+            if (updates.ContainsKey(levelsIndex))
+                data.CastLevel = (ushort)((updates[levelsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+            else
+                data.CastLevel = 0;
+
+            int stacksIndex = UNIT_FIELD_AURAAPPLICATIONS + i / 4;
+            if (updates.ContainsKey(stacksIndex))
+                data.Applications = (byte)((updates[stacksIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
+            else
+                data.Applications = 0;
+
+            return data;
+        }
+
         public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
         {
             // Object Fields
@@ -1548,53 +1598,23 @@ namespace HermesProxy.World.Client
                 int UNIT_FIELD_AURAAPPLICATIONS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURAAPPLICATIONS);
                 if (UNIT_FIELD_AURA > 0 && UNIT_FIELD_AURAFLAGS > 0 && UNIT_FIELD_AURALEVELS > 0 && UNIT_FIELD_AURAAPPLICATIONS > 0)
                 {
-                    int aurasCount = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 56 : 48;
+                    int aurasCount = LegacyVersion.GetAuraSlotsCount();
                     for (byte i = 0; i < aurasCount; i++)
                     {
                         if (updateMaskArray[UNIT_FIELD_AURA + i])
                         {
                             AuraInfo aura = new AuraInfo();
                             aura.Slot = i;
-                            int spellId = updates[UNIT_FIELD_AURA + i].Int32Value;
-                            if (spellId != 0)
+                            aura.AuraData = ReadAuraSlot(i, guid, updates);
+                            if (aura.AuraData != null && guid == GetSession().GameState.CurrentPlayerGuid)
                             {
-                                AuraDataInfo data = new AuraDataInfo();
-                                data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Objects.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetLow());
-                                data.SpellID = spellId;
-                                data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
-
-                                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                                int duration = GetSession().GameState.GetAuraDuration(i);
+                                if (duration > 0)
                                 {
-                                    int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 4;
-                                    if (updates.ContainsKey(flagsIndex))
-                                    {
-                                        ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
-                                        ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
-                                    }
+                                    aura.AuraData.Flags |= AuraFlagsModern.Duration;
+                                    aura.AuraData.Duration = duration;
+                                    aura.AuraData.Remaining = duration;
                                 }
-                                else
-                                {
-                                    int flagsIndex = UNIT_FIELD_AURAFLAGS + i / 8;
-                                    if (updates.ContainsKey(flagsIndex))
-                                    {
-                                        ushort flags = (ushort)((updates[flagsIndex].UInt32Value >> ((i % 8) * 4)) & 0xF);
-                                        ModernVersion.ConvertAuraFlags(flags, i, out data.Flags, out data.ActiveFlags);
-                                    }
-                                }
-
-                                int levelsIndex = UNIT_FIELD_AURALEVELS + i / 4;
-                                if (updates.ContainsKey(levelsIndex))
-                                    data.CastLevel = (ushort)((updates[levelsIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
-                                else
-                                    data.CastLevel = 0;
-
-                                int stacksIndex = UNIT_FIELD_AURAAPPLICATIONS + i / 4;
-                                if (updates.ContainsKey(stacksIndex))
-                                    data.Applications = (byte)((updates[stacksIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
-                                else
-                                    data.Applications = 0;
-
-                                aura.AuraData = data;
                             }
                             auraUpdate.Auras.Add(aura);
                         }

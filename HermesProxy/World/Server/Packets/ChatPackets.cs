@@ -99,6 +99,56 @@ namespace HermesProxy.World.Server.Packets
         public bool Suspended;
     }
 
+    class ChannelCommand : ClientPacket
+    {
+        public ChannelCommand(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
+        }
+
+        public string ChannelName;
+    }
+
+    // TODO NOT WORKING
+    // wrong opcode or structure
+    public class ChannelListResponse : ServerPacket
+    {
+        public ChannelListResponse() : base(Opcode.SMSG_CHANNEL_LIST)
+        {
+            Members = new List<ChannelPlayer>();
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(Display);
+            _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
+            _worldPacket.WriteUInt32((uint)ChannelFlags);
+            _worldPacket.WriteInt32(Members.Count);
+            _worldPacket.WriteString(ChannelName);
+
+            foreach (ChannelPlayer player in Members)
+            {
+                _worldPacket.WritePackedGuid128(player.Guid);
+                _worldPacket.WriteUInt32(player.VirtualRealmAddress);
+                _worldPacket.WriteUInt8(player.Flags);
+            }
+        }
+
+        public List<ChannelPlayer> Members;
+        public string ChannelName;
+        public ChannelFlags ChannelFlags;
+        public bool Display;
+
+        public struct ChannelPlayer
+        {
+            public WowGuid128 Guid;
+            public uint VirtualRealmAddress;
+            public byte Flags;
+        }
+    }
+
     public class ChatMessageAFK : ClientPacket
     {
         public ChatMessageAFK(WorldPacket packet) : base(packet) { }
@@ -161,6 +211,19 @@ namespace HermesProxy.World.Server.Packets
         public uint Language = 0;
         public string Text;
         public string Target;
+    }
+
+    public class ChatMessageEmote : ClientPacket
+    {
+        public ChatMessageEmote(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint len = _worldPacket.ReadBits<uint>(9);
+            Text = _worldPacket.ReadString(len);
+        }
+
+        public string Text;
     }
 
     public class ChatMessage : ClientPacket

@@ -37,6 +37,7 @@ namespace HermesProxy
         public WowGuid128 LastClientCastGuid;
         public WowGuid128 LastLootTargetGuid;
         public List<int> ActionButtons = new();
+        public Dictionary<byte, int> CurrentPlayerAuras = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, uint> PlayerGuildIds = new();
         public Dictionary<WowGuid128, Dictionary<int, UpdateField>> ObjectCacheLegacy = new();
@@ -50,6 +51,19 @@ namespace HermesProxy
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
         public Dictionary<uint, ArenaTeamData> ArenaTeams = new();
 
+        public void StoreAuraDuration(byte slot, int duration)
+        {
+            if (CurrentPlayerAuras.ContainsKey(slot))
+                CurrentPlayerAuras[slot] = duration;
+            else
+                CurrentPlayerAuras.Add(slot, duration);
+        }
+        public int GetAuraDuration(byte slot)
+        {
+            if (CurrentPlayerAuras.ContainsKey(slot))
+                return CurrentPlayerAuras[slot];
+            return -1;
+        }
         public void StorePlayerGuildId(WowGuid128 guid, uint guildId)
         {
             if (PlayerGuildIds.ContainsKey(guid))

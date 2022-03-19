@@ -198,5 +198,13 @@ namespace HermesProxy.World.Client
             cinematic.CinematicID = packet.ReadUInt32();
             SendPacketToClient(cinematic);
         }
+
+        [PacketHandler(Opcode.SMSG_SPECIAL_MOUNT_ANIM)]
+        void HandleSpecialMountAnim(WorldPacket packet)
+        {
+            SpecialMountAnim mount = new();
+            mount.UnitGUID = packet.ReadGuid().To128();
+            SendPacketToClient(mount);
+        }
     }
 }

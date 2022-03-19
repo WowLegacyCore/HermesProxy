@@ -4,6 +4,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using static HermesProxy.World.Server.Packets.ChannelListResponse;
 
 namespace HermesProxy.World.Client
 {
@@ -121,6 +122,28 @@ namespace HermesProxy.World.Client
                 case ChatNotify.NotInLfg:
                     break;
             }
+        }
+
+        [PacketHandler(Opcode.SMSG_CHANNEL_LIST)]
+        void HandleChannelList(WorldPacket packet)
+        {
+            ChannelListResponse list = new ChannelListResponse();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                list.Display = packet.ReadBool();
+            else
+                list.Display = true;
+            list.ChannelName = packet.ReadCString();
+            list.ChannelFlags = (ChannelFlags)packet.ReadUInt8();
+            int count = packet.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                ChannelPlayer member = new ChannelPlayer();
+                member.Guid = packet.ReadGuid().To128();
+                member.VirtualRealmAddress = GetSession().RealmId.GetAddress();
+                member.Flags = packet.ReadUInt8();
+                list.Members.Add(member);
+            }
+            SendPacketToClient(list);
         }
 
         [PacketHandler(Opcode.SMSG_CHAT, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]

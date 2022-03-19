@@ -661,7 +661,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         SMSG_MONSTER_MOVE_TRANSPORT                           = 0x2AE,
         SMSG_MOTD                                             = 0x33D,
         SMSG_MOUNT_RESULT                                     = 0x16E,
-        SMSG_MOUNT_SPECIAL_ANIM                               = 0x172,
+        SMSG_SPECIAL_MOUNT_ANIM                               = 0x172,
         SMSG_MOVE_KNOCK_BACK                                  = 0x0EF,
         SMSG_MOVE_SET_FEATHER_FALL                            = 0x0F2,
         SMSG_MOVE_SET_FLIGHT                                  = 0x33E,

@@ -1049,7 +1049,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         SMSG_MONSTER_MOVE_TRANSPORT                           = 0x2AE,
         SMSG_MOTD                                             = 0x33D,
         SMSG_MOUNT_RESULT                                     = 0x16E,
-        SMSG_MOUNT_SPECIAL_ANIM                               = 0x172,
+        SMSG_SPECIAL_MOUNT_ANIM                               = 0x172,
         SMSG_MOVE_CHARACTER_CHEAT                             = 0x00E,
         SMSG_MOVE_DISABLE_GRAVITY                             = 0x4CE,
         SMSG_MOVE_DISABLE_TRANSITION_BETWEEN_SWIM_AND_FLY     = 0x33F,

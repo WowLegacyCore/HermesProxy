@@ -506,4 +506,34 @@ namespace HermesProxy.World.Server.Packets
 
         public bool Enable;
     }
+
+    class MountSpecial : ClientPacket
+    {
+        public MountSpecial(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellVisualKitIDs = new int[_worldPacket.ReadUInt32()];
+            for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
+                SpellVisualKitIDs[i] = _worldPacket.ReadInt32();
+        }
+
+        public int[] SpellVisualKitIDs;
+    }
+
+    class SpecialMountAnim : ServerPacket
+    {
+        public SpecialMountAnim() : base(Opcode.SMSG_SPECIAL_MOUNT_ANIM, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
+            foreach (var id in SpellVisualKitIDs)
+                _worldPacket.WriteInt32(id);
+        }
+
+        public WowGuid128 UnitGUID;
+        public List<int> SpellVisualKitIDs = new();
+    }
 }
