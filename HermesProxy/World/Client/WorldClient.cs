@@ -193,6 +193,9 @@ namespace HermesProxy.World.Client
                     Log.Print(LogType.Error, $"Received an empty packet!");
                 }
 
+                if (!IsConnected())
+                    return;
+
                 headerBuffer = new byte[LegacyServerPacketHeader.StructSize];
 
                 // Start receiving data again.

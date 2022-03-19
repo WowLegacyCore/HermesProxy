@@ -335,6 +335,11 @@ namespace HermesProxy
 
         public void OnDisconnect()
         {
+            if (ModernSniff != null)
+            {
+                ModernSniff.CloseFile();
+                ModernSniff = null;
+            }
             if (AuthClient != null)
             {
                 AuthClient.Disconnect();

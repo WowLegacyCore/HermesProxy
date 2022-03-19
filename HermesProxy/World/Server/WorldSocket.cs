@@ -336,7 +336,13 @@ namespace HermesProxy.World.Server
             {
                 Log.Print(LogType.Error, $"Can't send {packet.GetUniversalOpcode()}, socket is closed!");
                 if (GetSession() != null)
+                {
+                    if (GetSession().RealmSocket == this)
+                        GetSession().RealmSocket = null;
+                    else if (GetSession().InstanceSocket == this)
+                        GetSession().InstanceSocket = null;
                     GetSession().OnDisconnect();
+                }
                 return;
             }
 
