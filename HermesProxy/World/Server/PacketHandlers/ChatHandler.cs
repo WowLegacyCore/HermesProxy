@@ -37,7 +37,6 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
-        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_LIST)]
         [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_OWNER)]
         [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_ANNOUNCEMENTS)]
 
@@ -48,14 +47,40 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
-        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_DECLINE_INVITE)]
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_LIST)]
+        void HandleChatChannelList(ChannelCommand command)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_LIST);
+            packet.WriteCString(command.ChannelName);
+            SendPacketToServer(packet);
+            GetSession().GameState.ChannelDisplayList = false;
+        }
+
         [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_DISPLAY_LIST)]
-        void HandleChatChannelCommandTBC(ChannelCommand command)
+        void HandleChatChannelDisplayList(ChannelCommand command)
+        {
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_LIST);
+                packet.WriteCString(command.ChannelName);
+                SendPacketToServer(packet);
+            }
+            else
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_DISPLAY_LIST);
+                packet.WriteCString(command.ChannelName);
+                SendPacketToServer(packet);
+            }
+            GetSession().GameState.ChannelDisplayList = true;
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_DECLINE_INVITE)]
+        void HandleChatChannelDeclineInvite(ChannelCommand command)
         {
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return;
 
-            WorldPacket packet = new WorldPacket(command.GetUniversalOpcode());
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_DECLINE_INVITE);
             packet.WriteCString(command.ChannelName);
             SendPacketToServer(packet);
         }

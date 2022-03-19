@@ -111,8 +111,6 @@ namespace HermesProxy.World.Server.Packets
         public string ChannelName;
     }
 
-    // TODO NOT WORKING
-    // wrong opcode or structure
     public class ChannelListResponse : ServerPacket
     {
         public ChannelListResponse() : base(Opcode.SMSG_CHANNEL_LIST)

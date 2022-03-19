@@ -131,7 +131,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 list.Display = packet.ReadBool();
             else
-                list.Display = true;
+                list.Display = GetSession().GameState.ChannelDisplayList;
             list.ChannelName = packet.ReadCString();
             list.ChannelFlags = (ChannelFlags)packet.ReadUInt8();
             int count = packet.ReadInt32();
