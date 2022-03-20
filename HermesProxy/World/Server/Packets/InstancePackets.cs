@@ -36,4 +36,38 @@ namespace HermesProxy.World.Server.Packets
 
         public uint MapID;
     }
+
+    class InstanceReset : ServerPacket
+    {
+        public InstanceReset() : base(Opcode.SMSG_INSTANCE_RESET) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(MapID);
+        }
+
+        public uint MapID;
+    }
+
+    class InstanceResetFailed : ServerPacket
+    {
+        public InstanceResetFailed() : base(Opcode.SMSG_INSTANCE_RESET_FAILED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteBits(ResetFailedReason, 2);
+            _worldPacket.FlushBits();
+        }
+
+        public uint MapID;
+        public ResetFailedReason ResetFailedReason;
+    }
+
+    class ResetFailedNotify : ServerPacket
+    {
+        public ResetFailedNotify() : base(Opcode.SMSG_RESET_FAILED_NOTIFY) { }
+
+        public override void Write() { }
+    }
 }

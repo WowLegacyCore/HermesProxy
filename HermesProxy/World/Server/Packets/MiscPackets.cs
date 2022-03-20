@@ -24,6 +24,16 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
+    public class EmptyClientPacket : ClientPacket
+    {
+        public EmptyClientPacket(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            System.Diagnostics.Trace.Assert(!_worldPacket.CanRead());
+        }
+    }
+
     public class BindPointUpdate : ServerPacket
     {
         public BindPointUpdate() : base(Opcode.SMSG_BIND_POINT_UPDATE, ConnectionType.Instance) { }
