@@ -33,6 +33,7 @@ namespace HermesProxy
         public long CurrentPlayerCreateTime;
         public uint CurrentGuildCreateTime;
         public uint CurrentGuildNumAccounts;
+        public WowGuid128 CurrentInteractedWithNPC;
         public uint LastWhoRequestId;
         public uint LastClientCastId;
         public WowGuid128 LastClientCastGuid;

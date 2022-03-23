@@ -16,6 +16,7 @@ namespace HermesProxy.World.Client
         {
             ServerPetitionShowList petitions = new();
             petitions.Unit = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = petitions.Unit;
             var count = packet.ReadUInt8();
             for (var i = 0; i < count; i++)
             {

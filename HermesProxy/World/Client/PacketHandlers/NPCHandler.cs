@@ -16,6 +16,7 @@ namespace HermesProxy.World.Client
         {
             GossipMessagePkt gossip = new GossipMessagePkt();
             gossip.GossipGUID = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = gossip.GossipGUID;
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 gossip.GossipID = packet.ReadInt32();
@@ -78,6 +79,7 @@ namespace HermesProxy.World.Client
         {
             BinderConfirm confirm = new BinderConfirm();
             confirm.Guid = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = confirm.Guid;
             SendPacketToClient(confirm);
         }
 
@@ -86,6 +88,7 @@ namespace HermesProxy.World.Client
         {
             VendorInventory vendor = new VendorInventory();
             vendor.VendorGUID = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = vendor.VendorGUID;
             byte itemsCount = packet.ReadUInt8();
 
             if (itemsCount == 0)
@@ -119,6 +122,7 @@ namespace HermesProxy.World.Client
         {
             ShowBank bank = new ShowBank();
             bank.Guid = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = bank.Guid;
             SendPacketToClient(bank);
         }
 
@@ -127,6 +131,7 @@ namespace HermesProxy.World.Client
         {
             TrainerList trainer = new TrainerList();
             trainer.TrainerGUID = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = trainer.TrainerGUID;
             trainer.TrainerID = trainer.TrainerGUID.GetEntry();
             trainer.TrainerType = packet.ReadInt32();
             int count = packet.ReadInt32();
