@@ -35,7 +35,7 @@ namespace HermesProxy.World.Client
             item.Item = new();
             item.Item.ItemID = packet.ReadUInt32();
 
-            byte enchantmentCount = 0;
+            byte enchantmentCount;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 enchantmentCount = 7;
             else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))

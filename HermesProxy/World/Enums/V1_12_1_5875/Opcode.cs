@@ -765,7 +765,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         SMSG_RAID_INSTANCE_MESSAGE                            = 0x2FA,
         SMSG_READ_ITEM_RESULT_FAILED                          = 0x0AF,
         SMSG_READ_ITEM_RESULT_OK                              = 0x0AE,
-        SMSG_RECEIVED_MAIL                                    = 0x285,
+        SMSG_NOTIFY_RECEIVED_MAIL                             = 0x285,
         SMSG_RESISTLOG                                        = 0x1D6,
         SMSG_RESURRECT_FAILED                                 = 0x252,
         SMSG_RESURRECT_REQUEST                                = 0x15B,

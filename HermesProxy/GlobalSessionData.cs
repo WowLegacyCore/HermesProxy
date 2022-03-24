@@ -34,6 +34,7 @@ namespace HermesProxy
         public uint CurrentGuildCreateTime;
         public uint CurrentGuildNumAccounts;
         public WowGuid128 CurrentInteractedWithNPC;
+        public WowGuid128 CurrentInteractedWithGO;
         public uint LastWhoRequestId;
         public uint LastClientCastId;
         public WowGuid128 LastClientCastGuid;
@@ -52,6 +53,9 @@ namespace HermesProxy
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
         public Dictionary<uint, ArenaTeamData> ArenaTeams = new();
+        public World.Server.Packets.MailListResult PendingMailListPacket;
+        public HashSet<uint> RequestedItemTextIds = new HashSet<uint>();
+        public Dictionary<uint, string> ItemTexts = new Dictionary<uint, string>();
 
         public void StoreAuraDuration(byte slot, int duration)
         {

@@ -19,5 +19,11 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(use.Guid.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_GAME_OBJ_REPORT_USE)]
+        void HandleGameObjUse(GameObjReportUse use)
+        {
+            GetSession().GameState.CurrentInteractedWithGO = use.Guid;
+        }
     }
 }

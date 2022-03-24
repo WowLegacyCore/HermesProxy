@@ -965,7 +965,7 @@ namespace HermesProxy.World.Enums.V2_4_3_8606
         SMSG_READ_ITEM_RESULT_OK                              = 0x0AE,
         SMSG_REALM_SPLIT                                      = 0x38B,
         SMSG_REAL_GROUP_UPDATE                                = 0x397,
-        SMSG_RECEIVED_MAIL                                    = 0x285,
+        SMSG_NOTIFY_RECEIVED_MAIL                             = 0x285,
         SMSG_REFER_A_FRIEND_FAILURE                           = 0x420,
         SMSG_REPORT_PVP_AFK_RESULT                            = 0x3E4,
         SMSG_RESET_FAILED_NOTIFY                              = 0x396,

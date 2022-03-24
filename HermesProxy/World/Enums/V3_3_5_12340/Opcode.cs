@@ -1191,7 +1191,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         SMSG_READ_ITEM_RESULT_OK                              = 0x0AE,
         SMSG_REALM_SPLIT                                      = 0x38B,
         SMSG_REAL_GROUP_UPDATE                                = 0x397,
-        SMSG_RECEIVED_MAIL                                    = 0x285,
+        SMSG_NOTIFY_RECEIVED_MAIL                             = 0x285,
         SMSG_REFER_A_FRIEND_EXPIRED                           = 0x01E,
         SMSG_REFER_A_FRIEND_FAILURE                           = 0x421,
         SMSG_REMOVED_FROM_PVP_QUEUE                           = 0x170,
