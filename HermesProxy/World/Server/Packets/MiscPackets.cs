@@ -76,6 +76,21 @@ namespace HermesProxy.World.Server.Packets
         public long Time;
     }
 
+    public class TutorialSetFlag : ClientPacket
+    {
+        public TutorialSetFlag(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Action = (TutorialAction)_worldPacket.ReadBits<byte>(2);
+            if (Action == TutorialAction.Update)
+                TutorialBit = _worldPacket.ReadUInt32();
+        }
+
+        public TutorialAction Action;
+        public uint TutorialBit;
+    }
+
     public class TutorialFlags : ServerPacket
     {
         public TutorialFlags() : base(Opcode.SMSG_TUTORIAL_FLAGS) { }
@@ -545,5 +560,55 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 UnitGUID;
         public List<int> SpellVisualKitIDs = new();
+    }
+
+    public class StartMirrorTimer : ServerPacket
+    {
+        public StartMirrorTimer() : base(Opcode.SMSG_START_MIRROR_TIMER) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32((int)Timer);
+            _worldPacket.WriteInt32(Value);
+            _worldPacket.WriteInt32(MaxValue);
+            _worldPacket.WriteInt32(Scale);
+            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteBit(Paused);
+            _worldPacket.FlushBits();
+        }
+
+        public MirrorTimerType Timer;
+        public int Value;
+        public int MaxValue;
+        public int Scale;
+        public int SpellID;
+        public bool Paused;
+    }
+
+    public class PauseMirrorTimer : ServerPacket
+    {
+        public PauseMirrorTimer() : base(Opcode.SMSG_PAUSE_MIRROR_TIMER) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32((int)Timer);
+            _worldPacket.WriteBit(Paused);
+            _worldPacket.FlushBits();
+        }
+
+        public MirrorTimerType Timer;
+        public bool Paused;
+    }
+
+    public class StopMirrorTimer : ServerPacket
+    {
+        public StopMirrorTimer() : base(Opcode.SMSG_STOP_MIRROR_TIMER) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32((int)Timer);
+        }
+
+        public MirrorTimerType Timer;
     }
 }

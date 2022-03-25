@@ -206,5 +206,35 @@ namespace HermesProxy.World.Client
             mount.UnitGUID = packet.ReadGuid().To128();
             SendPacketToClient(mount);
         }
+
+        [PacketHandler(Opcode.SMSG_START_MIRROR_TIMER)]
+        void HandleStartMirrorTimer(WorldPacket packet)
+        {
+            StartMirrorTimer timer = new();
+            timer.Timer = (MirrorTimerType)packet.ReadUInt32();
+            timer.Value = packet.ReadInt32();
+            timer.MaxValue = packet.ReadInt32();
+            timer.Scale = packet.ReadInt32();
+            timer.Paused = packet.ReadBool();
+            timer.SpellID = packet.ReadInt32();
+            SendPacketToClient(timer);
+        }
+
+        [PacketHandler(Opcode.SMSG_PAUSE_MIRROR_TIMER)]
+        void HandlePauseMirrorTimer(WorldPacket packet)
+        {
+            PauseMirrorTimer timer = new();
+            timer.Timer = (MirrorTimerType)packet.ReadUInt32();
+            timer.Paused = packet.ReadBool();
+            SendPacketToClient(timer);
+        }
+
+        [PacketHandler(Opcode.SMSG_STOP_MIRROR_TIMER)]
+        void HandleStopMirrorTimer(WorldPacket packet)
+        {
+            StopMirrorTimer timer = new();
+            timer.Timer = (MirrorTimerType)packet.ReadUInt32();
+            SendPacketToClient(timer);
+        }
     }
 }

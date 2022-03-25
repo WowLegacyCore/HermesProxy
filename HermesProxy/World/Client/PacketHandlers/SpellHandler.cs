@@ -773,7 +773,6 @@ namespace HermesProxy.World.Client
             aura.AuraData.Duration = duration;
             aura.AuraData.Remaining = duration;
 
-            Console.WriteLine("Sending update slot " + slot);
             AuraUpdate update = new AuraUpdate(GetSession().GameState.CurrentPlayerGuid, false);
             update.Auras.Add(aura);
             SendPacketToClient(update);

@@ -18,7 +18,7 @@ namespace HermesProxy.World.Client
             gossip.GossipGUID = packet.ReadGuid().To128();
             GetSession().GameState.CurrentInteractedWithNPC = gossip.GossipGUID;
 
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089))
                 gossip.GossipID = packet.ReadInt32();
             else
                 gossip.GossipID = (int)gossip.GossipGUID.GetEntry();

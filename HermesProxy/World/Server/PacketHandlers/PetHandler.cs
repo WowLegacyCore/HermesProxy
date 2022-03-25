@@ -19,6 +19,7 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(act.TargetGUID.To64());
             SendPacketToServer(packet);
         }
+
         [PacketHandler(Opcode.CMSG_PET_RENAME)]
         void HandlePetRename(PetRename pet)
         {
@@ -36,11 +37,54 @@ namespace HermesProxy.World.Server
             }
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_REQUEST_STABLED_PETS)]
+        void HandleRequestStabledPets(RequestStabledPets stable)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_LIST_STABLED_PETS);
+            packet.WriteGuid(stable.StableMaster.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_BUY_STABLE_SLOT)]
+        void HandleBuyStableSlot(BuyStableSlot stable)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BUY_STABLE_SLOT);
+            packet.WriteGuid(stable.StableMaster.To64());
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_PET_ABANDON)]
         void HandlePetAbandon(PetAbandon pet)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_ABANDON);
             packet.WriteGuid(pet.PetGUID.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_STABLE_PET)]
+        void HandleStablePet(StablePet pet)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_STABLE_PET);
+            packet.WriteGuid(pet.StableMaster.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_UNSTABLE_PET)]
+        void HandleUnstablePet(UnstablePet pet)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_UNSTABLE_PET);
+            packet.WriteGuid(pet.StableMaster.To64());
+            packet.WriteUInt32(pet.PetNumber);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_STABLE_SWAP_PET)]
+        void HandleStableSwapPet(StableSwapPet pet)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_STABLE_SWAP_PET);
+            packet.WriteGuid(pet.StableMaster.To64());
+            packet.WriteUInt32(pet.PetNumber);
             SendPacketToServer(packet);
         }
     }

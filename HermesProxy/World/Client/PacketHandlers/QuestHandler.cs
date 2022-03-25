@@ -178,19 +178,19 @@ namespace HermesProxy.World.Client
         {
             ClientGossipQuest quest = new();
             quest.QuestID = packet.ReadUInt32();
-            Int32 dialogStatus = packet.ReadInt32();
+            QuestGiverStatusModern dialogStatus = LegacyVersion.ConvertQuestGiverStatus((byte)packet.ReadInt32());
 
-            if (dialogStatus == 5)
+            if (dialogStatus.HasAnyFlag(QuestGiverStatusModern.Available | QuestGiverStatusModern.AvailableCovenantCalling | QuestGiverStatusModern.AvailableJourney | QuestGiverStatusModern.AvailableLegendaryQuest | QuestGiverStatusModern.AvailableRep | QuestGiverStatusModern.LowLevelAvailable | QuestGiverStatusModern.LowLevelAvailableRep))
                 quest.QuestType = 2; // available
             else
                 quest.QuestType = 4; // complete
 
             quest.QuestLevel = packet.ReadInt32();
 
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_3_11685))
                 quest.QuestFlags = packet.ReadUInt32();
 
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_3_11685))
                 quest.Repeatable = packet.ReadBool();
 
             quest.QuestTitle = packet.ReadCString();

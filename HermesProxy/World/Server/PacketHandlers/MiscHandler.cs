@@ -92,5 +92,32 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_MOUNT_SPECIAL_ANIM);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_TUTORIAL_FLAG)]
+        void HandleTutorialFlag(TutorialSetFlag tutorial)
+        {
+            switch (tutorial.Action)
+            {
+                case TutorialAction.Clear:
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.CMSG_TUTORIAL_CLEAR);
+                    SendPacketToServer(packet);
+                    break;
+                }
+                case TutorialAction.Reset:
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.CMSG_TUTORIAL_RESET);
+                    SendPacketToServer(packet);
+                    break;
+                }
+                case TutorialAction.Update:
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.CMSG_TUTORIAL_FLAG);
+                    packet.WriteUInt32(tutorial.TutorialBit);
+                    SendPacketToServer(packet);
+                    break;
+                }
+            }
+        }
     }
 }

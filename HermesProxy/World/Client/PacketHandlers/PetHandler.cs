@@ -69,5 +69,61 @@ namespace HermesProxy.World.Client
             commandState = (CommandStates)((raw >> 16) & 0xFF);
             petModeFlags = (PetModeFlags)(raw & 0xFFFF0000);
         }
+
+        [PacketHandler(Opcode.MSG_LIST_STABLED_PETS)]
+        void HandleListStabledPets(WorldPacket packet)
+        {
+            PetGuids pets = new PetGuids();
+            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
+            int UNIT_FIELD_SUMMON = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_SUMMON);
+            if (UNIT_FIELD_SUMMON >= 0 && updateFields.ContainsKey(UNIT_FIELD_SUMMON))
+            {
+                WowGuid128 guid = GetGuidValue(updateFields, UnitField.UNIT_FIELD_SUMMON).To128();
+                if (!guid.IsEmpty())
+                    pets.Guids.Add(guid);
+            }
+            SendPacketToClient(pets);
+
+            PetStableList stable = new PetStableList();
+            stable.StableMaster = packet.ReadGuid().To128();
+            byte count = packet.ReadUInt8();
+            stable.NumStableSlots = packet.ReadUInt8();
+            for (byte i = 0; i < count; i++)
+            {
+                PetStableInfo pet = new PetStableInfo();
+                pet.PetNumber = packet.ReadUInt32();
+                pet.CreatureID = packet.ReadUInt32();
+                pet.ExperienceLevel = packet.ReadUInt32();
+                pet.PetName = packet.ReadCString();
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    pet.LoyaltyLevel = (byte)packet.ReadUInt32();
+                pet.PetFlags = packet.ReadUInt8();
+
+                if (pet.PetFlags != 1)
+                    pet.PetFlags = 3;
+
+                CreatureTemplate template = GameData.GetCreatureTemplate(pet.CreatureID);
+                if (template != null)
+                    pet.DisplayID = template.Display.CreatureDisplay[0].CreatureDisplayID;
+                else
+                {
+                    WorldPacket query = new WorldPacket(Opcode.CMSG_QUERY_CREATURE);
+                    query.WriteUInt32(pet.CreatureID);
+                    query.WriteGuid(WowGuid64.Empty);
+                    SendPacket(query);
+                }
+
+                stable.Pets.Add(pet);
+            }
+            SendPacketToClient(stable);
+        }
+
+        [PacketHandler(Opcode.SMSG_PET_STABLE_RESULT)]
+        void HandlePetStableResult(WorldPacket packet)
+        {
+            PetStableResult stable = new PetStableResult();
+            stable.Result = packet.ReadUInt8();
+            SendPacketToClient(stable);
+        }
     }
 }

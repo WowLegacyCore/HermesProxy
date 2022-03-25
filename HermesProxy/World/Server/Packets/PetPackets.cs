@@ -176,4 +176,132 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 PetGUID;
     }
+
+    class RequestStabledPets : ClientPacket
+    {
+        public RequestStabledPets(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            StableMaster = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 StableMaster;
+    }
+
+    class PetStableList : ServerPacket
+    {
+        public PetStableList() : base(Opcode.SMSG_PET_STABLE_LIST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(StableMaster);
+            _worldPacket.WriteInt32(Pets.Count);
+            _worldPacket.WriteUInt8(NumStableSlots);
+            foreach (PetStableInfo pet in Pets)
+            {
+                _worldPacket.WriteUInt32(pet.PetNumber);
+                _worldPacket.WriteUInt32(pet.CreatureID);
+                _worldPacket.WriteUInt32(pet.DisplayID);
+                _worldPacket.WriteUInt32(pet.ExperienceLevel);
+                _worldPacket.WriteUInt8(pet.LoyaltyLevel);
+                _worldPacket.WriteUInt8(pet.PetFlags);
+                _worldPacket.WriteBits(pet.PetName.GetByteCount(), 8);
+                _worldPacket.WriteString(pet.PetName);
+            }
+        }
+
+        public WowGuid128 StableMaster;
+        public byte NumStableSlots;
+        public List<PetStableInfo> Pets = new();
+    }
+
+    class PetStableInfo
+    {
+        public uint PetNumber;
+        public uint CreatureID;
+        public uint DisplayID;
+        public uint ExperienceLevel;
+        public byte LoyaltyLevel = 1;
+        public byte PetFlags;
+        public string PetName;
+    }
+
+    class BuyStableSlot : ClientPacket
+    {
+        public BuyStableSlot(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            StableMaster = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 StableMaster;
+    }
+
+    public class PetGuids : ServerPacket
+    {
+        public PetGuids() : base(Opcode.SMSG_PET_GUIDS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Guids.Count);
+            foreach (var guid in Guids)
+                _worldPacket.WritePackedGuid128(guid);
+        }
+
+        public List<WowGuid128> Guids = new List<WowGuid128>();
+    }
+
+    class PetStableResult : ServerPacket
+    {
+        public PetStableResult() : base(Opcode.SMSG_PET_STABLE_RESULT, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(Result);
+        }
+
+        public byte Result;
+    }
+
+    class StablePet : ClientPacket
+    {
+        public StablePet(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            StableMaster = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 StableMaster;
+    }
+
+    class UnstablePet : ClientPacket
+    {
+        public UnstablePet(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetNumber = _worldPacket.ReadUInt32();
+            StableMaster = _worldPacket.ReadPackedGuid128();
+        }
+
+        public uint PetNumber;
+        public WowGuid128 StableMaster;
+    }
+
+    class StableSwapPet : ClientPacket
+    {
+        public StableSwapPet(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetNumber = _worldPacket.ReadUInt32();
+            StableMaster = _worldPacket.ReadPackedGuid128();
+        }
+
+        public uint PetNumber;
+        public WowGuid128 StableMaster;
+    }
 }

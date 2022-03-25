@@ -1253,7 +1253,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         SMSG_SPELL_STEAL_LOG                                  = 0x333,
         SMSG_SPELL_UPDATE_CHAIN_TARGETS                       = 0x330,
         SMSG_SPIRIT_HEALER_CONFIRM                            = 0x222,
-        SMSG_STABLE_RESULT                                    = 0x273,
+        SMSG_PET_STABLE_RESULT                                = 0x273,
         SMSG_STAND_STATE_UPDATE                               = 0x29D,
         SMSG_START_MIRROR_TIMER                               = 0x1D9,
         SMSG_STOP_DANCE                                       = 0x44F,
