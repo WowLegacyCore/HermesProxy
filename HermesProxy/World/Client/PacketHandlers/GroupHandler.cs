@@ -39,5 +39,16 @@ namespace HermesProxy.World.Client
                 SendPacketToClient(update);
             }
         }
+
+        [PacketHandler(Opcode.SMSG_SUMMON_REQUEST)]
+        void HandleSummonRequest(WorldPacket packet)
+        {
+            SummonRequest summon = new SummonRequest();
+            summon.SummonerGUID = packet.ReadGuid().To128();
+            summon.SummonerVirtualRealmAddress = GetSession().RealmId.GetAddress();
+            summon.AreaID = packet.ReadInt32();
+            packet.ReadUInt32(); // time to accept
+            SendPacketToClient(summon);
+        }
     }
 }

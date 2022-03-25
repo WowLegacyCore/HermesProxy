@@ -78,4 +78,45 @@ namespace HermesProxy.World.Server.Packets
         public sbyte PartyIndex;
         public List<Tuple<sbyte, WowGuid128>> TargetIcons = new();
     }
+
+    class SummonRequest : ServerPacket
+    {
+        public SummonRequest() : base(Opcode.SMSG_SUMMON_REQUEST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(SummonerGUID);
+            _worldPacket.WriteUInt32(SummonerVirtualRealmAddress);
+            _worldPacket.WriteInt32(AreaID);
+            _worldPacket.WriteUInt8((byte)Reason);
+            _worldPacket.WriteBit(SkipStartingArea);
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 SummonerGUID;
+        public uint SummonerVirtualRealmAddress;
+        public int AreaID;
+        public SummonReason Reason;
+        public bool SkipStartingArea;
+
+        public enum SummonReason
+        {
+            Spell = 0,
+            Scenario = 1
+        }
+    }
+
+    class SummonResponse : ClientPacket
+    {
+        public SummonResponse(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SummonerGUID = _worldPacket.ReadPackedGuid128();
+            Accept = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 SummonerGUID;
+        public bool Accept;
+    }
 }

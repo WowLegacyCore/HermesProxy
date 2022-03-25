@@ -20,5 +20,17 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(update.Target.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_SUMMON_RESPONSE)]
+        void HandleSummonResponse(SummonResponse update)
+        {
+            if (update.Accept || LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_SUMMON_RESPONSE);
+                packet.WriteGuid(update.SummonerGUID.To64());
+                packet.WriteBool(update.Accept);
+                SendPacketToServer(packet);
+            }
+        }
     }
 }
