@@ -70,6 +70,15 @@ namespace HermesProxy.World.Client
             petModeFlags = (PetModeFlags)(raw & 0xFFFF0000);
         }
 
+        [PacketHandler(Opcode.SMSG_PET_ACTION_SOUND)]
+        void HandlePetActionSound(WorldPacket packet)
+        {
+            PetActionSound sound = new PetActionSound();
+            sound.UnitGUID = packet.ReadGuid().To128();
+            sound.Action = packet.ReadUInt32();
+            SendPacketToClient(sound);
+        }
+
         [PacketHandler(Opcode.MSG_LIST_STABLED_PETS)]
         void HandleListStabledPets(WorldPacket packet)
         {

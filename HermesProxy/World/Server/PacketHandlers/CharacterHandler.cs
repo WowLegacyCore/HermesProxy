@@ -128,5 +128,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(bars.Mask);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_UNLEARN_SKILL)]
+        void HandleUnlearnSkill(UnlearnSkill skill)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_UNLEARN_SKILL);
+            packet.WriteUInt32(skill.SkillLine);
+            SendPacketToServer(packet);
+        }
     }
 }

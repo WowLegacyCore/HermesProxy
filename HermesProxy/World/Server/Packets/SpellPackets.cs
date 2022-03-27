@@ -47,6 +47,31 @@ namespace HermesProxy.World.Server.Packets
         public List<uint> FavoriteSpells = new(); // tradeskill recipes
     }
 
+    public class SupercededSpells : ServerPacket
+    {
+        public SupercededSpells() : base(Opcode.SMSG_SUPERCEDED_SPELLS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(SpellID.Count);
+            _worldPacket.WriteInt32(Superceded.Count);
+            _worldPacket.WriteInt32(FavoriteSpellID.Count);
+
+            foreach (var spellId in SpellID)
+                _worldPacket.WriteUInt32(spellId);
+
+            foreach (var spellId in Superceded)
+                _worldPacket.WriteUInt32(spellId);
+
+            foreach (var spellId in FavoriteSpellID)
+                _worldPacket.WriteInt32(spellId);
+        }
+
+        public List<uint> SpellID = new();
+        public List<uint> Superceded = new();
+        public List<int> FavoriteSpellID = new();
+    }
+
     public class LearnedSpells : ServerPacket
     {
         public LearnedSpells() : base(Opcode.SMSG_LEARNED_SPELLS, ConnectionType.Instance) { }
@@ -357,8 +382,6 @@ namespace HermesProxy.World.Server.Packets
 
     public class CastSpell : ClientPacket
     {
-        public SpellCastRequest Cast;
-
         public CastSpell(WorldPacket packet) : base(packet)
         {
             Cast = new SpellCastRequest();
@@ -368,15 +391,29 @@ namespace HermesProxy.World.Server.Packets
         {
             Cast.Read(_worldPacket);
         }
+
+        public SpellCastRequest Cast;
+    }
+
+    public class PetCastSpell : ClientPacket
+    {
+        public PetCastSpell(WorldPacket packet) : base(packet)
+        {
+            Cast = new SpellCastRequest();
+        }
+
+        public override void Read()
+        {
+            PetGUID = _worldPacket.ReadPackedGuid128();
+            Cast.Read(_worldPacket);
+        }
+
+        public WowGuid128 PetGUID;
+        public SpellCastRequest Cast;
     }
 
     public class UseItem : ClientPacket
     {
-        public byte PackSlot;
-        public byte Slot;
-        public WowGuid128 CastItem;
-        public SpellCastRequest Cast;
-
         public UseItem(WorldPacket packet) : base(packet)
         {
             Cast = new SpellCastRequest();
@@ -389,24 +426,15 @@ namespace HermesProxy.World.Server.Packets
             CastItem = _worldPacket.ReadPackedGuid128();
             Cast.Read(_worldPacket);
         }
+
+        public byte PackSlot;
+        public byte Slot;
+        public WowGuid128 CastItem;
+        public SpellCastRequest Cast;
     }
 
     public class SpellCastRequest
     {
-        public WowGuid128 CastID;
-        public uint SpellID;
-        public uint SpellXSpellVisualID;
-        public uint SendCastFlags;
-        public SpellTargetData Target = new();
-        public MissileTrajectoryRequest MissileTrajectory;
-        public WowGuid128 MoverGUID;
-        public MovementInfo MoveUpdate;
-        public List<SpellWeight> Weight = new();
-        public Array<SpellOptionalReagent> OptionalReagents = new(3);
-        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
-        public WowGuid128 CraftingNPC;
-        public uint[] Misc = new uint[2];
-
         public void Read(WorldPacket data)
         {
             CastID = data.ReadPackedGuid128();
@@ -450,18 +478,32 @@ namespace HermesProxy.World.Server.Packets
                 Weight.Add(weight);
             }
         }
+
+        public WowGuid128 CastID;
+        public uint SpellID;
+        public uint SpellXSpellVisualID;
+        public uint SendCastFlags;
+        public SpellTargetData Target = new();
+        public MissileTrajectoryRequest MissileTrajectory;
+        public WowGuid128 MoverGUID;
+        public MovementInfo MoveUpdate;
+        public List<SpellWeight> Weight = new();
+        public Array<SpellOptionalReagent> OptionalReagents = new(3);
+        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
+        public WowGuid128 CraftingNPC;
+        public uint[] Misc = new uint[2];
     }
 
     public struct MissileTrajectoryRequest
     {
-        public float Pitch;
-        public float Speed;
-
         public void Read(WorldPacket data)
         {
             Pitch = data.ReadFloat();
             Speed = data.ReadFloat();
         }
+
+        public float Pitch;
+        public float Speed;
     }
 
     public struct SpellWeight
@@ -473,30 +515,30 @@ namespace HermesProxy.World.Server.Packets
 
     public struct SpellOptionalReagent
     {
-        public int ItemID;
-        public int Slot;
-        public int Count;
-
         public void Read(WorldPacket data)
         {
             ItemID = data.ReadInt32();
             Slot = data.ReadInt32();
             Count = data.ReadInt32();
         }
+
+        public int ItemID;
+        public int Slot;
+        public int Count;
     }
 
     public struct SpellExtraCurrencyCost
     {
-        public int CurrencyID;
-        public int Slot;
-        public int Count;
-
         public void Read(WorldPacket data)
         {
             CurrencyID = data.ReadInt32();
             Slot = data.ReadInt32();
             Count = data.ReadInt32();
         }
+
+        public int CurrencyID;
+        public int Slot;
+        public int Count;
     }
 
     public class CancelCast : ClientPacket
@@ -544,13 +586,6 @@ namespace HermesProxy.World.Server.Packets
 
     class CastFailed : ServerPacket
     {
-        public WowGuid128 CastID;
-        public int SpellID;
-        public uint Reason;
-        public int FailedArg1 = -1;
-        public int FailedArg2 = -1;
-        public uint SpellXSpellVisualID;
-
         public CastFailed() : base(Opcode.SMSG_CAST_FAILED, ConnectionType.Instance) { }
 
         public override void Write()
@@ -562,6 +597,13 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteInt32(FailedArg1);
             _worldPacket.WriteInt32(FailedArg2);
         }
+
+        public WowGuid128 CastID;
+        public int SpellID;
+        public uint Reason;
+        public int FailedArg1 = -1;
+        public int FailedArg2 = -1;
+        public uint SpellXSpellVisualID;
     }
 
     class PetCastFailed : ServerPacket
@@ -762,9 +804,6 @@ namespace HermesProxy.World.Server.Packets
 
     public class TargetLocation
     {
-        public WowGuid128 Transport = WowGuid128.Empty;
-        public Vector3 Location;
-
         public void Read(WorldPacket data)
         {
             Transport = data.ReadPackedGuid128();
@@ -776,6 +815,9 @@ namespace HermesProxy.World.Server.Packets
             data.WritePackedGuid128(Transport);
             data.WriteVector3(Location);
         }
+
+        public WowGuid128 Transport = WowGuid128.Empty;
+        public Vector3 Location;
     }
 
     public class SpellTargetData
@@ -851,14 +893,14 @@ namespace HermesProxy.World.Server.Packets
 
     public struct SpellPowerData
     {
-        public int Cost;
-        public PowerType Type;
-
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Cost);
             data.WriteInt8((sbyte)Type);
         }
+
+        public int Cost;
+        public PowerType Type;
     }
 
     public class RuneData
@@ -880,40 +922,40 @@ namespace HermesProxy.World.Server.Packets
 
     public struct MissileTrajectoryResult
     {
-        public uint TravelTime;
-        public float Pitch;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(TravelTime);
             data.WriteFloat(Pitch);
         }
+
+        public uint TravelTime;
+        public float Pitch;
     }
 
     public struct CreatureImmunities
     {
-        public uint School;
-        public uint Value;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(School);
             data.WriteUInt32(Value);
         }
+
+        public uint School;
+        public uint Value;
     }
 
     public class SpellHealPrediction
     {
-        public WowGuid128 BeaconGUID = WowGuid128.Empty;
-        public uint Points;
-        public byte Type;
-
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Points);
             data.WriteUInt8(Type);
             data.WritePackedGuid128(BeaconGUID);
         }
+
+        public WowGuid128 BeaconGUID = WowGuid128.Empty;
+        public uint Points;
+        public byte Type;
     }
 
     class LearnTalent : ClientPacket
@@ -1261,6 +1303,36 @@ namespace HermesProxy.World.Server.Packets
         }
     }
 
+    class SpellEnergizeLog : ServerPacket
+    {
+        public SpellEnergizeLog() : base(Opcode.SMSG_SPELL_ENERGIZE_LOG, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TargetGUID);
+            _worldPacket.WritePackedGuid128(CasterGUID);
+
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32((uint)Type);
+            _worldPacket.WriteInt32(Amount);
+            _worldPacket.WriteInt32(OverEnergize);
+
+            _worldPacket.WriteBit(LogData != null);
+            _worldPacket.FlushBits();
+
+            if (LogData != null)
+                LogData.Write(_worldPacket);
+        }
+
+        public WowGuid128 TargetGUID;
+        public WowGuid128 CasterGUID;
+        public uint SpellID;
+        public PowerType Type;
+        public int Amount;
+        public int OverEnergize;
+        public SpellCastLogData LogData;
+    }
+
     class SpellDamageShield : ServerPacket
     {
         public SpellDamageShield() : base(Opcode.SMSG_SPELL_DAMAGE_SHIELD, ConnectionType.Instance) { }
@@ -1321,6 +1393,22 @@ namespace HermesProxy.World.Server.Packets
         public SpellCastLogData LogData;
     }
 
+    public class SpellInstakillLog : ServerPacket
+    {
+        public SpellInstakillLog() : base(Opcode.SMSG_SPELL_INSTAKILL_LOG, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(TargetGUID);
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteUInt32(SpellID);
+        }
+
+        public WowGuid128 TargetGUID;
+        public WowGuid128 CasterGUID;
+        public uint SpellID;
+    }
+
     class PlaySpellVisualKit : ServerPacket
     {
         public PlaySpellVisualKit() : base(Opcode.SMSG_PLAY_SPELL_VISUAL_KIT) { }
@@ -1340,5 +1428,58 @@ namespace HermesProxy.World.Server.Packets
         public uint KitType;
         public uint Duration;
         public bool MountedVisual = false;
+    }
+
+    class ResurrectRequest : ServerPacket
+    {
+        public ResurrectRequest() : base(Opcode.SMSG_RESURRECT_REQUEST) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteUInt32(CasterVirtualRealmAddress);
+            _worldPacket.WriteUInt32(PetNumber);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteBits(Name.GetByteCount(), 11);
+            _worldPacket.WriteBit(UseTimer);
+            _worldPacket.WriteBit(Sickness);
+            _worldPacket.FlushBits();
+
+            _worldPacket.WriteString(Name);
+        }
+
+        public WowGuid128 CasterGUID;
+        public uint CasterVirtualRealmAddress;
+        public uint PetNumber;
+        public uint SpellID;
+        public bool UseTimer = false;
+        public bool Sickness;
+        public string Name;
+    }
+
+    public class ResurrectResponse : ClientPacket
+    {
+        public ResurrectResponse(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            CasterGUID = _worldPacket.ReadPackedGuid128();
+            Response = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 CasterGUID;
+        public uint Response;
+    }
+
+    class SelfRes : ClientPacket
+    {
+        public SelfRes(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellId = _worldPacket.ReadUInt32();
+        }
+
+        public uint SpellId;
     }
 }

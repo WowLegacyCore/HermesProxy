@@ -59,6 +59,15 @@ namespace HermesProxy.World.Client
             loot.LootListID = packet.ReadUInt8();
             SendPacketToClient(loot);
         }
+        [PacketHandler(Opcode.SMSG_LOOT_MONEY_NOTIFY)]
+        void HandleLootMoneyNotify(WorldPacket packet)
+        {
+            LootMoneyNotify loot = new();
+            loot.Money = packet.ReadUInt32();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                loot.SoleLooter = packet.ReadBool();
+            SendPacketToClient(loot);
+        }
         [PacketHandler(Opcode.SMSG_LOOT_CLEAR_MONEY)]
         void HandleLootCelarMoney(WorldPacket packet)
         {

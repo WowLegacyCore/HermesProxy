@@ -335,7 +335,7 @@ namespace HermesProxy.World.Enums.V2_4_3_8606
         PLAYER_FIELD_KEYRING_SLOT_1 = UnitField.UNIT_END + 0x24C,                   // 0x330 - Size: 64 - Type: GUID - Flags: PRIVATE
         PLAYER_FIELD_VANITYPET_SLOT_1 = UnitField.UNIT_END + 0x28C,                 // 0x370 - Size: 36 - Type: GUID - Flags: PRIVATE
         PLAYER_FARSIGHT = UnitField.UNIT_END + 0x2B0,                               // 0x394 - Size: 2 - Type: GUID - Flags: PRIVATE
-        PLAYER__FIELD_KNOWN_TITLES = UnitField.UNIT_END + 0x2B2,                    // 0x396 - Size: 2 - Type: GUID - Flags: PRIVATE
+        PLAYER_FIELD_KNOWN_TITLES = UnitField.UNIT_END + 0x2B2,                     // 0x396 - Size: 2 - Type: GUID - Flags: PRIVATE
         PLAYER_XP = UnitField.UNIT_END + 0x2B4,                                     // 0x398 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_NEXT_LEVEL_XP = UnitField.UNIT_END + 0x2B5,                          // 0x399 - Size: 1 - Type: INT - Flags: PRIVATE
         PLAYER_SKILL_INFO_1_1 = UnitField.UNIT_END + 0x2B6,                         // 0x39A - Size: 384 - Type: TWO_SHORT - Flags: PRIVATE

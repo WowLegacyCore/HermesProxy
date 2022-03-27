@@ -99,6 +99,23 @@ namespace HermesProxy.World.Server
             WriteSpellTargets(cast.Cast.Target, targetFlags, packet);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_PET_CAST_SPELL)]
+        void HandlePetCastSpell(PetCastSpell cast)
+        {
+            GetSession().GameState.LastClientCastId = cast.Cast.SpellID;
+            GetSession().GameState.LastClientCastGuid = cast.Cast.CastID;
+            SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
+
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_CAST_SPELL);
+            packet.WriteGuid(cast.PetGUID.To64());
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt8(0); // cast count
+            packet.WriteUInt32(cast.Cast.SpellID);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt8((byte)cast.Cast.SendCastFlags);
+            WriteSpellTargets(cast.Cast.Target, targetFlags, packet);
+            SendPacketToServer(packet);
+        }
         [PacketHandler(Opcode.CMSG_USE_ITEM)]
         void HandleUseItem(UseItem use)
         {
@@ -154,6 +171,20 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_LEARN_TALENT);
             packet.WriteUInt32(talent.TalentID);
             packet.WriteUInt32(talent.Rank);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_RESURRECT_RESPONSE)]
+        void HandleResurrectResponse(ResurrectResponse revive)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_RESURRECT_RESPONSE);
+            packet.WriteGuid(revive.CasterGUID.To64());
+            packet.WriteUInt8((byte)(revive.Response != 0 ? 0 : 1));
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_SELF_RES)]
+        void HandleSelfRes(SelfRes revive)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SELF_RES);
             SendPacketToServer(packet);
         }
     }

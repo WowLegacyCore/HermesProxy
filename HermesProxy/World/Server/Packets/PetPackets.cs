@@ -127,6 +127,49 @@ namespace HermesProxy.World.Server.Packets
         public Vector3 ActionPosition;
     }
 
+    class PetStopAttack : ClientPacket
+    {
+        public PetStopAttack(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 PetGUID;
+    }
+
+    class PetSetAction : ClientPacket
+    {
+        public PetSetAction(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetGUID = _worldPacket.ReadPackedGuid128();
+
+            Index = _worldPacket.ReadUInt32();
+            Action = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 PetGUID;
+        public uint Index;
+        public uint Action;
+    }
+
+    class PetActionSound : ServerPacket
+    {
+        public PetActionSound() : base(Opcode.SMSG_PET_ACTION_SOUND) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WriteUInt32(Action);
+        }
+
+        public WowGuid128 UnitGUID;
+        public uint Action;
+    }
+
     class PetRename : ClientPacket
     {
         public PetRename(WorldPacket packet) : base(packet) { }

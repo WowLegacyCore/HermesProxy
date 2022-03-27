@@ -1372,6 +1372,11 @@ namespace HermesProxy.World.Client
                         updateData.UnitData.PvpFlags == null)
                         updateData.UnitData.PvpFlags = ReadPvPFlags(updates);
                 }
+                int UNIT_FIELD_FLAGS_2 = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_FLAGS_2);
+                if (UNIT_FIELD_FLAGS_2 >= 0 && updateMaskArray[UNIT_FIELD_FLAGS_2])
+                {
+                    updateData.UnitData.Flags2 = updates[UNIT_FIELD_FLAGS_2].UInt32Value;
+                }
                 int UNIT_FIELD_AURASTATE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURASTATE);
                 if (UNIT_FIELD_AURASTATE >= 0 && updateMaskArray[UNIT_FIELD_AURASTATE])
                 {
@@ -1541,6 +1546,24 @@ namespace HermesProxy.World.Client
                             updateData.UnitData.Stats[i] = updates[UNIT_FIELD_STAT0 + i].Int32Value;
                     }
                 }
+                int UNIT_FIELD_POSSTAT0 = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_POSSTAT0);
+                if (UNIT_FIELD_POSSTAT0 >= 0)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (updateMaskArray[UNIT_FIELD_POSSTAT0 + i])
+                            updateData.UnitData.StatPosBuff[i] = updates[UNIT_FIELD_POSSTAT0 + i].Int32Value;
+                    }
+                }
+                int UNIT_FIELD_NEGSTAT0 = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NEGSTAT0);
+                if (UNIT_FIELD_NEGSTAT0 >= 0)
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        if (updateMaskArray[UNIT_FIELD_NEGSTAT0 + i])
+                            updateData.UnitData.StatNegBuff[i] = updates[UNIT_FIELD_NEGSTAT0 + i].Int32Value;
+                    }
+                }
                 int UNIT_FIELD_RESISTANCES = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_RESISTANCES);
                 if (UNIT_FIELD_RESISTANCES >= 0)
                 {
@@ -1548,6 +1571,24 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_RESISTANCES + i])
                             updateData.UnitData.Resistances[i] = updates[UNIT_FIELD_RESISTANCES + i].Int32Value;
+                    }
+                }
+                int UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE);
+                if (UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE + i])
+                            updateData.UnitData.ResistanceBuffModsPositive[i] = updates[UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE + i].Int32Value;
+                    }
+                }
+                int UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE);
+                if (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE >= 0)
+                {
+                    for (int i = 0; i < 7; i++)
+                    {
+                        if (updateMaskArray[UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + i])
+                            updateData.UnitData.ResistanceBuffModsNegative[i] = updates[UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + i].Int32Value;
                     }
                 }
                 int UNIT_FIELD_BASE_MANA = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_BASE_MANA);
@@ -1617,6 +1658,11 @@ namespace HermesProxy.World.Client
                         if (updateMaskArray[UNIT_FIELD_POWER_COST_MULTIPLIER + i])
                             updateData.UnitData.PowerCostMultiplier[i] = updates[UNIT_FIELD_POWER_COST_MULTIPLIER + i].FloatValue;
                     }
+                }
+                int UNIT_FIELD_MAXHEALTHMODIFIER = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MAXHEALTHMODIFIER);
+                if (UNIT_FIELD_MAXHEALTHMODIFIER >= 0 && updateMaskArray[UNIT_FIELD_MAXHEALTHMODIFIER])
+                {
+                    updateData.UnitData.MaxHealthModifier = updates[UNIT_FIELD_MAXHEALTHMODIFIER].FloatValue;
                 }
                 int UNIT_FIELD_AURA = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURA);
                 int UNIT_FIELD_AURAFLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_AURAFLAGS);
@@ -1691,6 +1737,11 @@ namespace HermesProxy.World.Client
                     {
                         updateData.PlayerData.QuestLog[i] = ReadQuestLogEntry(i, updateMaskArray, updates);
                     }
+                }
+                int PLAYER_CHOSEN_TITLE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_CHOSEN_TITLE);
+                if (PLAYER_CHOSEN_TITLE >= 0 && updateMaskArray[PLAYER_CHOSEN_TITLE])
+                {
+                    updateData.PlayerData.ChosenTitle = updates[PLAYER_CHOSEN_TITLE].Int32Value;
                 }
                 int PLAYER_VISIBLE_ITEM_1_0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_0);
                 if (PLAYER_VISIBLE_ITEM_1_0 >= 0) // vanilla and tbc
@@ -1861,6 +1912,16 @@ namespace HermesProxy.World.Client
                 if (PLAYER_FIELD_COMBO_TARGET >= 0 && updateMaskArray[PLAYER_FIELD_COMBO_TARGET])
                 {
                     updateData.ActivePlayerData.ComboTarget = GetGuidValue(updates, PlayerField.PLAYER_FIELD_COMBO_TARGET).To128();
+                }
+                int PLAYER_FIELD_KNOWN_TITLES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_KNOWN_TITLES);
+                if (PLAYER_FIELD_KNOWN_TITLES >= 0)
+                {
+                    int count = LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056) ? 3 : 2;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (updateMaskArray[PLAYER_FIELD_KNOWN_TITLES + i])
+                            updateData.ActivePlayerData.KnownTitles[i] = updates[PLAYER_FIELD_KNOWN_TITLES + i].UInt32Value;
+                    }
                 }
                 int PLAYER_XP = LegacyVersion.GetUpdateField(PlayerField.PLAYER_XP);
                 if (PLAYER_XP >= 0 && updateMaskArray[PLAYER_XP])
@@ -2067,8 +2128,9 @@ namespace HermesProxy.World.Client
                 int PLAYER_SELF_RES_SPELL = LegacyVersion.GetUpdateField(PlayerField.PLAYER_SELF_RES_SPELL);
                 if (PLAYER_SELF_RES_SPELL >= 0 && updateMaskArray[PLAYER_SELF_RES_SPELL])
                 {
-                    // ACTIVE_PLAYER_DYNAMIC_FIELD_SELF_RES_SPELLS
-                    //updateData.PlayerData.self = updates[PLAYER_SELF_RES_SPELL].UInt32Value;
+                    uint spellId = updates[PLAYER_SELF_RES_SPELL].UInt32Value;
+                    updateData.ActivePlayerData.SelfResSpells = new List<uint>();
+                    updateData.ActivePlayerData.SelfResSpells.Add(spellId);
                 }
                 int PLAYER_FIELD_PVP_MEDALS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_PVP_MEDALS);
                 if (PLAYER_FIELD_PVP_MEDALS >= 0 && updateMaskArray[PLAYER_FIELD_PVP_MEDALS])

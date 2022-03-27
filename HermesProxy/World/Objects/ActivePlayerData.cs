@@ -148,5 +148,8 @@ namespace HermesProxy.World.Objects
         public uint? PvPLastWeeksTierMaxFromWins;
         public bool? InsertItemsLeftToRight;
         public byte? PvPRankProgress;
+
+        // Dynamic Fields
+        public List<uint> SelfResSpells;
     }
 }

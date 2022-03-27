@@ -67,6 +67,27 @@ namespace HermesProxy.World.Client
             }
         }
 
+        [PacketHandler(Opcode.SMSG_SUPERCEDED_SPELLS)]
+        void HandleSupercededSpells(WorldPacket packet)
+        {
+            SupercededSpells spells = new SupercededSpells();
+            uint spellId;
+            uint supercededId;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            {
+                supercededId = packet.ReadUInt32();
+                spellId = packet.ReadUInt32();
+            }
+            else
+            {
+                supercededId = packet.ReadUInt16();
+                spellId = packet.ReadUInt16();
+            }
+            spells.SpellID.Add(spellId);
+            spells.Superceded.Add(supercededId);
+            SendPacketToClient(spells);
+        }
+
         [PacketHandler(Opcode.SMSG_LEARNED_SPELL)]
         void HandleLearnedSpell(WorldPacket packet)
         {
@@ -649,19 +670,37 @@ namespace HermesProxy.World.Client
                     case AuraType.ObsModPower:
                     case AuraType.PeriodicEnergize:
                     {
-                        packet.ReadInt32(); // Power type
-                        packet.ReadUInt32(); // Amount
+                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                        effect.Effect = (uint)aura;
+                        effect.SchoolMaskOrPower = packet.ReadUInt32();
+                        effect.Amount = packet.ReadInt32();
+                        spell.Effects.Add(effect);
                         break;
                     }
                     case AuraType.PeriodicManaLeech:
                     {
-                        packet.ReadInt32(); // Power type
-                        packet.ReadUInt32(); // Amount
+                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                        effect.Effect = (uint)aura;
+                        effect.SchoolMaskOrPower = packet.ReadUInt32();
+                        effect.Amount = packet.ReadInt32();
                         packet.ReadFloat(); // Gain multiplier
+                        spell.Effects.Add(effect);
                         break;
                     }
                 }
             }
+            SendPacketToClient(spell);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_ENERGIZE_LOG)]
+        void HandleSpellEnergizeLog(WorldPacket packet)
+        {
+            SpellEnergizeLog spell = new();
+            spell.TargetGUID = packet.ReadPackedGuid().To128();
+            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.SpellID = packet.ReadUInt32();
+            spell.Type = (PowerType)packet.ReadUInt32();
+            spell.Amount = packet.ReadInt32();
             SendPacketToClient(spell);
         }
 
@@ -741,6 +780,21 @@ namespace HermesProxy.World.Client
             SendPacketToClient(damage);
         }
 
+        [PacketHandler(Opcode.SMSG_SPELL_INSTAKILL_LOG)]
+        void HandleSpellInstakillLog(WorldPacket packet)
+        {
+            SpellInstakillLog spell = new();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                spell.CasterGUID = packet.ReadGuid().To128();
+                spell.TargetGUID = packet.ReadGuid().To128();
+            }
+            else
+                spell.CasterGUID = spell.TargetGUID = packet.ReadGuid().To128();
+            spell.SpellID = packet.ReadUInt32();
+            SendPacketToClient(spell);
+        }
+
         [PacketHandler(Opcode.SMSG_PLAY_SPELL_VISUAL)]
         void HandlePlaySpellVisualKit(WorldPacket packet)
         {
@@ -776,6 +830,19 @@ namespace HermesProxy.World.Client
             AuraUpdate update = new AuraUpdate(GetSession().GameState.CurrentPlayerGuid, false);
             update.Auras.Add(aura);
             SendPacketToClient(update);
+        }
+
+        [PacketHandler(Opcode.SMSG_RESURRECT_REQUEST)]
+        void HandleResurrectRequest(WorldPacket packet)
+        {
+            ResurrectRequest revive = new();
+            revive.CasterGUID = packet.ReadGuid().To128();
+            revive.CasterVirtualRealmAddress = GetSession().RealmId.GetAddress();
+            packet.ReadUInt32(); // Name Length
+            revive.Name = packet.ReadCString();
+            revive.Sickness = packet.ReadBool();
+            revive.UseTimer = packet.ReadBool();
+            SendPacketToClient(revive);
         }
     }
 }

@@ -1579,6 +1579,15 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                     if (activeData.PvPRankProgress != null)
                         m_fields.SetUpdateField<byte>(ActivePlayerField.ACTIVE_PLAYER_FIELD_BYTES_5, (byte)activeData.PvPRankProgress, 1);
                 }
+
+                // Dynamic Fields
+                if (activeData.SelfResSpells != null)
+                {
+                    uint[] fields = new uint[activeData.SelfResSpells.Count];
+                    for (int i = 0; i < activeData.SelfResSpells.Count; i++)
+                        fields[i] = activeData.SelfResSpells[i];
+                    m_dynamicFields.SetUpdateField((int)ActivePlayerDynamicField.ACTIVE_PLAYER_DYNAMIC_FIELD_SELF_RES_SPELLS, fields, DynamicFieldChangeType.ValueAndSizeChanged);
+                }
             }
 
             GameObjectData goData = m_updateData.GameObjectData;

@@ -145,6 +145,23 @@ namespace HermesProxy.World.Server.Packets
         public override void Read() { }
     }
 
+    class LootMoneyNotify : ServerPacket
+    {
+        public LootMoneyNotify() : base(Opcode.SMSG_LOOT_MONEY_NOTIFY) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt64(Money);
+            _worldPacket.WriteUInt64(MoneyMod);
+            _worldPacket.WriteBit(SoleLooter);
+            _worldPacket.FlushBits();
+        }
+
+        public ulong Money;
+        public ulong MoneyMod;
+        public bool SoleLooter;
+    }
+
     class CoinRemoved : ServerPacket
     {
         public CoinRemoved() : base(Opcode.SMSG_COIN_REMOVED) { }

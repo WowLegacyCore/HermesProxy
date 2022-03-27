@@ -106,5 +106,21 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(failure);
         }
+        [PacketHandler(Opcode.SMSG_DURABILITY_DAMAGE_DEATH)]
+        void HandleDurabilityDamageDeath(WorldPacket packet)
+        {
+            DurabilityDamageDeath death = new DurabilityDamageDeath();
+            death.Percent = 10;
+            SendPacketToClient(death);
+        }
+        [PacketHandler(Opcode.SMSG_ITEM_COOLDOWN)]
+        void HandleItemCooldown(WorldPacket packet)
+        {
+            ItemCooldown item = new ItemCooldown();
+            item.ItemGuid = packet.ReadGuid().To128();
+            item.SpellID = packet.ReadUInt32();
+            item.Cooldown = 30000;
+            SendPacketToClient(item);
+        }
     }
 }

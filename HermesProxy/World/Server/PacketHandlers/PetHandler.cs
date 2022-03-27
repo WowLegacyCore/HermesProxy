@@ -20,6 +20,24 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_PET_STOP_ATTACK)]
+        void HandlePetStopAttack(PetStopAttack stop)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_STOP_ATTACK);
+            packet.WriteGuid(stop.PetGUID.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_PET_SET_ACTION)]
+        void HandlePetStopAttack(PetSetAction action)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_SET_ACTION);
+            packet.WriteGuid(action.PetGUID.To64());
+            packet.WriteUInt32(action.Index);
+            packet.WriteUInt32(action.Action);
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_PET_RENAME)]
         void HandlePetRename(PetRename pet)
         {

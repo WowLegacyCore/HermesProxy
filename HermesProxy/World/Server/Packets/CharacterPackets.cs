@@ -589,4 +589,16 @@ namespace HermesProxy.World.Server.Packets
         public int NumNewTalents;
         public int NumNewPvpTalentSlots;
     }
+
+    class UnlearnSkill : ClientPacket
+    {
+        public UnlearnSkill(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SkillLine = _worldPacket.ReadUInt32();
+        }
+
+        public uint SkillLine;
+    }
 }
