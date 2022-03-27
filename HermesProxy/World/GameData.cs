@@ -18,6 +18,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
+        public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
@@ -125,6 +126,13 @@ namespace HermesProxy.World
             }
             return 0;
         }
+        public static float GetUnitDisplayScale(uint displayId)
+        {
+            float scale;
+            if (UnitDisplayScales.TryGetValue(displayId, out scale))
+                return scale;
+            return 1.0f;
+        }
         public static int GetTransportPeriod(int entry)
         {
             switch (entry)
@@ -193,6 +201,7 @@ namespace HermesProxy.World
             LoadSpellVisuals();
             LoadLearnSpells();
             LoadGems();
+            LoadUnitDisplayScales();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
         public static void LoadBroadcastTexts()
@@ -324,6 +333,33 @@ namespace HermesProxy.World
                     uint enchantId = UInt32.Parse(fields[0]);
                     uint itemId = UInt32.Parse(fields[1]);
                     Gems.Add(enchantId, itemId);
+                }
+            }
+        }
+
+        public static void LoadUnitDisplayScales()
+        {
+            if (LegacyVersion.GetExpansionVersion() > 1)
+                return;
+
+            var path = $"CSV\\UnitDisplayScales.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint displayId = UInt32.Parse(fields[0]);
+                    float scale = Single.Parse(fields[1]);
+                    UnitDisplayScales.Add(displayId, scale);
                 }
             }
         }

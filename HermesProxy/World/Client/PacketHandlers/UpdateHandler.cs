@@ -1405,6 +1405,12 @@ namespace HermesProxy.World.Client
                 if (UNIT_FIELD_DISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_DISPLAYID])
                 {
                     updateData.UnitData.DisplayID = updates[UNIT_FIELD_DISPLAYID].Int32Value;
+
+                    // in post vanilla versions, the client automatically multiplies the scale
+                    // the server sends it by the default scale for this display id in the dbc
+                    // this is not the case in 1.12, so we have to adjust the unit scale here
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                        updateData.UnitData.DisplayScale = 1.0f / GameData.GetUnitDisplayScale((uint)updateData.UnitData.DisplayID);
                 }
                 int UNIT_FIELD_NATIVEDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NATIVEDISPLAYID);
                 if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_NATIVEDISPLAYID])
