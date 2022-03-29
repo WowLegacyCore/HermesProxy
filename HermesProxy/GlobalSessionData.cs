@@ -18,6 +18,8 @@ namespace HermesProxy
     }
     public class GameSessionData
     {
+        public bool HasWsgHordeFlagCarrier;
+        public bool HasWsgAllyFlagCarrier;
         public bool ChannelDisplayList;
         public bool ShowPlayedTime;
         public bool IsInTaxiFlight;
@@ -56,7 +58,41 @@ namespace HermesProxy
         public World.Server.Packets.MailListResult PendingMailListPacket;
         public HashSet<uint> RequestedItemTextIds = new HashSet<uint>();
         public Dictionary<uint, string> ItemTexts = new Dictionary<uint, string>();
+        public Dictionary<uint, uint> BattleFieldQueueTypes = new Dictionary<uint, uint>();
+        public Dictionary<uint, long> BattleFieldQueueTimes = new Dictionary<uint, long>();
+        public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
 
+        public bool IsAlliancePlayer(WowGuid128 guid)
+        {
+            PlayerCache cache;
+            if (CachedPlayers.TryGetValue(guid, out cache))
+                return GameData.IsAllianceRace(cache.RaceId);
+            return false;
+        }
+        public long GetBattleFieldQueueTime(uint queueSlot)
+        {
+            if (BattleFieldQueueTimes.ContainsKey(queueSlot))
+                return BattleFieldQueueTimes[queueSlot];
+            else
+            {
+                long time = Time.UnixTime;
+                BattleFieldQueueTimes.Add(queueSlot, time);
+                return time;
+            }
+        }
+        public void StoreBattleFieldQueueType(uint queueSlot, uint mapOrBgId)
+        {
+            if (BattleFieldQueueTypes.ContainsKey(queueSlot))
+                BattleFieldQueueTypes[queueSlot] = mapOrBgId;
+            else
+                BattleFieldQueueTypes.Add(queueSlot, mapOrBgId);
+        }
+        public uint GetBattleFieldQueueType(uint queueSlot)
+        {
+            if (BattleFieldQueueTypes.ContainsKey(queueSlot))
+                return BattleFieldQueueTypes[queueSlot];
+            return 0;
+        }
         public void StoreAuraDuration(byte slot, int duration)
         {
             if (CurrentPlayerAuras.ContainsKey(slot))

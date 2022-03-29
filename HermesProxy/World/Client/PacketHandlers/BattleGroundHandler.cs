@@ -1,0 +1,404 @@
+﻿using Framework.Logging;
+using HermesProxy.Enums;
+using HermesProxy.World.Enums;
+using HermesProxy.World.Objects;
+using HermesProxy.World.Server.Packets;
+using System;
+using System.Collections.Generic;
+using static HermesProxy.World.Server.Packets.PVPMatchStatisticsMessage;
+
+namespace HermesProxy.World.Client
+{
+    public partial class WorldClient
+    {
+        // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_BATTLEFIELD_LIST, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandleBattlefieldListVanilla(WorldPacket packet)
+        {
+            BattlefieldList bglist = new BattlefieldList();
+            bglist.BattlemasterGuid = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
+            bglist.BattlemasterListID = GameData.GetBattlegroundIdFromMapId(packet.ReadUInt32());
+            packet.ReadUInt8(); // unk
+            packet.ReadUInt32(); // unk
+            packet.ReadUInt8(); // unk
+            var instancesCount = packet.ReadUInt32();
+            for (var i = 0; i < instancesCount; i++)
+            {
+                int instanceId = packet.ReadInt32();
+                bglist.BattlefieldInstances.Add(instanceId);
+            }
+            SendPacketToClient(bglist);
+        }
+
+        [PacketHandler(Opcode.SMSG_BATTLEFIELD_LIST, ClientVersionBuild.V2_0_1_6180, ClientVersionBuild.V3_0_2_9056)]
+        void HandleBattlefieldListTBC(WorldPacket packet)
+        {
+            BattlefieldList bglist = new BattlefieldList();
+            bglist.BattlemasterGuid = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
+            bglist.BattlemasterListID = packet.ReadUInt32();
+            packet.ReadUInt8(); // unk
+            var instancesCount = packet.ReadUInt32();
+            for (var i = 0; i < instancesCount; i++)
+            {
+                int instanceId = packet.ReadInt32();
+                bglist.BattlefieldInstances.Add(instanceId);
+            }
+            SendPacketToClient(bglist);
+        }
+
+        [PacketHandler(Opcode.SMSG_BATTLEFIELD_LIST, ClientVersionBuild.V3_0_2_9056)]
+        void HandleBattlefieldListWotLK(WorldPacket packet)
+        {
+            BattlefieldList bglist = new BattlefieldList();
+            bglist.BattlemasterGuid = packet.ReadGuid().To128();
+            GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
+            bglist.PvpAnywhere = packet.ReadBool(); // from UI
+            bglist.BattlemasterListID = packet.ReadUInt32();
+            bglist.MinLevel = packet.ReadUInt8();
+            bglist.MaxLevel = packet.ReadUInt8();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_3_11685))
+            {
+                packet.ReadBool(); // Has Win
+                packet.ReadInt32(); // Winner Honor Reward
+                packet.ReadInt32(); // Winner Arena Reward
+                packet.ReadInt32(); // Loser Honor Reward
+
+                if (packet.ReadBool()) // Is random
+                {
+                    bglist.HasRandomWinToday = packet.ReadBool();
+                    packet.ReadInt32(); // Random Winner Honor Reward
+                    packet.ReadInt32(); // Random Winner Arena Reward
+                    packet.ReadInt32(); // Random Loser Honor Reward
+                }
+            }
+            var instancesCount = packet.ReadUInt32();
+            for (var i = 0; i < instancesCount; i++)
+            {
+                int instanceId = packet.ReadInt32();
+                bglist.BattlefieldInstances.Add(instanceId);
+            }
+            SendPacketToClient(bglist);
+        }
+        
+        [PacketHandler(Opcode.SMSG_BATTLEFIELD_STATUS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandleBattlefieldStatusVanilla(WorldPacket packet)
+        {
+            BattlefieldStatusHeader hdr = new BattlefieldStatusHeader();
+            hdr.Ticket.Id = 1 + packet.ReadUInt32(); // Queue Slot
+            hdr.Ticket.RequesterGuid = GetSession().GameState.CurrentPlayerGuid;
+            hdr.Ticket.Time = GetSession().GameState.GetBattleFieldQueueTime(hdr.Ticket.Id);
+            hdr.Ticket.Type = RideType.Battlegrounds;
+
+            uint mapId = packet.ReadUInt32();
+            if (mapId != 0)
+            {
+                uint battlefieldListId = GameData.GetBattlegroundIdFromMapId(mapId);
+                hdr.BattlefieldListIDs.Add(battlefieldListId);
+                packet.ReadUInt8(); // unk
+                hdr.InstanceID = packet.ReadUInt32();
+                BattleGroundStatus status = (BattleGroundStatus)packet.ReadUInt32();
+                switch (status)
+                {
+                    case BattleGroundStatus.WaitQueue:
+                    {
+                        BattlefieldStatusQueued queue = new BattlefieldStatusQueued();
+                        queue.Hdr = hdr;
+                        queue.AverageWaitTime = packet.ReadUInt32();
+                        queue.WaitTime = packet.ReadUInt32();
+                        SendPacketToClient(queue);
+                        break;
+                    }
+                    case BattleGroundStatus.WaitJoin:
+                    {
+                        BattlefieldStatusNeedConfirmation confirm = new BattlefieldStatusNeedConfirmation();
+                        confirm.Hdr = hdr;
+                        confirm.Mapid = mapId;
+                        confirm.Timeout = packet.ReadUInt32();
+                        SendPacketToClient(confirm);
+                        break;
+                    }
+                    case BattleGroundStatus.InProgress:
+                    {
+                        BattlegroundInit init = new BattlegroundInit();
+                        init.Milliseconds = 1154756799;
+                        SendPacketToClient(init);
+
+                        BattlefieldStatusActive active = new BattlefieldStatusActive();
+                        active.Hdr = hdr;
+                        active.Mapid = mapId;
+                        active.ShutdownTimer = packet.ReadUInt32();
+                        active.StartTimer = packet.ReadUInt32();
+                        SendPacketToClient(active);
+                        break;
+                    }
+                    default:
+                    {
+                        Log.Print(LogType.Error, $"Unexpected BG status {status}.");
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                BattlefieldStatusFailed failed = new BattlefieldStatusFailed();
+                failed.Ticket = hdr.Ticket;
+                failed.Reason = 30;
+                failed.BattlefieldListId = GameData.GetBattlegroundIdFromMapId(GetSession().GameState.GetBattleFieldQueueType(hdr.Ticket.Id));
+                SendPacketToClient(failed);
+                GetSession().GameState.BattleFieldQueueTimes.Remove(hdr.Ticket.Id);
+            }
+            GetSession().GameState.StoreBattleFieldQueueType(hdr.Ticket.Id, mapId);
+        }
+
+        [PacketHandler(Opcode.SMSG_BATTLEFIELD_STATUS, ClientVersionBuild.V2_0_1_6180)]
+        void HandleBattlefieldStatusTBC(WorldPacket packet)
+        {
+            BattlefieldStatusHeader hdr = new BattlefieldStatusHeader();
+            hdr.Ticket.Id = 1 + packet.ReadUInt32(); // Queue Slot
+            hdr.Ticket.RequesterGuid = GetSession().GameState.CurrentPlayerGuid;
+            hdr.Ticket.Time = GetSession().GameState.GetBattleFieldQueueTime(hdr.Ticket.Id);
+            hdr.Ticket.Type = RideType.Battlegrounds;
+
+            hdr.ArenaTeamSize = packet.ReadUInt8();
+            packet.ReadUInt8(); // unk
+            uint battlefieldListId = packet.ReadUInt32();
+            packet.ReadUInt16(); // 0x1F90
+
+            if (battlefieldListId != 0)
+            {
+                hdr.BattlefieldListIDs.Add(battlefieldListId);
+
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_3_11685))
+                {
+                    hdr.RangeMin = packet.ReadUInt8();
+                    hdr.RangeMax = packet.ReadUInt8();
+                }
+
+                hdr.InstanceID = packet.ReadUInt32();
+                hdr.IsArena = packet.ReadBool();
+                BattleGroundStatus status = (BattleGroundStatus)packet.ReadUInt32();
+                switch (status)
+                {
+                    case BattleGroundStatus.WaitQueue:
+                    {
+                        BattlefieldStatusQueued queue = new BattlefieldStatusQueued();
+                        queue.Hdr = hdr;
+                        queue.AverageWaitTime = packet.ReadUInt32();
+                        queue.WaitTime = packet.ReadUInt32();
+                        SendPacketToClient(queue);
+                        break;
+                    }
+                    case BattleGroundStatus.WaitJoin:
+                    {
+                        BattlefieldStatusNeedConfirmation confirm = new BattlefieldStatusNeedConfirmation();
+                        confirm.Hdr = hdr;
+                        confirm.Mapid = packet.ReadUInt32();
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_5_12213))
+                            packet.ReadUInt64(); // unk
+                        confirm.Timeout = packet.ReadUInt32();
+                        SendPacketToClient(confirm);
+                        break;
+                    }
+                    case BattleGroundStatus.InProgress:
+                    {
+                        BattlegroundInit init = new BattlegroundInit();
+                        init.Milliseconds = 1154756799;
+                        SendPacketToClient(init);
+
+                        BattlefieldStatusActive active = new BattlefieldStatusActive();
+                        active.Hdr = hdr;
+                        active.Mapid = packet.ReadUInt32();
+                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_5_12213))
+                            packet.ReadUInt64(); // unk
+                        active.ShutdownTimer = packet.ReadUInt32();
+                        active.StartTimer = packet.ReadUInt32();
+                        active.ArenaFaction = packet.ReadUInt8();
+                        SendPacketToClient(active);
+                        break;
+                    }
+                    default:
+                    {
+                        Log.Print(LogType.Error, $"Unexpected BG status {status}.");
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                BattlefieldStatusFailed failed = new BattlefieldStatusFailed();
+                failed.Ticket = hdr.Ticket;
+                failed.Reason = 30;
+                failed.BattlefieldListId = GetSession().GameState.GetBattleFieldQueueType(hdr.Ticket.Id);
+                SendPacketToClient(failed);
+                GetSession().GameState.BattleFieldQueueTimes.Remove(hdr.Ticket.Id);
+            }
+            GetSession().GameState.StoreBattleFieldQueueType(hdr.Ticket.Id, battlefieldListId);
+        }
+
+        [PacketHandler(Opcode.MSG_PVP_LOG_DATA, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandlePvPLogDataVanilla(WorldPacket packet)
+        {
+            PVPMatchStatisticsMessage pvp = new PVPMatchStatisticsMessage();
+            if (packet.ReadBool()) // Has Winner
+                pvp.Winner = packet.ReadUInt8();
+
+            int count = packet.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
+                player.PlayerGUID = packet.ReadGuid().To128();
+                player.Role = packet.ReadInt32();
+                player.Kills = packet.ReadUInt32();
+                player.Honor = new();
+                player.Honor.HonorKills = packet.ReadUInt32();
+                player.Honor.Deaths = packet.ReadUInt32();
+                player.Honor.ContributionPoints = packet.ReadUInt32();
+
+                int statsCount = packet.ReadInt32();
+                for (int j = 0; j < statsCount; j++)
+                    player.Stats.Add(packet.ReadUInt32());
+
+                PlayerCache cache;
+                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out cache))
+                {
+                    player.Sex = cache.SexId;
+                    player.PlayerRace = cache.RaceId;
+                    player.PlayerClass = cache.ClassId;
+                    player.Faction = GameData.IsAllianceRace(cache.RaceId);
+                }
+                else
+                {
+                    player.Sex = Gender.Male;
+                    player.PlayerRace = Race.Human;
+                    player.PlayerClass = Class.Warrior;
+                }
+                pvp.Statistics.Add(player);
+            }
+            SendPacketToClient(pvp);
+        }
+
+        [PacketHandler(Opcode.MSG_PVP_LOG_DATA, ClientVersionBuild.V2_0_1_6180)]
+        void HandlePvPLogDataTBC(WorldPacket packet)
+        {
+            PVPMatchStatisticsMessage pvp = new PVPMatchStatisticsMessage();
+            if (packet.ReadBool()) // Has Arena Teams
+            {
+                pvp.ArenaTeams = new ArenaTeamsInfo();
+                pvp.ArenaTeams.Guids[0] = WowGuid128.Empty;
+                pvp.ArenaTeams.Guids[1] = WowGuid128.Empty;
+
+                for (int i = 0; i < 2; i++)
+                {
+                    packet.ReadUInt32(); // Rating Lost
+                    packet.ReadUInt32(); // Rating gained
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                        packet.ReadUInt32(); // MMR
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    pvp.ArenaTeams.Names[i] = packet.ReadCString();
+                }
+            }
+
+            if (packet.ReadBool()) // Has Winner
+                pvp.Winner = packet.ReadUInt8();
+
+            int count = packet.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
+                player.PlayerGUID = packet.ReadGuid().To128();
+                player.Kills = packet.ReadUInt32();
+
+                if (pvp.ArenaTeams == null)
+                {
+                    player.Honor = new();
+                    player.Honor.HonorKills = packet.ReadUInt32();
+                    player.Honor.Deaths = packet.ReadUInt32();
+                    player.Honor.ContributionPoints = packet.ReadUInt32();
+                }
+                else
+                {
+                    player.Faction = packet.ReadBool();
+                }
+
+                player.DamageDone = packet.ReadUInt32();
+                player.HealingDone = packet.ReadUInt32();
+
+                int statsCount = packet.ReadInt32();
+                for (int j = 0; j < statsCount; j++)
+                    player.Stats.Add(packet.ReadUInt32());
+
+                PlayerCache cache;
+                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out cache))
+                {
+                    player.Sex = cache.SexId;
+                    player.PlayerRace = cache.RaceId;
+                    player.PlayerClass = cache.ClassId;
+
+                    if (pvp.ArenaTeams == null)
+                        player.Faction = GameData.IsAllianceRace(cache.RaceId);
+                }
+                else
+                {
+                    player.Sex = Gender.Male;
+                    player.PlayerRace = Race.Human;
+                    player.PlayerClass = Class.Warrior;
+                }
+                pvp.Statistics.Add(player);
+            }
+            SendPacketToClient(pvp);
+        }
+
+        [PacketHandler(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS)]
+        void HandleBattlegroundPlayerPositions(WorldPacket packet)
+        {
+            BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
+            packet.ReadUInt32(); // unk
+            uint flagCarriersCount = packet.ReadUInt32();
+            GetSession().GameState.FlagCarrierGuids.Clear();
+            for (uint i = 0; i < flagCarriersCount; i++)
+            {
+                BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
+                position.Guid = packet.ReadGuid().To128();
+                position.Pos = packet.ReadVector2();
+
+                if (GetSession().GameState.IsAlliancePlayer(position.Guid))
+                {
+                    position.IconID = 1;
+                    position.ArenaSlot = 3;
+                }
+                else
+                {
+                    position.IconID = 2;
+                    position.ArenaSlot = 2;
+                }
+
+                bglist.FlagCarriers.Add(position);
+                GetSession().GameState.FlagCarrierGuids.Add(position.Guid);
+            }
+            SendPacketToClient(bglist);
+        }
+
+        [PacketHandler(Opcode.SMSG_BATTLEGROUND_PLAYER_JOINED)]
+        [PacketHandler(Opcode.SMSG_BATTLEGROUND_PLAYER_LEFT)]
+        void HandleBattlegroundPlayerLeftOrJoined(WorldPacket packet)
+        {
+            BattlegroundPlayerLeftOrJoined player = new BattlegroundPlayerLeftOrJoined(packet.GetUniversalOpcode(false));
+            player.Guid = packet.ReadGuid().To128();
+            SendPacketToClient(player);
+        }
+
+        [PacketHandler(Opcode.SMSG_AREA_SPIRIT_HEALER_TIME)]
+        void HandleAreaSpiritHealerTime(WorldPacket packet)
+        {
+            AreaSpiritHealerTime healer = new AreaSpiritHealerTime();
+            healer.HealerGuid = packet.ReadGuid().To128();
+            healer.TimeLeft = packet.ReadUInt32();
+            SendPacketToClient(healer);
+        }
+    }
+}

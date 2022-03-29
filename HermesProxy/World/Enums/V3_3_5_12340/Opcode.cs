@@ -340,7 +340,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         CMSG_LEARN_PREVIEW_TALENTS_PET                        = 0x4C2,
         CMSG_LEARN_SPELL                                      = 0x010,
         CMSG_LEARN_TALENT                                     = 0x251,
-        CMSG_LEAVE_BATTLEFIELD                                = 0x2E1,
+        CMSG_BATTLEFIELD_LEAVE                                = 0x2E1,
         CMSG_LEVEL_CHEAT                                      = 0x025,
         CMSG_LFG_JOIN                                         = 0x35C,
         CMSG_LFG_LEAVE                                        = 0x35D,

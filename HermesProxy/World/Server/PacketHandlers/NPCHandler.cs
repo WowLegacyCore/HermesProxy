@@ -17,6 +17,9 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SPIRIT_HEALER_ACTIVATE)]
         [PacketHandler(Opcode.CMSG_TALK_TO_GOSSIP)]
         [PacketHandler(Opcode.CMSG_TRAINER_LIST)]
+        [PacketHandler(Opcode.CMSG_BATTLEMASTER_HELLO)]
+        [PacketHandler(Opcode.CMSG_AREA_SPIRIT_HEALER_QUERY)]
+        [PacketHandler(Opcode.CMSG_AREA_SPIRIT_HEALER_QUEUE)]
         void HandleInteractWithNPC(InteractWithNPC interact)
         {
             WorldPacket packet = new WorldPacket(interact.GetUniversalOpcode());

@@ -50,5 +50,22 @@ namespace HermesProxy.World.Client
             packet.ReadUInt32(); // time to accept
             SendPacketToClient(summon);
         }
+
+        uint _requestBgPlayerPosCounter = 0;
+
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS)]
+        void HandlePartyMemberStats(WorldPacket packet)
+        {
+            if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&
+               (GetSession().GameState.HasWsgAllyFlagCarrier || GetSession().GameState.HasWsgHordeFlagCarrier))
+            {
+                if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
+                {
+                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    SendPacket(packet2);
+                    _requestBgPlayerPosCounter = 0;
+                }
+            }
+        }
     }
 }

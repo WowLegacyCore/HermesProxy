@@ -701,6 +701,7 @@ namespace HermesProxy.World.Server
                 SendSetTimeZoneInformation();
                 SendFeatureSystemStatusGlueScreen();
                 SendClientCacheVersion(0);
+                SendAvailableHotfixes();
                 SendBnetConnectionState(1);
                 _accountDataMgr = new AccountDataManager(GetSession().Username, RealmManager.Instance.GetRealm(_realmId).Name);
                 GetSession().RealmSocket = this;
@@ -983,7 +984,14 @@ namespace HermesProxy.World.Server
         {
             ClientCacheVersion cache = new();
             cache.CacheVersion = version;
-            SendPacket(cache);//enabled it
+            SendPacket(cache);
+        }
+
+        public void SendAvailableHotfixes()
+        {
+            AvailableHotfixes hotfixes = new AvailableHotfixes();
+            hotfixes.VirtualRealmAddress = GetSession().RealmId.GetAddress();
+            SendPacket(hotfixes);
         }
 
         public void SendBnetConnectionState(byte state)

@@ -61,7 +61,7 @@ namespace HermesProxy.World.Server
         void HandleMoveTeleportAck(MoveTeleportAck teleport)
         {
             WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_TELEPORT_ACK);
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(teleport.MoverGUID.To64());
             else
                 packet.WriteGuid(teleport.MoverGUID.To64());
@@ -89,7 +89,7 @@ namespace HermesProxy.World.Server
         void HandleMoveForceSpeedChangeAck(MovementSpeedAck speed)
         {
             WorldPacket packet = new WorldPacket(speed.GetUniversalOpcode());
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(speed.MoverGUID.To64());
             else
                 packet.WriteGuid(speed.MoverGUID.To64());
@@ -122,7 +122,7 @@ namespace HermesProxy.World.Server
         void HandleMoveForceAck1(MovementAckMessage movementAck)
         {
             WorldPacket packet = new WorldPacket(movementAck.GetUniversalOpcode());
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movementAck.MoverGUID.To64());
             else
                 packet.WriteGuid(movementAck.MoverGUID.To64());
@@ -140,7 +140,7 @@ namespace HermesProxy.World.Server
         void HandleMoveForceAck2(MovementAckMessage movementAck)
         {
             WorldPacket packet = new WorldPacket(movementAck.GetUniversalOpcode());
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movementAck.MoverGUID.To64());
             else
                 packet.WriteGuid(movementAck.MoverGUID.To64());

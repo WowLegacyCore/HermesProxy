@@ -141,6 +141,25 @@ namespace HermesProxy.World.Client
                 updateObject.ObjectUpdates[activePlayerUpdateIndex] = tmp;
             }
 
+            // Fix flag carrier positions on map bugging out when player goes out of range
+            if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch)
+            {
+                bool resetBgPlayerPositions = false;
+                foreach (var guid in updateObject.OutOfRangeGuids)
+                {
+                    if (guid.IsPlayer() && GetSession().GameState.FlagCarrierGuids.Contains(guid))
+                    {
+                        resetBgPlayerPositions = true;
+                        break;
+                    }
+                }
+                if (resetBgPlayerPositions)
+                {
+                    BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
+                    SendPacketToClient(bglist);
+                }
+            }
+
             if (updateObject.ObjectUpdates.Count != 0 ||
                 updateObject.DestroyedGuids.Count != 0 ||
                 updateObject.OutOfRangeGuids.Count != 0)
@@ -1256,9 +1275,8 @@ namespace HermesProxy.World.Client
 
                     if (objectType == ObjectType.Unit)
                         GetSession().GameState.StoreCreatureClass(guid.GetEntry(), (Class)updateData.UnitData.ClassId);
-
-                    //if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
-                    //    updateData.UnitData.PlayerClassId = updateData.UnitData.ClassId;
+                    else
+                        updateData.PlayerData.ArenaFaction = (byte)(GameData.IsAllianceRace((Race)updateData.UnitData.RaceId) ? 1 : 0);
                 }
 
                 int UNIT_FIELD_POWER1 = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_POWER1);

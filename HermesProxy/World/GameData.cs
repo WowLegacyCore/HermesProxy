@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Framework;
 using Framework.Logging;
+using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using Microsoft.VisualBasic.FileIO;
 
@@ -159,6 +160,65 @@ namespace HermesProxy.World
             return 0;
         }
 
+        public static uint GetBattlegroundIdFromMapId(uint mapId)
+        {
+            switch (mapId)
+            {
+                case 30: // Alterac Valley
+                    return 1;
+                case 489: // Warsong Gulch
+                    return 2;
+                case 529: // Arathi Basin
+                    return 3;
+                case 559: // Nagrand Arena
+                    return 4;
+                case 562: // Blade's Edge Arena
+                    return 5;
+                case 566: // Eye of the Storm
+                    return 7;
+                case 572: // Ruins of Lordaeron Arena
+                    return 8;
+            }
+            return 0;
+        }
+
+        public static uint GetMapIdFromBattlegroundId(uint bgId)
+        {
+            switch (bgId)
+            {
+                case 1: // Alterac Valley
+                    return 30;
+                case 2: // Warsong Gulch
+                    return 489;
+                case 3: // Arathi Basin
+                    return 529;
+                case 4: // Nagrand Arena
+                    return 559;
+                case 5: // Blade's Edge Arena
+                    return 562;
+                case 7: // Eye of the Storm
+                    return 566;
+                case 8: // Ruins of Lordaeron Arena
+                    return 572;
+            }
+            return 0;
+        }
+
+        public static bool IsAllianceRace(Race raceId)
+        {
+            switch (raceId)
+            {
+                case Race.Human:
+                case Race.Dwarf:
+                case Race.NightElf:
+                case Race.Gnome:
+                case Race.Draenei:
+                case Race.Worgen:
+                    return true;
+            }
+            return false;
+        }
+
         public static BroadcastText GetBroadcastText(uint entry)
         {
             BroadcastText data;
@@ -202,6 +262,7 @@ namespace HermesProxy.World
             LoadLearnSpells();
             LoadGems();
             LoadUnitDisplayScales();
+            LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
         public static void LoadBroadcastTexts()
@@ -363,6 +424,84 @@ namespace HermesProxy.World
                 }
             }
         }
+        #region HotFixes
+        // Stores
+        public const uint HotfixAreaTriggerBegin = 100000;
+        public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
+        public static void LoadHotfixes()
+        {
+            LoadAreaTriggerHotfixes();
+        }
+        
+        public static void LoadAreaTriggerHotfixes()
+        {
+            var path = $"CSV\\Hotfix\\AreaTrigger{ModernVersion.GetExpansionVersion()}.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    AreaTrigger at = new AreaTrigger();
+                    at.Message = fields[0];
+                    at.PositionX = float.Parse(fields[1]);
+                    at.PositionY = float.Parse(fields[2]);
+                    at.PositionZ = float.Parse(fields[3]);
+                    at.Id = UInt32.Parse(fields[4]);
+                    at.MapId = UInt16.Parse(fields[5]);
+                    at.PhaseUseFlags = Byte.Parse(fields[6]);
+                    at.PhaseId = UInt16.Parse(fields[7]);
+                    at.PhaseGroupId = UInt16.Parse(fields[8]);
+                    at.Radius = float.Parse(fields[9]);
+                    at.BoxLength = float.Parse(fields[10]);
+                    at.BoxWidth = float.Parse(fields[11]);
+                    at.BoxHeight = float.Parse(fields[12]);
+                    at.BoxYaw = float.Parse(fields[13]);
+                    at.ShapeType = Byte.Parse(fields[14]);
+                    at.ShapeId = UInt16.Parse(fields[15]);
+                    at.ActionSetId = UInt16.Parse(fields[16]);
+                    at.Flags = Byte.Parse(fields[17]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.AreaTrigger;
+                    record.HotfixId = HotfixAreaTriggerBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = at.Id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteCString(at.Message);
+                    record.HotfixContent.WriteFloat(at.PositionX);
+                    record.HotfixContent.WriteFloat(at.PositionY);
+                    record.HotfixContent.WriteFloat(at.PositionZ);
+                    record.HotfixContent.WriteUInt32(at.Id);
+                    record.HotfixContent.WriteUInt16(at.MapId);
+                    record.HotfixContent.WriteUInt8(at.PhaseUseFlags);
+                    record.HotfixContent.WriteUInt16(at.PhaseId);
+                    record.HotfixContent.WriteUInt16(at.PhaseGroupId);
+                    record.HotfixContent.WriteFloat(at.Radius);
+                    record.HotfixContent.WriteFloat(at.BoxLength);
+                    record.HotfixContent.WriteFloat(at.BoxWidth);
+                    record.HotfixContent.WriteFloat(at.BoxHeight);
+                    record.HotfixContent.WriteFloat(at.BoxYaw);
+                    record.HotfixContent.WriteUInt8(at.ShapeType);
+                    record.HotfixContent.WriteUInt16(at.ShapeId);
+                    record.HotfixContent.WriteUInt16(at.ActionSetId);
+                    record.HotfixContent.WriteUInt8(at.Flags);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        #endregion
     }
 
     // Data structures
@@ -380,5 +519,27 @@ namespace HermesProxy.World
         public uint Entry;
         public uint DisplayId;
         public byte InventoryType;
+    }
+    // Hotfix structures
+    public class AreaTrigger
+    {
+        public string Message;
+        public float PositionX;
+        public float PositionY;
+        public float PositionZ;
+        public uint Id;
+        public ushort MapId;
+        public byte PhaseUseFlags;
+        public ushort PhaseId;
+        public ushort PhaseGroupId;
+        public float Radius;
+        public float BoxLength;
+        public float BoxWidth;
+        public float BoxHeight;
+        public float BoxYaw;
+        public byte ShapeType;
+        public ushort ShapeId;
+        public ushort ActionSetId;
+        public byte Flags;
     }
 }

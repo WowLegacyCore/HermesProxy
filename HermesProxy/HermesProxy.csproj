@@ -33,7 +33,13 @@
   <ItemGroup>
     <Content Include="CSV\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>  
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="CSV\Hotfix\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
 </Project>

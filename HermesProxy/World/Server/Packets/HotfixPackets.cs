@@ -25,14 +25,6 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
-    public enum HotfixStatus : byte
-    {
-        Valid         = 1,
-        RecordRemoved = 2,
-        Invalid       = 3,
-        NotPublic     = 4,
-    }
-
     class DBQueryBulk : ClientPacket
     {
         public DBQueryBulk(WorldPacket packet) : base(packet) { }
@@ -72,5 +64,64 @@ namespace HermesProxy.World.Server.Packets
         public HotfixStatus Status = HotfixStatus.Invalid;
 
         public ByteBuffer Data = new();
+    }
+
+    class AvailableHotfixes : ServerPacket
+    {
+        public AvailableHotfixes() : base(Opcode.SMSG_AVAILABLE_HOTFIXES) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(VirtualRealmAddress);
+            _worldPacket.WriteInt32(GameData.Hotfixes.Count);
+
+            foreach (var hotfix in GameData.Hotfixes)
+                hotfix.Value.WriteAvailable(_worldPacket);
+        }
+
+        public uint VirtualRealmAddress;
+    }
+
+    class HotfixRequest : ClientPacket
+    {
+        public HotfixRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ClientBuild = _worldPacket.ReadUInt32();
+            DataBuild = _worldPacket.ReadUInt32();
+
+            uint hotfixCount = _worldPacket.ReadUInt32();
+            for (var i = 0; i < hotfixCount; ++i)
+                Hotfixes.Add(_worldPacket.ReadUInt32());
+        }
+
+        public uint ClientBuild;
+        public uint DataBuild;
+        public List<uint> Hotfixes = new();
+    }
+
+    class HotfixConnect : ServerPacket
+    {
+        public HotfixConnect() : base(Opcode.SMSG_HOTFIX_CONNECT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Hotfixes.Count);
+            uint totalDataSize = 0;
+            foreach (HotfixRecord hotfix in Hotfixes)
+            {
+                totalDataSize += hotfix.HotfixContent.GetSize();
+                hotfix.WriteConnect(_worldPacket);
+            }
+
+            _worldPacket.WriteUInt32(totalDataSize);
+            foreach(HotfixRecord hotfix in Hotfixes)
+            {
+                _worldPacket.WriteBytes(hotfix.HotfixContent);
+            }
+        }
+
+        public List<HotfixRecord> Hotfixes = new();
     }
 }

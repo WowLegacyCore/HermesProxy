@@ -19,6 +19,9 @@ namespace HermesProxy.World.Client
             states.AreaID = packet.ReadUInt32();
             states.SubareaID = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_1_0_6692) ? packet.ReadUInt32() : states.AreaID;
 
+            GetSession().GameState.HasWsgAllyFlagCarrier = false;
+            GetSession().GameState.HasWsgHordeFlagCarrier = false;
+
             ushort count = packet.ReadUInt16();
             for (ushort i = 0; i < count; i++)
             {
@@ -26,6 +29,11 @@ namespace HermesProxy.World.Client
                 int value = packet.ReadInt32();
                 if (variable != 0 || value != 0)
                     states.AddState(variable, value);
+
+                if (variable == (uint)WorldStates.WsgFlagStateAlliance)
+                    GetSession().GameState.HasWsgAllyFlagCarrier = value == 2;
+                else if (variable == (uint)WorldStates.WsgFlagStateHorde)
+                    GetSession().GameState.HasWsgHordeFlagCarrier = value == 2;
             }
             states.AddClassicStates();
             SendPacketToClient(states);
@@ -33,6 +41,12 @@ namespace HermesProxy.World.Client
             // These packets don't exist in old versions.
             SendPacketToClient(new SetupCurrency());
             SendPacketToClient(new AllAccountCriteria());
+
+            if (GetSession().GameState.HasWsgHordeFlagCarrier || GetSession().GameState.HasWsgAllyFlagCarrier)
+            {
+                WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                SendPacket(packet2);
+            }
         }
 
         [PacketHandler(Opcode.SMSG_UPDATE_WORLD_STATE)]
@@ -42,6 +56,19 @@ namespace HermesProxy.World.Client
             update.VariableID = packet.ReadUInt32();
             update.Value = packet.ReadInt32();
             SendPacketToClient(update);
+
+            if (update.VariableID == (uint)WorldStates.WsgFlagStateAlliance)
+            {
+                WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                SendPacket(packet2);
+                GetSession().GameState.HasWsgAllyFlagCarrier = update.Value == 2;
+            }    
+            else if (update.VariableID == (uint)WorldStates.WsgFlagStateHorde)
+            {
+                WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                SendPacket(packet2);
+                GetSession().GameState.HasWsgHordeFlagCarrier = update.Value == 2;
+            }
         }
     }
 }

@@ -270,7 +270,7 @@ namespace HermesProxy.World.Enums.V2_4_3_8606
         CMSG_KEEP_ALIVE                                       = 0x406,
         CMSG_LEARN_SPELL                                      = 0x010,
         CMSG_LEARN_TALENT                                     = 0x251,
-        CMSG_LEAVE_BATTLEFIELD                                = 0x2E1,
+        CMSG_BATTLEFIELD_LEAVE                                = 0x2E1,
         CMSG_LEVEL_CHEAT                                      = 0x025,
         CMSG_LFG_CLEAR_AUTOJOIN                               = 0x35D,
         CMSG_LFG_SET_AUTOJOIN                                 = 0x35C,

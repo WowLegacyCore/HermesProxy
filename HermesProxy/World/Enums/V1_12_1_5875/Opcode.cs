@@ -205,7 +205,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         CMSG_ITEM_TEXT_QUERY                                  = 0x243,
         CMSG_LEARN_SPELL                                      = 0x010,
         CMSG_LEARN_TALENT                                     = 0x251,
-        CMSG_LEAVE_BATTLEFIELD                                = 0x2E1,
+        CMSG_BATTLEFIELD_LEAVE                                = 0x2E1,
         CMSG_LEVEL_CHEAT                                      = 0x025,
         CMSG_LIST_INVENTORY                                   = 0x19E,
         CMSG_LOGOUT_CANCEL                                    = 0x04E,
