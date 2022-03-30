@@ -134,11 +134,11 @@ namespace HermesProxy.World.Server.Packets
                     GameObjectData.StateAnimID = 1556;
                 if (Guid.GetHighType() == HighGuidType.Transport)
                 {
-                    int period = GameData.GetTransportPeriod((int)ObjectData.EntryID);
+                    uint period = GameData.GetTransportPeriod((uint)ObjectData.EntryID);
                     if (period != 0)
                     {
                         if (GameObjectData.Level == null)
-                            GameObjectData.Level = period;
+                            GameObjectData.Level = (int)period;
                         if (ObjectData.DynamicFlags == null)
                             ObjectData.DynamicFlags = (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * System.UInt16.MaxValue)) << 16);
                         GameObjectData.Flags = 1048616;

@@ -452,9 +452,9 @@ namespace HermesProxy.World.Objects
     public enum AuraFlagsTBC : ushort
     {
         None          = 0x00,
-        Positive      = 0x01,
-        Negative      = 0x02,
-        Passive       = 0x04,     // Pre-WotLK: debuffs can't be queried using this flag. Unused in UI since 1.10.0, new meaning unknown (still the same?)
+        EffectIndex0  = 0x01,
+        EffectIndex1  = 0x02,
+        EffectIndex2  = 0x04,     // Pre-WotLK: debuffs can't be queried using this flag. Unused in UI since 1.10.0, new meaning unknown (still the same?)
         Unk4          = 0x08,     // Pre-WotLK: unused in UI
         Cancelable    = 0x10,
         NotCancelable = 0x20,

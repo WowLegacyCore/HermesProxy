@@ -64,11 +64,15 @@ namespace HermesProxy.World.Server
         void HandleBattlefieldLeave(BattlefieldLeave leave)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEFIELD_LEAVE);
-            packet.WriteUInt8(0);
-            packet.WriteUInt8(0);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                packet.WriteUInt32(0);
-            packet.WriteUInt16(0);
+            {
+                packet.WriteUInt8(2);
+                packet.WriteUInt8(0);
+                packet.WriteUInt32(GetSession().GameState.GetBattleFieldQueueType(1));
+                packet.WriteUInt16(0x1F90);
+            }
+            else
+                packet.WriteUInt32((uint)GetSession().GameState.CurrentMapId);
             SendPacketToServer(packet);
         }
     }

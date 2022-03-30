@@ -31,6 +31,7 @@ namespace HermesProxy
         public uint CurrentTaxiNode;
         public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
+        public uint LastDispellSpellId;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public uint CurrentGuildCreateTime;
@@ -60,8 +61,21 @@ namespace HermesProxy
         public Dictionary<uint, string> ItemTexts = new Dictionary<uint, string>();
         public Dictionary<uint, uint> BattleFieldQueueTypes = new Dictionary<uint, uint>();
         public Dictionary<uint, long> BattleFieldQueueTimes = new Dictionary<uint, long>();
+        public Dictionary<uint, uint> DailyQuestsDone = new Dictionary<uint, uint>();
         public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
 
+        public void SetDailyQuestSlot(uint slot, uint questId)
+        {
+            if (DailyQuestsDone.ContainsKey(slot))
+            {
+                if (questId != 0)
+                    DailyQuestsDone[slot] = questId;
+                else
+                    DailyQuestsDone.Remove(slot);
+            }
+            else if (questId != 0)
+                DailyQuestsDone.Add(slot, questId);
+        }
         public bool IsAlliancePlayer(WowGuid128 guid)
         {
             PlayerCache cache;

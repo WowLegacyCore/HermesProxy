@@ -347,5 +347,20 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(info);
         }
+
+        [PacketHandler(Opcode.SMSG_UPDATE_COMBO_POINTS)]
+        void HandleUpdateComboPoints(WorldPacket packet)
+        {
+            ObjectUpdate updateData = new ObjectUpdate(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
+            updateData.ActivePlayerData.ComboTarget = packet.ReadPackedGuid().To128();
+            byte comboPoints = packet.ReadUInt8();
+            sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(GetSession().GameState.GetUnitClass(GetSession().GameState.CurrentPlayerGuid), PowerType.ComboPoints);
+            if (powerSlot >= 0)
+                updateData.UnitData.Power[powerSlot] = comboPoints;
+
+            UpdateObject updatePacket = new UpdateObject(GetSession().GameState);
+            updatePacket.ObjectUpdates.Add(updateData);
+            SendPacketToClient(updatePacket);
+        }
     }
 }

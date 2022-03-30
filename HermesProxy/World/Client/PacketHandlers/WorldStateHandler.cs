@@ -39,7 +39,8 @@ namespace HermesProxy.World.Client
             SendPacketToClient(states);
 
             // These packets don't exist in old versions.
-            SendPacketToClient(new SetupCurrency());
+            if (LegacyVersion.GetExpansionVersion() <= 1 || ModernVersion.GetExpansionVersion() <= 1)
+                SendPacketToClient(new SetupCurrency());
             SendPacketToClient(new AllAccountCriteria());
 
             if (GetSession().GameState.HasWsgHordeFlagCarrier || GetSession().GameState.HasWsgAllyFlagCarrier)

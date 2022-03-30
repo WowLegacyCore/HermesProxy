@@ -151,5 +151,6 @@ namespace HermesProxy.World.Objects
 
         // Dynamic Fields
         public List<uint> SelfResSpells;
+        public bool HasDailyQuestsUpdate;
     }
 }

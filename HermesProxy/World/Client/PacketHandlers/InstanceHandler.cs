@@ -10,6 +10,14 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_UPDATE_INSTANCE_OWNERSHIP)]
+        void HandleUpdateInstanceOwnership(WorldPacket packet)
+        {
+            UpdateInstanceOwnership instance = new UpdateInstanceOwnership();
+            instance.IOwnInstance = packet.ReadUInt32();
+            SendPacketToClient(instance);
+        }
+
         [PacketHandler(Opcode.SMSG_INSTANCE_RESET)]
         void HandleInstanceReset(WorldPacket packet)
         {

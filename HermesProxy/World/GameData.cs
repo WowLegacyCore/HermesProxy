@@ -16,16 +16,20 @@ namespace HermesProxy.World
         // From CSV
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
+        public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
         public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
+        public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
+        public static HashSet<uint> DispellSpells = new HashSet<uint>();
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
         public static Dictionary<uint, QuestTemplate> QuestTemplates = new Dictionary<uint, QuestTemplate>();
         public static Dictionary<uint, string> ItemNames = new Dictionary<uint, string>();
 
+        #region GettersAndSetters
         public static void StoreItemName(uint entry, string name)
         {
             if (ItemNames.ContainsKey(entry))
@@ -33,6 +37,7 @@ namespace HermesProxy.World
             else
                 ItemNames.Add(entry, name);
         }
+
         public static string GetItemName(uint entry)
         {
             string data;
@@ -40,6 +45,7 @@ namespace HermesProxy.World
                 return data;
             return "";
         }
+
         public static void StoreQuestTemplate(uint entry, QuestTemplate template)
         {
             if (QuestTemplates.ContainsKey(entry))
@@ -47,6 +53,7 @@ namespace HermesProxy.World
             else
                 QuestTemplates.Add(entry, template);
         }
+
         public static QuestTemplate GetQuestTemplate(uint entry)
         {
             QuestTemplate data;
@@ -54,6 +61,7 @@ namespace HermesProxy.World
                 return data;
             return null;
         }
+
         public static QuestObjective GetQuestObjectiveForItem(uint entry)
         {
             foreach (var quest in QuestTemplates)
@@ -67,6 +75,7 @@ namespace HermesProxy.World
             }
             return null;
         }
+
         public static void StoreCreatureTemplate(uint entry, CreatureTemplate template)
         {
             if (CreatureTemplates.ContainsKey(entry))
@@ -74,6 +83,7 @@ namespace HermesProxy.World
             else
                 CreatureTemplates.Add(entry, template);
         }
+
         public static CreatureTemplate GetCreatureTemplate(uint entry)
         {
             CreatureTemplate data;
@@ -81,6 +91,7 @@ namespace HermesProxy.World
                 return data;
             return null;
         }
+
         public static ItemTemplate GetItemTemplate(uint entry)
         {
             ItemTemplate data;
@@ -88,6 +99,7 @@ namespace HermesProxy.World
                 return data;
             return null;
         }
+
         public static uint GetItemIdWithDisplayId(uint displayId)
         {
             foreach (var item in ItemTemplateStore)
@@ -97,6 +109,7 @@ namespace HermesProxy.World
             }
             return 0;
         }
+
         public static uint GetSpellVisual(uint spellId)
         {
             uint visual;
@@ -104,6 +117,7 @@ namespace HermesProxy.World
                 return visual;
             return 0;
         }
+
         public static uint GetRealSpell(uint learnSpellId)
         {
             uint realSpellId;
@@ -111,6 +125,7 @@ namespace HermesProxy.World
                 return realSpellId;
             return learnSpellId;
         }
+
         public static uint GetGemFromEnchantId(uint enchantId)
         {
             uint itemId;
@@ -118,6 +133,7 @@ namespace HermesProxy.World
                 return itemId;
             return 0;
         }
+
         public static uint GetEnchantIdFromGem(uint itemId)
         {
             foreach (var itr in Gems)
@@ -127,6 +143,7 @@ namespace HermesProxy.World
             }
             return 0;
         }
+
         public static float GetUnitDisplayScale(uint displayId)
         {
             float scale;
@@ -134,73 +151,30 @@ namespace HermesProxy.World
                 return scale;
             return 1.0f;
         }
-        public static int GetTransportPeriod(int entry)
+
+        public static uint GetTransportPeriod(uint entry)
         {
-            switch (entry)
-            {
-                case 20808:
-                    return 350822;
-                case 164871:
-                    return 356287;
-                case 175080:
-                    return 303466;
-                case 176231:
-                    return 329315;
-                case 176244:
-                    return 316253;
-                case 176310:
-                    return 295580;
-                case 176495:
-                    return 335297;
-                case 177233:
-                    return 317044;
-                case 181056:
-                    return 1208095;
-            }
+            uint period;
+            if (TransportPeriods.TryGetValue(entry, out period))
+                return period;
             return 0;
         }
 
         public static uint GetBattlegroundIdFromMapId(uint mapId)
         {
-            switch (mapId)
+            foreach (var bg in Battlegrounds)
             {
-                case 30: // Alterac Valley
-                    return 1;
-                case 489: // Warsong Gulch
-                    return 2;
-                case 529: // Arathi Basin
-                    return 3;
-                case 559: // Nagrand Arena
-                    return 4;
-                case 562: // Blade's Edge Arena
-                    return 5;
-                case 566: // Eye of the Storm
-                    return 7;
-                case 572: // Ruins of Lordaeron Arena
-                    return 8;
+                if (bg.Value.MapIds.Contains(mapId))
+                    return bg.Key;
             }
             return 0;
         }
 
         public static uint GetMapIdFromBattlegroundId(uint bgId)
         {
-            switch (bgId)
-            {
-                case 1: // Alterac Valley
-                    return 30;
-                case 2: // Warsong Gulch
-                    return 489;
-                case 3: // Arathi Basin
-                    return 529;
-                case 4: // Nagrand Arena
-                    return 559;
-                case 5: // Blade's Edge Arena
-                    return 562;
-                case 7: // Eye of the Storm
-                    return 566;
-                case 8: // Ruins of Lordaeron Arena
-                    return 572;
-            }
+            Battleground bg;
+            if (Battlegrounds.TryGetValue(bgId, out bg))
+                return bg.MapIds[0];
             return 0;
         }
 
@@ -251,23 +225,28 @@ namespace HermesProxy.World
             BroadcastTextStore.Add(broadcastText.Entry, broadcastText);
             return broadcastText.Entry;
         }
-
+        #endregion
+        #region Loading
         // Loading code
         public static void LoadEverything()
         {
             Log.Print(LogType.Storage, "Loading data files...");
             LoadBroadcastTexts();
             LoadItemTemplates();
+            LoadBattlegrounds();
             LoadSpellVisuals();
             LoadLearnSpells();
             LoadGems();
             LoadUnitDisplayScales();
+            LoadTransports();
+            LoadDispellSpells();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
+
         public static void LoadBroadcastTexts()
         {
-            var path = $"CSV\\BroadcastTexts{ModernVersion.GetExpansionVersion()}.csv";
+            var path = $"CSV\\BroadcastTexts{LegacyVersion.GetExpansionVersion()}.csv";
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
@@ -297,6 +276,7 @@ namespace HermesProxy.World
                 }
             }
         }
+
         public static void LoadItemTemplates()
         {
             var path = $"CSV\\Items{ModernVersion.GetExpansionVersion()}.csv";
@@ -322,6 +302,39 @@ namespace HermesProxy.World
                 }
             }
         }
+
+        public static void LoadBattlegrounds()
+        {
+            var path = $"CSV\\Battlegrounds.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    Battleground bg = new Battleground();
+                    uint bgId = UInt32.Parse(fields[0]);
+                    bg.IsArena = Byte.Parse(fields[1]) != 0;
+                    for (int i = 0; i < 6; i++)
+                    {
+                        uint mapId = UInt32.Parse(fields[2 + i]);
+                        if (mapId != 0)
+                            bg.MapIds.Add(mapId);
+                    }
+                    System.Diagnostics.Trace.Assert(bg.MapIds.Count != 0);
+                    Battlegrounds.Add(bgId, bg);
+                }
+            }
+        }
+
         public static void LoadSpellVisuals()
         {
             var path = $"CSV\\SpellVisuals{ModernVersion.GetExpansionVersion()}.csv";
@@ -424,6 +437,57 @@ namespace HermesProxy.World
                 }
             }
         }
+
+        public static void LoadTransports()
+        {
+            var path = $"CSV\\Transports{LegacyVersion.GetExpansionVersion()}.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint entry = UInt32.Parse(fields[0]);
+                    uint period = UInt32.Parse(fields[1]);
+                    TransportPeriods.Add(entry, period);
+                }
+            }
+        }
+
+        public static void LoadDispellSpells()
+        {
+            if (LegacyVersion.GetExpansionVersion() > 1)
+                return;
+
+            var path = $"CSV\\DispellSpells.csv";
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    DispellSpells.Add(spellId);
+                }
+            }
+        }
+        #endregion
         #region HotFixes
         // Stores
         public const uint HotfixAreaTriggerBegin = 100000;
@@ -519,6 +583,11 @@ namespace HermesProxy.World
         public uint Entry;
         public uint DisplayId;
         public byte InventoryType;
+    }
+    public class Battleground
+    {
+        public bool IsArena;
+        public List<uint> MapIds = new List<uint>();
     }
     // Hotfix structures
     public class AreaTrigger

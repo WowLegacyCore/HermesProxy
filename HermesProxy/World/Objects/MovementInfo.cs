@@ -117,6 +117,7 @@ namespace HermesProxy.World.Objects
                 MovementFlagVanilla flags = (MovementFlagVanilla)packet.ReadUInt32();
                 info.Flags = (uint)flags.CastFlags<MovementFlagWotLK>();
                 hasPitch = flags.HasAnyFlag(MovementFlagVanilla.Swimming);
+                Hover = flags.HasAnyFlag(MovementFlagVanilla.FixedZ);
             }
 
             info.MoveTime = packet.ReadUInt32();

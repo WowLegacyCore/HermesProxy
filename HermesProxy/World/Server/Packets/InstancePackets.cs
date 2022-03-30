@@ -25,6 +25,18 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
+    class UpdateInstanceOwnership : ServerPacket
+    {
+        public UpdateInstanceOwnership() : base(Opcode.SMSG_UPDATE_INSTANCE_OWNERSHIP) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(IOwnInstance);
+        }
+
+        public uint IOwnInstance;
+    }
+
     class UpdateLastInstance : ServerPacket
     {
         public UpdateLastInstance() : base(Opcode.SMSG_UPDATE_LAST_INSTANCE) { }

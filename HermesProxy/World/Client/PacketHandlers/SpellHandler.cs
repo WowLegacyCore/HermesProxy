@@ -244,10 +244,14 @@ namespace HermesProxy.World.Client
             SpellStart spell = new SpellStart();
             spell.Cast = HandleSpellStartOrGo(packet, false);
 
-
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                // We need spell id for SMSG_SPELL_DISPELL_LOG since its not sent by server
+                if (GameData.DispellSpells.Contains((uint)spell.Cast.SpellID))
+                    GetSession().GameState.LastDispellSpellId = (uint)spell.Cast.SpellID;
+            }
             // In TBC+ the server does not send SMSG_CAST_RESULT on success
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) &&
-                spell.Cast.OriginalCastID != null && spell.Cast.CastID != null)
+            else if (spell.Cast.OriginalCastID != null && spell.Cast.CastID != null)
             {
                 SpellPrepare prepare = new();
                 prepare.ClientCastID = spell.Cast.OriginalCastID;
@@ -792,6 +796,43 @@ namespace HermesProxy.World.Client
             else
                 spell.CasterGUID = spell.TargetGUID = packet.ReadGuid().To128();
             spell.SpellID = packet.ReadUInt32();
+            SendPacketToClient(spell);
+        }
+
+        [PacketHandler(Opcode.SMSG_SPELL_DISPELL_LOG)]
+        void HandleSpellDispellLog(WorldPacket packet)
+        {
+            SpellDispellLog spell = new();
+            spell.TargetGUID = packet.ReadPackedGuid().To128();
+            spell.CasterGUID = packet.ReadPackedGuid().To128();
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                spell.DispelledBySpellID = packet.ReadUInt32();
+            else
+                spell.DispelledBySpellID = GetSession().GameState.LastDispellSpellId;
+
+            bool hasDebug;
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                hasDebug = packet.ReadBool();
+            else
+                hasDebug = false;
+
+            int count = packet.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                SpellDispellData dispel = new SpellDispellData();
+                dispel.SpellID = packet.ReadUInt32();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    dispel.Harmful = packet.ReadBool();
+                spell.DispellData.Add(dispel);
+            }
+
+            if (hasDebug)
+            {
+                packet.ReadInt32(); // unk
+                packet.ReadInt32(); // unk
+            }
+
             SendPacketToClient(spell);
         }
 

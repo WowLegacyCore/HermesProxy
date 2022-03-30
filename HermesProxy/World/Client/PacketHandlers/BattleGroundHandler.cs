@@ -19,9 +19,7 @@ namespace HermesProxy.World.Client
             bglist.BattlemasterGuid = packet.ReadGuid().To128();
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = GameData.GetBattlegroundIdFromMapId(packet.ReadUInt32());
-            packet.ReadUInt8(); // unk
-            packet.ReadUInt32(); // unk
-            packet.ReadUInt8(); // unk
+            packet.ReadUInt8(); // min level offset
             var instancesCount = packet.ReadUInt32();
             for (var i = 0; i < instancesCount; i++)
             {
@@ -96,7 +94,7 @@ namespace HermesProxy.World.Client
             {
                 uint battlefieldListId = GameData.GetBattlegroundIdFromMapId(mapId);
                 hdr.BattlefieldListIDs.Add(battlefieldListId);
-                packet.ReadUInt8(); // unk
+                packet.ReadUInt8(); // min level offset
                 hdr.InstanceID = packet.ReadUInt32();
                 BattleGroundStatus status = (BattleGroundStatus)packet.ReadUInt32();
                 switch (status)
@@ -353,8 +351,49 @@ namespace HermesProxy.World.Client
             SendPacketToClient(pvp);
         }
 
-        [PacketHandler(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS)]
-        void HandleBattlegroundPlayerPositions(WorldPacket packet)
+        BattlegroundPlayerPosition ReadBattlegroundPlayerPosition(WorldPacket packet)
+        {
+            BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
+            position.Guid = packet.ReadGuid().To128();
+            position.Pos = packet.ReadVector2();
+            return position;
+        }
+
+        [PacketHandler(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandleBattlegroundPlayerPositionsVanilla(WorldPacket packet)
+        {
+            GetSession().GameState.FlagCarrierGuids.Clear();
+            BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
+            uint teamMembersCount = packet.ReadUInt32();
+            for (uint i = 0; i < teamMembersCount; i++)
+            {
+                ReadBattlegroundPlayerPosition(packet);
+            }
+
+            bool hasFlagCarrier = packet.ReadBool();
+            if (hasFlagCarrier)
+            {
+                var position = ReadBattlegroundPlayerPosition(packet);
+
+                if (GetSession().GameState.IsAlliancePlayer(position.Guid))
+                {
+                    position.IconID = 1;
+                    position.ArenaSlot = 3;
+                }
+                else
+                {
+                    position.IconID = 2;
+                    position.ArenaSlot = 2;
+                }
+
+                bglist.FlagCarriers.Add(position);
+                GetSession().GameState.FlagCarrierGuids.Add(position.Guid);
+            }
+            SendPacketToClient(bglist);
+        }
+
+        [PacketHandler(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS, ClientVersionBuild.V2_0_1_6180)]
+        void HandleBattlegroundPlayerPositionsTBC(WorldPacket packet)
         {
             BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
             packet.ReadUInt32(); // unk
@@ -399,6 +438,24 @@ namespace HermesProxy.World.Client
             healer.HealerGuid = packet.ReadGuid().To128();
             healer.TimeLeft = packet.ReadUInt32();
             SendPacketToClient(healer);
+        }
+
+        [PacketHandler(Opcode.SMSG_PVP_CREDIT)]
+        void HandlePvPCredit(WorldPacket packet)
+        {
+            PvPCredit credit = new PvPCredit();
+            credit.OriginalHonor = packet.ReadInt32();
+            credit.Target = packet.ReadGuid().To128();
+            credit.Rank = packet.ReadUInt32();
+            SendPacketToClient(credit);
+        }
+
+        [PacketHandler(Opcode.SMSG_PLAYER_SKINNED)]
+        void HandlePlayerSkinned(WorldPacket packet)
+        {
+            PlayerSkinned skinned = new PlayerSkinned();
+            skinned.FreeRepop = packet.ReadBool();
+            SendPacketToClient(skinned);
         }
     }
 }

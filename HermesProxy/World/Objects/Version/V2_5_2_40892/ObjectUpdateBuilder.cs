@@ -127,6 +127,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
         public void SetCreateObjectBits()
         {
             m_createBits.Clear();
+            m_createBits.PlayHoverAnim = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.Hover;
             m_createBits.MovementUpdate = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_objectTypeMask.HasAnyFlag(Enums.ObjectTypeMask.Unit);
             m_createBits.MovementTransport = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && m_updateData.CreateData.MoveInfo.TransportGuid != null;
             m_createBits.Stationary = m_updateData.CreateData != null & m_updateData.CreateData.MoveInfo != null && !m_objectTypeMask.HasAnyFlag(Enums.ObjectTypeMask.Unit);
@@ -1587,6 +1588,14 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                     for (int i = 0; i < activeData.SelfResSpells.Count; i++)
                         fields[i] = activeData.SelfResSpells[i];
                     m_dynamicFields.SetUpdateField((int)ActivePlayerDynamicField.ACTIVE_PLAYER_DYNAMIC_FIELD_SELF_RES_SPELLS, fields, DynamicFieldChangeType.ValueAndSizeChanged);
+                }
+                if (activeData.HasDailyQuestsUpdate)
+                {
+                    uint[] fields = new uint[m_gameState.DailyQuestsDone.Count];
+                    int counter = 0;
+                    foreach (var itr in m_gameState.DailyQuestsDone)
+                        fields[counter++] = itr.Value;
+                    m_dynamicFields.SetUpdateField((int)ActivePlayerDynamicField.ACTIVE_PLAYER_DYNAMIC_FIELD_DAILY_QUESTS_COMPLETED, fields, DynamicFieldChangeType.ValueAndSizeChanged);
                 }
             }
 

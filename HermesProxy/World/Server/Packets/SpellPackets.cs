@@ -1409,6 +1409,50 @@ namespace HermesProxy.World.Server.Packets
         public uint SpellID;
     }
 
+    class SpellDispellLog : ServerPacket
+    {
+        public SpellDispellLog() : base(Opcode.SMSG_SPELL_DISPELL_LOG, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(IsSteal);
+            _worldPacket.WriteBit(IsBreak);
+            _worldPacket.WritePackedGuid128(TargetGUID);
+            _worldPacket.WritePackedGuid128(CasterGUID);
+            _worldPacket.WriteUInt32(DispelledBySpellID);
+
+            _worldPacket.WriteInt32(DispellData.Count);
+            foreach (var data in DispellData)
+            {
+                _worldPacket.WriteUInt32(data.SpellID);
+                _worldPacket.WriteBit(data.Harmful);
+                _worldPacket.WriteBit(data.Rolled.HasValue);
+                _worldPacket.WriteBit(data.Needed.HasValue);
+                if (data.Rolled.HasValue)
+                    _worldPacket.WriteInt32(data.Rolled.Value);
+                if (data.Needed.HasValue)
+                    _worldPacket.WriteInt32(data.Needed.Value);
+
+                _worldPacket.FlushBits();
+            }
+        }
+
+        public bool IsSteal;
+        public bool IsBreak;
+        public WowGuid128 TargetGUID;
+        public WowGuid128 CasterGUID;
+        public uint DispelledBySpellID;
+        public List<SpellDispellData> DispellData = new();
+    }
+
+    struct SpellDispellData
+    {
+        public uint SpellID;
+        public bool Harmful;
+        public int? Rolled;
+        public int? Needed;
+    }
+
     class PlaySpellVisualKit : ServerPacket
     {
         public PlaySpellVisualKit() : base(Opcode.SMSG_PLAY_SPELL_VISUAL_KIT) { }

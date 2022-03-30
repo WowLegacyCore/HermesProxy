@@ -487,18 +487,19 @@ namespace HermesProxy
                 activeFlags = 1;
                 newFlags = AuraFlagsModern.None;
 
-                if (oldFlags.HasAnyFlag(AuraFlagsTBC.Negative))
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.NotCancelable))
                     newFlags |= AuraFlagsModern.Negative;
-                else if (oldFlags.HasAnyFlag(AuraFlagsTBC.Positive))
-                    newFlags |= AuraFlagsModern.Positive; 
-                else if (oldFlags.HasAnyFlag(AuraFlagsTBC.NotCancelable))
+                else if (oldFlags.HasAnyFlag(AuraFlagsTBC.Cancelable))
+                    newFlags |= (AuraFlagsModern.Positive | AuraFlagsModern.Cancelable);
+                else if (slot >= 40)
                     newFlags |= AuraFlagsModern.Negative;
 
-                if (oldFlags.HasAnyFlag(AuraFlagsTBC.Cancelable))
-                    newFlags |= AuraFlagsModern.Cancelable;
-
-                if (oldFlags.HasAnyFlag(AuraFlagsTBC.Passive))
-                    newFlags |= AuraFlagsModern.Passive;
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.EffectIndex0))
+                    activeFlags |= 1;
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.EffectIndex1))
+                    activeFlags |= 2;
+                if (oldFlags.HasAnyFlag(AuraFlagsTBC.EffectIndex2))
+                    activeFlags |= 4;
             }
             else
             {
