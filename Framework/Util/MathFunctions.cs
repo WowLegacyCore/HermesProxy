@@ -196,48 +196,6 @@ public static class MathFunctions
         value *= (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val));
     }
 
-    public static bool CompareValues(ComparisionType type, uint val1, uint val2)
-    {
-        switch (type)
-        {
-            case ComparisionType.EQ:
-                return val1 == val2;
-            case ComparisionType.High:
-                return val1 > val2;
-            case ComparisionType.Low:
-                return val1 < val2;
-            case ComparisionType.HighEQ:
-                return val1 >= val2;
-            case ComparisionType.LowEQ:
-                return val1 <= val2;
-            default:
-                // incorrect parameter
-                Cypher.Assert(false);
-                return false;
-        }
-
-    }
-    public static bool CompareValues(ComparisionType type, float val1, float val2)
-    {
-        switch (type)
-        {
-            case ComparisionType.EQ:
-                return val1 == val2;
-            case ComparisionType.High:
-                return val1 > val2;
-            case ComparisionType.Low:
-                return val1 < val2;
-            case ComparisionType.HighEQ:
-                return val1 >= val2;
-            case ComparisionType.LowEQ:
-                return val1 <= val2;
-            default:
-                // incorrect parameter
-                Cypher.Assert(false);
-                return false;
-        }
-    }
-
     public static ulong MakePair64(uint l, uint h)
     {
         return (ulong)l | ((ulong)h << 32);

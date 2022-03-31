@@ -1,6 +1,6 @@
 ﻿using Framework.GameMath;
 using Framework.IO;
-using HermesProxy.World.Enums.V2_5_2_40892;
+using HermesProxy.World.Enums.V2_5_2_39570;
 using HermesProxy.World.Server.Packets;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HermesProxy.World.Objects.Version.V2_5_2_40892
+namespace HermesProxy.World.Objects.Version.V2_5_2_39570
 {
     public class ObjectUpdateBuilder
     {
@@ -84,6 +84,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
 
             m_dynamicFields = new(dynamicFieldsSize, m_updateData.Type);
 
+            m_gameState.ObjectCacheMutex.WaitOne();
             if (m_updateData.CreateData == null &&
                 m_gameState.ObjectCacheModern.TryGetValue(updateData.Guid, out m_fields) &&
                 m_fields != null)
@@ -96,6 +97,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_40892
                 m_gameState.ObjectCacheModern.Remove(updateData.Guid);
                 m_gameState.ObjectCacheModern.Add(updateData.Guid, m_fields);
             }
+            m_gameState.ObjectCacheMutex.ReleaseMutex();
         }
 
         protected bool m_alreadyWritten;

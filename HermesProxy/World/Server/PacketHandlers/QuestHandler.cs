@@ -1,4 +1,5 @@
 ﻿using Framework.Constants;
+using Framework.Logging;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -58,6 +59,7 @@ namespace HermesProxy.World.Server
                 if (UNIT_NPC_FLAGS < 0)
                     return;
 
+                GetSession().GameState.ObjectCacheMutex.WaitOne();
                 foreach (var obj in GetSession().GameState.ObjectCacheModern)
                 {
                     if (obj.Key.GetObjectType() != ObjectType.Unit)
@@ -70,6 +72,7 @@ namespace HermesProxy.World.Server
                         SendPacketToServer(packet);
                     }
                 }
+                GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
             }
         }
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_HELLO)]
@@ -90,10 +93,38 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD)]
         void HandleQuestGiverChooseReward(QuestGiverChooseReward quest)
         {
+            int choiceIndex = 0;
+
+            if (quest.Choice.Item.ItemID != 0)
+            {
+                QuestTemplate questTemplate = GameData.GetQuestTemplate(quest.QuestID);
+                if (questTemplate == null)
+                {
+                    Log.Print(LogType.Error, "Unable to select quest reward because quest template is missing. Try again.");
+                    WorldPacket packet2 = new WorldPacket(Opcode.CMSG_QUERY_QUEST_INFO);
+                    packet2.WriteUInt32(quest.QuestID);
+                    SendPacketToServer(packet2);
+                    QuestGiverQuestFailed fail = new QuestGiverQuestFailed();
+                    fail.QuestID = quest.QuestID;
+                    fail.Reason = InventoryResult.ItemNotFound;
+                    SendPacket(fail);
+                    return;
+                }
+
+                for (int i = 0; i < questTemplate.UnfilteredChoiceItems.Length; i++)
+                {
+                    if (questTemplate.UnfilteredChoiceItems[i].ItemID == quest.Choice.Item.ItemID)
+                    {
+                        choiceIndex = i;
+                        break;
+                    }
+                }
+            }
+            
             WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);
-            packet.WriteUInt32(quest.Choice.Item.ItemID);
+            packet.WriteInt32(choiceIndex);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_COMPLETE_QUEST)]

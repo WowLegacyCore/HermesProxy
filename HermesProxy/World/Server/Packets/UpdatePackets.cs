@@ -281,12 +281,20 @@ namespace HermesProxy.World.Server.Packets
             foreach (var update in ObjectUpdates)
             {
                 update.InitializePlaceholders();
-                switch (Framework.Settings.ClientBuild)
+                switch (ModernVersion.GetUpdateFieldsDefiningBuild())
                 {
-                    case ClientVersionBuild.V2_5_2_40892:
-                        Objects.Version.V2_5_2_40892.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_40892.ObjectUpdateBuilder(update, _gameState);
+                    case ClientVersionBuild.V1_14_0_40237:
+                    {
+                        Objects.Version.V1_14_0_40237.ObjectUpdateBuilder builder = new Objects.Version.V1_14_0_40237.ObjectUpdateBuilder(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
+                    }
+                    case ClientVersionBuild.V2_5_2_39570:
+                    {
+                        Objects.Version.V2_5_2_39570.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_39570.ObjectUpdateBuilder(update, _gameState);
+                        builder.WriteToPacket(data);
+                        break;
+                    }
                     default:
                         throw new System.ArgumentOutOfRangeException("No object update builder defined for current build.");
                 }

@@ -46,6 +46,7 @@ namespace HermesProxy
         public Dictionary<byte, int> CurrentPlayerAuras = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, uint> PlayerGuildIds = new();
+        public System.Threading.Mutex ObjectCacheMutex = new System.Threading.Mutex();
         public Dictionary<WowGuid128, Dictionary<int, UpdateField>> ObjectCacheLegacy = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> ObjectCacheModern = new();
         public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
@@ -158,12 +159,17 @@ namespace HermesProxy
         }
         public WowGuid128 GetPetGuidByNumber(uint petNumber)
         {
+            ObjectCacheMutex.WaitOne();
             foreach (var itr in ObjectCacheModern)
             {
                 if (itr.Key.GetHighType() == HighGuidType.Pet &&
                     itr.Key.GetEntry() == petNumber)
+                {
+                    ObjectCacheMutex.ReleaseMutex();
                     return itr.Key;
+                }  
             }
+            ObjectCacheMutex.ReleaseMutex();
             return null;
         }
         public void StoreOriginalObjectType(WowGuid128 guid, ObjectType type)
@@ -279,16 +285,26 @@ namespace HermesProxy
         public Dictionary<int, UpdateField> GetCachedObjectFieldsLegacy(WowGuid128 guid)
         {
             Dictionary<int, UpdateField> dict;
+            ObjectCacheMutex.WaitOne();
             if (ObjectCacheLegacy.TryGetValue(guid, out dict))
+            {
+                ObjectCacheMutex.ReleaseMutex();
                 return dict;
+            }
+            ObjectCacheMutex.ReleaseMutex();
             return null;
         }
 
         public UpdateFieldsArray GetCachedObjectFieldsModern(WowGuid128 guid)
         {
             UpdateFieldsArray array;
+            ObjectCacheMutex.WaitOne();
             if (ObjectCacheModern.TryGetValue(guid, out array))
+            {
+                ObjectCacheMutex.ReleaseMutex();
                 return array;
+            }
+            ObjectCacheMutex.ReleaseMutex();
             return null;
         }
     }

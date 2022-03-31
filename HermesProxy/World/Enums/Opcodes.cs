@@ -9,53 +9,85 @@ namespace HermesProxy.World.Enums
 {
     public static class Opcodes
     {
-        public static uint GetOpcodeValueForVersion(Opcode opcode, ClientVersionBuild version)
+        public static ClientVersionBuild GetOpcodesDefiningBuild(ClientVersionBuild version)
         {
             switch (version)
+            {
+                case ClientVersionBuild.V1_12_1_5875:
+                    return ClientVersionBuild.V1_12_1_5875;
+                case ClientVersionBuild.V2_4_3_8606:
+                    return ClientVersionBuild.V2_4_3_8606;
+                case ClientVersionBuild.V3_3_5a_12340:
+                    return ClientVersionBuild.V3_3_5a_12340;
+                case ClientVersionBuild.V2_5_2_39570:
+                case ClientVersionBuild.V2_5_2_39618:
+                case ClientVersionBuild.V2_5_2_39926:
+                case ClientVersionBuild.V2_5_2_40011:
+                case ClientVersionBuild.V2_5_2_40045:
+                case ClientVersionBuild.V2_5_2_40203:
+                case ClientVersionBuild.V2_5_2_40260:
+                case ClientVersionBuild.V2_5_2_40422:
+                case ClientVersionBuild.V2_5_2_40488:
+                case ClientVersionBuild.V2_5_2_40617:
+                case ClientVersionBuild.V2_5_2_40892:
+                case ClientVersionBuild.V2_5_2_41446:
+                case ClientVersionBuild.V2_5_2_41510:
+                case ClientVersionBuild.V1_14_0_39802:
+                case ClientVersionBuild.V1_14_0_39958:
+                case ClientVersionBuild.V1_14_0_40140:
+                case ClientVersionBuild.V1_14_0_40179:
+                case ClientVersionBuild.V1_14_0_40237:
+                case ClientVersionBuild.V1_14_0_40347:
+                case ClientVersionBuild.V1_14_0_40441:
+                case ClientVersionBuild.V1_14_0_40618:
+                    return ClientVersionBuild.V2_5_2_39570;
+            }
+            return ClientVersionBuild.Zero;
+        }
+        public static uint GetOpcodeValueForVersion(Opcode opcode, ClientVersionBuild version)
+        {
+            switch (GetOpcodesDefiningBuild(version))
             {
                 case ClientVersionBuild.V1_12_1_5875:
                     return FindOpcodeValueInEnum<V1_12_1_5875.Opcode>(opcode.ToString());
                 case ClientVersionBuild.V2_4_3_8606:
                     return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode.ToString());
-                case ClientVersionBuild.V1_14_0_40618:
-                case ClientVersionBuild.V2_5_2_40892:
-                    return FindOpcodeValueInEnum<V2_5_2_40892.Opcode>(opcode.ToString());
                 case ClientVersionBuild.V3_3_5a_12340:
                     return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode.ToString());
+                case ClientVersionBuild.V2_5_2_39570:
+                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode.ToString());
             }
             return 0;
         }
 
         public static uint GetOpcodeValueForVersion(string opcode, ClientVersionBuild version)
         {
-            switch (version)
+            switch (GetOpcodesDefiningBuild(version))
             {
                 case ClientVersionBuild.V1_12_1_5875:
                     return FindOpcodeValueInEnum<V1_12_1_5875.Opcode>(opcode);
                 case ClientVersionBuild.V2_4_3_8606:
                     return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode);
-                case ClientVersionBuild.V1_14_0_40618:
-                case ClientVersionBuild.V2_5_2_40892:
-                    return FindOpcodeValueInEnum<V2_5_2_40892.Opcode>(opcode);
                 case ClientVersionBuild.V3_3_5a_12340:
                     return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode);
+                case ClientVersionBuild.V2_5_2_39570:
+                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode);
             }
             return 0;
         }
 
         public static string GetOpcodeNameForVersion(uint opcode, ClientVersionBuild version)
         {
-            switch (version)
+            switch (GetOpcodesDefiningBuild(version))
             {
                 case ClientVersionBuild.V1_12_1_5875:
                     return FindOpcodeNameInEnum<V1_12_1_5875.Opcode>(opcode);
                 case ClientVersionBuild.V2_4_3_8606:
                     return FindOpcodeNameInEnum<V2_4_3_8606.Opcode>(opcode);
-                case ClientVersionBuild.V1_14_0_40618:
-                case ClientVersionBuild.V2_5_2_40892:
-                    return FindOpcodeNameInEnum<V2_5_2_40892.Opcode>(opcode);
                 case ClientVersionBuild.V3_3_5a_12340:
                     return FindOpcodeNameInEnum<V3_3_5_12340.Opcode>(opcode);
+                case ClientVersionBuild.V2_5_2_39570:
+                    return FindOpcodeNameInEnum<V2_5_2_39570.Opcode>(opcode);
             }
             return "UNKNOWN";
         }

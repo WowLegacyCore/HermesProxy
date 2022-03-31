@@ -330,7 +330,7 @@ namespace HermesProxy.World.Client
             creature.MovementInfoID = 1693;
             creature.Class = 1;
 
-            GameData.CreatureTemplates.Add(response.CreatureID, creature);
+            GameData.StoreCreatureTemplate(response.CreatureID, creature);
             SendPacketToClient(response);
         }
         [PacketHandler(Opcode.SMSG_QUERY_GAME_OBJECT_RESPONSE)]

@@ -35,6 +35,25 @@ namespace HermesProxy
         private static readonly Dictionary<Type, SortedList<int, UpdateFieldInfo>> UpdateFieldDictionary;
         private static readonly Dictionary<Type, Dictionary<string, int>> UpdateFieldNameDictionary;
 
+        public static ClientVersionBuild GetUpdateFieldsDefiningBuild()
+        {
+            return GetUpdateFieldsDefiningBuild(Build);
+        }
+
+        public static ClientVersionBuild GetUpdateFieldsDefiningBuild(ClientVersionBuild version)
+        {
+            switch (version)
+            {
+                case ClientVersionBuild.V1_12_1_5875:
+                    return ClientVersionBuild.V1_12_1_5875;
+                case ClientVersionBuild.V2_4_3_8606:
+                    return ClientVersionBuild.V2_4_3_8606;
+                case ClientVersionBuild.V3_3_5a_12340:
+                    return ClientVersionBuild.V3_3_5a_12340;
+            }
+            return ClientVersionBuild.Zero;
+        }
+
         private static bool LoadUFDictionariesInto(Dictionary<Type, SortedList<int, UpdateFieldInfo>> dicts,
             Dictionary<Type, Dictionary<string, int>> nameToValueDict)
         {
@@ -48,16 +67,19 @@ namespace HermesProxy
                 typeof(CorpseDynamicField), typeof(AreaTriggerDynamicField), typeof(SceneObjectDynamicField), typeof(ConversationDynamicField)
             };
 
+            ClientVersionBuild ufDefiningBuild = GetUpdateFieldsDefiningBuild(Build);
+            System.Diagnostics.Trace.Assert(ufDefiningBuild != ClientVersionBuild.Zero);
+
             bool loaded = false;
             foreach (Type enumType in enumTypes)
             {
                 string vTypeString =
-                    $"HermesProxy.World.Enums.{Build.ToString()}.{enumType.Name}";
+                    $"HermesProxy.World.Enums.{ufDefiningBuild.ToString()}.{enumType.Name}";
                 Type vEnumType = Assembly.GetExecutingAssembly().GetType(vTypeString);
                 if (vEnumType == null)
                 {
                     vTypeString =
-                        $"HermesProxy.World.Enums.{Build.ToString()}.{enumType.Name}";
+                        $"HermesProxy.World.Enums.{ufDefiningBuild.ToString()}.{enumType.Name}";
                     vEnumType = Assembly.GetExecutingAssembly().GetType(vTypeString);
                     if (vEnumType == null)
                         continue;   // versions prior to 4.3.0 do not have AreaTriggerField
@@ -260,6 +282,42 @@ namespace HermesProxy
         private static readonly Dictionary<Type, SortedList<int, UpdateFieldInfo>> UpdateFieldDictionary;
         private static readonly Dictionary<Type, Dictionary<string, int>> UpdateFieldNameDictionary;
 
+        public static ClientVersionBuild GetUpdateFieldsDefiningBuild()
+        {
+            return GetUpdateFieldsDefiningBuild(Build);
+        }
+
+        public static ClientVersionBuild GetUpdateFieldsDefiningBuild(ClientVersionBuild version)
+        {
+            switch (version)
+            {
+                case ClientVersionBuild.V1_14_0_39802:
+                case ClientVersionBuild.V1_14_0_39958:
+                case ClientVersionBuild.V1_14_0_40140:
+                case ClientVersionBuild.V1_14_0_40179:
+                case ClientVersionBuild.V1_14_0_40237:
+                case ClientVersionBuild.V1_14_0_40347:
+                case ClientVersionBuild.V1_14_0_40441:
+                case ClientVersionBuild.V1_14_0_40618:
+                    return ClientVersionBuild.V1_14_0_40237;
+                case ClientVersionBuild.V2_5_2_39570:
+                case ClientVersionBuild.V2_5_2_39618:
+                case ClientVersionBuild.V2_5_2_39926:
+                case ClientVersionBuild.V2_5_2_40011:
+                case ClientVersionBuild.V2_5_2_40045:
+                case ClientVersionBuild.V2_5_2_40203:
+                case ClientVersionBuild.V2_5_2_40260:
+                case ClientVersionBuild.V2_5_2_40422:
+                case ClientVersionBuild.V2_5_2_40488:
+                case ClientVersionBuild.V2_5_2_40617:
+                case ClientVersionBuild.V2_5_2_40892:
+                case ClientVersionBuild.V2_5_2_41446:
+                case ClientVersionBuild.V2_5_2_41510:
+                    return ClientVersionBuild.V2_5_2_39570;
+            }
+            return ClientVersionBuild.Zero;
+        }
+
         private static bool LoadUFDictionariesInto(Dictionary<Type, SortedList<int, UpdateFieldInfo>> dicts,
             Dictionary<Type, Dictionary<string, int>> nameToValueDict)
         {
@@ -273,16 +331,19 @@ namespace HermesProxy
                 typeof(CorpseDynamicField), typeof(AreaTriggerDynamicField), typeof(SceneObjectDynamicField), typeof(ConversationDynamicField)
             };
 
+            ClientVersionBuild ufDefiningBuild = GetUpdateFieldsDefiningBuild(Build);
+            System.Diagnostics.Trace.Assert(ufDefiningBuild != ClientVersionBuild.Zero);
+
             bool loaded = false;
             foreach (Type enumType in enumTypes)
             {
                 string vTypeString =
-                    $"HermesProxy.World.Enums.{Build.ToString()}.{enumType.Name}";
+                    $"HermesProxy.World.Enums.{ufDefiningBuild.ToString()}.{enumType.Name}";
                 Type vEnumType = Assembly.GetExecutingAssembly().GetType(vTypeString);
                 if (vEnumType == null)
                 {
                     vTypeString =
-                        $"HermesProxy.World.Enums.{Build.ToString()}.{enumType.Name}";
+                        $"HermesProxy.World.Enums.{ufDefiningBuild.ToString()}.{enumType.Name}";
                     vEnumType = Assembly.GetExecutingAssembly().GetType(vTypeString);
                     if (vEnumType == null)
                         continue;   // versions prior to 4.3.0 do not have AreaTriggerField

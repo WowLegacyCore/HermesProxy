@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HermesProxy.World.Enums.V2_5_2_40892
+namespace HermesProxy.World.Enums.V2_5_2_39570
 {
     public enum Opcode : uint
     {

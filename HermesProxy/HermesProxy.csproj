@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <StartupObject>HermesProxy.Server</StartupObject>
-    <ApplicationIcon>Red.ico</ApplicationIcon>
+    <ApplicationIcon>Hermes.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   

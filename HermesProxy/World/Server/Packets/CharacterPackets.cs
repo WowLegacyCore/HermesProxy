@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Dynamic;
 using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
@@ -71,7 +70,7 @@ namespace HermesProxy.World.Server.Packets
         public bool IsAlliedRacesCreationAllowed;
 
         public int MaxCharacterLevel = 1;
-        public Optional<uint> DisabledClassesMask = new();
+        public uint? DisabledClassesMask = new();
 
         public List<CharacterInfo> Characters = new(); // all characters on the list
         public List<RaceUnlock> RaceUnlockData = new(); //
@@ -288,8 +287,8 @@ namespace HermesProxy.World.Server.Packets
             var customizationCount = _worldPacket.ReadUInt32();
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
-            if (CreateInfo.TemplateSet.HasValue)
-                CreateInfo.TemplateSet.Set(_worldPacket.ReadUInt32());
+            if (hasTemplateSet)
+                CreateInfo.TemplateSet = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < customizationCount; ++i)
             {
@@ -309,7 +308,7 @@ namespace HermesProxy.World.Server.Packets
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
         public Array<ChrCustomizationChoice> Customizations = new(50);
-        public Optional<uint> TemplateSet = new();
+        public uint? TemplateSet;
         public bool IsTrialBoost;
         public bool UseNPE;
         public string Name;

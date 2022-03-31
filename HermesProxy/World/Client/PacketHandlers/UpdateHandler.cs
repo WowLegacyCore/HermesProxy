@@ -18,8 +18,10 @@ namespace HermesProxy.World.Client
         void HandleDestroyObject(WorldPacket packet)
         {
             WowGuid128 guid = packet.ReadGuid().To128();
+            GetSession().GameState.ObjectCacheMutex.WaitOne();
             GetSession().GameState.ObjectCacheLegacy.Remove(guid);
             GetSession().GameState.ObjectCacheModern.Remove(guid);
+            GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
 
             UpdateObject updateObject = new UpdateObject(GetSession().GameState);
             updateObject.DestroyedGuids.Add(guid);
@@ -188,8 +190,10 @@ namespace HermesProxy.World.Client
             {
                 var guid = packet.ReadPackedGuid().To128();
                 PrintString($"Guid = {objCount}", index, j);
+                GetSession().GameState.ObjectCacheMutex.WaitOne();
                 GetSession().GameState.ObjectCacheLegacy.Remove(guid);
                 GetSession().GameState.ObjectCacheModern.Remove(guid);
+                GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
                 updateObject.OutOfRangeGuids.Add(guid);
             }
         }
@@ -207,10 +211,12 @@ namespace HermesProxy.World.Client
             BitArray updateMaskArray = null;
             var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData);
+            GetSession().GameState.ObjectCacheMutex.WaitOne();
             if (!GetSession().GameState.ObjectCacheLegacy.ContainsKey(guid))
                 GetSession().GameState.ObjectCacheLegacy.Add(guid, updates);
             else
                 GetSession().GameState.ObjectCacheLegacy[guid] = updates;
+            GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
         }
 
         public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid128 guid, ObjectUpdate updateData, AuraUpdate auraUpdate, PowerUpdate powerUpdate, int index)
