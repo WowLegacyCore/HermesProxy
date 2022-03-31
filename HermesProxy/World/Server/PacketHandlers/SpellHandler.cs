@@ -122,8 +122,8 @@ namespace HermesProxy.World.Server
             GetSession().GameState.LastClientCastId = use.Cast.SpellID;
             GetSession().GameState.LastClientCastGuid = use.Cast.CastID;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_USE_ITEM);
-            byte containerSlot = use.PackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.PackSlot) : use.PackSlot;
-            byte slot = use.PackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.Slot) : use.Slot;
+            byte containerSlot = use.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.PackSlot) : use.PackSlot;
+            byte slot = use.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.Slot) : use.Slot;
             packet.WriteUInt8(containerSlot);
             packet.WriteUInt8(slot);
             packet.WriteUInt8(0); // spell count

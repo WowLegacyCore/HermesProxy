@@ -422,41 +422,41 @@ namespace HermesProxy
         public static byte AdjustInventorySlot(byte slot)
         {
             byte offset = 0;
-            if (slot >= World.Objects.Classic.InventorySlots.BankItemStart && slot < World.Objects.Classic.InventorySlots.BankItemEnd)
+            if (slot >= World.Enums.Classic.InventorySlots.BankItemStart && slot < World.Enums.Classic.InventorySlots.BankItemEnd)
             {
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    offset = World.Objects.Classic.InventorySlots.BankItemStart - World.Objects.Vanilla.InventorySlots.BankItemStart;
+                    offset = World.Enums.Classic.InventorySlots.BankItemStart - World.Enums.Vanilla.InventorySlots.BankItemStart;
                 else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    offset = World.Objects.Classic.InventorySlots.BankItemStart - World.Objects.TBC.InventorySlots.BankItemStart;
+                    offset = World.Enums.Classic.InventorySlots.BankItemStart - World.Enums.TBC.InventorySlots.BankItemStart;
                 else
-                    offset = World.Objects.Classic.InventorySlots.BankItemStart - World.Objects.WotLK.InventorySlots.BankItemStart;
+                    offset = World.Enums.Classic.InventorySlots.BankItemStart - World.Enums.WotLK.InventorySlots.BankItemStart;
             }
-            else if (slot >= World.Objects.Classic.InventorySlots.BankBagStart && slot < World.Objects.Classic.InventorySlots.BankBagEnd)
+            else if (slot >= World.Enums.Classic.InventorySlots.BankBagStart && slot < World.Enums.Classic.InventorySlots.BankBagEnd)
             {
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    offset = World.Objects.Classic.InventorySlots.BankBagStart - World.Objects.Vanilla.InventorySlots.BankBagStart;
+                    offset = World.Enums.Classic.InventorySlots.BankBagStart - World.Enums.Vanilla.InventorySlots.BankBagStart;
                 else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    offset = World.Objects.Classic.InventorySlots.BankBagStart - World.Objects.TBC.InventorySlots.BankBagStart;
+                    offset = World.Enums.Classic.InventorySlots.BankBagStart - World.Enums.TBC.InventorySlots.BankBagStart;
                 else
-                    offset = World.Objects.Classic.InventorySlots.BankBagStart - World.Objects.WotLK.InventorySlots.BankBagStart;
+                    offset = World.Enums.Classic.InventorySlots.BankBagStart - World.Enums.WotLK.InventorySlots.BankBagStart;
             }
-            else if (slot >= World.Objects.Classic.InventorySlots.BuyBackStart && slot < World.Objects.Classic.InventorySlots.BuyBackEnd)
+            else if (slot >= World.Enums.Classic.InventorySlots.BuyBackStart && slot < World.Enums.Classic.InventorySlots.BuyBackEnd)
             {
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    offset = World.Objects.Classic.InventorySlots.BuyBackStart - World.Objects.Vanilla.InventorySlots.BuyBackStart;
+                    offset = World.Enums.Classic.InventorySlots.BuyBackStart - World.Enums.Vanilla.InventorySlots.BuyBackStart;
                 else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    offset = World.Objects.Classic.InventorySlots.BuyBackStart - World.Objects.TBC.InventorySlots.BuyBackStart;
+                    offset = World.Enums.Classic.InventorySlots.BuyBackStart - World.Enums.TBC.InventorySlots.BuyBackStart;
                 else
-                    offset = World.Objects.Classic.InventorySlots.BuyBackStart - World.Objects.WotLK.InventorySlots.BuyBackStart;
+                    offset = World.Enums.Classic.InventorySlots.BuyBackStart - World.Enums.WotLK.InventorySlots.BuyBackStart;
             }
-            else if (slot >= World.Objects.Classic.InventorySlots.KeyringStart && slot < World.Objects.Classic.InventorySlots.KeyringEnd)
+            else if (slot >= World.Enums.Classic.InventorySlots.KeyringStart && slot < World.Enums.Classic.InventorySlots.KeyringEnd)
             {
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    offset = World.Objects.Classic.InventorySlots.KeyringStart - World.Objects.Vanilla.InventorySlots.KeyringStart;
+                    offset = World.Enums.Classic.InventorySlots.KeyringStart - World.Enums.Vanilla.InventorySlots.KeyringStart;
                 else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    offset = World.Objects.Classic.InventorySlots.KeyringStart - World.Objects.TBC.InventorySlots.KeyringStart;
+                    offset = World.Enums.Classic.InventorySlots.KeyringStart - World.Enums.TBC.InventorySlots.KeyringStart;
                 else
-                    offset = World.Objects.Classic.InventorySlots.KeyringStart - World.Objects.WotLK.InventorySlots.KeyringStart;
+                    offset = World.Enums.Classic.InventorySlots.KeyringStart - World.Enums.WotLK.InventorySlots.KeyringStart;
             }
             return (byte)(slot - offset);
         }

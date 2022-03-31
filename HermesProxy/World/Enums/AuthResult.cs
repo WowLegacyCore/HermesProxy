@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HermesProxy.World.Client
+namespace HermesProxy.World.Enums
 {
     public enum AuthResult : byte
     {

@@ -197,7 +197,7 @@ namespace HermesProxy.World
         {
             return MapSpecificCreate(type, 0, (ushort)mapId, 0, entry, counter);
         }
-        public static WowGuid128 Create(HighGuidType703 type, World.Objects.SpellCastSource subType, uint mapId, uint entry, ulong counter)
+        public static WowGuid128 Create(HighGuidType703 type, World.Enums.SpellCastSource subType, uint mapId, uint entry, ulong counter)
         {
             return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter);
         }

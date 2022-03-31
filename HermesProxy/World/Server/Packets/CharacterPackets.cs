@@ -174,7 +174,7 @@ namespace HermesProxy.World.Server.Packets
             public uint PetCreatureFamilyId;
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
-            public VisualItemInfo[] VisualItems = new VisualItemInfo[Objects.Classic.InventorySlots.BagEnd];
+            public VisualItemInfo[] VisualItems = new VisualItemInfo[Enums.Classic.InventorySlots.BagEnd];
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
 
@@ -328,7 +328,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WritePackedGuid128(Guid);
         }
 
-        public HermesProxy.World.Objects.Classic.ResponseCodes Code;
+        public HermesProxy.World.Enums.Classic.ResponseCodes Code;
         public WowGuid128 Guid;
     }
 
@@ -353,7 +353,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt8((byte)Code);
         }
 
-        public HermesProxy.World.Objects.Classic.ResponseCodes Code;
+        public HermesProxy.World.Enums.Classic.ResponseCodes Code;
     }
 
     public class LoadingScreenNotify : ClientPacket

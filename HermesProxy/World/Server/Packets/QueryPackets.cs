@@ -97,12 +97,12 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteInt8((sbyte)Result);
             _worldPacket.WritePackedGuid128(Player);
 
-            if (Result == HermesProxy.World.Objects.Classic.ResponseCodes.Success)
+            if (Result == Enums.Classic.ResponseCodes.Success)
                 Data.Write(_worldPacket);
         }
 
         public WowGuid128 Player;
-        public HermesProxy.World.Objects.Classic.ResponseCodes Result; // 0 - full packet, != 0 - only guid
+        public Enums.Classic.ResponseCodes Result; // 0 - full packet, != 0 - only guid
         public PlayerGuidLookupData Data;
     }
 

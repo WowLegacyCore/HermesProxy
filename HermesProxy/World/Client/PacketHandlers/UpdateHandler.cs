@@ -939,7 +939,7 @@ namespace HermesProxy.World.Client
                 return null;
 
             AuraDataInfo data = new AuraDataInfo();
-            data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Objects.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetLow());
+            data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetLow());
             data.SpellID = spellId;
             data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
 
@@ -2313,8 +2313,8 @@ namespace HermesProxy.World.Client
                 int PLAYER_FIELD_ARENA_TEAM_INFO_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_ARENA_TEAM_INFO_1_1);
                 if (PLAYER_FIELD_ARENA_TEAM_INFO_1_1 >= 0)
                 {
-                    int teamIdOffset = 0;
-                    int teamMemberOffset = 1;
+                    //int teamIdOffset = 0;
+                    //int teamMemberOffset = 1;
                     int teamGamesWeekOffset = 2;
                     int teamGamesSeasonOffset = 3;
                     int teamWinsSeasonOffset = 4;

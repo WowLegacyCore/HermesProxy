@@ -45,10 +45,10 @@ namespace HermesProxy.World.Server
         void HandleSplitItem(SplitItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SPLIT_ITEM);
-            byte containerSlot1 = item.FromPackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.FromPackSlot) : item.FromPackSlot;
-            byte slot1 = item.FromPackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.FromSlot) : item.FromSlot;
-            byte containerSlot2 = item.ToPackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ToPackSlot) : item.ToPackSlot;
-            byte slot2 = item.ToPackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ToSlot) : item.ToSlot;
+            byte containerSlot1 = item.FromPackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.FromPackSlot) : item.FromPackSlot;
+            byte slot1 = item.FromPackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.FromSlot) : item.FromSlot;
+            byte containerSlot2 = item.ToPackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ToPackSlot) : item.ToPackSlot;
+            byte slot2 = item.ToPackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ToSlot) : item.ToSlot;
             packet.WriteUInt8(containerSlot1);
             packet.WriteUInt8(slot1);
             packet.WriteUInt8(containerSlot2);
@@ -75,10 +75,10 @@ namespace HermesProxy.World.Server
         void HandleSwapItem(SwapItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SWAP_ITEM);
-            byte containerSlotB = item.ContainerSlotB != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerSlotB) : item.ContainerSlotB;
-            byte slotB = item.ContainerSlotB == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotB) : item.SlotB;
-            byte containerSlotA = item.ContainerSlotA != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerSlotA) : item.ContainerSlotA;
-            byte slotA = item.ContainerSlotA == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotA) : item.SlotA;
+            byte containerSlotB = item.ContainerSlotB != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerSlotB) : item.ContainerSlotB;
+            byte slotB = item.ContainerSlotB == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotB) : item.SlotB;
+            byte containerSlotA = item.ContainerSlotA != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerSlotA) : item.ContainerSlotA;
+            byte slotA = item.ContainerSlotA == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotA) : item.SlotA;
             packet.WriteUInt8(containerSlotB);
             packet.WriteUInt8(slotB);
             packet.WriteUInt8(containerSlotA);
@@ -90,8 +90,8 @@ namespace HermesProxy.World.Server
         void HandleDestroyItem(DestroyItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_DESTROY_ITEM);
-            byte containerSlot = item.ContainerId != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerId) : item.ContainerId;
-            byte slot = item.ContainerId == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotNum) : item.SlotNum;
+            byte containerSlot = item.ContainerId != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ContainerId) : item.ContainerId;
+            byte slot = item.ContainerId == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.SlotNum) : item.SlotNum;
             packet.WriteUInt8(containerSlot);
             packet.WriteUInt8(slot);
             packet.WriteUInt32(item.Count);
@@ -102,8 +102,8 @@ namespace HermesProxy.World.Server
         void HandleAutoEquipItem(AutoEquipItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTO_EQUIP_ITEM);
-            byte containerSlot = item.PackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
-            byte slot = item.PackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
+            byte containerSlot = item.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
+            byte slot = item.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
             packet.WriteUInt8(containerSlot);
             packet.WriteUInt8(slot);
             SendPacketToServer(packet);
@@ -112,8 +112,8 @@ namespace HermesProxy.World.Server
         void HandleReadItem(ReadItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_READ_ITEM);
-            byte containerSlot = item.PackSlot != Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
-            byte slot = item.PackSlot == Objects.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
+            byte containerSlot = item.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
+            byte slot = item.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
             packet.WriteUInt8(containerSlot);
             packet.WriteUInt8(slot);
             SendPacketToServer(packet);

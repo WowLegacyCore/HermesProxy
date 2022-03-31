@@ -1,4 +1,5 @@
 ﻿using HermesProxy.World.Server.Packets;
+using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
