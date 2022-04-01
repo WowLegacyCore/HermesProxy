@@ -31,10 +31,22 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Read()
         {
-            TeamId = _worldPacket.ReadInt32();
+            TeamIndex = _worldPacket.ReadUInt32();
         }
 
-        public int TeamId;
+        public uint TeamIndex;
+    }
+
+    public class ArenaTeamQuery : ClientPacket
+    {
+        public ArenaTeamQuery(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TeamId = _worldPacket.ReadUInt32();
+        }
+
+        public uint TeamId;
     }
 
     class ArenaTeamRosterResponse : ServerPacket
@@ -43,7 +55,7 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(dword20);
+            _worldPacket.WriteUInt32(TeamId);
             _worldPacket.WriteUInt32(TeamSize);
             _worldPacket.WriteUInt32(TeamPlayed);
             _worldPacket.WriteUInt32(TeamWins);
@@ -56,7 +68,7 @@ namespace HermesProxy.World.Server.Packets
                 member.Write(_worldPacket);
         }
 
-        public int dword20;
+        public uint TeamId;
         public uint TeamSize;
         public uint TeamPlayed;
         public uint TeamWins;
@@ -107,5 +119,49 @@ namespace HermesProxy.World.Server.Packets
         public string Name;
         public float? dword60;
         public float? dword68;
+    }
+
+    class ArenaTeamQueryResponse : ServerPacket
+    {
+        public ArenaTeamQueryResponse() : base(Opcode.SMSG_QUERY_ARENA_TEAM_RESPONSE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(TeamId);
+            _worldPacket.WriteBit(Emblem != null);
+            _worldPacket.FlushBits();
+
+            if (Emblem != null)
+                Emblem.Write(_worldPacket);
+        }
+
+        public uint TeamId;
+        public ArenaTeamEmblem Emblem;
+    }
+
+    public class ArenaTeamEmblem
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TeamId);
+            data.WriteUInt32(TeamSize);
+            data.WriteUInt32(BackgroundColor);
+            data.WriteUInt32(EmblemStyle);
+            data.WriteUInt32(EmblemColor);
+            data.WriteUInt32(BorderStyle);
+            data.WriteUInt32(BorderColor);
+            data.WriteBits(TeamName.GetByteCount(), 7);
+            data.FlushBits();
+            data.WriteString(TeamName);
+        }
+
+        public uint TeamId;
+        public uint TeamSize;
+        public uint BackgroundColor;
+        public uint EmblemStyle;
+        public uint EmblemColor;
+        public uint BorderStyle;
+        public uint BorderColor;
+        public string TeamName;
     }
 }

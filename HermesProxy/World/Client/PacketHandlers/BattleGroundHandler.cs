@@ -19,7 +19,7 @@ namespace HermesProxy.World.Client
             bglist.BattlemasterGuid = packet.ReadGuid().To128();
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = GameData.GetBattlegroundIdFromMapId(packet.ReadUInt32());
-            packet.ReadUInt8(); // min level offset
+            packet.ReadUInt8(); // bracket id
             var instancesCount = packet.ReadUInt32();
             for (var i = 0; i < instancesCount; i++)
             {
@@ -36,7 +36,7 @@ namespace HermesProxy.World.Client
             bglist.BattlemasterGuid = packet.ReadGuid().To128();
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = packet.ReadUInt32();
-            packet.ReadUInt8(); // unk
+            packet.ReadUInt8(); // bracket id
             var instancesCount = packet.ReadUInt32();
             for (var i = 0; i < instancesCount; i++)
             {
@@ -94,7 +94,7 @@ namespace HermesProxy.World.Client
             {
                 uint battlefieldListId = GameData.GetBattlegroundIdFromMapId(mapId);
                 hdr.BattlefieldListIDs.Add(battlefieldListId);
-                packet.ReadUInt8(); // min level offset
+                packet.ReadUInt8(); // bracket id
                 hdr.InstanceID = packet.ReadUInt32();
                 BattleGroundStatus status = (BattleGroundStatus)packet.ReadUInt32();
                 switch (status)
@@ -396,14 +396,16 @@ namespace HermesProxy.World.Client
         void HandleBattlegroundPlayerPositionsTBC(WorldPacket packet)
         {
             BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
-            packet.ReadUInt32(); // unk
+            uint teamMembersCount = packet.ReadUInt32();
             uint flagCarriersCount = packet.ReadUInt32();
+            for (uint i = 0; i < teamMembersCount; i++)
+            {
+                ReadBattlegroundPlayerPosition(packet);
+            }
             GetSession().GameState.FlagCarrierGuids.Clear();
             for (uint i = 0; i < flagCarriersCount; i++)
             {
-                BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
-                position.Guid = packet.ReadGuid().To128();
-                position.Pos = packet.ReadVector2();
+                var position = ReadBattlegroundPlayerPosition(packet);
 
                 if (GetSession().GameState.IsAlliancePlayer(position.Guid))
                 {

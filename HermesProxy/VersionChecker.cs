@@ -586,7 +586,7 @@ namespace HermesProxy
             }
         }
 
-        public static uint GetArenaTeamSizeFromIndex(int index)
+        public static uint GetArenaTeamSizeFromIndex(uint index)
         {
             switch (index)
             {

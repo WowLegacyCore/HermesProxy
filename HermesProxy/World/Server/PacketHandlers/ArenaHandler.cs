@@ -18,18 +18,39 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
-                response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamId);
+                response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamIndex);
                 SendPacket(response);
             }
             else
             {
                 WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
-                packet.WriteInt32(arena.TeamId + 1);
+                packet.WriteUInt32(arena.TeamIndex + 1);
                 SendPacketToServer(packet);
 
                 WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
-                packet2.WriteInt32(arena.TeamId + 1);
+                packet2.WriteUInt32(arena.TeamIndex + 1);
                 SendPacketToServer(packet2);
+            }
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_QUERY)]
+        void HandleArenaTeamQuery(ArenaTeamQuery arena)
+        {
+            ArenaTeamData team;
+            if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out team))
+            {
+                ArenaTeamQueryResponse response = new ArenaTeamQueryResponse();
+                response.TeamId = arena.TeamId;
+                response.Emblem = new ArenaTeamEmblem();
+                response.Emblem.TeamId = arena.TeamId;
+                response.Emblem.TeamSize = team.TeamSize;
+                response.Emblem.BackgroundColor = team.BackgroundColor;
+                response.Emblem.EmblemStyle = team.EmblemStyle;
+                response.Emblem.EmblemColor = team.EmblemColor;
+                response.Emblem.BorderStyle = team.BorderStyle;
+                response.Emblem.BorderColor = team.BorderColor;
+                response.Emblem.TeamName = team.Name;
+                SendPacket(response);
             }
         }
     }

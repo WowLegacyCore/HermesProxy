@@ -53,7 +53,7 @@ namespace HermesProxy.World.Client
         void HandleArenaTeamRoster(WorldPacket packet)
         {
             ArenaTeamRosterResponse arena = new ArenaTeamRosterResponse();
-            uint teamId = packet.ReadUInt32();
+            arena.TeamId = packet.ReadUInt32();
 
             var hiddenRating = false;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_8_9464))
@@ -87,7 +87,7 @@ namespace HermesProxy.World.Client
             }
 
             ArenaTeamData team;
-            if (GetSession().GameState.ArenaTeams.TryGetValue(teamId, out team))
+            if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out team))
             {
                 arena.TeamPlayed = team.WeekPlayed;
                 arena.TeamWins = team.WeekWins;
