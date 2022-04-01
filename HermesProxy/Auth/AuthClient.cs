@@ -42,7 +42,7 @@ namespace HermesProxy.Auth
                 Log.Print(LogType.Network, "Connecting to auth server...");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
-                var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), 3724);
+                var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
                 _clientSocket.BeginConnect(endPoint, ConnectCallback, null);
             }
             catch (Exception ex)
