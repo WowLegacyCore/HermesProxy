@@ -338,10 +338,18 @@ namespace HermesProxy.World.Client
         }
 
         [PacketHandler(Opcode.SMSG_ON_MONSTER_MOVE)]
+        [PacketHandler(Opcode.SMSG_MONSTER_MOVE_TRANSPORT)]
         void HandleMonsterMove(WorldPacket packet)
         {
             WowGuid128 guid = packet.ReadPackedGuid().To128();
             ServerSideMovement moveSpline = new();
+
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_MONSTER_MOVE_TRANSPORT)
+            {
+                moveSpline.TransportGuid = packet.ReadPackedGuid().To128();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
+                    moveSpline.TransportSeat = packet.ReadInt8();
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767)) // no idea when this was added exactly
                 packet.ReadBool(); // "Toggle AnimTierInTrans"

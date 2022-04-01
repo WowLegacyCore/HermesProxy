@@ -945,7 +945,7 @@ namespace HermesProxy.World.Client
                 return null;
 
             AuraDataInfo data = new AuraDataInfo();
-            data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetLow());
+            data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetCounter());
             data.SpellID = spellId;
             data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
 

@@ -393,7 +393,7 @@ namespace HermesProxy
             if (GameState.OwnCharacters.Contains(playerGuid))
                 return WowGuid128.Create(HighGuidType703.WowAccount, GameAccountInfo.Id);
             else
-                return WowGuid128.Create(HighGuidType703.WowAccount, playerGuid.GetLow());
+                return WowGuid128.Create(HighGuidType703.WowAccount, playerGuid.GetCounter());
         }
 
         public WowGuid128 GetBnetAccountGuidForPlayer(WowGuid128 playerGuid)
@@ -401,7 +401,7 @@ namespace HermesProxy
             if (GameState.OwnCharacters.Contains(playerGuid))
                 return WowGuid128.Create(HighGuidType703.BNetAccount, AccountInfo.Id);
             else
-                return WowGuid128.Create(HighGuidType703.BNetAccount, playerGuid.GetLow());
+                return WowGuid128.Create(HighGuidType703.BNetAccount, playerGuid.GetCounter());
         }
 
         public void OnDisconnect()

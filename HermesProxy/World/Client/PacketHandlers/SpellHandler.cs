@@ -219,7 +219,7 @@ namespace HermesProxy.World.Client
             byte reason = 61;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 reason = (byte)LegacyVersion.ConvertSpellCastResult(packet.ReadUInt8());
-            WowGuid128 castId = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spellId, spellId + casterUnit.GetLow());
+            WowGuid128 castId = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spellId, spellId + casterUnit.GetCounter());
 
             SpellFailure spell = new SpellFailure();
             spell.CasterUnit = casterUnit;
@@ -285,7 +285,7 @@ namespace HermesProxy.World.Client
 
             dbdata.SpellID = packet.ReadInt32();
             dbdata.SpellXSpellVisualID = GameData.GetSpellVisual((uint)dbdata.SpellID);
-            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, (uint)dbdata.SpellID, (ulong)dbdata.SpellID + dbdata.CasterUnit.GetLow());
+            dbdata.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, (uint)dbdata.SpellID, (ulong)dbdata.SpellID + dbdata.CasterUnit.GetCounter());
 
             if (GetSession().GameState.CurrentPlayerGuid == dbdata.CasterUnit &&
                 GetSession().GameState.LastClientCastId == dbdata.SpellID &&
@@ -526,7 +526,7 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.LastClientCastGuid != null)
                 spell.CastID = GetSession().GameState.LastClientCastGuid;
             else
-                spell.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spell.SpellID, spell.SpellID + spell.CasterGUID.GetLow());
+                spell.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spell.SpellID, spell.SpellID + spell.CasterGUID.GetCounter());
 
             spell.Damage = packet.ReadInt32();
             spell.OriginalDamage = spell.Damage;

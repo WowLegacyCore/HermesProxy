@@ -39,7 +39,7 @@ namespace HermesProxy.World.Objects
         public Vector4 TransportOffset;
         public uint TransportTime;
         public uint TransportTime2;
-        public sbyte TransportSeat;
+        public sbyte TransportSeat = -1;
         public Quaternion Rotation;
         public float WalkSpeed;
         public float RunSpeed;
@@ -133,7 +133,9 @@ namespace HermesProxy.World.Objects
                     info.TransportGuid = packet.ReadGuid().To128();
 
                 info.TransportOffset = packet.ReadVector4();
-                info.TransportTime = packet.ReadUInt32();
+
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    info.TransportTime = packet.ReadUInt32();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     info.TransportSeat = packet.ReadInt8();
@@ -169,6 +171,17 @@ namespace HermesProxy.World.Objects
                 flags = (uint)(((MovementFlagModern)info.Flags).CastFlags<MovementFlagTBC>());
             else
                 flags = (uint)(((MovementFlagModern)info.Flags).CastFlags<MovementFlagVanilla>());
+
+            if (info.TransportGuid != null)
+            {
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    flags |= (uint)MovementFlagWotLK.OnTransport;
+                else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    flags |= (uint)MovementFlagTBC.OnTransport;
+                else
+                    flags |= (uint)MovementFlagVanilla.OnTransport;
+            }
+            
             data.WriteUInt32(flags);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -196,7 +209,9 @@ namespace HermesProxy.World.Objects
                     data.WriteGuid(info.TransportGuid.To64());
 
                 data.WriteVector4(info.TransportOffset);
-                data.WriteUInt32(info.TransportTime);
+
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    data.WriteUInt32(info.TransportTime);
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     data.WriteInt8(info.TransportSeat);

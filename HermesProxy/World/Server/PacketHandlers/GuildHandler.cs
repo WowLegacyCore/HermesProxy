@@ -14,7 +14,7 @@ namespace HermesProxy.World.Server
         void HandleQueryGuildInfo(QueryGuildInfo query)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_GUILD_INFO);
-            packet.WriteUInt32((uint)query.GuildGuid.GetLow());
+            packet.WriteUInt32((uint)query.GuildGuid.GetCounter());
             SendPacketToServer(packet);
         }
 

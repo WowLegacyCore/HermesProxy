@@ -144,7 +144,7 @@ namespace HermesProxy.World.Server.Packets
                         GameObjectData.Flags = 1048616;
                     }
                     else if (ObjectData.DynamicFlags == null)
-                        ObjectData.DynamicFlags = (CreateData.MoveInfo.TransportPathTimer % System.UInt16.MaxValue);
+                        ObjectData.DynamicFlags = ((CreateData.MoveInfo.TransportPathTimer % System.UInt16.MaxValue) << 16);
                 }
             }
             if (CorpseData != null)
@@ -194,7 +194,7 @@ namespace HermesProxy.World.Server.Packets
                     if (CreateData.ThisIsYou == true)
                         PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, GlobalSession.GameAccountInfo.Id);
                     else
-                        PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Guid.GetLow());
+                        PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Guid.GetCounter());
                 }
                 if (PlayerData.VirtualPlayerRealm == null)
                     PlayerData.VirtualPlayerRealm = GlobalSession.RealmId.GetAddress();

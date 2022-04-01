@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Dynamic;
 using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
@@ -26,8 +25,6 @@ namespace HermesProxy.World.Server.Packets
     {
         public FeatureSystemStatus() : base(Opcode.SMSG_FEATURE_SYSTEM_STATUS)
         {
-            SessionAlert = new Optional<SessionAlertConfig>();
-            EuropaTicketSystemStatus = new Optional<EuropaTicketConfig>();
         }
 
         public override void Write()
@@ -57,14 +54,14 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt32(HiddenUIClubsPresenceUpdateTimer);
 
             _worldPacket.WriteBit(VoiceEnabled);
-            _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
+            _worldPacket.WriteBit(EuropaTicketSystemStatus != null);
             _worldPacket.WriteBit(ScrollOfResurrectionEnabled);
             _worldPacket.WriteBit(BpayStoreEnabled);
             _worldPacket.WriteBit(BpayStoreAvailable);
             _worldPacket.WriteBit(BpayStoreDisabledByParentalControls);
             _worldPacket.WriteBit(ItemRestorationButtonEnabled);
             _worldPacket.WriteBit(BrowserEnabled);
-            _worldPacket.WriteBit(SessionAlert.HasValue);
+            _worldPacket.WriteBit(SessionAlert != null);
             _worldPacket.WriteBit(RAFSystem.Enabled);
             _worldPacket.WriteBit(RAFSystem.RecruitingEnabled);
             _worldPacket.WriteBit(CharUndeleteEnabled);
@@ -89,7 +86,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.WriteBit(BattlegroundsEnabled);
-            _worldPacket.WriteBit(RaceClassExpansionLevels.HasValue);
+            _worldPacket.WriteBit(RaceClassExpansionLevels != null);
             _worldPacket.FlushBits();
 
             {
@@ -118,36 +115,36 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteFloat(QuickJoinConfig.ThrottleDfBestPriority);
             }
 
-            if (SessionAlert.HasValue)
+            if (SessionAlert != null)
             {
-                _worldPacket.WriteInt32(SessionAlert.Value.Delay);
-                _worldPacket.WriteInt32(SessionAlert.Value.Period);
-                _worldPacket.WriteInt32(SessionAlert.Value.DisplayTime);
+                _worldPacket.WriteInt32(SessionAlert.Delay);
+                _worldPacket.WriteInt32(SessionAlert.Period);
+                _worldPacket.WriteInt32(SessionAlert.DisplayTime);
             }
 
-            if (RaceClassExpansionLevels.HasValue)
+            if (RaceClassExpansionLevels != null)
             {
-                _worldPacket.WriteInt32(RaceClassExpansionLevels.Value.Count);
-                for (var i = 0; i < RaceClassExpansionLevels.Value.Count; ++i)
-                    _worldPacket.WriteUInt8(RaceClassExpansionLevels.Value[i]);
+                _worldPacket.WriteInt32(RaceClassExpansionLevels.Count);
+                for (var i = 0; i < RaceClassExpansionLevels.Count; ++i)
+                    _worldPacket.WriteUInt8(RaceClassExpansionLevels[i]);
             }
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
             _worldPacket.WritePackedGuid128(Squelch.BnetAccountGuid);
             _worldPacket.WritePackedGuid128(Squelch.GuildGuid);
 
-            if (EuropaTicketSystemStatus.HasValue)
-                EuropaTicketSystemStatus.Value.Write(_worldPacket);
+            if (EuropaTicketSystemStatus != null)
+                EuropaTicketSystemStatus.Write(_worldPacket);
         }
 
         public bool VoiceEnabled;
         public bool BrowserEnabled;
         public bool BpayStoreAvailable;
         public bool BpayStoreEnabled;
-        public Optional<SessionAlertConfig> SessionAlert;
+        public SessionAlertConfig SessionAlert;
         public uint ScrollOfResurrectionMaxRequestsPerDay;
         public bool ScrollOfResurrectionEnabled;
-        public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
+        public EuropaTicketConfig EuropaTicketSystemStatus;
         public uint ScrollOfResurrectionRequestsRemaining;
         public uint CfgRealmID;
         public byte ComplaintStatus;
@@ -184,13 +181,13 @@ namespace HermesProxy.World.Server.Packets
         public bool ClubFinderEnabled;
         public bool Unknown901CheckoutRelated;
         public bool BattlegroundsEnabled;
-        public Optional<List<byte>> RaceClassExpansionLevels;
+        public List<byte> RaceClassExpansionLevels;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
 
-        public struct SessionAlertConfig
+        public class SessionAlertConfig
         {
             public int Delay;
             public int Period;
@@ -265,11 +262,11 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
-            _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
+            _worldPacket.WriteBit(EuropaTicketSystemStatus != null);
             _worldPacket.FlushBits();
 
-            if (EuropaTicketSystemStatus.HasValue)
-                EuropaTicketSystemStatus.Value.Write(_worldPacket);
+            if (EuropaTicketSystemStatus != null)
+                EuropaTicketSystemStatus.Write(_worldPacket);
 
             _worldPacket.WriteUInt32(TokenPollTimeSeconds);
             _worldPacket.WriteUInt32(KioskSessionMinutes);
@@ -304,7 +301,7 @@ namespace HermesProxy.World.Server.Packets
         public bool LiveRegionAccountCopyEnabled; // NYI
         public bool LiveRegionKeyBindingsCopyEnabled = false;
         public bool Unknown901CheckoutRelated = false; // NYI
-        public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
+        public EuropaTicketConfig EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
         public long TokenBalanceAmount;     // NYI 
@@ -369,7 +366,7 @@ namespace HermesProxy.World.Server.Packets
         }
     }
 
-    public struct EuropaTicketConfig
+    public class EuropaTicketConfig
     {
         public bool TicketsEnabled;
         public bool BugsEnabled;

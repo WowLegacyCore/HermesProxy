@@ -16,7 +16,7 @@ namespace HermesProxy.World.Client
             LootResponse loot = new();
             loot.Owner = packet.ReadGuid().To128();
             GetSession().GameState.LastLootTargetGuid = loot.Owner;
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetLow());
+            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetCounter());
             loot.AcquireReason = (LootType)packet.ReadUInt8();
             if (loot.AcquireReason == LootType.None)
             {
@@ -46,7 +46,7 @@ namespace HermesProxy.World.Client
         {
             LootReleaseResponse loot = new();
             loot.Owner = packet.ReadGuid().To128();
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetLow());
+            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetCounter());
             packet.ReadBool(); // unk
             SendPacketToClient(loot);
         }
@@ -55,7 +55,7 @@ namespace HermesProxy.World.Client
         {
             LootRemoved loot = new();
             loot.Owner = GetSession().GameState.LastLootTargetGuid;
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetLow());
+            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetCounter());
             loot.LootListID = packet.ReadUInt8();
             SendPacketToClient(loot);
         }
@@ -73,7 +73,7 @@ namespace HermesProxy.World.Client
         {
             CoinRemoved loot = new();
             WowGuid128 owner = GetSession().GameState.LastLootTargetGuid;
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetLow());
+            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetCounter());
             SendPacketToClient(loot);
         }
     }

@@ -15,22 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+using System.Net.Sockets;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Collections.Concurrent;
 
 using Framework.Constants;
-using HermesProxy.World.Enums;
 using Framework.Cryptography;
 using Framework.IO;
 using Framework.Networking;
-
-using System;
-using System.Net.Sockets;
 using Framework.Logging;
 using Framework.Realm;
-using System.Collections.Generic;
-using HermesProxy.World.Objects;
-using System.Reflection;
-using System.Collections.Concurrent;
-using HermesProxy.World;
+
+using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
 using static HermesProxy.World.Server.Packets.AuthResponse;
 
@@ -717,8 +715,8 @@ namespace HermesProxy.World.Server
         public void SendAuthResponseError(BattlenetRpcErrorCode code)
         {
             AuthResponse response = new();
-            response.SuccessInfo.HasValue = false;
-            response.WaitInfo.HasValue = false;
+            response.SuccessInfo = null;
+            response.WaitInfo = null;
             response.Result = code;
             SendPacket(response);
         }
@@ -730,18 +728,16 @@ namespace HermesProxy.World.Server
 
             if (code == BattlenetRpcErrorCode.Ok)
             {
-                response.SuccessInfo.HasValue = true;
-
-                response.SuccessInfo.Value = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.Value.ActiveExpansionLevel = (byte)0;
-                response.SuccessInfo.Value.AccountExpansionLevel = (byte)0;
-                response.SuccessInfo.Value.VirtualRealmAddress = _realmId.GetAddress();
-                response.SuccessInfo.Value.Time = (uint)Time.UnixTime;
+                response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
+                response.SuccessInfo.ActiveExpansionLevel = (byte)0;
+                response.SuccessInfo.AccountExpansionLevel = (byte)0;
+                response.SuccessInfo.VirtualRealmAddress = _realmId.GetAddress();
+                response.SuccessInfo.Time = (uint)Time.UnixTime;
 
                 var realm = RealmManager.Instance.GetRealm(_realmId);
 
                 // Send current home realm. Also there is no need to send it later in realm queries.
-                response.SuccessInfo.Value.VirtualRealms.Add(new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName));
+                response.SuccessInfo.VirtualRealms.Add(new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName));
 
                 List<RaceClassAvailability> availableRaces = new List<RaceClassAvailability>();
                 RaceClassAvailability race = new RaceClassAvailability();
@@ -841,13 +837,13 @@ namespace HermesProxy.World.Server
                     availableRaces.Add(race);
                 }
 
-                response.SuccessInfo.Value.AvailableClasses = availableRaces;
+                response.SuccessInfo.AvailableClasses = availableRaces;
             }
 
             if (queued)
             {
-                response.WaitInfo.HasValue = true;
-                response.WaitInfo.Value.WaitCount = queuePos;
+                response.WaitInfo = new AuthWaitInfo();
+                response.WaitInfo.WaitCount = queuePos;
             }
 
             SendPacket(response);
@@ -898,7 +894,7 @@ namespace HermesProxy.World.Server
             europaTicketConfig.ComplaintsEnabled = true;
             europaTicketConfig.SuggestionsEnabled = true;
 
-            features.EuropaTicketSystemStatus.Set(europaTicketConfig);
+            features.EuropaTicketSystemStatus = europaTicketConfig;
 
             SendPacket(features);
         }
@@ -920,11 +916,11 @@ namespace HermesProxy.World.Server
             features.VoiceEnabled = false;
             features.BrowserEnabled = false;
 
-            features.EuropaTicketSystemStatus.HasValue = true;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.MaxTries = 10;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow = 111111;
+            features.EuropaTicketSystemStatus = new EuropaTicketConfig();
+            features.EuropaTicketSystemStatus.ThrottleState.MaxTries = 10;
+            features.EuropaTicketSystemStatus.ThrottleState.PerMilliseconds = 60000;
+            features.EuropaTicketSystemStatus.ThrottleState.TryCount = 1;
+            features.EuropaTicketSystemStatus.ThrottleState.LastResetTimeBeforeNow = 111111;
 
             features.TutorialsEnabled = true;
             features.Unk67 = true;
@@ -956,15 +952,15 @@ namespace HermesProxy.World.Server
             features.Squelch.BnetAccountGuid = WowGuid128.Create(HighGuidType703.BNetAccount, GetSession().AccountInfo.Id);
             features.Squelch.GuildGuid = WowGuid128.Empty;
 
-            features.EuropaTicketSystemStatus.Value.TicketsEnabled = true;
-            features.EuropaTicketSystemStatus.Value.BugsEnabled = true;
-            features.EuropaTicketSystemStatus.Value.ComplaintsEnabled = true;
-            features.EuropaTicketSystemStatus.Value.SuggestionsEnabled = true;
+            features.EuropaTicketSystemStatus.TicketsEnabled = true;
+            features.EuropaTicketSystemStatus.BugsEnabled = true;
+            features.EuropaTicketSystemStatus.ComplaintsEnabled = true;
+            features.EuropaTicketSystemStatus.SuggestionsEnabled = true;
 
-            features.EuropaTicketSystemStatus.Value.ThrottleState.MaxTries = 10;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.PerMilliseconds = 60000;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.TryCount = 1;
-            features.EuropaTicketSystemStatus.Value.ThrottleState.LastResetTimeBeforeNow = 10627480;
+            features.EuropaTicketSystemStatus.ThrottleState.MaxTries = 10;
+            features.EuropaTicketSystemStatus.ThrottleState.PerMilliseconds = 60000;
+            features.EuropaTicketSystemStatus.ThrottleState.TryCount = 1;
+            features.EuropaTicketSystemStatus.ThrottleState.LastResetTimeBeforeNow = 10627480;
             SendPacket(features);
         }
 
