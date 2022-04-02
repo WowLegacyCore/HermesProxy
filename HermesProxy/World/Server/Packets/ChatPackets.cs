@@ -22,6 +22,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HermesProxy.World.Server.Packets
 {
@@ -239,6 +240,54 @@ namespace HermesProxy.World.Server.Packets
         public uint Language;
     }
 
+    public class ChatAddonMessage : ClientPacket
+    {
+        public ChatAddonMessage(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Params.Read(_worldPacket);
+        }
+
+        public ChatAddonMessageParams Params = new();
+    }
+
+    class ChatAddonMessageTargeted : ClientPacket
+    {
+        public ChatAddonMessageTargeted(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint targetLen = _worldPacket.ReadBits<uint>(9);
+            Params.Read(_worldPacket);
+            ChannelGuid = _worldPacket.ReadPackedGuid128();
+            Target = _worldPacket.ReadString(targetLen);
+        }
+
+        public ChatAddonMessageParams Params = new();
+        public WowGuid128 ChannelGuid;
+        public string Target;
+    }
+
+    public class ChatAddonMessageParams
+    {
+        public void Read(WorldPacket data)
+        {
+            data.ResetBitPos();
+            uint prefixLen = data.ReadBits<uint>(5);
+            uint textLen = data.ReadBits<uint>(8);
+            IsLogged = data.HasBit();
+            Type = (ChatMessageTypeModern)data.ReadInt32();
+            Prefix = data.ReadString(prefixLen);
+            Text = data.ReadString(textLen);
+        }
+
+        public string Prefix;
+        public string Text;
+        public ChatMessageTypeModern Type;
+        public bool IsLogged;
+    }
+
     public class ChatPkt : ServerPacket
     {
         public ChatPkt(GlobalSessionData globalSession, ChatMessageTypeModern chatType, uint language, WowGuid128 sender, string senderName, WowGuid128 receiver, string receiverName, string message, string channelName, ChatFlags chatFlags, uint achievementId = 0) : base(Opcode.SMSG_CHAT)
@@ -268,6 +317,18 @@ namespace HermesProxy.World.Server.Packets
             AchievementID = achievementId;
             SenderVirtualAddress = globalSession.RealmId.GetAddress();
             TargetVirtualAddress = globalSession.RealmId.GetAddress();
+
+            if (language == (uint)Language.Addon)
+            {
+                char tab = (char)9;
+                if (ChatText.Contains(tab))
+                {
+                    string[] parts = ChatText.Split(tab);
+                    Prefix = parts[0];
+                    ChatText = string.Join(" ", parts.Skip(1).ToList());
+                }
+                _Language = (uint)Language.AddonBfA;
+            }
         }
         public override void Write()
         {

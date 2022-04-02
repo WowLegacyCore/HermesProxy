@@ -218,7 +218,7 @@ namespace HermesProxy
             return 7;
         }
 
-        public static int GetMaxLevel()
+        public static byte GetMaxLevel()
         {
             if (RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return 60;

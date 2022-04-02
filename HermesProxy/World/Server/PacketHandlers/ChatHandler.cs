@@ -185,6 +185,44 @@ namespace HermesProxy.World.Server
             }
         }
 
+        [PacketHandler(Opcode.CMSG_CHAT_ADDON_MESSAGE)]
+        void HandleAddonMessage(ChatAddonMessage packet)
+        {
+            uint language = (uint)Language.Addon;
+            string text = packet.Params.Prefix + ((char)9) + packet.Params.Text;
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                ChatMessageTypeWotLK chatMsg = (ChatMessageTypeWotLK)Enum.Parse(typeof(ChatMessageTypeWotLK), packet.Params.Type.ToString());
+                GetSession().WorldClient.SendMessageChatWotLK(chatMsg, language, text, "", "");
+            }
+            else
+            {
+                ChatMessageTypeVanilla chatMsg = (ChatMessageTypeVanilla)Enum.Parse(typeof(ChatMessageTypeVanilla), packet.Params.Type.ToString());
+                GetSession().WorldClient.SendMessageChatVanilla(chatMsg, language, text, "", "");
+            }
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAT_ADDON_MESSAGE_TARGETED)]
+        void HandleAddonMessageTargeted(ChatAddonMessageTargeted packet)
+        {
+            uint language = (uint)Language.Addon;
+            string text = packet.Params.Prefix + ((char)9) + packet.Params.Text;
+            string channelName = packet.ChannelGuid.IsEmpty() ? "" :
+                GetSession().GameState.GetChannelName((int)packet.ChannelGuid.GetCounter());
+
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                ChatMessageTypeWotLK chatMsg = (ChatMessageTypeWotLK)Enum.Parse(typeof(ChatMessageTypeWotLK), packet.Params.Type.ToString());
+                GetSession().WorldClient.SendMessageChatWotLK(chatMsg, language, text, channelName, packet.Target);
+            }
+            else
+            {
+                ChatMessageTypeVanilla chatMsg = (ChatMessageTypeVanilla)Enum.Parse(typeof(ChatMessageTypeVanilla), packet.Params.Type.ToString());
+                GetSession().WorldClient.SendMessageChatVanilla(chatMsg, language, text, channelName, packet.Target);
+            }
+        }
+
         [PacketHandler(Opcode.CMSG_SEND_TEXT_EMOTE)]
         void HandleSendTextEmote(CTextEmote emote)
         {

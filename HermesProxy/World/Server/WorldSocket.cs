@@ -967,6 +967,12 @@ namespace HermesProxy.World.Server
         public void SendSeasonInfo()
         {
             SeasonInfo seasonInfo = new();
+            if (LegacyVersion.GetExpansionVersion() > 1 &&
+                ModernVersion.GetExpansionVersion() > 1)
+            {
+                seasonInfo.CurrentSeason = 2;
+                seasonInfo.PreviousSeason = 1;
+            }
             SendPacket(seasonInfo);
         }
 

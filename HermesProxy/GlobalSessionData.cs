@@ -228,6 +228,15 @@ namespace HermesProxy
             else
                 ChannelIds.Add(name, id);
         }
+        public string GetChannelName(int id)
+        {
+            foreach (var itr in ChannelIds)
+            {
+                if (itr.Value == id)
+                    return itr.Key;
+            }
+            return "";
+        }
 
         public string GetPlayerName(WowGuid128 guid)
         {

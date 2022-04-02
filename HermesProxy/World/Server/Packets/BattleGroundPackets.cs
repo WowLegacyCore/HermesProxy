@@ -50,7 +50,11 @@ namespace HermesProxy.World.Server.Packets
 
     class BattlefieldList : ServerPacket
     {
-        public BattlefieldList() : base(Opcode.SMSG_BATTLEFIELD_LIST) { }
+        public BattlefieldList() : base(Opcode.SMSG_BATTLEFIELD_LIST)
+        {
+            MinLevel = LegacyVersion.GetMaxLevel();
+            MaxLevel = LegacyVersion.GetMaxLevel();
+        }
 
         public override void Write()
         {
