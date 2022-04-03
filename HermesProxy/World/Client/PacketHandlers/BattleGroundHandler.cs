@@ -247,7 +247,7 @@ namespace HermesProxy.World.Client
             {
                 PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
                 player.PlayerGUID = packet.ReadGuid().To128();
-                player.Role = packet.ReadInt32();
+                player.Rank = packet.ReadInt32();
                 player.Kills = packet.ReadUInt32();
                 player.Honor = new();
                 player.Honor.HonorKills = packet.ReadUInt32();

@@ -611,4 +611,81 @@ namespace HermesProxy.World.Server.Packets
 
         public MirrorTimerType Timer;
     }
+
+    public class LFGListUpdateBlacklist : ServerPacket
+    {
+        public LFGListUpdateBlacklist() : base(Opcode.SMSG_LFG_LIST_UPDATE_BLACKLIST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Blacklist.Count);
+            foreach (var entry in Blacklist)
+                entry.Write(_worldPacket);
+        }
+
+        public void AddBlacklist(int activity, int reason)
+        {
+            LFGListBlacklistEntry entry = new LFGListBlacklistEntry();
+            entry.ActivityID = activity;
+            entry.Reason = reason;
+            Blacklist.Add(entry);
+        }
+
+        public List<LFGListBlacklistEntry> Blacklist = new List<LFGListBlacklistEntry>();
+    }
+
+    public struct LFGListBlacklistEntry
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(ActivityID);
+            data.WriteInt32(Reason);
+        }
+
+        public int ActivityID;
+        public int Reason;
+    }
+
+    public class ConquestFormulaConstants : ServerPacket
+    {
+        public ConquestFormulaConstants() : base(Opcode.SMSG_CONQUEST_FORMULA_CONSTANTS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(PvpMinCPPerWeek);
+            _worldPacket.WriteInt32(PvpMaxCPPerWeek);
+            _worldPacket.WriteFloat(PvpCPBaseCoefficient);
+            _worldPacket.WriteFloat(PvpCPExpCoefficient);
+            _worldPacket.WriteFloat(PvpCPNumerator);
+        }
+
+        public int PvpMinCPPerWeek;
+        public int PvpMaxCPPerWeek;
+        public float PvpCPBaseCoefficient;
+        public float PvpCPExpCoefficient;
+        public float PvpCPNumerator;
+    }
+
+    public class SeasonInfo : ServerPacket
+    {
+        public SeasonInfo() : base(Opcode.SMSG_SEASON_INFO) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(MythicPlusSeasonID);
+            _worldPacket.WriteInt32(CurrentSeason);
+            _worldPacket.WriteInt32(PreviousSeason);
+            _worldPacket.WriteInt32(ConquestWeeklyProgressCurrencyID);
+            _worldPacket.WriteInt32(PvpSeasonID);
+            _worldPacket.WriteBit(WeeklyRewardChestsEnabled);
+            _worldPacket.FlushBits();
+        }
+
+        public int MythicPlusSeasonID;
+        public int PreviousSeason;
+        public int CurrentSeason;
+        public int PvpSeasonID;
+        public int ConquestWeeklyProgressCurrencyID;
+        public bool WeeklyRewardChestsEnabled;
+    }
 }

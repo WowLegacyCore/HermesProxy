@@ -25,36 +25,9 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
-    public class SeasonInfo : ServerPacket
-    {
-        public SeasonInfo() : base(Opcode.SMSG_SEASON_INFO) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(MythicPlusSeasonID);
-            _worldPacket.WriteInt32(CurrentSeason);
-            _worldPacket.WriteInt32(PreviousSeason);
-            _worldPacket.WriteInt32(ConquestWeeklyProgressCurrencyID);
-            _worldPacket.WriteInt32(PvpSeasonID);
-            _worldPacket.WriteBit(WeeklyRewardChestsEnabled);
-            _worldPacket.FlushBits();
-        }
-
-        public int MythicPlusSeasonID;
-        public int PreviousSeason;
-        public int CurrentSeason;
-        public int PvpSeasonID;
-        public int ConquestWeeklyProgressCurrencyID;
-        public bool WeeklyRewardChestsEnabled;
-    }
-
     class BattlefieldList : ServerPacket
     {
-        public BattlefieldList() : base(Opcode.SMSG_BATTLEFIELD_LIST)
-        {
-            MinLevel = LegacyVersion.GetMaxLevel();
-            MaxLevel = LegacyVersion.GetMaxLevel();
-        }
+        public BattlefieldList() : base(Opcode.SMSG_BATTLEFIELD_LIST) { }
 
         public override void Write()
         {
@@ -395,7 +368,7 @@ namespace HermesProxy.World.Server.Packets
                 data.WriteUInt32((uint)PlayerClass);
                 data.WriteInt32(CreatureID);
                 data.WriteInt32(HonorLevel);
-                data.WriteInt32(Role);
+                data.WriteInt32(Rank);
 
                 foreach (var pvpStat in Stats)
                     data.WriteUInt32(pvpStat);
@@ -443,7 +416,7 @@ namespace HermesProxy.World.Server.Packets
             public Class PlayerClass;
             public int CreatureID;
             public int HonorLevel = 1;
-            public int Role;
+            public int Rank;
         }
     }
 

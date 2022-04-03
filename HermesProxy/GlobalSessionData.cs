@@ -32,6 +32,10 @@ namespace HermesProxy
         public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
         public uint LastDispellSpellId;
+        public int GroupUpdateCounter;
+        public uint GroupReadyCheckResponses;
+        public uint CurrentGroupSize;
+        public WowGuid128 CurrentGroupLeader;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public uint CurrentGuildCreateTime;
@@ -83,6 +87,13 @@ namespace HermesProxy
             if (CachedPlayers.TryGetValue(guid, out cache))
                 return GameData.IsAllianceRace(cache.RaceId);
             return false;
+        }
+        public bool IsInBattleground()
+        {
+            if (CurrentMapId == null)
+                return false;
+
+            return GameData.GetBattlegroundIdFromMapId((uint)CurrentMapId) != 0;
         }
         public long GetBattleFieldQueueTime(uint queueSlot)
         {

@@ -166,7 +166,10 @@ namespace HermesProxy.World.Server
                     type = ChatMessageTypeModern.RaidWarning;
                     break;
                 case Opcode.CMSG_CHAT_MESSAGE_INSTANCE_CHAT:
-                    type = ChatMessageTypeModern.Party;
+                    if (GetSession().GameState.IsInBattleground())
+                        type = ChatMessageTypeModern.Battleground;
+                    else
+                        type = ChatMessageTypeModern.Party;
                     break;
                 default:
                     Log.Print(LogType.Error, $"HandleMessagechatOpcode : Unknown chat opcode ({packet.GetOpcode()})");

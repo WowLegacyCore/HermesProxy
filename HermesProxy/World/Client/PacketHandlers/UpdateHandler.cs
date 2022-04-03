@@ -1392,6 +1392,12 @@ namespace HermesProxy.World.Client
                         updateData.UnitData.Flags = updates[UNIT_FIELD_FLAGS].UInt32Value;
                     }
 
+                    // Here because of this bullshit in cmangos:
+                    // https://github.com/cmangos/mangos-tbc/blob/fd093b33071b546545cc5973608304bccc5a041b/src/game/Entities/Object.cpp#L544
+                    if (updateData.UnitData.Flags.HasAnyFlag(UnitFlags.ServerControlled) && isCreate &&
+                        guid == GetSession().GameState.CurrentPlayerGuid && updateData.CreateData.MoveSpline == null)
+                        updateData.UnitData.Flags &= ~(uint)UnitFlags.ServerControlled;
+
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) &&
                         updateData.UnitData.PvpFlags == null)
                         updateData.UnitData.PvpFlags = ReadPvPFlags(updates);
