@@ -62,7 +62,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(party);
         }
 
-        [PacketHandler(Opcode.SMSG_GROUP_LIST)]
+        [PacketHandler(Opcode.SMSG_GROUP_LIST, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleGroupList(WorldPacket packet)
         {
             PartyUpdate party = new PartyUpdate();
