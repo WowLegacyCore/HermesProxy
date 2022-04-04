@@ -24,8 +24,8 @@ namespace HermesProxy.World.Server
         
         public AccountDataManager(string accountName, string realmName)
         {
-            _accountName = accountName;
-            _realmName = realmName;
+            _accountName = accountName.Trim();
+            _realmName = realmName.Trim();
         }
 
         public static bool IsGlobalDataType(uint type)
