@@ -31,6 +31,7 @@ using Framework.Realm;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
 using static HermesProxy.World.Server.Packets.AuthResponse;
+using System.Net;
 
 namespace HermesProxy.World.Server
 {
@@ -620,8 +621,9 @@ namespace HermesProxy.World.Server
 
         public void SendConnectToInstance(ConnectToSerial serial)
         {
-            var instanceAddress = GetRemoteIpAddress();
-            System.Console.WriteLine("Redirecting to " + instanceAddress);
+            IPAddress externalIp = IPAddress.Parse(Framework.Settings.ExternalAddress);
+            IPEndPoint instanceAddress = new IPEndPoint(externalIp, Framework.Settings.InstancePort);
+            
             _instanceConnectKey.AccountId = GetSession().AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
