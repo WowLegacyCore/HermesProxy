@@ -34,7 +34,7 @@ namespace HermesProxy
         public uint LastDispellSpellId;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
-        public uint CurrentGroupSize;
+        public List<WowGuid128> CurrentGroupMembers = new();
         public WowGuid128 CurrentGroupLeader;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;

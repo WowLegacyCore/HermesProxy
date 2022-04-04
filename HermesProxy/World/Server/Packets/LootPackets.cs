@@ -217,4 +217,145 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 LootObj;
         public byte LootListID;
     }
+
+    class SetLootMethod : ClientPacket
+    {
+        public SetLootMethod(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PartyIndex = _worldPacket.ReadInt8();
+            LootMethod = (LootMethod)_worldPacket.ReadUInt8();
+            LootMasterGUID = _worldPacket.ReadPackedGuid128();
+            LootThreshold = _worldPacket.ReadUInt32();
+        }
+
+        public sbyte PartyIndex;
+        public LootMethod LootMethod;
+        public WowGuid128 LootMasterGUID;
+        public uint LootThreshold;
+    }
+
+    class OptOutOfLoot : ClientPacket
+    {
+        public OptOutOfLoot(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PassOnLoot = _worldPacket.HasBit();
+        }
+
+        public bool PassOnLoot;
+    }
+
+    class StartLootRoll : ServerPacket
+    {
+        public StartLootRoll() : base(Opcode.SMSG_LOOT_START_ROLL) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteUInt32(RollTime);
+            _worldPacket.WriteUInt8((byte)ValidRolls);
+            _worldPacket.WriteUInt8((byte)Method);
+            Item.Write(_worldPacket);
+        }
+
+        public WowGuid128 LootObj;
+        public uint MapID;
+        public uint RollTime;
+        public LootMethod Method = LootMethod.GroupLoot;
+        public RollMask ValidRolls;
+        public LootItemData Item = new();
+    }
+
+    class LootRoll : ClientPacket
+    {
+        public LootRoll(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            LootObj = _worldPacket.ReadPackedGuid128();
+            LootListID = _worldPacket.ReadUInt8();
+            RollType = (RollType)_worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 LootObj;
+        public byte LootListID;
+        public RollType RollType;
+    }
+
+    class LootRollBroadcast : ServerPacket
+    {
+        public LootRollBroadcast() : base(Opcode.SMSG_LOOT_ROLL) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+            _worldPacket.WritePackedGuid128(Player);
+            _worldPacket.WriteInt32(Roll);
+            _worldPacket.WriteUInt8((byte)RollType);
+            Item.Write(_worldPacket);
+            _worldPacket.WriteBit(Autopassed);
+            _worldPacket.FlushBits();
+        }
+
+        public WowGuid128 LootObj;
+        public WowGuid128 Player;
+        public int Roll;
+        public RollType RollType;
+        public LootItemData Item = new();
+        public bool Autopassed = false;    // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
+    }
+
+    class LootRollWon : ServerPacket
+    {
+        public LootRollWon() : base(Opcode.SMSG_LOOT_ROLL_WON) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+            _worldPacket.WritePackedGuid128(Winner);
+            _worldPacket.WriteInt32(Roll);
+            _worldPacket.WriteUInt8((byte)RollType);
+            Item.Write(_worldPacket);
+            _worldPacket.WriteUInt8(MainSpec);
+        }
+
+        public WowGuid128 LootObj;
+        public WowGuid128 Winner;
+        public int Roll;
+        public RollType RollType;
+        public LootItemData Item = new();
+        public byte MainSpec;
+    }
+
+    class LootAllPassed : ServerPacket
+    {
+        public LootAllPassed() : base(Opcode.SMSG_LOOT_ALL_PASSED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+            Item.Write(_worldPacket);
+        }
+
+        public WowGuid128 LootObj;
+        public LootItemData Item = new();
+    }
+
+    class LootRollsComplete : ServerPacket
+    {
+        public LootRollsComplete() : base(Opcode.SMSG_LOOT_ROLLS_COMPLETE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+            _worldPacket.WriteUInt8(LootListID);
+        }
+
+        public WowGuid128 LootObj;
+        public byte LootListID;
+    }
 }

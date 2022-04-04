@@ -204,7 +204,7 @@ namespace HermesProxy.World.Server.Packets
         public PartyDifficultySettings DifficultySettings;
     }
 
-    struct PartyPlayerInfo
+    public struct PartyPlayerInfo
     {
         public void Write(WorldPacket data)
         {
@@ -327,6 +327,36 @@ namespace HermesProxy.World.Server.Packets
         public GroupUninvite() : base(Opcode.SMSG_GROUP_UNINVITE) { }
 
         public override void Write() { }
+    }
+
+    class SetAssistantLeader : ClientPacket
+    {
+        public SetAssistantLeader(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PartyIndex = _worldPacket.ReadUInt8();
+            TargetGUID = _worldPacket.ReadPackedGuid128();
+            Apply = _worldPacket.HasBit();
+        }
+
+        public byte PartyIndex;
+        public WowGuid128 TargetGUID;
+        public bool Apply;
+    }
+
+    class SetEveryoneIsAssistant : ClientPacket
+    {
+        public SetEveryoneIsAssistant(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PartyIndex = _worldPacket.ReadUInt8();
+            Apply = _worldPacket.HasBit();
+        }
+
+        public byte PartyIndex;
+        public bool Apply;
     }
 
     class SetPartyLeader : ClientPacket
@@ -541,6 +571,20 @@ namespace HermesProxy.World.Server.Packets
         public bool Accept;
     }
 
+    class RequestPartyMemberStats : ClientPacket
+    {
+        public RequestPartyMemberStats(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PartyIndex = _worldPacket.ReadUInt8();
+            TargetGUID = _worldPacket.ReadPackedGuid128();
+        }
+
+        public byte PartyIndex;
+        public WowGuid128 TargetGUID;
+    }
+
     class PartyMemberPartialState : ServerPacket
     {
         public PartyMemberPartialState() : base(Opcode.SMSG_PARTY_MEMBER_PARTIAL_STATE) { }
@@ -557,11 +601,11 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(OverrideDisplayPower.HasValue);
             _worldPacket.WriteBit(CurrentHealth.HasValue);
             _worldPacket.WriteBit(MaxHealth.HasValue);
-            _worldPacket.WriteBit(Power.HasValue);
+            _worldPacket.WriteBit(CurrentPower.HasValue);
             _worldPacket.WriteBit(MaxPower.HasValue);
             _worldPacket.WriteBit(Level.HasValue);
             _worldPacket.WriteBit(Spec.HasValue);
-            _worldPacket.WriteBit(AreaID.HasValue);
+            _worldPacket.WriteBit(ZoneID.HasValue);
             _worldPacket.WriteBit(WmoGroupID.HasValue);
             _worldPacket.WriteBit(WmoDoodadPlacementID.HasValue);
             _worldPacket.WriteBit(Position != null);
@@ -573,7 +617,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.FlushBits();
 
             if (Pet != null)
-                Pet.Write(_worldPacket);
+                Pet.WritePartial(_worldPacket);
 
             _worldPacket.WritePackedGuid128(AffectedGUID);
             if (PartyType != null)
@@ -592,25 +636,25 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteUInt32(CurrentHealth.Value);
             if (MaxHealth.HasValue)
                 _worldPacket.WriteUInt32(MaxHealth.Value);
-            if (Power.HasValue)
-                _worldPacket.WriteUInt16(Power.Value);
+            if (CurrentPower.HasValue)
+                _worldPacket.WriteUInt16(CurrentPower.Value);
             if (MaxPower.HasValue)
                 _worldPacket.WriteUInt16(MaxPower.Value);
             if (Level.HasValue)
                 _worldPacket.WriteUInt16(Level.Value);
             if (Spec.HasValue)
                 _worldPacket.WriteUInt16(Spec.Value);
-            if (AreaID.HasValue)
-                _worldPacket.WriteUInt16(AreaID.Value);
+            if (ZoneID.HasValue)
+                _worldPacket.WriteUInt16(ZoneID.Value);
             if (WmoGroupID.HasValue)
                 _worldPacket.WriteUInt16(WmoGroupID.Value);
             if (WmoDoodadPlacementID.HasValue)
                 _worldPacket.WriteUInt32(WmoDoodadPlacementID.Value);
             if (Position != null)
             {
-                _worldPacket.WriteUInt16(Position.X);
-                _worldPacket.WriteUInt16(Position.Y);
-                _worldPacket.WriteUInt16(Position.Z);
+                _worldPacket.WriteInt16(Position.X);
+                _worldPacket.WriteInt16(Position.Y);
+                _worldPacket.WriteInt16(Position.Z);
             }
             if (VehicleSeatRecID.HasValue)
                 _worldPacket.WriteUInt32(VehicleSeatRecID.Value);
@@ -637,18 +681,18 @@ namespace HermesProxy.World.Server.Packets
         public ushort? OverrideDisplayPower;
         public uint? CurrentHealth;
         public uint? MaxHealth;
-        public ushort? Power;
+        public ushort? CurrentPower;
         public ushort? MaxPower;
         public ushort? Level;
         public ushort? Spec;
-        public ushort? AreaID;
+        public ushort? ZoneID;
         public ushort? WmoGroupID;
         public uint? WmoDoodadPlacementID;
         public Vector3_UInt16 Position;
         public uint? VehicleSeatRecID;
-        public List<AuraInfo> Auras;
-        public PetState Pet;
-        public PhaseInfo Phase;
+        public List<PartyMemberAuraStates> Auras;
+        public PartyMemberPetStats Pet;
+        public PartyMemberPhaseStates Phase;
         public UnkStruct901_2 Unk901_2;
 
         public class PartyTypeChange
@@ -658,92 +702,9 @@ namespace HermesProxy.World.Server.Packets
         }
         public class Vector3_UInt16
         {
-            public ushort X;
-            public ushort Y;
-            public ushort Z;
-        }
-        public class AuraInfo
-        {
-            public void Write(WorldPacket data)
-            {
-                data.WriteUInt32(SpellId);
-                data.WriteUInt16(AuraFlags);
-                data.WriteUInt32(ActiveFlags);
-                data.WriteInt32(Points.Count);
-                foreach (var point in Points)
-                    data.WriteFloat(point);
-            }
-
-            public uint SpellId;
-            public ushort AuraFlags;
-            public uint ActiveFlags;
-            public List<float> Points = new();
-        }
-        public class PetState
-        {
-            public void Write(WorldPacket data)
-            {
-                data.WriteBit(NewPetGuid != null);
-                data.WriteBit(NewPetName != null);
-                data.WriteBit(DisplayID.HasValue);
-                data.WriteBit(MaxHealth.HasValue);
-                data.WriteBit(Health.HasValue);
-                data.WriteBit(Auras != null);
-                data.FlushBits();
-
-                if (NewPetName != null)
-                {
-                    data.WriteBits(NewPetName.GetByteCount(), 8);
-                    data.WriteString(NewPetName);
-                }
-                if (NewPetGuid != null)
-                    data.WritePackedGuid128(NewPetGuid);
-                if (DisplayID.HasValue)
-                    data.WriteUInt32(DisplayID.Value);
-                if (MaxHealth.HasValue)
-                    data.WriteUInt32(MaxHealth.Value);
-                if (Health.HasValue)
-                    data.WriteUInt32(Health.Value);
-                if (Auras != null)
-                {
-                    data.WriteInt32(Auras.Count);
-                    foreach (var aura in Auras)
-                        aura.Write(data);
-                }
-            }
-
-            public WowGuid128 NewPetGuid;
-            public string NewPetName;
-            public uint? DisplayID;
-            public uint? MaxHealth;
-            public uint? Health;
-            public List<AuraInfo> Auras;
-        }
-        public class PhaseInfo
-        {
-            public void Write(WorldPacket data)
-            {
-                data.WriteUInt32(PhaseShiftFlags);
-                data.WriteInt32(Phases.Count);
-                data.WritePackedGuid128(PersonalGUID);
-                foreach (var phase in Phases)
-                    phase.Write(data);
-            }
-
-            public uint PhaseShiftFlags;
-            public List<PhaseData> Phases;
-            public WowGuid128 PersonalGUID;
-
-            public struct PhaseData
-            {
-                public void Write(WorldPacket data)
-                {
-                    data.WriteUInt16(PhaseFlags);
-                    data.WriteUInt16(Id);
-                }
-                public ushort PhaseFlags;
-                public ushort Id;
-            }
+            public short X;
+            public short Y;
+            public short Z;
         }
         public class UnkStruct901_2
         {
@@ -757,5 +718,275 @@ namespace HermesProxy.World.Server.Packets
             public uint Unk902_4;
             public uint Unk902_5;
         }
+    }
+
+    class PartyMemberFullState : ServerPacket
+    {
+        public PartyMemberFullState() : base(Opcode.SMSG_PARTY_MEMBER_FULL_STATE)
+        {
+            Phases.PhaseShiftFlags = 8;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(ForEnemy);
+            _worldPacket.FlushBits();
+
+            for (byte i = 0; i < 2; i++)
+                _worldPacket.WriteInt8(PartyType[i]);
+
+            _worldPacket.WriteInt16((short)StatusFlags);
+            _worldPacket.WriteUInt8(PowerType);
+            _worldPacket.WriteInt16((short)PowerDisplayID);
+            _worldPacket.WriteInt32(CurrentHealth);
+            _worldPacket.WriteInt32(MaxHealth);
+            _worldPacket.WriteUInt16(CurrentPower);
+            _worldPacket.WriteUInt16(MaxPower);
+            _worldPacket.WriteUInt16(Level);
+            _worldPacket.WriteUInt16(SpecID);
+            _worldPacket.WriteUInt16(ZoneID);
+            _worldPacket.WriteUInt16(WmoGroupID);
+            _worldPacket.WriteInt32(WmoDoodadPlacementID);
+            _worldPacket.WriteInt16(PositionX);
+            _worldPacket.WriteInt16(PositionY);
+            _worldPacket.WriteInt16(PositionZ);
+            _worldPacket.WriteInt32(VehicleSeat);
+            _worldPacket.WriteInt32(Auras.Count);
+
+            Phases.Write(_worldPacket);
+            ChromieTime.Write(_worldPacket);
+
+            foreach (PartyMemberAuraStates aura in Auras)
+                aura.Write(_worldPacket);
+
+            _worldPacket.WriteBit(Pet != null);
+            _worldPacket.FlushBits();
+
+            if (Pet != null)
+                Pet.WriteFull(_worldPacket);
+
+            _worldPacket.WritePackedGuid128(MemberGuid);
+        }
+
+        public bool ForEnemy;
+        public ushort Level;
+        public GroupMemberOnlineStatus StatusFlags;
+
+        public int CurrentHealth;
+        public int MaxHealth;
+
+        public byte PowerType;
+        public ushort CurrentPower;
+        public ushort MaxPower;
+
+        public ushort ZoneID;
+        public short PositionX;
+        public short PositionY;
+        public short PositionZ;
+
+        public int VehicleSeat;
+
+        public PartyMemberPhaseStates Phases = new();
+        public List<PartyMemberAuraStates> Auras = new();
+        public PartyMemberPetStats Pet;
+
+        public ushort PowerDisplayID;
+        public ushort SpecID;
+        public ushort WmoGroupID;
+        public int WmoDoodadPlacementID;
+        public sbyte[] PartyType = new sbyte[2];
+        public CTROptions ChromieTime;
+        public WowGuid128 MemberGuid;
+    }
+
+    public struct CTROptions
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(ContentTuningConditionMask);
+            data.WriteInt32(Unused901);
+            data.WriteUInt32(ExpansionLevelMask);
+        }
+
+        public uint ContentTuningConditionMask;
+        public int Unused901;
+        public uint ExpansionLevelMask;
+    }
+
+    public class PartyMemberPhaseStates
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(PhaseShiftFlags);
+            data.WriteInt32(Phases.Count);
+            data.WritePackedGuid128(PersonalGUID);
+            foreach (var phase in Phases)
+                phase.Write(data);
+        }
+
+        public uint PhaseShiftFlags;
+        public List<PartyMemberPhase> Phases = new List<PartyMemberPhase>();
+        public WowGuid128 PersonalGUID = WowGuid128.Empty;
+
+        public struct PartyMemberPhase
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt16(PhaseFlags);
+                data.WriteUInt16(Id);
+            }
+            public ushort PhaseFlags;
+            public ushort Id;
+        }
+    }
+
+    public class PartyMemberAuraStates
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(SpellId);
+            data.WriteUInt16(AuraFlags);
+            data.WriteUInt32(ActiveFlags);
+            data.WriteInt32(Points.Count);
+            foreach (var point in Points)
+                data.WriteFloat(point);
+        }
+
+        public uint SpellId;
+        public ushort AuraFlags;
+        public uint ActiveFlags;
+        public List<float> Points = new();
+    }
+
+    public class PartyMemberPetStats
+    {
+        public void WritePartial(WorldPacket data)
+        {
+            data.WriteBit(NewPetGuid != null);
+            data.WriteBit(NewPetName != null);
+            data.WriteBit(DisplayID.HasValue);
+            data.WriteBit(MaxHealth.HasValue);
+            data.WriteBit(Health.HasValue);
+            data.WriteBit(Auras != null);
+            data.FlushBits();
+
+            if (NewPetName != null)
+            {
+                data.WriteBits(NewPetName.GetByteCount(), 8);
+                data.WriteString(NewPetName);
+            }
+            if (NewPetGuid != null)
+                data.WritePackedGuid128(NewPetGuid);
+            if (DisplayID.HasValue)
+                data.WriteUInt32(DisplayID.Value);
+            if (MaxHealth.HasValue)
+                data.WriteUInt32(MaxHealth.Value);
+            if (Health.HasValue)
+                data.WriteUInt32(Health.Value);
+            if (Auras != null)
+            {
+                data.WriteInt32(Auras.Count);
+                foreach (var aura in Auras)
+                    aura.Write(data);
+            }
+        }
+
+        public void WriteFull(WorldPacket data)
+        {
+            if (NewPetGuid == null)
+                NewPetGuid = WowGuid128.Empty;
+            if (NewPetName == null)
+                NewPetName = "";
+            if (DisplayID == null)
+                DisplayID = 0;
+            if (MaxHealth == null)
+                MaxHealth = 0;
+            if (Health == null)
+                Health = 0;
+            if (Auras == null)
+                Auras = new List<PartyMemberAuraStates>();
+
+            data.WritePackedGuid128(NewPetGuid);
+            data.WriteUInt32(DisplayID.Value);
+            data.WriteUInt32(Health.Value);
+            data.WriteUInt32(MaxHealth.Value);
+            data.WriteInt32(Auras.Count);
+            Auras.ForEach(p => p.Write(data));
+
+            data.WriteBits(NewPetName.GetByteCount(), 8);
+            data.FlushBits();
+            data.WriteString(NewPetName);
+        }
+
+        public WowGuid128 NewPetGuid;
+        public string NewPetName;
+        public uint? DisplayID;
+        public uint? MaxHealth;
+        public uint? Health;
+        public List<PartyMemberAuraStates> Auras;
+    }
+
+    class MinimapPingClient : ClientPacket
+    {
+        public MinimapPingClient(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Position = _worldPacket.ReadVector2();
+            PartyIndex = _worldPacket.ReadInt8();
+        }
+
+        public Vector2 Position;
+        public sbyte PartyIndex;
+    }
+
+    class MinimapPing : ServerPacket
+    {
+        public MinimapPing() : base(Opcode.SMSG_MINIMAP_PING) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(SenderGUID);
+            _worldPacket.WriteVector2(Position);
+        }
+
+        public WowGuid128 SenderGUID;
+        public Vector2 Position;
+    }
+
+    public class RandomRollClient : ClientPacket
+    {
+        public RandomRollClient(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Min = _worldPacket.ReadInt32();
+            Max = _worldPacket.ReadInt32();
+            PartyIndex = _worldPacket.ReadUInt8();
+        }
+
+        public int Min;
+        public int Max;
+        public byte PartyIndex;
+    }
+
+    public class RandomRoll : ServerPacket
+    {
+        public RandomRoll() : base(Opcode.SMSG_RANDOM_ROLL) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Roller);
+            _worldPacket.WritePackedGuid128(RollerWowAccount);
+            _worldPacket.WriteInt32(Min);
+            _worldPacket.WriteInt32(Max);
+            _worldPacket.WriteInt32(Result);
+        }
+
+        public WowGuid128 Roller;
+        public WowGuid128 RollerWowAccount;
+        public int Min;
+        public int Max;
+        public int Result;
     }
 }

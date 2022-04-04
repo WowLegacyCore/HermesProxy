@@ -54,4 +54,27 @@ namespace HermesProxy.World.Enums
         Master = 3,                        // Item Can Only Be Distributed By Group Loot Master.
         Owner = 4                         // Ignore Binding Confirmation And Etc, For Single Player Looting
     }
+
+    public enum RollMask
+    {
+        Pass = 0x01,
+        Need = 0x02,
+        Greed = 0x04,
+        Disenchant = 0x08,
+
+        AllNoDisenchant = 0x07,
+        AllMask = 0x0f
+    }
+
+    public enum RollType
+    {
+        Pass = 0,
+        Need = 1,
+        Greed = 2,
+        Disenchant = 3,
+        NotEmitedYet = 4,
+        NotValid = 5,
+
+        MaxTypes = 4,
+    }
 }

@@ -56,6 +56,28 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_SET_ASSISTANT_LEADER)]
+        void HandleSetAssistantLeader(SetAssistantLeader assist)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ASSISTANT_LEADER);
+            packet.WriteGuid(assist.TargetGUID.To64());
+            packet.WriteBool(assist.Apply);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SET_EVERYONE_IS_ASSISTANT)]
+        void HandleSetAssistantLeader(SetEveryoneIsAssistant assist)
+        {
+            var groupMembers = GetSession().GameState.CurrentGroupMembers;
+            foreach (var member in groupMembers)
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ASSISTANT_LEADER);
+                packet.WriteGuid(member.To64());
+                packet.WriteBool(assist.Apply);
+                SendPacketToServer(packet);
+            }
+        }
+
         [PacketHandler(Opcode.CMSG_SET_PARTY_LEADER)]
         void HandleSetPartyLeader(SetPartyLeader leader)
         {
@@ -111,6 +133,31 @@ namespace HermesProxy.World.Server
                 packet.WriteBool(update.Accept);
                 SendPacketToServer(packet);
             }
+        }
+
+        [PacketHandler(Opcode.CMSG_MINIMAP_PING)]
+        void HandleMinimapPing(MinimapPingClient ping)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_MINIMAP_PING);
+            packet.WriteVector2(ping.Position);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_RANDOM_ROLL)]
+        void HandleMinimapPing(RandomRollClient roll)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_RANDOM_ROLL);
+            packet.WriteInt32(roll.Min);
+            packet.WriteInt32(roll.Max);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_REQUEST_PARTY_MEMBER_STATS)]
+        void HandleRequestPartyMemberStats(RequestPartyMemberStats request)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_REQUEST_PARTY_MEMBER_STATS);
+            packet.WriteGuid(request.TargetGUID.To64());
+            SendPacketToServer(packet);
         }
     }
 }

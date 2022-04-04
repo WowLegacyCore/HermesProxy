@@ -65,6 +65,7 @@ namespace HermesProxy.World.Server
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         AccountDataManager _accountDataMgr;
         GlobalSessionData _globalSession;
+        System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -348,6 +349,7 @@ namespace HermesProxy.World.Server
             if (GetSession() != null)
                 packet.LogPacket(ref GetSession().ModernSniff);
 
+            _sendMutex.WaitOne();
             var data = packet.GetData();
             Opcode universalOpcode = packet.GetUniversalOpcode();
             ushort opcode = (ushort)packet.GetOpcode();
@@ -389,6 +391,7 @@ namespace HermesProxy.World.Server
             byteBuffer.WriteBytes(data);
 
             AsyncWrite(byteBuffer.GetData());
+            _sendMutex.ReleaseMutex();
         }
 
         public uint CompressPacket(byte[] data, ushort opcode, out byte[] outData)
