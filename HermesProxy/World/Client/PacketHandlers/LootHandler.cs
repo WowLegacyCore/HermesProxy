@@ -105,6 +105,15 @@ namespace HermesProxy.World.Client
             else
                 loot.ValidRolls = RollMask.AllNoDisenchant;
             SendPacketToClient(loot);
+
+            if (GetSession().GameState.IsPassingOnLoot)
+            {
+                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_LOOT_ROLL);
+                packet2.WriteGuid(owner);
+                packet2.WriteUInt32(loot.Item.LootListID);
+                packet2.WriteUInt8((byte)RollType.Pass);
+                SendPacketToServer(packet2);
+            }
         }
 
         [PacketHandler(Opcode.SMSG_LOOT_ROLL)]

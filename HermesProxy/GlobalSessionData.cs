@@ -32,6 +32,7 @@ namespace HermesProxy
         public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
         public uint LastDispellSpellId;
+        public bool IsPassingOnLoot;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
         public List<WowGuid128> CurrentGroupMembers = new();

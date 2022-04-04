@@ -63,6 +63,8 @@ namespace HermesProxy.World.Server
                 packet.WriteInt32(loot.PassOnLoot ? 1 : 0);
                 SendPacketToServer(packet);
             }
+            else
+                GetSession().GameState.IsPassingOnLoot = loot.PassOnLoot;
         }
 
         [PacketHandler(Opcode.CMSG_LOOT_ROLL)]
