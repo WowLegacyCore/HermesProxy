@@ -190,8 +190,8 @@ namespace HermesProxy.World.Client
                     break;
             }
 
-            packet.ReadInt32(); // Text Length
-            string text = packet.ReadCString();
+            uint textLength = packet.ReadUInt32();
+            string text = packet.ReadString(textLength);
             ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
 
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
@@ -286,8 +286,8 @@ namespace HermesProxy.World.Client
                 }
             }
 
-            packet.ReadInt32(); // Text Length
-            string text = packet.ReadCString();
+            uint textLength = packet.ReadUInt32();
+            string text = packet.ReadString(textLength);
             ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
 
             uint achievementId = 0;
