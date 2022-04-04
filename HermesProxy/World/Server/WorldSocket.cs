@@ -621,7 +621,7 @@ namespace HermesProxy.World.Server
         public void SendConnectToInstance(ConnectToSerial serial)
         {
             var instanceAddress = GetRemoteIpAddress();
-
+            System.Console.WriteLine("Redirecting to " + instanceAddress);
             _instanceConnectKey.AccountId = GetSession().AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
