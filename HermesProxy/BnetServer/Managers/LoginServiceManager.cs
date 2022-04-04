@@ -39,7 +39,7 @@ namespace BNetServer
                 port = 8081;
             }
 
-            string configuredAddress = "127.0.0.1";
+            string configuredAddress = Framework.Settings.ExternalAddress;
             IPAddress address;
             if (!IPAddress.TryParse(configuredAddress, out address))
             {
@@ -51,10 +51,9 @@ namespace BNetServer
             configuredAddress = "127.0.0.1";
             if (!IPAddress.TryParse(configuredAddress, out address))
             {
-                Log.Print(LogType.Error, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
+                Log.Print(LogType.Error, $"Could not resolve local address.");
                 return;
             }
-
             localAddress = new IPEndPoint(address, port);
 
             // set up form inputs 
