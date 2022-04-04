@@ -80,7 +80,7 @@ namespace HermesProxy.World.Server
         }
 
         [PacketHandler(Opcode.CMSG_LOGOUT_CANCEL)]
-        void HandleLogoutCancel(LogoutRequest logoutRequest)
+        void HandleLogoutCancel(LogoutCancel logoutCancel)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_LOGOUT_CANCEL);
             SendPacketToServer(packet);
