@@ -90,12 +90,18 @@ namespace HermesProxy.World.Server
                     GetSession().GameState.LastClientCastSpellId = 0;
                 }
 
+                SpellPrepare prepare2 = new SpellPrepare();
+                prepare2.ClientCastID = cast.Cast.CastID;
+                prepare2.ServerCastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, cast.Cast.SpellID + cast.Cast.CastID.GetCounter());
+                SendPacket(prepare2);
+
                 CastFailed failed = new();
-                failed.SpellID = (int)cast.Cast.SpellID;
+                failed.SpellID = cast.Cast.SpellID;
                 failed.SpellXSpellVisualID = cast.Cast.SpellXSpellVisualID;
                 failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
-                failed.CastID = cast.Cast.CastID;
+                failed.CastID = prepare2.ServerCastID;
                 SendPacket(failed);
+
                 return;
             }
 
@@ -140,11 +146,17 @@ namespace HermesProxy.World.Server
                     GetSession().GameState.LastClientPetCastSpellId = 0;
                 }
 
+                SpellPrepare prepare2 = new SpellPrepare();
+                prepare2.ClientCastID = cast.Cast.CastID;
+                prepare2.ServerCastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, cast.Cast.SpellID + cast.Cast.CastID.GetCounter());
+                SendPacket(prepare2);
+
                 PetCastFailed failed = new();
                 failed.SpellID = cast.Cast.SpellID;
                 failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
-                failed.CastID = cast.Cast.CastID;
+                failed.CastID = prepare2.ServerCastID;
                 SendPacket(failed);
+
                 return;
             }
 
@@ -179,12 +191,18 @@ namespace HermesProxy.World.Server
                     GetSession().GameState.LastClientCastSpellId = 0;
                 }
 
+                SpellPrepare prepare2 = new SpellPrepare();
+                prepare2.ClientCastID = use.Cast.CastID;
+                prepare2.ServerCastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, use.Cast.SpellID, use.Cast.SpellID + use.Cast.CastID.GetCounter());
+                SendPacket(prepare2);
+
                 CastFailed failed = new();
-                failed.SpellID = (int)use.Cast.SpellID;
+                failed.SpellID = use.Cast.SpellID;
                 failed.SpellXSpellVisualID = use.Cast.SpellXSpellVisualID;
                 failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
-                failed.CastID = use.Cast.CastID;
+                failed.CastID = prepare2.ServerCastID;
                 SendPacket(failed);
+
                 return;
             }
 

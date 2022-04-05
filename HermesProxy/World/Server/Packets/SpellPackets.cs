@@ -591,7 +591,7 @@ namespace HermesProxy.World.Server.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid128(CastID);
-            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt32(SpellXSpellVisualID);
             _worldPacket.WriteUInt32(Reason);
             _worldPacket.WriteInt32(FailedArg1);
@@ -599,7 +599,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public WowGuid128 CastID;
-        public int SpellID;
+        public uint SpellID;
         public uint Reason;
         public int FailedArg1 = -1;
         public int FailedArg2 = -1;

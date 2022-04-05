@@ -133,6 +133,8 @@ namespace HermesProxy.World.Client
             }
             else
             {
+                GetSession().GameState.CurrentGroupLeader = null;
+                GetSession().GameState.CurrentGroupLootMethod = LootMethod.FreeForAll;
                 party.PartyFlags = GroupFlags.Destroyed;
                 party.PartyGUID = WowGuid128.Empty;
                 party.LeaderGUID = WowGuid128.Empty;
