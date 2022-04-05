@@ -888,6 +888,7 @@ namespace HermesProxy.World.Server
             features.MaxCharactersPerRealm = 10;
             features.MinimumExpansionLevel = 5;
             features.MaximumExpansionLevel = 8;
+            features.Unk14 = true;
 
             var europaTicketConfig = new EuropaTicketConfig();
             europaTicketConfig.ThrottleState.MaxTries = 10;

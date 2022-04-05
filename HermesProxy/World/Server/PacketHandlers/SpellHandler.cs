@@ -76,8 +76,32 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAST_SPELL)]
         void HandleCastSpell(CastSpell cast)
         {
-            GetSession().GameState.LastClientCastId = cast.Cast.SpellID;
+            if (GetSession().GameState.LastClientCastSpellId != 0 &&
+                GetSession().GameState.LastClientCastGuid != null)
+            {
+                // prevent getting stuck if server did not respond to last cast attempt
+                if (!GetSession().GameState.LastClientCastHasStarted)
+                {
+                    SpellPrepare prepare = new SpellPrepare();
+                    prepare.ClientCastID = GetSession().GameState.LastClientCastGuid;
+                    prepare.ServerCastID = WowGuid128.Empty;
+                    SendPacket(prepare);
+                    GetSession().GameState.LastClientCastGuid = null;
+                    GetSession().GameState.LastClientCastSpellId = 0;
+                }
+
+                CastFailed failed = new();
+                failed.SpellID = (int)cast.Cast.SpellID;
+                failed.SpellXSpellVisualID = cast.Cast.SpellXSpellVisualID;
+                failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
+                failed.CastID = cast.Cast.CastID;
+                SendPacket(failed);
+                return;
+            }
+
+            GetSession().GameState.LastClientCastSpellId = cast.Cast.SpellID;
             GetSession().GameState.LastClientCastGuid = cast.Cast.CastID;
+
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CAST_SPELL);
@@ -102,8 +126,30 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PET_CAST_SPELL)]
         void HandlePetCastSpell(PetCastSpell cast)
         {
-            GetSession().GameState.LastClientCastId = cast.Cast.SpellID;
-            GetSession().GameState.LastClientCastGuid = cast.Cast.CastID;
+            if (GetSession().GameState.LastClientPetCastSpellId != 0 &&
+                GetSession().GameState.LastClientPetCastGuid != null)
+            {
+                // prevent getting stuck if server did not respond to last cast attempt
+                if (!GetSession().GameState.LastClientPetCastHasStarted)
+                {
+                    SpellPrepare prepare = new SpellPrepare();
+                    prepare.ClientCastID = GetSession().GameState.LastClientPetCastGuid;
+                    prepare.ServerCastID = WowGuid128.Empty;
+                    SendPacket(prepare);
+                    GetSession().GameState.LastClientPetCastGuid = null;
+                    GetSession().GameState.LastClientPetCastSpellId = 0;
+                }
+
+                PetCastFailed failed = new();
+                failed.SpellID = cast.Cast.SpellID;
+                failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
+                failed.CastID = cast.Cast.CastID;
+                SendPacket(failed);
+                return;
+            }
+
+            GetSession().GameState.LastClientPetCastSpellId = cast.Cast.SpellID;
+            GetSession().GameState.LastClientPetCastGuid = cast.Cast.CastID;
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_CAST_SPELL);
@@ -119,8 +165,32 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_USE_ITEM)]
         void HandleUseItem(UseItem use)
         {
-            GetSession().GameState.LastClientCastId = use.Cast.SpellID;
+            if (GetSession().GameState.LastClientCastSpellId != 0 &&
+                GetSession().GameState.LastClientCastGuid != null)
+            {
+                // prevent getting stuck if server did not respond to last cast attempt
+                if (!GetSession().GameState.LastClientCastHasStarted)
+                {
+                    SpellPrepare prepare = new SpellPrepare();
+                    prepare.ClientCastID = GetSession().GameState.LastClientCastGuid;
+                    prepare.ServerCastID = WowGuid128.Empty;
+                    SendPacket(prepare);
+                    GetSession().GameState.LastClientCastGuid = null;
+                    GetSession().GameState.LastClientCastSpellId = 0;
+                }
+
+                CastFailed failed = new();
+                failed.SpellID = (int)use.Cast.SpellID;
+                failed.SpellXSpellVisualID = use.Cast.SpellXSpellVisualID;
+                failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
+                failed.CastID = use.Cast.CastID;
+                SendPacket(failed);
+                return;
+            }
+
+            GetSession().GameState.LastClientCastSpellId = use.Cast.SpellID;
             GetSession().GameState.LastClientCastGuid = use.Cast.CastID;
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_USE_ITEM);
             byte containerSlot = use.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.PackSlot) : use.PackSlot;
             byte slot = use.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.Slot) : use.Slot;
@@ -140,7 +210,7 @@ namespace HermesProxy.World.Server
         void HandleCancelCast(CancelCast cast)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CAST);
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.WriteUInt8(0);
             packet.WriteUInt32(cast.SpellID);
             SendPacketToServer(packet);

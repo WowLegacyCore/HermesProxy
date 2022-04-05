@@ -201,6 +201,10 @@ namespace HermesProxy.World
         {
             return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter);
         }
+        public static WowGuid128 CreateLootGuid(HighGuidTypeLegacy type, uint entry, ulong counter)
+        {
+            return MapSpecificCreate(HighGuidType703.LootObject, 0, 0, (uint)type, entry, counter);
+        }
 
         static WowGuid128 GlobalCreate(HighGuidType703 type, ulong counter)
         {
@@ -350,6 +354,8 @@ namespace HermesProxy.World
                     return new WowGuid64(HighGuidTypeLegacy.DynamicObject, guid.GetEntry(), (uint)guid.GetCounter());
                 case HighGuidType.Corpse:
                     return new WowGuid64(HighGuidTypeLegacy.Corpse, guid.GetEntry(), (uint)guid.GetCounter());
+                case HighGuidType.LootObject:
+                    return new WowGuid64((HighGuidTypeLegacy)guid.GetServerId(), guid.GetEntry(), (uint)guid.GetCounter());
             }
             return WowGuid64.Empty;
         }
@@ -421,6 +427,10 @@ namespace HermesProxy.World
         public override WowGuid128 To128()
         {
             return WowGuid128.Create(this);
+        }
+        public WowGuid128 ToLootGuid()
+        {
+            return WowGuid128.CreateLootGuid(GetHighGuidTypeLegacy(), GetEntry(), GetCounter());
         }
     }
 }

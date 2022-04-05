@@ -127,7 +127,7 @@ namespace HermesProxy.World.Client
                 party.LeaderGUID = GetSession().GameState.CurrentGroupLeader = packet.ReadGuid().To128();
 
                 party.LootSettings = new PartyLootSettings();
-                party.LootSettings.Method = packet.ReadUInt8();
+                party.LootSettings.Method = GetSession().GameState.CurrentGroupLootMethod = (LootMethod)packet.ReadUInt8();
                 party.LootSettings.LootMaster = packet.ReadGuid().To128();
                 party.LootSettings.Threshold = packet.ReadUInt8();
             }

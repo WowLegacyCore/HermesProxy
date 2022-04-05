@@ -347,4 +347,18 @@ namespace HermesProxy.World.Server.Packets
         public uint PetNumber;
         public WowGuid128 StableMaster;
     }
+
+    class PetCancelAura : ClientPacket
+    {
+        public PetCancelAura(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetGUID = _worldPacket.ReadPackedGuid128();
+            SpellID = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 PetGUID;
+        public uint SpellID;
+    }
 }

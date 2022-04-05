@@ -14,15 +14,16 @@ namespace HermesProxy.World.Client
         void HandleLootResponse(WorldPacket packet)
         {
             LootResponse loot = new();
-            loot.Owner = packet.ReadGuid().To128();
-            GetSession().GameState.LastLootTargetGuid = loot.Owner;
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetCounter());
+            GetSession().GameState.LastLootTargetGuid = packet.ReadGuid();
+            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128();
+            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
             loot.AcquireReason = (LootType)packet.ReadUInt8();
             if (loot.AcquireReason == LootType.None)
             {
                 loot.FailureReason = (LootError)packet.ReadUInt8();
                 return;
             }
+            loot.LootMethod = GetSession().GameState.CurrentGroupLootMethod;
 
             loot.Coins = packet.ReadUInt32();
 
@@ -36,7 +37,8 @@ namespace HermesProxy.World.Client
                 packet.ReadUInt32(); // DisplayID
                 lootItem.Loot.RandomPropertiesSeed = packet.ReadUInt32();
                 lootItem.Loot.RandomPropertiesID = packet.ReadUInt32();
-                lootItem.UIType = (LootSlotType)packet.ReadUInt8();
+                var uiType = (LootSlotTypeLegacy)packet.ReadUInt8();
+                lootItem.UIType = (LootSlotTypeModern)Enum.Parse(typeof(LootSlotTypeModern), uiType.ToString());
                 loot.Items.Add(lootItem);
             }
             SendPacketToClient(loot);
@@ -46,8 +48,9 @@ namespace HermesProxy.World.Client
         void HandleLootRelease(WorldPacket packet)
         {
             LootReleaseResponse loot = new();
-            loot.Owner = packet.ReadGuid().To128();
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetCounter());
+            WowGuid64 owner = packet.ReadGuid();
+            loot.Owner = owner.To128();
+            loot.LootObj = owner.ToLootGuid();
             packet.ReadBool(); // unk
             SendPacketToClient(loot);
         }
@@ -56,8 +59,8 @@ namespace HermesProxy.World.Client
         void HandleLootRemoved(WorldPacket packet)
         {
             LootRemoved loot = new();
-            loot.Owner = GetSession().GameState.LastLootTargetGuid;
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, loot.Owner.GetEntry(), loot.Owner.GetCounter());
+            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128();
+            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
             loot.LootListID = packet.ReadUInt8();
             SendPacketToClient(loot);
         }
@@ -76,8 +79,7 @@ namespace HermesProxy.World.Client
         void HandleLootCelarMoney(WorldPacket packet)
         {
             CoinRemoved loot = new();
-            WowGuid128 owner = GetSession().GameState.LastLootTargetGuid;
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetCounter());
+            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
             SendPacketToClient(loot);
         }
 
@@ -86,7 +88,7 @@ namespace HermesProxy.World.Client
         {
             StartLootRoll loot = new StartLootRoll();
             WowGuid64 owner = packet.ReadGuid();
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetCounter());
+            loot.LootObj = owner.ToLootGuid();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 loot.MapID = packet.ReadUInt32();
             else
@@ -121,7 +123,7 @@ namespace HermesProxy.World.Client
         {
             LootRollBroadcast loot = new LootRollBroadcast();
             WowGuid64 owner = packet.ReadGuid();
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetCounter());
+            loot.LootObj = owner.ToLootGuid();
             loot.Item.LootListID = (byte)packet.ReadUInt32();
             loot.Player = packet.ReadGuid().To128();
             loot.Item.Loot.ItemID = packet.ReadUInt32();
@@ -148,8 +150,7 @@ namespace HermesProxy.World.Client
         void HandleLootRollWon(WorldPacket packet)
         {
             LootRollWon loot = new LootRollWon();
-            WowGuid64 owner = packet.ReadGuid();
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetCounter());
+            loot.LootObj = packet.ReadGuid().ToLootGuid();
             loot.Item.LootListID = (byte)packet.ReadUInt32();
             loot.Item.Loot.ItemID = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesSeed = packet.ReadUInt32();
@@ -172,8 +173,7 @@ namespace HermesProxy.World.Client
         void HandleLootAllPassed(WorldPacket packet)
         {
             LootAllPassed loot = new LootAllPassed();
-            WowGuid64 owner = packet.ReadGuid();
-            loot.LootObj = WowGuid128.Create(HighGuidType703.LootObject, (uint)GetSession().GameState.CurrentMapId, owner.GetEntry(), owner.GetCounter());
+            loot.LootObj = packet.ReadGuid().ToLootGuid();
             loot.Item.LootListID = (byte)packet.ReadUInt32();
             loot.Item.Loot.ItemID = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesSeed = packet.ReadUInt32();
@@ -185,6 +185,29 @@ namespace HermesProxy.World.Client
             complete.LootObj = loot.LootObj;
             complete.LootListID = loot.Item.LootListID;
             SendPacketToClient(complete);
+        }
+
+        [PacketHandler(Opcode.SMSG_LOOT_MASTER_LIST)]
+        void HandleLootMasterList(WorldPacket packet)
+        {
+            if (GetSession().GameState.LastLootTargetGuid == null)
+                return;
+
+            LootList list = new LootList();
+            list.Owner = GetSession().GameState.LastLootTargetGuid.To128();
+            list.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
+            list.Master = GetSession().GameState.CurrentPlayerGuid;
+            SendPacketToClient(list);
+
+            MasterLootCandidateList loot = new MasterLootCandidateList();
+            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
+            byte count = packet.ReadUInt8();
+            for (byte i = 0; i < count; i++)
+            {
+                WowGuid128 guid = packet.ReadGuid().To128();
+                loot.Players.Add(guid);
+            }
+            SendPacketToClient(loot);
         }
     }
 }

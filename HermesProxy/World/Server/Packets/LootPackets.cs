@@ -96,7 +96,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public byte Type;
-        public LootSlotType UIType;
+        public LootSlotTypeModern UIType;
         public uint Quantity;
         public byte LootItemType;
         public byte LootListID;
@@ -357,5 +357,69 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 LootObj;
         public byte LootListID;
+    }
+
+    class LootMasterGive : ClientPacket
+    {
+        public LootMasterGive(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            uint Count = _worldPacket.ReadUInt32();
+            TargetGUID = _worldPacket.ReadPackedGuid128();
+
+            for (int i = 0; i < Count; ++i)
+            {
+                LootRequest lootRequest = new();
+                lootRequest.LootObj = _worldPacket.ReadPackedGuid128();
+                lootRequest.LootListID = _worldPacket.ReadUInt8();
+                Loot.Add(lootRequest);
+            }
+        }
+
+        public WowGuid128 TargetGUID;
+        public List<LootRequest> Loot = new();
+    }
+
+    class MasterLootCandidateList : ServerPacket
+    {
+        public MasterLootCandidateList() : base(Opcode.SMSG_LOOT_MASTER_LIST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(LootObj);
+            _worldPacket.WriteInt32(Players.Count);
+            foreach (var guid in Players)
+                _worldPacket.WritePackedGuid128(guid);
+        }
+
+        public WowGuid128 LootObj;
+        public List<WowGuid128> Players = new();
+    }
+
+    class LootList : ServerPacket
+    {
+        public LootList() : base(Opcode.SMSG_LOOT_LIST, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Owner);
+            _worldPacket.WritePackedGuid128(LootObj);
+
+            _worldPacket.WriteBit(Master != null);
+            _worldPacket.WriteBit(RoundRobinWinner != null);
+            _worldPacket.FlushBits();
+
+            if (Master != null)
+                _worldPacket.WritePackedGuid128(Master);
+
+            if (RoundRobinWinner != null)
+                _worldPacket.WritePackedGuid128(RoundRobinWinner);
+        }
+
+        public WowGuid128 Owner;
+        public WowGuid128 LootObj;
+        public WowGuid128 Master;
+        public WowGuid128 RoundRobinWinner;
     }
 }

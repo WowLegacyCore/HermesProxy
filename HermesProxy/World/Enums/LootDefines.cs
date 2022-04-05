@@ -46,15 +46,22 @@ namespace HermesProxy.World.Enums
     }
 
     // type of Loot Item in Loot View
-    public enum LootSlotType
+    public enum LootSlotTypeLegacy : uint
+    {
+        AllowLoot = 0,
+        RollOngoing = 1,
+        Master = 2,
+        Locked = 3,
+        Owner = 4
+    }
+    public enum LootSlotTypeModern : uint
     {
         AllowLoot = 0,                     // Player Can Loot The Item.
         RollOngoing = 1,                   // Roll Is Ongoing. Player Cannot Loot.
         Locked = 2,                        // Item Is Shown In Red. Player Cannot Loot.
         Master = 3,                        // Item Can Only Be Distributed By Group Loot Master.
-        Owner = 4                         // Ignore Binding Confirmation And Etc, For Single Player Looting
+        Owner = 4                          // Ignore Binding Confirmation And Etc, For Single Player Looting
     }
-
     public enum RollMask
     {
         Pass = 0x01,

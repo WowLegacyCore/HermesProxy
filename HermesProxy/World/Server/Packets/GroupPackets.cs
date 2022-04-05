@@ -268,12 +268,12 @@ namespace HermesProxy.World.Server.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8(Method);
+            data.WriteUInt8((byte)Method);
             data.WritePackedGuid128(LootMaster);
             data.WriteUInt8(Threshold);
         }
 
-        public byte Method;
+        public LootMethod Method;
         public WowGuid128 LootMaster;
         public byte Threshold;
     }

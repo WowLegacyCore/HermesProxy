@@ -35,6 +35,7 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_LOOT_UNIT);
             packet.WriteGuid(loot.Unit.To64());
             SendPacketToServer(packet);
+            GetSession().GameState.LastLootTargetGuid = loot.Unit.To64();
         }
 
         [PacketHandler(Opcode.CMSG_LOOT_MONEY)]
@@ -71,10 +72,23 @@ namespace HermesProxy.World.Server
         void HandleLootRoll(LootRoll loot)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_LOOT_ROLL);
-            packet.WriteGuid(new WowGuid64(HighGuidTypeLegacy.Creature, loot.LootObj.GetEntry(), (uint)loot.LootObj.GetCounter()));
+            packet.WriteGuid(loot.LootObj.To64());
             packet.WriteUInt32(loot.LootListID);
             packet.WriteUInt8((byte)loot.RollType);
             SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_LOOT_MASTER_GIVE)]
+        void HandleLootMasterGive(LootMasterGive loot)
+        {
+            foreach (var item in loot.Loot)
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_LOOT_MASTER_GIVE);
+                packet.WriteGuid(item.LootObj.To64());
+                packet.WriteUInt8(item.LootListID);
+                packet.WriteGuid(loot.TargetGUID.To64());
+                SendPacketToServer(packet);
+            }
         }
     }
 }

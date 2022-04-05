@@ -35,6 +35,7 @@ namespace HermesProxy
         public bool IsPassingOnLoot;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
+        public LootMethod CurrentGroupLootMethod;
         public List<WowGuid128> CurrentGroupMembers = new();
         public WowGuid128 CurrentGroupLeader;
         public WowGuid128 CurrentPlayerGuid;
@@ -44,9 +45,14 @@ namespace HermesProxy
         public WowGuid128 CurrentInteractedWithNPC;
         public WowGuid128 CurrentInteractedWithGO;
         public uint LastWhoRequestId;
-        public uint LastClientCastId;
+        public WowGuid128 CurrentPetGuid;
+        public uint LastClientCastSpellId;
+        public bool LastClientCastHasStarted;
         public WowGuid128 LastClientCastGuid;
-        public WowGuid128 LastLootTargetGuid;
+        public uint LastClientPetCastSpellId;
+        public WowGuid128 LastClientPetCastGuid;
+        public bool LastClientPetCastHasStarted;
+        public WowGuid64 LastLootTargetGuid;
         public List<int> ActionButtons = new();
         public Dictionary<byte, int> CurrentPlayerAuras = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();

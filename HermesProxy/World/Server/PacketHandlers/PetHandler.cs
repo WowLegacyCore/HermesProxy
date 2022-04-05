@@ -105,5 +105,14 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(pet.PetNumber);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_PET_CANCEL_AURA)]
+        void HandlePetCancelAura(PetCancelAura cancel)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_CANCEL_AURA);
+            packet.WriteGuid(cancel.PetGUID.To64());
+            packet.WriteUInt32(cancel.SpellID);
+            SendPacketToServer(packet);
+        }
     }
 }
