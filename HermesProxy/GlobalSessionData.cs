@@ -22,6 +22,7 @@ namespace HermesProxy
         public bool HasWsgAllyFlagCarrier;
         public bool ChannelDisplayList;
         public bool ShowPlayedTime;
+        public bool IsInFarSight;
         public bool IsInTaxiFlight;
         public bool IsWaitingForTaxiStart;
         public bool IsWaitingForNewWorld;

@@ -84,6 +84,7 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_FAR_SIGHT);
             packet.WriteBool(sight.Enable);
             SendPacketToServer(packet);
+            GetSession().GameState.IsInFarSight = sight.Enable;
         }
 
         [PacketHandler(Opcode.CMSG_MOUNT_SPECIAL_ANIM)]

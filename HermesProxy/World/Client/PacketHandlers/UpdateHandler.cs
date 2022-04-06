@@ -94,6 +94,20 @@ namespace HermesProxy.World.Client
                         var guid = oldGuid.To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
 
+                        // workaround for mind vision and mind control
+                        // mangos sends a create object for own player upon interrupt
+                        // instead of a values update like on official servers
+                        // modern client seems to ignore create packets for existing objects
+                        if (guid == GetSession().GameState.CurrentPlayerGuid &&
+                            GetSession().GameState.IsInFarSight)
+                        {
+                            UpdateObject updateObject2 = new UpdateObject(GetSession().GameState);
+                            ObjectUpdate updateData2 = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
+                            updateData2.ActivePlayerData.FarsightObject = WowGuid128.Empty;
+                            updateObject2.ObjectUpdates.Add(updateData2);
+                            SendPacketToClient(updateObject2);
+                        }
+
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject1, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
