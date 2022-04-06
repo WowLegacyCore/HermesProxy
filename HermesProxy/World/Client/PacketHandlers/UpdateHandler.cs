@@ -836,14 +836,11 @@ namespace HermesProxy.World.Client
                 }
             }
 
-            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V4_2_2_14545))
-            {
-                if (flags.HasAnyFlag(UpdateFlag.LowGuid))
-                    packet.ReadUInt32();
+            if (flags.HasAnyFlag(UpdateFlag.LowGuid))
+                packet.ReadUInt32();
 
-                if (flags.HasAnyFlag(UpdateFlag.HighGuid))
-                    packet.ReadUInt32();
-            }
+            if (flags.HasAnyFlag(UpdateFlag.HighGuid))
+                packet.ReadUInt32();
 
             if (flags.HasAnyFlag(UpdateFlag.AttackingTarget))
             {
@@ -853,16 +850,29 @@ namespace HermesProxy.World.Client
             }
 
             if (flags.HasAnyFlag(UpdateFlag.Transport))
-                moveInfo.TransportPathTimer = packet.ReadUInt32();
+            {
+                uint transportPathTimer = packet.ReadUInt32();
+                if (moveInfo != null)
+                    moveInfo.TransportPathTimer = transportPathTimer;
+            }
 
             if (flags.HasAnyFlag(UpdateFlag.Vehicle))
             {
-                moveInfo.VehicleId = packet.ReadUInt32();
-                moveInfo.VehicleOrientation = packet.ReadFloat();
+                uint vehicleId = packet.ReadUInt32();
+                float vehicleOrientation = packet.ReadFloat();
+                if (moveInfo != null)
+                {
+                    moveInfo.VehicleId = vehicleId;
+                    moveInfo.VehicleOrientation = vehicleOrientation;
+                }
             }
 
             if (flags.HasAnyFlag(UpdateFlag.GORotation))
-                moveInfo.Rotation = packet.ReadPackedQuaternion();
+            {
+                var rotation = packet.ReadPackedQuaternion();
+                if (moveInfo != null)
+                    moveInfo.Rotation = rotation;
+            }
 
             if (updateData != null && moveInfo != null)
             {
@@ -1026,9 +1036,9 @@ namespace HermesProxy.World.Client
             int PLAYER_FLAGS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FLAGS);
             if (PLAYER_FLAGS >= 0 && updates.ContainsKey(PLAYER_FLAGS))
             {
-                if (updates[PLAYER_FLAGS].UInt32Value.HasAnyFlag(PlayerFlags.FreeForAllPvP))
+                if (updates[PLAYER_FLAGS].UInt32Value.HasAnyFlag(PlayerFlagsLegacy.FreeForAllPvP))
                     flags |= (byte)PvPFlags.FFAPvp;
-                if (updates[PLAYER_FLAGS].UInt32Value.HasAnyFlag(PlayerFlags.Sanctuary))
+                if (updates[PLAYER_FLAGS].UInt32Value.HasAnyFlag(PlayerFlagsLegacy.Sanctuary))
                     flags |= (byte)PvPFlags.Sanctuary;
             }
 
@@ -1765,7 +1775,15 @@ namespace HermesProxy.World.Client
                 int PLAYER_FLAGS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FLAGS);
                 if (PLAYER_FLAGS >= 0 && updateMaskArray[PLAYER_FLAGS])
                 {
-                    updateData.PlayerData.PlayerFlags = updates[PLAYER_FLAGS].UInt32Value;
+                    PlayerFlagsLegacy playerFlags = (PlayerFlagsLegacy)updates[PLAYER_FLAGS].UInt32Value;
+                    updateData.PlayerData.PlayerFlags = (uint)playerFlags.CastFlags<PlayerFlags>();
+
+                    if (updateData.PlayerData.PlayerFlagsEx == null)
+                        updateData.PlayerData.PlayerFlagsEx = 0;
+                    if (playerFlags.HasAnyFlag(PlayerFlagsLegacy.HideHelm))
+                        updateData.PlayerData.PlayerFlagsEx |= (uint)PlayerFlagsEx.HideHelm;
+                    if (playerFlags.HasAnyFlag(PlayerFlagsLegacy.HideCloak))
+                        updateData.PlayerData.PlayerFlagsEx |= (uint)PlayerFlagsEx.HideCloak;
 
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) &&
                         updateData.UnitData.PvpFlags == null)

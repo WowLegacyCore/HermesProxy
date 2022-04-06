@@ -600,4 +600,17 @@ namespace HermesProxy.World.Server.Packets
 
         public uint SkillLine;
     }
+
+    class PlayerShowingHelmOrCloak : ClientPacket
+    {
+        public PlayerShowingHelmOrCloak(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            _worldPacket.ResetBitPos();
+            Showing = _worldPacket.HasBit();
+        }
+
+        public bool Showing;
+    }
 }

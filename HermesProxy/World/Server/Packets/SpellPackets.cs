@@ -1526,4 +1526,44 @@ namespace HermesProxy.World.Server.Packets
 
         public uint SpellId;
     }
+
+    public class SetSpellModifier : ServerPacket
+    {
+        public SetSpellModifier(Opcode opcode) : base(opcode, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Modifiers.Count);
+            foreach (SpellModifierInfo spellMod in Modifiers)
+                spellMod.Write(_worldPacket);
+        }
+
+        public List<SpellModifierInfo> Modifiers = new();
+    }
+
+    public class SpellModifierInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(ModIndex);
+            data.WriteInt32(ModifierData.Count);
+            foreach (SpellModifierData modData in ModifierData)
+                modData.Write(data);
+        }
+
+        public byte ModIndex;
+        public List<SpellModifierData> ModifierData = new();
+    }
+
+    public struct SpellModifierData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(ModifierValue);
+            data.WriteUInt8(ClassIndex);
+        }
+
+        public int ModifierValue;
+        public byte ClassIndex;
+    }
 }

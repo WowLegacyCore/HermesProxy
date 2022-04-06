@@ -984,5 +984,20 @@ namespace HermesProxy.World.Client
             revive.UseTimer = packet.ReadBool();
             SendPacketToClient(revive);
         }
+
+        [PacketHandler(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER)]
+        [PacketHandler(Opcode.SMSG_SET_PCT_SPELL_MODIFIER)]
+        void HandleSetSpellModifier(WorldPacket packet)
+        {
+            SetSpellModifier spell = new SetSpellModifier(packet.GetUniversalOpcode(false));
+            SpellModifierInfo mod = new SpellModifierInfo();
+            SpellModifierData data = new SpellModifierData();
+            data.ClassIndex = packet.ReadUInt8();
+            mod.ModIndex = packet.ReadUInt8();
+            data.ModifierValue = packet.ReadInt32();
+            mod.ModifierData.Add(data);
+            spell.Modifiers.Add(mod);
+            SendPacketToClient(spell);
+        }
     }
 }

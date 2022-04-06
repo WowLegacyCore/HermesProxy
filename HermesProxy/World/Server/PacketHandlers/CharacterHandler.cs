@@ -136,5 +136,14 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(skill.SkillLine);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_PLAYER_SHOWING_CLOAK)]
+        [PacketHandler(Opcode.CMSG_PLAYER_SHOWING_HELM)]
+        void HandleShowHelmOrCloak(PlayerShowingHelmOrCloak show)
+        {
+            WorldPacket packet = new WorldPacket(show.GetUniversalOpcode());
+            packet.WriteBool(show.Showing);
+            SendPacketToServer(packet);
+        }
     }
 }

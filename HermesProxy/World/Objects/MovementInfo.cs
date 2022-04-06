@@ -387,23 +387,23 @@ namespace HermesProxy.World.Objects
             bool hasPrevTime = false;
             bool hasVehicleId = moveInfo.VehicleId != 0;
 
-            data.WritePackedGuid128(moveInfo.TransportGuid); // Transport Guid
+            data.WritePackedGuid128(moveInfo.TransportGuid);
             data.WriteFloat(moveInfo.TransportOffset.X);
             data.WriteFloat(moveInfo.TransportOffset.Y);
             data.WriteFloat(moveInfo.TransportOffset.Z);
             data.WriteFloat(moveInfo.TransportOffset.W);
-            data.WriteInt8(moveInfo.TransportSeat);                  // VehicleSeatIndex
-            data.WriteUInt32(moveInfo.TransportTime);                // MoveTime
+            data.WriteInt8(moveInfo.TransportSeat);
+            data.WriteUInt32(moveInfo.TransportTime);
 
             data.WriteBit(hasPrevTime);
             data.WriteBit(hasVehicleId);
             data.FlushBits();
 
             if (hasPrevTime)
-                data.WriteUInt32(0);                                 // PrevMoveTime
+                data.WriteUInt32(0); // PrevMoveTime
 
             if (hasVehicleId)
-                data.WriteUInt32(moveInfo.VehicleId);                // VehicleRecID
+                data.WriteUInt32(moveInfo.VehicleId);
         }
     }
 }

@@ -259,6 +259,22 @@ namespace HermesProxy.World.Server.Packets
         public byte PackSlot;
     }
 
+    class AutoEquipItemSlot : ClientPacket
+    {
+        public AutoEquipItemSlot(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Inv = new InvUpdate(_worldPacket);
+            Item = _worldPacket.ReadPackedGuid128();
+            ItemDstSlot = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 Item;
+        public byte ItemDstSlot;
+        public InvUpdate Inv;
+    }
+
     public struct InvUpdate
     {
         public InvUpdate(WorldPacket data)
@@ -576,5 +592,19 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 ItemGuid;
         public uint SpellID;
         public uint Cooldown;
+    }
+
+    public class OpenItem : ClientPacket
+    {
+        public OpenItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PackSlot = _worldPacket.ReadUInt8();
+            Slot = _worldPacket.ReadUInt8();
+        }
+
+        public byte PackSlot;
+        public byte Slot;
     }
 }

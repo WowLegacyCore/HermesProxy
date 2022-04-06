@@ -108,6 +108,17 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(slot);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_AUTO_EQUIP_ITEM_SLOT)]
+        void HandleAutoEquipItemSlot(AutoEquipItemSlot item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTO_EQUIP_ITEM_SLOT);
+            packet.WriteGuid(item.Item.To64());
+            byte slot = ModernVersion.AdjustInventorySlot(item.ItemDstSlot);
+            packet.WriteUInt8(slot);
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_READ_ITEM)]
         void HandleReadItem(ReadItem item)
         {
@@ -118,6 +129,7 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(slot);
             SendPacketToServer(packet);
         }
+
         [PacketHandler(Opcode.CMSG_BUY_BACK_ITEM)]
         void HandleBuyBackItem(BuyBackItem item)
         {
@@ -127,6 +139,7 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(slot);
             SendPacketToServer(packet);
         }
+
         [PacketHandler(Opcode.CMSG_REPAIR_ITEM)]
         void HandleRepairItem(RepairItem item)
         {
@@ -137,6 +150,7 @@ namespace HermesProxy.World.Server
                 packet.WriteBool(item.UseGuildBank);
             SendPacketToServer(packet);
         }
+
         [PacketHandler(Opcode.CMSG_SOCKET_GEMS)]
         void HandleSocketGems(SocketGems gems)
         {
@@ -150,6 +164,17 @@ namespace HermesProxy.World.Server
             SocketGemsSuccess success = new SocketGemsSuccess();
             success.ItemGuid = gems.ItemGuid;
             SendPacket(success);
+        }
+
+        [PacketHandler(Opcode.CMSG_OPEN_ITEM)]
+        void HandleOpenItem(OpenItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_OPEN_ITEM);
+            byte containerSlot = item.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
+            byte slot = item.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
+            packet.WriteUInt8(containerSlot);
+            packet.WriteUInt8(slot);
+            SendPacketToServer(packet);
         }
     }
 }

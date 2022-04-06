@@ -372,50 +372,82 @@ namespace HermesProxy.World.Enums
         public const int Miss = 1500;     // cooldown applied on runes when the spell misses
     }
 
+    [Flags]
+    enum PlayerFlagsLegacy
+    {
+        None                = 0x00000000,
+        GroupLeader         = 0x00000001,
+        AFK                 = 0x00000002,
+        DND                 = 0x00000004,
+        GM                  = 0x00000008,
+        Ghost               = 0x00000010,
+        Resting             = 0x00000020,
+        Unk7                = 0x00000040,       // admin?
+        FreeForAllPvP       = 0x00000080,
+        ContestedPvP        = 0x00000100,       // Player has been involved in a PvP combat and will be attacked by contested guards
+        PvPDesired          = 0x00000200,       // Stores player's permanent PvP flag preference
+        HideHelm            = 0x00000400,
+        HideCloak           = 0x00000800,
+        PlayedLongTime      = 0x00001000,       // played long time
+        PlayedTooLong       = 0x00002000,       // played too long time
+        Unk15               = 0x00004000,
+        Unk16               = 0x00008000,       // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
+        Sanctuary           = 0x00010000,       // player entered sanctuary
+        TaxiBenchmark       = 0x00020000,       // taxi benchmark mode (on/off) (2.0.1)
+        PVPTimer            = 0x00040000,       // 3.0.2, pvp timer active (after you disable pvp manually)
+        Commentator         = 0x00080000,       // first appeared in TBC
+        Unk21               = 0x00100000,
+        Unk22               = 0x00200000,
+        CommentatorCamera   = 0x00400000,       // something like COMMENTATOR_CAN_USE_INSTANCE_COMMAND
+    };
+
+    [Flags]
     public enum PlayerFlags : uint
     {
-        GroupLeader = 0x01,
-        AFK = 0x02,
-        DND = 0x04,
-        GM = 0x08,
-        Ghost = 0x10,
-        Resting = 0x20,
-        VoiceChat = 0x40,
-        FreeForAllPvP = 0x80,
-        ContestedPVP = 0x100,
-        InPVP = 0x200,
-        WarModeActive = 0x400,
-        WarModeDesired = 0x800,
-        PlayedLongTime = 0x1000,
-        PlayedTooLong = 0x2000,
-        IsOutOfBounds = 0x4000,
-        Developer = 0x8000,
-        Sanctuary = 0x10000,
-        TaxiBenchmark = 0x20000,
-        PVPTimer = 0x40000,
-        Uber = 0x80000,
-        Unk20 = 0x100000,
-        Unk21 = 0x200000,
-        Commentator2 = 0x400000,
-        HidAccountAchievements = 0x800000,
-        PetBattlesUnlocked = 0x1000000,
-        NoXPGain = 0x2000000,
-        Unk26 = 0x4000000,
-        AutoDeclineGuild = 0x8000000,
-        GuildLevelEnabled = 0x10000000,
-        VoidUnlocked = 0x20000000,
-        Timewalking = 0x40000000,
-        CommentatorCamera = 0x80000000
+        None                = 0x00000000,
+        GroupLeader         = 0x00000001,
+        AFK                 = 0x00000002,
+        DND                 = 0x00000004,
+        GM                  = 0x00000008,
+        Ghost               = 0x00000010,
+        Resting             = 0x00000020,
+        VoiceChat           = 0x00000040,
+        Unk7                = 0x00000080,
+        ContestedPvP        = 0x00000100,
+        PvPDesired          = 0x00000200,
+        WarModeActive       = 0x00000400,
+        WarModeDesired      = 0x00000800,
+        PlayedLongTime      = 0x00001000,
+        PlayedTooLong       = 0x00002000,
+        IsOutOfBounds       = 0x00004000,
+        Developer           = 0x00008000,
+        LowLevelRaidEnabled = 0x00010000,
+        TaxiBenchmark       = 0x00020000,
+        PVPTimer            = 0x00040000,
+        Uber                = 0x00080000,
+        Unk20               = 0x00100000,
+        Unk21               = 0x00200000,
+        Commentator         = 0x00400000,
+        HideAccountAchievements = 0x00800000,
+        PetBattlesUnlocked  = 0x01000000,
+        NoXPGain            = 0x02000000,
+        Unk26               = 0x04000000,
+        AutoDeclineGuild    = 0x08000000,
+        GuildLevelEnabled   = 0x10000000,
+        VoidUnlocked        = 0x20000000,
+        Timewalking         = 0x40000000,
+        CommentatorCamera   = 0x80000000
     }
 
+    [Flags]
     public enum PlayerFlagsEx
     {
         ReagentBankUnlocked = 0x01,
         MercenaryMode = 0x02,
         ArtifactForgeCheat = 0x04,
         InPvpCombat = 0x0040,       // Forbids /Follow
-        Mentor = 0x0080,
-        Newcomer = 0x0100,
+        HideHelm = 0x0080,
+        HideCloak = 0x0100,
         UnlockedAoeLoot = 0x0200
     }
 
