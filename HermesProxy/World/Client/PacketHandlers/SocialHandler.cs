@@ -21,7 +21,7 @@ namespace HermesProxy.World.Client
             {
                 ContactInfo contact = new ContactInfo();
                 contact.TypeFlags = SocialFlag.Friend;
-                contact.Guid = packet.ReadGuid().To128();
+                contact.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 contact.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(contact.Guid);
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
@@ -49,7 +49,7 @@ namespace HermesProxy.World.Client
             {
                 ContactInfo contact = new ContactInfo();
                 contact.TypeFlags = SocialFlag.Ignored;
-                contact.Guid = packet.ReadGuid().To128();
+                contact.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 contact.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(contact.Guid);
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
@@ -69,7 +69,7 @@ namespace HermesProxy.World.Client
             for (var i = 0; i < count; i++)
             {
                 ContactInfo contact = new ContactInfo();
-                contact.Guid = packet.ReadGuid().To128();
+                contact.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 contact.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(contact.Guid);
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
@@ -96,7 +96,7 @@ namespace HermesProxy.World.Client
         {
             FriendStatusPkt friend = new FriendStatusPkt();
             friend.FriendResult = (FriendsResult)packet.ReadUInt8();
-            friend.Guid = packet.ReadGuid().To128();
+            friend.Guid = packet.ReadGuid().To128(GetSession().GameState);
             friend.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(friend.Guid);
             friend.VirtualRealmAddress = GetSession().RealmId.GetAddress();
             switch (friend.FriendResult)

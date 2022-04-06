@@ -14,8 +14,8 @@ namespace HermesProxy.World.Client
         void HandleDuelRequested(WorldPacket packet)
         {
             DuelRequested duel = new DuelRequested();
-            duel.ArbiterGUID = packet.ReadGuid().To128();
-            duel.RequestedByGUID = packet.ReadGuid().To128();
+            duel.ArbiterGUID = packet.ReadGuid().To128(GetSession().GameState);
+            duel.RequestedByGUID = packet.ReadGuid().To128(GetSession().GameState);
             duel.RequestedByWowAccount = GetSession().GetGameAccountGuidForPlayer(duel.RequestedByGUID);
             SendPacketToClient(duel);
         }

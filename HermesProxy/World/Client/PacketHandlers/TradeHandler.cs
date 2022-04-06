@@ -19,7 +19,7 @@ namespace HermesProxy.World.Client
             switch (trade.Status)
             {
                 case TradeStatus.Proposed:
-                    trade.Partner = packet.ReadGuid().To128();
+                    trade.Partner = packet.ReadGuid().To128(GetSession().GameState);
                     trade.PartnerAccount = GetSession().GetGameAccountGuidForPlayer(trade.Partner);
                     break;
                 case TradeStatus.Initiated:
@@ -59,14 +59,14 @@ namespace HermesProxy.World.Client
                 packet.ReadUInt32(); // Item Display ID
                 item.StackCount = packet.ReadInt32();
                 packet.ReadUInt32(); // Is Wrapped
-                item.GiftCreator = packet.ReadGuid().To128();
+                item.GiftCreator = packet.ReadGuid().To128(GetSession().GameState);
                 item.Unwrapped.EnchantID = packet.ReadInt32();
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 {
                     for (var i = 0; i < 3; ++i)
                         packet.ReadUInt32(); // Item Enchantment Id
                 }
-                item.Unwrapped.Creator = packet.ReadGuid().To128();
+                item.Unwrapped.Creator = packet.ReadGuid().To128(GetSession().GameState);
                 item.Unwrapped.Charges = packet.ReadInt32();
                 item.Item.RandomPropertiesSeed = packet.ReadUInt32();
                 item.Item.RandomPropertiesID = packet.ReadUInt32();

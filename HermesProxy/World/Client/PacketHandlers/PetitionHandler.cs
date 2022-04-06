@@ -15,7 +15,7 @@ namespace HermesProxy.World.Client
         void HandlePetitionShowList(WorldPacket packet)
         {
             ServerPetitionShowList petitions = new();
-            petitions.Unit = packet.ReadGuid().To128();
+            petitions.Unit = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = petitions.Unit;
             var count = packet.ReadUInt8();
             for (var i = 0; i < count; i++)
@@ -44,15 +44,15 @@ namespace HermesProxy.World.Client
         void HandlePetitionShowSignatures(WorldPacket packet)
         {
             ServerPetitionShowSignatures petition = new();
-            petition.Item = packet.ReadGuid().To128();
-            petition.Owner = packet.ReadGuid().To128();
+            petition.Item = packet.ReadGuid().To128(GetSession().GameState);
+            petition.Owner = packet.ReadGuid().To128(GetSession().GameState);
             petition.OwnerAccountID = GetSession().GetGameAccountGuidForPlayer(petition.Owner);
             petition.PetitionID = packet.ReadInt32();
             var counter = packet.ReadUInt8();
             for (var i = 0; i < counter; i++)
             {
                 PetitionSignature signature = new PetitionSignature();
-                signature.Signer = packet.ReadGuid().To128();
+                signature.Signer = packet.ReadGuid().To128(GetSession().GameState);
                 signature.Choice = packet.ReadInt32();
                 petition.Signatures.Add(signature);
             }
@@ -67,7 +67,7 @@ namespace HermesProxy.World.Client
             petition.Allow = true;
             petition.Info = new PetitionInfo();
             petition.Info.PetitionID = petition.PetitionID;
-            petition.Info.Petitioner = packet.ReadGuid().To128();
+            petition.Info.Petitioner = packet.ReadGuid().To128(GetSession().GameState);
 
             petition.Info.Title = packet.ReadCString();
             petition.Info.BodyText = packet.ReadCString();
@@ -103,7 +103,7 @@ namespace HermesProxy.World.Client
         void HandlePetitionRename(WorldPacket packet)
         {
             PetitionRenameGuildResponse petition = new();
-            petition.PetitionGuid = packet.ReadGuid().To128();
+            petition.PetitionGuid = packet.ReadGuid().To128(GetSession().GameState);
             petition.NewGuildName = packet.ReadCString();
             SendPacketToClient(petition);
         }
@@ -111,7 +111,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_PETITION_DECLINE)]
         void HandlePetitionDecline(WorldPacket packet)
         {
-            WowGuid128 guid = packet.ReadGuid().To128();
+            WowGuid128 guid = packet.ReadGuid().To128(GetSession().GameState);
             string name = GetSession().GameState.GetPlayerName(guid);
             if (!String.IsNullOrEmpty(name))
             {
@@ -124,8 +124,8 @@ namespace HermesProxy.World.Client
         void HandlePetitionSignResults(WorldPacket packet)
         {
             PetitionSignResults petition = new();
-            petition.Item = packet.ReadGuid().To128();
-            petition.Player = packet.ReadGuid().To128();
+            petition.Item = packet.ReadGuid().To128(GetSession().GameState);
+            petition.Player = packet.ReadGuid().To128(GetSession().GameState);
             petition.Error = (PetitionSignResult)packet.ReadUInt32();
             SendPacketToClient(petition);
         }

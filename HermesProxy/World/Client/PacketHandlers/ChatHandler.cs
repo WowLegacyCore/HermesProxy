@@ -138,7 +138,7 @@ namespace HermesProxy.World.Client
             for (int i = 0; i < count; i++)
             {
                 ChannelPlayer member = new ChannelPlayer();
-                member.Guid = packet.ReadGuid().To128();
+                member.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 member.VirtualRealmAddress = GetSession().RealmId.GetAddress();
                 member.Flags = packet.ReadUInt8();
                 list.Members.Add(member);
@@ -164,29 +164,29 @@ namespace HermesProxy.World.Client
                 case ChatMessageTypeVanilla.MonsterEmote:
                     packet.ReadUInt32(); // Sender Name Length
                     senderName = packet.ReadCString();
-                    receiver = packet.ReadGuid().To128();
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 case ChatMessageTypeVanilla.Say:
                 case ChatMessageTypeVanilla.Party:
                 case ChatMessageTypeVanilla.Yell:
-                    sender = packet.ReadGuid().To128();
+                    sender = packet.ReadGuid().To128(GetSession().GameState);
                     packet.ReadGuid(); // Sender Guid again
                     break;
                 case ChatMessageTypeVanilla.MonsterSay:
                 case ChatMessageTypeVanilla.MonsterYell:
-                    sender = packet.ReadGuid().To128();
+                    sender = packet.ReadGuid().To128(GetSession().GameState);
                     packet.ReadUInt32(); // Sender Name Length
                     senderName = packet.ReadCString();
-                    receiver = packet.ReadGuid().To128();
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
                     break;
 
                 case ChatMessageTypeVanilla.Channel:
                     channelName = packet.ReadCString();
                     packet.ReadUInt32(); // Player Rank
-                    sender = packet.ReadGuid().To128();
+                    sender = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 default:
-                    sender = packet.ReadGuid().To128();
+                    sender = packet.ReadGuid().To128(GetSession().GameState);
                     break;
             }
 
@@ -205,7 +205,7 @@ namespace HermesProxy.World.Client
         {
             ChatMessageTypeWotLK chatType = (ChatMessageTypeWotLK)packet.ReadUInt8();
             uint language = packet.ReadUInt32();
-            WowGuid128 sender = packet.ReadGuid().To128();
+            WowGuid128 sender = packet.ReadGuid().To128(GetSession().GameState);
             string senderName = "";
             WowGuid128 receiver = null;
             string receiverName = "";
@@ -225,7 +225,7 @@ namespace HermesProxy.World.Client
                 {
                     packet.ReadInt32(); // Name Length
                     senderName = packet.ReadCString();
-                    receiver = packet.ReadGuid().To128();
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 }
                 case ChatMessageTypeWotLK.BattlegroundNeutral:
@@ -257,7 +257,7 @@ namespace HermesProxy.World.Client
                 {
                     packet.ReadInt32(); // Name Length
                     senderName = packet.ReadCString();
-                    receiver = packet.ReadGuid().To128();
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
                     switch (receiver.GetHighType())
                     {
                         case HighGuidType.Creature:
@@ -377,7 +377,7 @@ namespace HermesProxy.World.Client
         {
             EmoteMessage emote = new EmoteMessage();
             emote.EmoteID = packet.ReadUInt32();
-            emote.Guid = packet.ReadGuid().To128();
+            emote.Guid = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(emote);
         }
 
@@ -385,7 +385,7 @@ namespace HermesProxy.World.Client
         void HandleTextEmote(WorldPacket packet)
         {
             STextEmote emote = new STextEmote();
-            emote.SourceGUID = packet.ReadGuid().To128();
+            emote.SourceGUID = packet.ReadGuid().To128(GetSession().GameState);
             emote.SourceAccountGUID = GetSession().GetGameAccountGuidForPlayer(emote.SourceGUID);
             emote.EmoteID = packet.ReadInt32();
             emote.SoundIndex = packet.ReadInt32();

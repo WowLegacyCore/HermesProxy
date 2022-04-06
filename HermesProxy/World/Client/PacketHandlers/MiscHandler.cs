@@ -48,7 +48,7 @@ namespace HermesProxy.World.Client
         void HandlePlayerBound(WorldPacket packet)
         {
             PlayerBound bound = new PlayerBound();
-            bound.BinderGUID = packet.ReadGuid().To128();
+            bound.BinderGUID = packet.ReadGuid().To128(GetSession().GameState);
             bound.AreaID = packet.ReadUInt32();
             SendPacketToClient(bound);
         }
@@ -186,7 +186,7 @@ namespace HermesProxy.World.Client
         {
             PlayObjectSound sound = new();
             sound.SoundEntryID = packet.ReadUInt32();
-            sound.SourceObjectGUID = packet.ReadGuid().To128();
+            sound.SourceObjectGUID = packet.ReadGuid().To128(GetSession().GameState);
             sound.TargetObjectGUID = sound.SourceObjectGUID;
             SendPacketToClient(sound);
         }
@@ -203,7 +203,7 @@ namespace HermesProxy.World.Client
         void HandleSpecialMountAnim(WorldPacket packet)
         {
             SpecialMountAnim mount = new();
-            mount.UnitGUID = packet.ReadGuid().To128();
+            mount.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(mount);
         }
 

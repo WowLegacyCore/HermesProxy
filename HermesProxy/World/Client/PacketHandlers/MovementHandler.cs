@@ -49,9 +49,9 @@ namespace HermesProxy.World.Client
         void HandleMovementMessages(WorldPacket packet)
         {
             MoveUpdate moveUpdate = new MoveUpdate();
-            moveUpdate.MoverGUID = packet.ReadPackedGuid().To128();
+            moveUpdate.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             moveUpdate.MoveInfo = new();
-            moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet);
+            moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             moveUpdate.MoveInfo.Flags = (uint)(((MovementFlagWotLK)moveUpdate.MoveInfo.Flags).CastFlags<MovementFlagModern>());
             SendPacketToClient(moveUpdate);
         }
@@ -60,9 +60,9 @@ namespace HermesProxy.World.Client
         void HandleMoveKnockBack(WorldPacket packet)
         {
             MoveUpdateKnockBack knockback = new MoveUpdateKnockBack();
-            knockback.MoverGUID = packet.ReadPackedGuid().To128();
+            knockback.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             knockback.MoveInfo = new();
-            knockback.MoveInfo.ReadMovementInfoLegacy(packet);
+            knockback.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             knockback.MoveInfo.Flags = (uint)(((MovementFlagWotLK)knockback.MoveInfo.Flags).CastFlags<MovementFlagModern>());
             knockback.MoveInfo.JumpSinAngle = packet.ReadFloat();
             knockback.MoveInfo.JumpCosAngle = packet.ReadFloat();
@@ -75,7 +75,7 @@ namespace HermesProxy.World.Client
         void HandleMoveForceKnockBack(WorldPacket packet)
         {
             MoveKnockBack knockback = new MoveKnockBack();
-            knockback.MoverGUID = packet.ReadPackedGuid().To128();
+            knockback.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             knockback.MoveCounter = packet.ReadUInt32();
             knockback.Direction = packet.ReadVector2();
             knockback.HorizontalSpeed = packet.ReadFloat();
@@ -87,7 +87,7 @@ namespace HermesProxy.World.Client
         void HandleControlUpdate(WorldPacket packet)
         {
             ControlUpdate control = new ControlUpdate();
-            control.Guid = packet.ReadPackedGuid().To128();
+            control.Guid = packet.ReadPackedGuid().To128(GetSession().GameState);
             control.HasControl = packet.ReadBool();
             SendPacketToClient(control);
         }
@@ -95,7 +95,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_MOVE_TELEPORT_ACK)]
         void HandleMoveTeleportAck(WorldPacket packet)
         {
-            WowGuid128 guid = packet.ReadPackedGuid().To128();
+            WowGuid128 guid = packet.ReadPackedGuid().To128(GetSession().GameState);
 
             if (GetSession().GameState.IsInTaxiFlight &&
                 GetSession().GameState.CurrentPlayerGuid == guid)
@@ -111,7 +111,7 @@ namespace HermesProxy.World.Client
             teleport.MoverGUID = guid;
             teleport.MoveCounter = packet.ReadUInt32();
             MovementInfo moveInfo = new();
-            moveInfo.ReadMovementInfoLegacy(packet);
+            moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             teleport.Position = moveInfo.Position;
             teleport.Orientation = moveInfo.Orientation;
             teleport.TransportGUID = moveInfo.TransportGuid;
@@ -217,7 +217,7 @@ namespace HermesProxy.World.Client
         void HandleMoveSplineSetSpeed(WorldPacket packet)
         {
             MoveSplineSetSpeed speed = new MoveSplineSetSpeed(packet.GetUniversalOpcode(false));
-            speed.MoverGUID = packet.ReadPackedGuid().To128();
+            speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
         }
@@ -238,7 +238,7 @@ namespace HermesProxy.World.Client
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
 
             MoveSetSpeed speed = new MoveSetSpeed(universalOpcode);
-            speed.MoverGUID = packet.ReadPackedGuid().To128();
+            speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             speed.MoveCounter = packet.ReadUInt32();
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) &&
@@ -265,9 +265,9 @@ namespace HermesProxy.World.Client
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
 
             MoveUpdateSpeed speed = new MoveUpdateSpeed(universalOpcode);
-            speed.MoverGUID = packet.ReadPackedGuid().To128();
+            speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             speed.MoveInfo = new MovementInfo();
-            speed.MoveInfo.ReadMovementInfoLegacy(packet);
+            speed.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             speed.MoveInfo.Flags = (uint)(((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>());
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
@@ -292,7 +292,7 @@ namespace HermesProxy.World.Client
         void HandleSplineMovementMessages(WorldPacket packet)
         {
             MoveSplineSetFlag spline = new MoveSplineSetFlag(packet.GetUniversalOpcode(false));
-            spline.MoverGUID = packet.ReadPackedGuid().To128();
+            spline.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             SendPacketToClient(spline);
         }
 
@@ -313,7 +313,7 @@ namespace HermesProxy.World.Client
         void HandleMoveForceFlagChange(WorldPacket packet)
         {
             MoveSetFlag flag = new MoveSetFlag(packet.GetUniversalOpcode(false));
-            flag.MoverGUID = packet.ReadPackedGuid().To128();
+            flag.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             flag.MoveCounter = packet.ReadUInt32();
             SendPacketToClient(flag);
         }
@@ -341,12 +341,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MONSTER_MOVE_TRANSPORT)]
         void HandleMonsterMove(WorldPacket packet)
         {
-            WowGuid128 guid = packet.ReadPackedGuid().To128();
+            WowGuid128 guid = packet.ReadPackedGuid().To128(GetSession().GameState);
             ServerSideMovement moveSpline = new();
 
             if (packet.GetUniversalOpcode(false) == Opcode.SMSG_MONSTER_MOVE_TRANSPORT)
             {
-                moveSpline.TransportGuid = packet.ReadPackedGuid().To128();
+                moveSpline.TransportGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                     moveSpline.TransportSeat = packet.ReadInt8();
             }
@@ -368,7 +368,7 @@ namespace HermesProxy.World.Client
                 case SplineTypeLegacy.FacingTarget:
                 {
                     moveSpline.SplineType = SplineTypeModern.FacingTarget;
-                    moveSpline.FinalFacingGuid = packet.ReadGuid().To128();
+                    moveSpline.FinalFacingGuid = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 }
                 case SplineTypeLegacy.FacingAngle:

@@ -14,7 +14,7 @@ namespace HermesProxy.World.Client
         void HandleTaxiNodeStatus(WorldPacket packet)
         {
             TaxiNodeStatusPkt taxi = new();
-            taxi.FlightMaster = packet.ReadGuid().To128();
+            taxi.FlightMaster = packet.ReadGuid().To128(GetSession().GameState);
             bool learned = packet.ReadBool();
             taxi.Status = learned ? TaxiNodeStatus.Learned : TaxiNodeStatus.Unlearned;
             SendPacketToClient(taxi);
@@ -27,7 +27,7 @@ namespace HermesProxy.World.Client
             if (hasWindowInfo)
             {
                 taxi.WindowInfo = new();
-                taxi.WindowInfo.UnitGUID = packet.ReadGuid().To128();
+                taxi.WindowInfo.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
                 taxi.WindowInfo.CurrentNode = GetSession().GameState.CurrentTaxiNode = packet.ReadUInt32();
             }
             while (packet.CanRead())

@@ -14,16 +14,16 @@ namespace HermesProxy.World.Client
         void HandleAttackStart(WorldPacket packet)
         {
             SAttackStart attack = new();
-            attack.Attacker = packet.ReadGuid().To128();
-            attack.Victim = packet.ReadGuid().To128();
+            attack.Attacker = packet.ReadGuid().To128(GetSession().GameState);
+            attack.Victim = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_ATTACK_STOP)]
         void HandleAttackStop(WorldPacket packet)
         {
             SAttackStop attack = new();
-            attack.Attacker = packet.ReadPackedGuid().To128();
-            attack.Victim = packet.ReadPackedGuid().To128();
+            attack.Attacker = packet.ReadPackedGuid().To128(GetSession().GameState);
+            attack.Victim = packet.ReadPackedGuid().To128(GetSession().GameState);
             attack.NowDead = packet.ReadUInt32() != 0;
             SendPacketToClient(attack);
         }
@@ -33,8 +33,8 @@ namespace HermesProxy.World.Client
             AttackerStateUpdate attack = new();
             uint hitInfo = packet.ReadUInt32();
             attack.HitInfo = LegacyVersion.ConvertHitInfoFlags(hitInfo);
-            attack.AttackerGUID = packet.ReadPackedGuid().To128();
-            attack.VictimGUID = packet.ReadPackedGuid().To128();
+            attack.AttackerGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            attack.VictimGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             attack.Damage = packet.ReadInt32();
             attack.OriginalDamage = attack.Damage;
 
@@ -141,7 +141,7 @@ namespace HermesProxy.World.Client
         void HandleAIReaction(WorldPacket packet)
         {
             AIReaction reaction = new();
-            reaction.UnitGUID = packet.ReadGuid().To128();
+            reaction.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
             reaction.Reaction = packet.ReadUInt32();
             SendPacketToClient(reaction);
         }
@@ -149,8 +149,8 @@ namespace HermesProxy.World.Client
         void HandlePartyKillLog(WorldPacket packet)
         {
             PartyKillLog log = new();
-            log.Player = packet.ReadGuid().To128();
-            log.Victim = packet.ReadGuid().To128();
+            log.Player = packet.ReadGuid().To128(GetSession().GameState);
+            log.Victim = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(log);
         }
     }

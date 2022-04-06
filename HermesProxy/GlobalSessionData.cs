@@ -75,21 +75,21 @@ namespace HermesProxy
         public Dictionary<uint, long> BattleFieldQueueTimes = new Dictionary<uint, long>();
         public Dictionary<uint, uint> DailyQuestsDone = new Dictionary<uint, uint>();
         public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
-        public Dictionary<WowGuid128, long> ObjectDestroyTime = new Dictionary<WowGuid128, long>();
+        public Dictionary<WowGuid64, ushort> ObjectSpawnCount = new Dictionary<WowGuid64, ushort>();
 
-        public bool MustDelayObjectCreate(WowGuid128 guid)
+        public ushort GetObjectSpawnCounter(WowGuid64 guid)
         {
-            long timestamp;
-            if (ObjectDestroyTime.TryGetValue(guid, out timestamp))
-                return (timestamp + 1 > Time.UnixTime);
-            return false;
+            ushort count;
+            if (ObjectSpawnCount.TryGetValue(guid, out count))
+                return count;
+            return 0;
         }
-        public void StoreObjectDestroyTime(WowGuid128 guid, long timestamp)
+        public void IncrementObjectSpawnCounter(WowGuid64 guid)
         {
-            if (ObjectDestroyTime.ContainsKey(guid))
-                ObjectDestroyTime[guid] = timestamp;
+            if (ObjectSpawnCount.ContainsKey(guid))
+                ObjectSpawnCount[guid]++;
             else
-                ObjectDestroyTime.Add(guid, timestamp);
+                ObjectSpawnCount.Add(guid, 0);
         }
         public void SetDailyQuestSlot(uint slot, uint questId)
         {

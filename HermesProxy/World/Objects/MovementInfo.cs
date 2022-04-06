@@ -93,7 +93,7 @@ namespace HermesProxy.World.Objects
             return copy;
         }
 
-        public void ReadMovementInfoLegacy(WorldPacket packet)
+        public void ReadMovementInfoLegacy(WorldPacket packet, GameSessionData gameState)
         {
             MovementInfo info = this;
 
@@ -128,9 +128,9 @@ namespace HermesProxy.World.Objects
             if (info.Flags.HasAnyFlag(MovementFlagWotLK.OnTransport))
             {
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
-                    info.TransportGuid = packet.ReadPackedGuid().To128();
+                    info.TransportGuid = packet.ReadPackedGuid().To128(gameState);
                 else
-                    info.TransportGuid = packet.ReadGuid().To128();
+                    info.TransportGuid = packet.ReadGuid().To128(gameState);
 
                 info.TransportOffset = packet.ReadVector4();
 
@@ -387,7 +387,7 @@ namespace HermesProxy.World.Objects
             bool hasPrevTime = false;
             bool hasVehicleId = moveInfo.VehicleId != 0;
 
-            data.WritePackedGuid128(moveInfo.TransportGuid.To128()); // Transport Guid
+            data.WritePackedGuid128(moveInfo.TransportGuid); // Transport Guid
             data.WriteFloat(moveInfo.TransportOffset.X);
             data.WriteFloat(moveInfo.TransportOffset.Y);
             data.WriteFloat(moveInfo.TransportOffset.Z);

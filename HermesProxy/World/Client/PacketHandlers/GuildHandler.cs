@@ -33,7 +33,7 @@ namespace HermesProxy.World.Client
 
             WowGuid128 guid = WowGuid128.Empty;
             if (packet.CanRead())
-                guid = packet.ReadGuid().To128();
+                guid = packet.ReadGuid().To128(GetSession().GameState);
 
             switch (eventType)
             {
@@ -296,7 +296,7 @@ namespace HermesProxy.World.Client
             {
                 GuildRosterMemberData member = new GuildRosterMemberData();
                 PlayerCache cache = new PlayerCache();
-                member.Guid = packet.ReadGuid().To128();
+                member.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 member.VirtualRealmAddress = GetSession().RealmId.GetAddress();
                 member.Status = packet.ReadUInt8();
                 member.Name = cache.Name = packet.ReadCString();
@@ -336,7 +336,7 @@ namespace HermesProxy.World.Client
         void HandleTabardVendorActivate(WorldPacket packet)
         {
             PlayerTabardVendorActivate activate = new();
-            activate.DesignerGUID = packet.ReadGuid().To128();
+            activate.DesignerGUID = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(activate);
         }
 

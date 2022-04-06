@@ -17,12 +17,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DESTROY_OBJECT)]
         void HandleDestroyObject(WorldPacket packet)
         {
-            WowGuid128 guid = packet.ReadGuid().To128();
+            WowGuid128 guid = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.ObjectCacheMutex.WaitOne();
             GetSession().GameState.ObjectCacheLegacy.Remove(guid);
             GetSession().GameState.ObjectCacheModern.Remove(guid);
             GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
-            GetSession().GameState.StoreObjectDestroyTime(guid, Time.UnixTime);
 
             UpdateObject updateObject = new UpdateObject(GetSession().GameState);
             updateObject.DestroyedGuids.Add(guid);
@@ -59,7 +58,7 @@ namespace HermesProxy.World.Client
                 {
                     case UpdateTypeLegacy.Values:
                     {
-                        var guid = packet.ReadPackedGuid().To128();
+                        var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
 
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
@@ -83,7 +82,16 @@ namespace HermesProxy.World.Client
                     }
                     case UpdateTypeLegacy.CreateObject1:
                     {
-                        var guid = packet.ReadPackedGuid().To128();
+                        var oldGuid = packet.ReadPackedGuid();
+
+                        // workaround for lack of dynamic guids on private servers
+                        if (oldGuid.GetHighType() == HighGuidType.Creature || oldGuid.GetHighType() == HighGuidType.GameObject)
+                        {
+                            if (!GetSession().GameState.ObjectSpawnCount.ContainsKey(oldGuid))
+                                GetSession().GameState.ObjectSpawnCount.Add(oldGuid, 0);
+                        }
+
+                        var guid = oldGuid.To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
 
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject1, GetSession());
@@ -97,16 +105,14 @@ namespace HermesProxy.World.Client
                     }
                     case UpdateTypeLegacy.CreateObject2:
                     {
-                        var guid = packet.ReadPackedGuid().To128();
-                        PrintString($"Guid = {guid.ToString()}", i);
+                        var oldGuid = packet.ReadPackedGuid();
 
-                        // This is awful but i cannot think of another way to
-                        // delay the create while preserving the order of updates.
-                        // It's needed because mangos reuses the same guid for
-                        // respawning objects, and the new client bugs out if
-                        // you send a create too soon after the destroy packet.
-                        if (GetSession().GameState.MustDelayObjectCreate(guid))
-                            System.Threading.Thread.Sleep(1000);
+                        // workaround for lack of dynamic guids on private servers
+                        if (oldGuid.GetHighType() == HighGuidType.Creature || oldGuid.GetHighType() == HighGuidType.GameObject)
+                            GetSession().GameState.IncrementObjectSpawnCounter(oldGuid);
+
+                        var guid = oldGuid.To128(GetSession().GameState);
+                        PrintString($"Guid = {guid.ToString()}", i);
 
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject2, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
@@ -197,7 +203,7 @@ namespace HermesProxy.World.Client
             PrintString($"FarObjectsCount = {objCount}", index);
             for (var j = 0; j < objCount; j++)
             {
-                var guid = packet.ReadPackedGuid().To128();
+                var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
                 PrintString($"Guid = {objCount}", index, j);
                 GetSession().GameState.ObjectCacheMutex.WaitOne();
                 GetSession().GameState.ObjectCacheLegacy.Remove(guid);
@@ -605,7 +611,7 @@ namespace HermesProxy.World.Client
             if (flags.HasAnyFlag(UpdateFlag.Living))
             {
                 moveInfo = new MovementInfo();
-                moveInfo.ReadMovementInfoLegacy(packet);
+                moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
                 var moveFlags = moveInfo.Flags;
 
                 var speeds = 6;
@@ -689,7 +695,7 @@ namespace HermesProxy.World.Client
 
                         if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalTarget))
                         {
-                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128();
+                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128(GetSession().GameState);
                             monsterMove.SplineType = SplineTypeModern.FacingTarget;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalOrientation))
@@ -711,7 +717,7 @@ namespace HermesProxy.World.Client
 
                         if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalTarget))
                         {
-                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128();
+                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128(GetSession().GameState);
                             monsterMove.SplineType = SplineTypeModern.FacingTarget;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalOrientation))
@@ -733,7 +739,7 @@ namespace HermesProxy.World.Client
 
                         if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalTarget))
                         {
-                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128();
+                            monsterMove.FinalFacingGuid = packet.ReadGuid().To128(GetSession().GameState);
                             monsterMove.SplineType = SplineTypeModern.FacingTarget;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalOrientation))
@@ -796,7 +802,7 @@ namespace HermesProxy.World.Client
                 if (flags.HasAnyFlag(UpdateFlag.GOPosition))
                 {
                     moveInfo = new MovementInfo();
-                    moveInfo.TransportGuid = packet.ReadPackedGuid().To128();
+                    moveInfo.TransportGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
 
                     moveInfo.Position = packet.ReadVector3();
                     moveInfo.TransportOffset.X = packet.ReadFloat();
@@ -829,7 +835,7 @@ namespace HermesProxy.World.Client
             {
                 WowGuid64 attackGuid = packet.ReadPackedGuid();
                 if (updateData != null)
-                    updateData.CreateData.AutoAttackVictim = attackGuid.To128();
+                    updateData.CreateData.AutoAttackVictim = attackGuid.To128(GetSession().GameState);
             }
 
             if (flags.HasAnyFlag(UpdateFlag.Transport))
@@ -1021,7 +1027,7 @@ namespace HermesProxy.World.Client
             int OBJECT_FIELD_GUID = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_GUID);
             if (OBJECT_FIELD_GUID >= 0 && updateMaskArray[OBJECT_FIELD_GUID])
             {
-                updateData.ObjectData.Guid = GetGuidValue(updates, ObjectField.OBJECT_FIELD_GUID).To128();
+                updateData.ObjectData.Guid = GetGuidValue(updates, ObjectField.OBJECT_FIELD_GUID).To128(GetSession().GameState);
             }
             int OBJECT_FIELD_ENTRY = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_ENTRY);
             if (OBJECT_FIELD_ENTRY >= 0 && updateMaskArray[OBJECT_FIELD_ENTRY])
@@ -1041,22 +1047,22 @@ namespace HermesProxy.World.Client
                 int ITEM_FIELD_OWNER = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_OWNER);
                 if (ITEM_FIELD_OWNER >= 0 && updateMaskArray[ITEM_FIELD_OWNER])
                 {
-                    updateData.ItemData.Owner = GetGuidValue(updates, ItemField.ITEM_FIELD_OWNER).To128();
+                    updateData.ItemData.Owner = GetGuidValue(updates, ItemField.ITEM_FIELD_OWNER).To128(GetSession().GameState);
                 }
                 int ITEM_FIELD_CONTAINED = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_CONTAINED);
                 if (ITEM_FIELD_CONTAINED >= 0 && updateMaskArray[ITEM_FIELD_CONTAINED])
                 {
-                    updateData.ItemData.ContainedIn = GetGuidValue(updates, ItemField.ITEM_FIELD_CONTAINED).To128();
+                    updateData.ItemData.ContainedIn = GetGuidValue(updates, ItemField.ITEM_FIELD_CONTAINED).To128(GetSession().GameState);
                 }
                 int ITEM_FIELD_CREATOR = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_CREATOR);
                 if (ITEM_FIELD_CREATOR >= 0 && updateMaskArray[ITEM_FIELD_CREATOR])
                 {
-                    updateData.ItemData.Creator = GetGuidValue(updates, ItemField.ITEM_FIELD_CREATOR).To128();
+                    updateData.ItemData.Creator = GetGuidValue(updates, ItemField.ITEM_FIELD_CREATOR).To128(GetSession().GameState);
                 }
                 int ITEM_FIELD_GIFTCREATOR = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_GIFTCREATOR);
                 if (ITEM_FIELD_GIFTCREATOR >= 0 && updateMaskArray[ITEM_FIELD_GIFTCREATOR])
                 {
-                    updateData.ItemData.GiftCreator = GetGuidValue(updates, ItemField.ITEM_FIELD_GIFTCREATOR).To128();
+                    updateData.ItemData.GiftCreator = GetGuidValue(updates, ItemField.ITEM_FIELD_GIFTCREATOR).To128(GetSession().GameState);
                 }
                 int ITEM_FIELD_STACK_COUNT = LegacyVersion.GetUpdateField(ItemField.ITEM_FIELD_STACK_COUNT);
                 if (ITEM_FIELD_STACK_COUNT >= 0 && updateMaskArray[ITEM_FIELD_STACK_COUNT])
@@ -1213,7 +1219,7 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[CONTAINER_FIELD_SLOT_1 + i * 2])
                         {
-                            updateData.ContainerData.Slots[i] = GetGuidValue(updates, CONTAINER_FIELD_SLOT_1 + i * 2).To128();
+                            updateData.ContainerData.Slots[i] = GetGuidValue(updates, CONTAINER_FIELD_SLOT_1 + i * 2).To128(GetSession().GameState);
                         }
                     }
                 }
@@ -1227,37 +1233,37 @@ namespace HermesProxy.World.Client
                 int UNIT_FIELD_CHARM = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_CHARM);
                 if (UNIT_FIELD_CHARM >= 0 && updateMaskArray[UNIT_FIELD_CHARM])
                 {
-                    updateData.UnitData.Charm = GetGuidValue(updates, UnitField.UNIT_FIELD_CHARM).To128();
+                    updateData.UnitData.Charm = GetGuidValue(updates, UnitField.UNIT_FIELD_CHARM).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_SUMMON = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_SUMMON);
                 if (UNIT_FIELD_SUMMON >= 0 && updateMaskArray[UNIT_FIELD_SUMMON])
                 {
-                    updateData.UnitData.Summon = GetGuidValue(updates, UnitField.UNIT_FIELD_SUMMON).To128();
+                    updateData.UnitData.Summon = GetGuidValue(updates, UnitField.UNIT_FIELD_SUMMON).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_CHARMEDBY = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_CHARMEDBY);
                 if (UNIT_FIELD_CHARMEDBY >= 0 && updateMaskArray[UNIT_FIELD_CHARMEDBY])
                 {
-                    updateData.UnitData.CharmedBy = GetGuidValue(updates, UnitField.UNIT_FIELD_CHARMEDBY).To128();
+                    updateData.UnitData.CharmedBy = GetGuidValue(updates, UnitField.UNIT_FIELD_CHARMEDBY).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_SUMMONEDBY = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_SUMMONEDBY);
                 if (UNIT_FIELD_SUMMONEDBY >= 0 && updateMaskArray[UNIT_FIELD_SUMMONEDBY])
                 {
-                    updateData.UnitData.SummonedBy = GetGuidValue(updates, UnitField.UNIT_FIELD_SUMMONEDBY).To128();
+                    updateData.UnitData.SummonedBy = GetGuidValue(updates, UnitField.UNIT_FIELD_SUMMONEDBY).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_CREATEDBY = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_CREATEDBY);
                 if (UNIT_FIELD_CREATEDBY >= 0 && updateMaskArray[UNIT_FIELD_CREATEDBY])
                 {
-                    updateData.UnitData.CreatedBy = GetGuidValue(updates, UnitField.UNIT_FIELD_CREATEDBY).To128();
+                    updateData.UnitData.CreatedBy = GetGuidValue(updates, UnitField.UNIT_FIELD_CREATEDBY).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_TARGET = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_TARGET);
                 if (UNIT_FIELD_TARGET >= 0 && updateMaskArray[UNIT_FIELD_TARGET])
                 {
-                    updateData.UnitData.Target = GetGuidValue(updates, UnitField.UNIT_FIELD_TARGET).To128();
+                    updateData.UnitData.Target = GetGuidValue(updates, UnitField.UNIT_FIELD_TARGET).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_CHANNEL_OBJECT = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_CHANNEL_OBJECT);
                 if (UNIT_FIELD_CHANNEL_OBJECT >= 0 && updateMaskArray[UNIT_FIELD_CHANNEL_OBJECT])
                 {
-                    updateData.UnitData.ChannelObject = GetGuidValue(updates, UnitField.UNIT_FIELD_CHANNEL_OBJECT).To128();
+                    updateData.UnitData.ChannelObject = GetGuidValue(updates, UnitField.UNIT_FIELD_CHANNEL_OBJECT).To128(GetSession().GameState);
                 }
                 int UNIT_FIELD_HEALTH = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_HEALTH);
                 if (UNIT_FIELD_HEALTH >= 0 && updateMaskArray[UNIT_FIELD_HEALTH])
@@ -1308,7 +1314,7 @@ namespace HermesProxy.World.Client
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
-                                classId = GetSession().GameState.GetUnitClass(guid.To128());
+                                classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
 
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
@@ -1327,7 +1333,7 @@ namespace HermesProxy.World.Client
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
-                                classId = GetSession().GameState.GetUnitClass(guid.To128());
+                                classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
 
                             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             if (powerSlot >= 0)
@@ -1740,7 +1746,7 @@ namespace HermesProxy.World.Client
                 int PLAYER_DUEL_ARBITER = LegacyVersion.GetUpdateField(PlayerField.PLAYER_DUEL_ARBITER);
                 if (PLAYER_DUEL_ARBITER >= 0 && updateMaskArray[PLAYER_DUEL_ARBITER])
                 {
-                    updateData.PlayerData.DuelArbiter = GetGuidValue(updates, PlayerField.PLAYER_DUEL_ARBITER).To128();
+                    updateData.PlayerData.DuelArbiter = GetGuidValue(updates, PlayerField.PLAYER_DUEL_ARBITER).To128(GetSession().GameState);
                 }
                 int PLAYER_FLAGS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FLAGS);
                 if (PLAYER_FLAGS >= 0 && updateMaskArray[PLAYER_FLAGS])
@@ -1814,7 +1820,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 23; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_INV_SLOT_HEAD + i * 2])
-                            updateData.ActivePlayerData.InvSlots[i] = GetGuidValue(updates, PLAYER_FIELD_INV_SLOT_HEAD + i * 2).To128();
+                            updateData.ActivePlayerData.InvSlots[i] = GetGuidValue(updates, PLAYER_FIELD_INV_SLOT_HEAD + i * 2).To128(GetSession().GameState);
                     }
                 }
                 int PLAYER_FIELD_PACK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_PACK_SLOT_1);
@@ -1823,7 +1829,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 16; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_PACK_SLOT_1 + i * 2])
-                            updateData.ActivePlayerData.PackSlots[i] = GetGuidValue(updates, PLAYER_FIELD_PACK_SLOT_1 + i * 2).To128();
+                            updateData.ActivePlayerData.PackSlots[i] = GetGuidValue(updates, PLAYER_FIELD_PACK_SLOT_1 + i * 2).To128(GetSession().GameState);
                     }
                 }
                 int PLAYER_FIELD_BANK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BANK_SLOT_1);
@@ -1833,7 +1839,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < bankSlots; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_BANK_SLOT_1 + i * 2])
-                            updateData.ActivePlayerData.BankSlots[i] = GetGuidValue(updates, PLAYER_FIELD_BANK_SLOT_1 + i * 2).To128();
+                            updateData.ActivePlayerData.BankSlots[i] = GetGuidValue(updates, PLAYER_FIELD_BANK_SLOT_1 + i * 2).To128(GetSession().GameState);
                     }
                 }
                 int PLAYER_FIELD_BANKBAG_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BANKBAG_SLOT_1);
@@ -1843,7 +1849,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < bankBagSlots; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_BANKBAG_SLOT_1 + i * 2])
-                            updateData.ActivePlayerData.BankBagSlots[i] = GetGuidValue(updates, PLAYER_FIELD_BANKBAG_SLOT_1 + i * 2).To128();
+                            updateData.ActivePlayerData.BankBagSlots[i] = GetGuidValue(updates, PLAYER_FIELD_BANKBAG_SLOT_1 + i * 2).To128(GetSession().GameState);
                     }
                 }
                 int PLAYER_FIELD_VENDORBUYBACK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_VENDORBUYBACK_SLOT_1);
@@ -1852,7 +1858,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 12; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i * 2])
-                            updateData.ActivePlayerData.BuyBackSlots[i] = GetGuidValue(updates, PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i * 2).To128();
+                            updateData.ActivePlayerData.BuyBackSlots[i] = GetGuidValue(updates, PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i * 2).To128(GetSession().GameState);
                     }
                 }
                 int PLAYER_FIELD_KEYRING_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_KEYRING_SLOT_1);
@@ -1861,7 +1867,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 32; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_KEYRING_SLOT_1 + i * 2])
-                            updateData.ActivePlayerData.KeyringSlots[i] = GetGuidValue(updates, PLAYER_FIELD_KEYRING_SLOT_1 + i * 2).To128();
+                            updateData.ActivePlayerData.KeyringSlots[i] = GetGuidValue(updates, PLAYER_FIELD_KEYRING_SLOT_1 + i * 2).To128(GetSession().GameState);
                     }
                 }
 
@@ -1903,7 +1909,7 @@ namespace HermesProxy.World.Client
                     if (raceId == Race.None || sexId == Gender.None)
                     {
                         PlayerCache cache;
-                        if (GetSession().GameState.CachedPlayers.TryGetValue(guid.To128(), out cache))
+                        if (GetSession().GameState.CachedPlayers.TryGetValue(guid.To128(GetSession().GameState), out cache))
                         {
                             raceId = cache.RaceId;
                             sexId = cache.SexId;
@@ -1945,12 +1951,12 @@ namespace HermesProxy.World.Client
                 int PLAYER_FARSIGHT = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FARSIGHT);
                 if (PLAYER_FARSIGHT >= 0 && updateMaskArray[PLAYER_FARSIGHT])
                 {
-                    updateData.ActivePlayerData.FarsightObject = GetGuidValue(updates, PlayerField.PLAYER_FARSIGHT).To128();
+                    updateData.ActivePlayerData.FarsightObject = GetGuidValue(updates, PlayerField.PLAYER_FARSIGHT).To128(GetSession().GameState);
                 }
                 int PLAYER_FIELD_COMBO_TARGET = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_COMBO_TARGET);
                 if (PLAYER_FIELD_COMBO_TARGET >= 0 && updateMaskArray[PLAYER_FIELD_COMBO_TARGET])
                 {
-                    updateData.ActivePlayerData.ComboTarget = GetGuidValue(updates, PlayerField.PLAYER_FIELD_COMBO_TARGET).To128();
+                    updateData.ActivePlayerData.ComboTarget = GetGuidValue(updates, PlayerField.PLAYER_FIELD_COMBO_TARGET).To128(GetSession().GameState);
                 }
                 int PLAYER_FIELD_KNOWN_TITLES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_KNOWN_TITLES);
                 if (PLAYER_FIELD_KNOWN_TITLES >= 0)
@@ -2193,7 +2199,7 @@ namespace HermesProxy.World.Client
                         if (updateData.UnitData.ClassId != null)
                             classId = (Class)updateData.UnitData.ClassId;
                         else
-                            classId = GetSession().GameState.GetUnitClass(guid.To128());
+                            classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
                         sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, PowerType.ComboPoints);
                         if (powerSlot >= 0)
                         {
@@ -2447,7 +2453,7 @@ namespace HermesProxy.World.Client
                 int GAMEOBJECT_FIELD_CREATED_BY = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_FIELD_CREATED_BY);
                 if (GAMEOBJECT_FIELD_CREATED_BY >= 0 && updateMaskArray[GAMEOBJECT_FIELD_CREATED_BY])
                 {
-                    updateData.GameObjectData.CreatedBy = GetGuidValue(updates, GameObjectField.GAMEOBJECT_FIELD_CREATED_BY).To128();
+                    updateData.GameObjectData.CreatedBy = GetGuidValue(updates, GameObjectField.GAMEOBJECT_FIELD_CREATED_BY).To128(GetSession().GameState);
                 }
                 int GAMEOBJECT_DISPLAYID = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_DISPLAYID);
                 if (GAMEOBJECT_DISPLAYID >= 0 && updateMaskArray[GAMEOBJECT_DISPLAYID])
@@ -2513,7 +2519,7 @@ namespace HermesProxy.World.Client
                 int DYNAMICOBJECT_CASTER = LegacyVersion.GetUpdateField(DynamicObjectField.DYNAMICOBJECT_CASTER);
                 if (DYNAMICOBJECT_CASTER >= 0 && updateMaskArray[DYNAMICOBJECT_CASTER])
                 {
-                    updateData.DynamicObjectData.Caster = GetGuidValue(updates, DynamicObjectField.DYNAMICOBJECT_CASTER).To128();
+                    updateData.DynamicObjectData.Caster = GetGuidValue(updates, DynamicObjectField.DYNAMICOBJECT_CASTER).To128(GetSession().GameState);
                 }
                 int DYNAMICOBJECT_SPELLID = LegacyVersion.GetUpdateField(DynamicObjectField.DYNAMICOBJECT_SPELLID);
                 if (DYNAMICOBJECT_SPELLID >= 0 && updateMaskArray[DYNAMICOBJECT_SPELLID])
@@ -2534,7 +2540,7 @@ namespace HermesProxy.World.Client
                 int CORPSE_FIELD_OWNER = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_OWNER);
                 if (CORPSE_FIELD_OWNER >= 0 && updateMaskArray[CORPSE_FIELD_OWNER])
                 {
-                    updateData.CorpseData.Owner = GetGuidValue(updates, CorpseField.CORPSE_FIELD_OWNER).To128();
+                    updateData.CorpseData.Owner = GetGuidValue(updates, CorpseField.CORPSE_FIELD_OWNER).To128(GetSession().GameState);
                 }
                 int CORPSE_FIELD_DISPLAY_ID = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_DISPLAY_ID);
                 if (CORPSE_FIELD_DISPLAY_ID >= 0 && updateMaskArray[CORPSE_FIELD_DISPLAY_ID])

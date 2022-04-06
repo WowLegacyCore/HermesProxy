@@ -65,7 +65,7 @@ namespace HermesProxy.World.Client
             for (var i = 0; i < count; i++)
             {
                 ArenaTeamMember member = new ArenaTeamMember();
-                member.MemberGUID = packet.ReadGuid().To128();
+                member.MemberGUID = packet.ReadGuid().To128(GetSession().GameState);
                 member.Online = packet.ReadBool();
                 member.Name = packet.ReadCString();
                 member.Captain = packet.ReadInt32();

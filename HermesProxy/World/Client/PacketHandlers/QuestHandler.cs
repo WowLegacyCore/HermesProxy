@@ -14,11 +14,11 @@ namespace HermesProxy.World.Client
         void HandleQuestGiverQuestDetails(WorldPacket packet)
         {
             QuestGiverQuestDetails quest = new();
-            quest.QuestGiverGUID = packet.ReadGuid().To128();
+            quest.QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = quest.QuestGiverGUID;
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                quest.InformUnit = packet.ReadGuid().To128();
+                quest.InformUnit = packet.ReadGuid().To128(GetSession().GameState);
             else
                 quest.InformUnit = quest.QuestGiverGUID;
 
@@ -135,7 +135,7 @@ namespace HermesProxy.World.Client
         void HandleQuestGiverStatus(WorldPacket packet)
         {
             QuestGiverStatusPkt response = new QuestGiverStatusPkt();
-            response.QuestGiver.Guid = packet.ReadGuid().To128();
+            response.QuestGiver.Guid = packet.ReadGuid().To128(GetSession().GameState);
             response.QuestGiver.Status = LegacyVersion.ConvertQuestGiverStatus(packet.ReadUInt8());
             SendPacketToClient(response);
         }
@@ -148,7 +148,7 @@ namespace HermesProxy.World.Client
             for (int i = 0; i < count; i++)
             {
                 QuestGiverInfo info = new();
-                info.Guid = packet.ReadGuid().To128();
+                info.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 info.Status = LegacyVersion.ConvertQuestGiverStatus(packet.ReadUInt8());
                 response.QuestGivers.Add(info);
             }
@@ -159,7 +159,7 @@ namespace HermesProxy.World.Client
         void HandleQuestGiverQuestListMessage(WorldPacket packet)
         {
             QuestGiverQuestListMessage quests = new QuestGiverQuestListMessage();
-            quests.QuestGiverGUID = packet.ReadGuid().To128();
+            quests.QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = quests.QuestGiverGUID;
             quests.Greeting = packet.ReadCString();
             quests.GreetEmoteDelay = packet.ReadUInt32();
@@ -201,7 +201,7 @@ namespace HermesProxy.World.Client
         void HandleQuestGiverRequestItems(WorldPacket packet)
         {
             QuestGiverRequestItems quest = new QuestGiverRequestItems();
-            quest.QuestGiverGUID = packet.ReadGuid().To128();
+            quest.QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = quest.QuestGiverGUID;
             quest.QuestGiverCreatureID = quest.QuestGiverGUID.GetEntry();
             quest.QuestID = packet.ReadUInt32();
@@ -249,7 +249,7 @@ namespace HermesProxy.World.Client
         void HandleQuestGiverOfferRewardMessage(WorldPacket packet)
         {
             QuestGiverOfferRewardMessage quest = new QuestGiverOfferRewardMessage();
-            quest.QuestData.QuestGiverGUID = packet.ReadGuid().To128();
+            quest.QuestData.QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = quest.QuestData.QuestGiverGUID;
             quest.QuestData.QuestGiverCreatureID = quest.QuestData.QuestGiverGUID.GetEntry();
             quest.QuestData.QuestID = packet.ReadUInt32();

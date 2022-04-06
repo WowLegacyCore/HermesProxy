@@ -114,7 +114,7 @@ namespace HermesProxy.World
         }
 
         public abstract WowGuid64 To64();
-        public abstract WowGuid128 To128();
+        public abstract WowGuid128 To128(GameSessionData gameState);
     }
 
     public class WowGuid128 : WowGuid
@@ -134,7 +134,7 @@ namespace HermesProxy.World
             HighGuid = new HighGuid703((byte)((High >> 58) & 0x3F));
         }
 
-        public static WowGuid128 Create(WowGuid64 guid)
+        public static WowGuid128 Create(WowGuid64 guid, GameSessionData gamestate)
         {
             switch (guid.GetHighType())
             {
@@ -148,9 +148,9 @@ namespace HermesProxy.World
                 case HighGuidType.RaidGroup:
                     return Create(HighGuidType703.RaidGroup, guid.GetCounter());
                 case HighGuidType.GameObject:
-                    return Create(HighGuidType703.GameObject, 0, guid.GetEntry(), guid.GetCounter());
+                    return Create(HighGuidType703.GameObject, gamestate.GetObjectSpawnCounter(guid), guid.GetEntry(), guid.GetCounter());
                 case HighGuidType.Creature:
-                    return Create(HighGuidType703.Creature, 0, guid.GetEntry(), guid.GetCounter());
+                    return Create(HighGuidType703.Creature, gamestate.GetObjectSpawnCounter(guid), guid.GetEntry(), guid.GetCounter());
                 case HighGuidType.Pet:
                     return Create(HighGuidType703.Pet, 0, guid.GetEntry(), guid.GetCounter());
                 case HighGuidType.Vehicle:
@@ -299,7 +299,7 @@ namespace HermesProxy.World
         {
             return WowGuid64.Create(this);
         }
-        public override WowGuid128 To128()
+        public override WowGuid128 To128(GameSessionData gameState)
         {
             return this;
         }
@@ -424,9 +424,9 @@ namespace HermesProxy.World
         {
             return this;
         }
-        public override WowGuid128 To128()
+        public override WowGuid128 To128(GameSessionData gameState)
         {
-            return WowGuid128.Create(this);
+            return WowGuid128.Create(this, gameState);
         }
         public WowGuid128 ToLootGuid()
         {

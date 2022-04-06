@@ -26,7 +26,7 @@ namespace HermesProxy.World.Client
             {
                 EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
                 PlayerCache cache = new PlayerCache();
-                char1.Guid = packet.ReadGuid().To128();
+                char1.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 GetSession().GameState.OwnCharacters.Add(char1.Guid);
                 char1.Name = cache.Name = packet.ReadCString();
                 char1.RaceId = cache.RaceId = (Race)packet.ReadUInt8();
@@ -160,7 +160,7 @@ namespace HermesProxy.World.Client
             QueryPlayerNameResponse response = new QueryPlayerNameResponse();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
             {
-                response.Player = response.Data.GuidActual = packet.ReadPackedGuid().To128();
+                response.Player = response.Data.GuidActual = packet.ReadPackedGuid().To128(GetSession().GameState);
                 var fail = packet.ReadBool();
                 if (fail)
                 {
@@ -170,7 +170,7 @@ namespace HermesProxy.World.Client
                 }
             }
             else
-                response.Player = response.Data.GuidActual = packet.ReadGuid().To128();
+                response.Player = response.Data.GuidActual = packet.ReadGuid().To128(GetSession().GameState);
 
             PlayerCache cache = new PlayerCache();
             response.Data.Name = cache.Name = packet.ReadCString();
@@ -306,7 +306,7 @@ namespace HermesProxy.World.Client
         void HandleLogXPGain(WorldPacket packet)
         {
             LogXPGain log = new();
-            log.Victim = packet.ReadGuid().To128();
+            log.Victim = packet.ReadGuid().To128(GetSession().GameState);
             log.Original = packet.ReadInt32();
             log.Reason = (PlayerLogXPReason)packet.ReadUInt8();
             if (log.Reason == PlayerLogXPReason.Kill)
@@ -352,7 +352,7 @@ namespace HermesProxy.World.Client
         void HandleUpdateComboPoints(WorldPacket packet)
         {
             ObjectUpdate updateData = new ObjectUpdate(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
-            updateData.ActivePlayerData.ComboTarget = packet.ReadPackedGuid().To128();
+            updateData.ActivePlayerData.ComboTarget = packet.ReadPackedGuid().To128(GetSession().GameState);
             byte comboPoints = packet.ReadUInt8();
             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(GetSession().GameState.GetUnitClass(GetSession().GameState.CurrentPlayerGuid), PowerType.ComboPoints);
             if (powerSlot >= 0)

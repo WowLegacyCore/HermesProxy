@@ -278,9 +278,9 @@ namespace HermesProxy.World.Client
         {
             WowGuid128 casterUnit;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                casterUnit = packet.ReadPackedGuid().To128();
+                casterUnit = packet.ReadPackedGuid().To128(GetSession().GameState);
             else
-                casterUnit = packet.ReadGuid().To128();
+                casterUnit = packet.ReadGuid().To128(GetSession().GameState);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // Cast Count
             uint spellId = packet.ReadUInt32();
@@ -389,8 +389,8 @@ namespace HermesProxy.World.Client
         {
             SpellCastData dbdata = new SpellCastData();
             
-            dbdata.CasterGUID = packet.ReadPackedGuid().To128();
-            dbdata.CasterUnit = packet.ReadPackedGuid().To128();
+            dbdata.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            dbdata.CasterUnit = packet.ReadPackedGuid().To128(GetSession().GameState);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
@@ -417,14 +417,14 @@ namespace HermesProxy.World.Client
                 var hitCount = packet.ReadUInt8();
                 for (var i = 0; i < hitCount; i++)
                 {
-                    WowGuid128 hitTarget = packet.ReadGuid().To128();
+                    WowGuid128 hitTarget = packet.ReadGuid().To128(GetSession().GameState);
                     dbdata.HitTargets.Add(hitTarget);
                 }
 
                 var missCount = packet.ReadUInt8();
                 for (var i = 0; i < missCount; i++)
                 {
-                    WowGuid128 missTarget = packet.ReadGuid().To128();
+                    WowGuid128 missTarget = packet.ReadGuid().To128(GetSession().GameState);
                     SpellMissInfo missType = (SpellMissInfo)packet.ReadUInt8();
                     SpellMissInfo reflectType = SpellMissInfo.None;
                     if (missType == SpellMissInfo.Reflect)
@@ -442,12 +442,12 @@ namespace HermesProxy.World.Client
             WowGuid128 unitTarget = WowGuid128.Empty;
             if (targetFlags.HasAnyFlag(SpellCastTargetFlags.Unit | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.GameObject |
                 SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.UnitMinipet))
-                unitTarget = packet.ReadPackedGuid().To128();
+                unitTarget = packet.ReadPackedGuid().To128(GetSession().GameState);
             dbdata.Target.Unit = unitTarget;
 
             WowGuid128 itemTarget = WowGuid128.Empty;
             if (targetFlags.HasAnyFlag(SpellCastTargetFlags.Item | SpellCastTargetFlags.TradeItem))
-                itemTarget = packet.ReadPackedGuid().To128();
+                itemTarget = packet.ReadPackedGuid().To128(GetSession().GameState);
             dbdata.Target.Item = itemTarget;
 
             if (targetFlags.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
@@ -455,7 +455,7 @@ namespace HermesProxy.World.Client
                 dbdata.Target.SrcLocation = new TargetLocation();
                 dbdata.Target.SrcLocation.Transport = WowGuid128.Empty;
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
-                    dbdata.Target.SrcLocation.Transport = packet.ReadPackedGuid().To128();
+                    dbdata.Target.SrcLocation.Transport = packet.ReadPackedGuid().To128(GetSession().GameState);
 
                 dbdata.Target.SrcLocation.Location = packet.ReadVector3();
             }
@@ -465,7 +465,7 @@ namespace HermesProxy.World.Client
                 dbdata.Target.DstLocation = new TargetLocation();
                 dbdata.Target.DstLocation.Transport = WowGuid128.Empty;
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_8_9464))
-                    dbdata.Target.DstLocation.Transport = packet.ReadPackedGuid().To128();
+                    dbdata.Target.DstLocation.Transport = packet.ReadPackedGuid().To128(GetSession().GameState);
 
                 dbdata.Target.DstLocation.Location = packet.ReadVector3();
             }
@@ -536,7 +536,7 @@ namespace HermesProxy.World.Client
                             for (var i = 0; i < targetCount; i++)
                             {
                                 location.Location = packet.ReadVector3();
-                                location.Transport = packet.ReadGuid().To128();
+                                location.Transport = packet.ReadGuid().To128(GetSession().GameState);
                             }
                             dbdata.TargetPoints.Add(location);
                         }
@@ -568,7 +568,7 @@ namespace HermesProxy.World.Client
         {
             CancelAutoRepeat cancel = new CancelAutoRepeat();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                cancel.Guid = packet.ReadPackedGuid().To128();
+                cancel.Guid = packet.ReadPackedGuid().To128(GetSession().GameState);
             else
                 cancel.Guid = GetSession().GameState.CurrentPlayerGuid;
             SendPacketToClient(cancel);
@@ -578,7 +578,7 @@ namespace HermesProxy.World.Client
         void HandleSpellCooldown(WorldPacket packet)
         {
             SpellCooldownPkt cooldown = new();
-            cooldown.Caster = packet.ReadGuid().To128();
+            cooldown.Caster = packet.ReadGuid().To128(GetSession().GameState);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 cooldown.Flags = packet.ReadUInt8();
             while (packet.CanRead())
@@ -614,7 +614,7 @@ namespace HermesProxy.World.Client
         void HandleCooldownCheat(WorldPacket packet)
         {
             CooldownCheat cooldown = new();
-            cooldown.Guid = packet.ReadGuid().To128();
+            cooldown.Guid = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(cooldown);
         }
 
@@ -622,8 +622,8 @@ namespace HermesProxy.World.Client
         void HandleSpellNonMeleeDamageLog(WorldPacket packet)
         {
             SpellNonMeleeDamageLog spell = new();
-            spell.TargetGUID = packet.ReadPackedGuid().To128();
-            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.TargetGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            spell.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             spell.SpellID = packet.ReadUInt32();
             spell.SpellXSpellVisualID = GameData.GetSpellVisual(spell.SpellID);
             spell.CastID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, spell.SpellID, spell.SpellID + spell.CasterGUID.GetCounter());
@@ -683,8 +683,8 @@ namespace HermesProxy.World.Client
         void HandleSpellHealLog(WorldPacket packet)
         {
             SpellHealLog spell = new();
-            spell.TargetGUID = packet.ReadPackedGuid().To128();
-            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.TargetGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            spell.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             spell.SpellID = packet.ReadUInt32();
             spell.HealAmount = packet.ReadInt32();
             spell.OriginalHealAmount = spell.HealAmount;
@@ -714,8 +714,8 @@ namespace HermesProxy.World.Client
         void HandleSpellPeriodicAuraLog(WorldPacket packet)
         {
             SpellPeriodicAuraLog spell = new();
-            spell.TargetGUID = packet.ReadPackedGuid().To128();
-            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.TargetGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            spell.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             spell.SpellID = packet.ReadUInt32();
 
             var count = packet.ReadInt32();
@@ -799,8 +799,8 @@ namespace HermesProxy.World.Client
         void HandleSpellEnergizeLog(WorldPacket packet)
         {
             SpellEnergizeLog spell = new();
-            spell.TargetGUID = packet.ReadPackedGuid().To128();
-            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.TargetGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            spell.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             spell.SpellID = packet.ReadUInt32();
             spell.Type = (PowerType)packet.ReadUInt32();
             spell.Amount = packet.ReadInt32();
@@ -812,9 +812,9 @@ namespace HermesProxy.World.Client
         {
             SpellDelayed delay = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                delay.CasterGUID = packet.ReadPackedGuid().To128();
+                delay.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             else
-                delay.CasterGUID = packet.ReadGuid().To128();
+                delay.CasterGUID = packet.ReadGuid().To128(GetSession().GameState);
             delay.Delay = packet.ReadInt32();
             SendPacketToClient(delay);
         }
@@ -824,7 +824,7 @@ namespace HermesProxy.World.Client
         {
             SpellChannelStart channel = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                channel.CasterGUID = packet.ReadPackedGuid().To128();
+                channel.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             else
                 channel.CasterGUID = GetSession().GameState.CurrentPlayerGuid;
             channel.SpellID = packet.ReadUInt32();
@@ -838,7 +838,7 @@ namespace HermesProxy.World.Client
         {
             SpellChannelUpdate channel = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                channel.CasterGUID = packet.ReadPackedGuid().To128();
+                channel.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             else
                 channel.CasterGUID = GetSession().GameState.CurrentPlayerGuid;
             channel.TimeRemaining = packet.ReadInt32();
@@ -849,8 +849,8 @@ namespace HermesProxy.World.Client
         void HandleSpellDamageShield(WorldPacket packet)
         {
             SpellDamageShield spell = new();
-            spell.VictimGUID = packet.ReadGuid().To128();
-            spell.CasterGUID = packet.ReadGuid().To128();
+            spell.VictimGUID = packet.ReadGuid().To128(GetSession().GameState);
+            spell.CasterGUID = packet.ReadGuid().To128(GetSession().GameState);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 spell.SpellID = packet.ReadUInt32();
@@ -875,7 +875,7 @@ namespace HermesProxy.World.Client
         void HandleEnvironmentalDamageLog(WorldPacket packet)
         {
             EnvironmentalDamageLog damage = new();
-            damage.Victim = packet.ReadGuid().To128();
+            damage.Victim = packet.ReadGuid().To128(GetSession().GameState);
             damage.Type = (EnvironmentalDamage)packet.ReadUInt8();
             damage.Amount = packet.ReadInt32();
             damage.Absorbed = packet.ReadInt32();
@@ -889,11 +889,11 @@ namespace HermesProxy.World.Client
             SpellInstakillLog spell = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                spell.CasterGUID = packet.ReadGuid().To128();
-                spell.TargetGUID = packet.ReadGuid().To128();
+                spell.CasterGUID = packet.ReadGuid().To128(GetSession().GameState);
+                spell.TargetGUID = packet.ReadGuid().To128(GetSession().GameState);
             }
             else
-                spell.CasterGUID = spell.TargetGUID = packet.ReadGuid().To128();
+                spell.CasterGUID = spell.TargetGUID = packet.ReadGuid().To128(GetSession().GameState);
             spell.SpellID = packet.ReadUInt32();
             SendPacketToClient(spell);
         }
@@ -902,8 +902,8 @@ namespace HermesProxy.World.Client
         void HandleSpellDispellLog(WorldPacket packet)
         {
             SpellDispellLog spell = new();
-            spell.TargetGUID = packet.ReadPackedGuid().To128();
-            spell.CasterGUID = packet.ReadPackedGuid().To128();
+            spell.TargetGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            spell.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 spell.DispelledBySpellID = packet.ReadUInt32();
@@ -939,7 +939,7 @@ namespace HermesProxy.World.Client
         void HandlePlaySpellVisualKit(WorldPacket packet)
         {
             PlaySpellVisualKit spell = new();
-            spell.Unit = packet.ReadGuid().To128();
+            spell.Unit = packet.ReadGuid().To128(GetSession().GameState);
             spell.KitRecID = packet.ReadUInt32();
             SendPacketToClient(spell);
         }
@@ -976,7 +976,7 @@ namespace HermesProxy.World.Client
         void HandleResurrectRequest(WorldPacket packet)
         {
             ResurrectRequest revive = new();
-            revive.CasterGUID = packet.ReadGuid().To128();
+            revive.CasterGUID = packet.ReadGuid().To128(GetSession().GameState);
             revive.CasterVirtualRealmAddress = GetSession().RealmId.GetAddress();
             packet.ReadUInt32(); // Name Length
             revive.Name = packet.ReadCString();

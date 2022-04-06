@@ -109,7 +109,7 @@ namespace HermesProxy.World.Client
                 {
                     PartyPlayerInfo member = new PartyPlayerInfo();
                     member.Name = packet.ReadCString();
-                    member.GUID = packet.ReadGuid().To128();
+                    member.GUID = packet.ReadGuid().To128(GetSession().GameState);
                     member.Status = (GroupMemberOnlineStatus)packet.ReadUInt8();
                     byte subGroupAndFlags = packet.ReadUInt8();
                     member.Subgroup = (byte)(subGroupAndFlags & 0xF);
@@ -124,11 +124,11 @@ namespace HermesProxy.World.Client
                 if (allAssist)
                     party.PartyFlags |= GroupFlags.EveryoneAssistant;
 
-                party.LeaderGUID = GetSession().GameState.CurrentGroupLeader = packet.ReadGuid().To128();
+                party.LeaderGUID = GetSession().GameState.CurrentGroupLeader = packet.ReadGuid().To128(GetSession().GameState);
 
                 party.LootSettings = new PartyLootSettings();
                 party.LootSettings.Method = GetSession().GameState.CurrentGroupLootMethod = (LootMethod)packet.ReadUInt8();
-                party.LootSettings.LootMaster = packet.ReadGuid().To128();
+                party.LootSettings.LootMaster = packet.ReadGuid().To128(GetSession().GameState);
                 party.LootSettings.Threshold = packet.ReadUInt8();
             }
             else
@@ -174,7 +174,7 @@ namespace HermesProxy.World.Client
             else
             {
                 ReadyCheckResponse ready = new ReadyCheckResponse();
-                ready.Player = packet.ReadGuid().To128();
+                ready.Player = packet.ReadGuid().To128(GetSession().GameState);
                 ready.IsReady = packet.ReadBool();
                 ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
                 SendPacketToClient(ready);
@@ -196,7 +196,7 @@ namespace HermesProxy.World.Client
         {
             ReadyCheckStarted ready = new ReadyCheckStarted();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                ready.InitiatorGUID = packet.ReadGuid().To128();
+                ready.InitiatorGUID = packet.ReadGuid().To128(GetSession().GameState);
             else
                 ready.InitiatorGUID = WowGuid128.Empty;
             ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
@@ -208,7 +208,7 @@ namespace HermesProxy.World.Client
         void HandleRaidReadyCheckConfirm(WorldPacket packet)
         {
             ReadyCheckResponse ready = new ReadyCheckResponse();
-            ready.Player = packet.ReadGuid().To128();
+            ready.Player = packet.ReadGuid().To128(GetSession().GameState);
             ready.IsReady = packet.ReadBool();
             ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
             SendPacketToClient(ready);
@@ -233,7 +233,7 @@ namespace HermesProxy.World.Client
                 while (packet.CanRead())
                 {
                     sbyte symbol = packet.ReadInt8();
-                    WowGuid128 guid = packet.ReadGuid().To128();
+                    WowGuid128 guid = packet.ReadGuid().To128(GetSession().GameState);
                     update.TargetIcons.Add(new Tuple<sbyte, WowGuid128>(symbol, guid));
                 }
                 SendPacketToClient(update);
@@ -243,12 +243,12 @@ namespace HermesProxy.World.Client
                 SendRaidTargetUpdateSingle update = new SendRaidTargetUpdateSingle();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    update.ChangedBy = packet.ReadGuid().To128();
+                    update.ChangedBy = packet.ReadGuid().To128(GetSession().GameState);
                 else
                     update.ChangedBy = GetSession().GameState.CurrentPlayerGuid;
                 
                 update.Symbol = packet.ReadInt8();
-                update.Target = packet.ReadGuid().To128();
+                update.Target = packet.ReadGuid().To128(GetSession().GameState);
                 SendPacketToClient(update);
             }
         }
@@ -257,7 +257,7 @@ namespace HermesProxy.World.Client
         void HandleSummonRequest(WorldPacket packet)
         {
             SummonRequest summon = new SummonRequest();
-            summon.SummonerGUID = packet.ReadGuid().To128();
+            summon.SummonerGUID = packet.ReadGuid().To128(GetSession().GameState);
             summon.SummonerVirtualRealmAddress = GetSession().RealmId.GetAddress();
             summon.AreaID = packet.ReadInt32();
             packet.ReadUInt32(); // time to accept
@@ -281,7 +281,7 @@ namespace HermesProxy.World.Client
             }
 
             PartyMemberPartialState state = new PartyMemberPartialState();
-            state.AffectedGUID = packet.ReadPackedGuid().To128();
+            state.AffectedGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             var updateFlags = (GroupUpdateFlagVanilla)packet.ReadUInt32();
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.Status))
@@ -369,7 +369,7 @@ namespace HermesProxy.World.Client
             {
                 if (state.Pet == null)
                     state.Pet = new PartyMemberPetStats();
-                state.Pet.NewPetGuid = packet.ReadGuid().To128();
+                state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
                 
 
@@ -493,7 +493,7 @@ namespace HermesProxy.World.Client
                 state.PartyType[1] = 0;
             }
             
-            state.MemberGuid = packet.ReadPackedGuid().To128();
+            state.MemberGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
             var updateFlags = (GroupUpdateFlagVanilla)packet.ReadUInt32();
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.Status))
@@ -580,7 +580,7 @@ namespace HermesProxy.World.Client
             {
                 if (state.Pet == null)
                     state.Pet = new PartyMemberPetStats();
-                state.Pet.NewPetGuid = packet.ReadGuid().To128();
+                state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
 
 
@@ -682,7 +682,7 @@ namespace HermesProxy.World.Client
         void HandleMinimapPing(WorldPacket packet)
         {
             MinimapPing ping = new MinimapPing();
-            ping.SenderGUID = packet.ReadGuid().To128();
+            ping.SenderGUID = packet.ReadGuid().To128(GetSession().GameState);
             ping.Position = packet.ReadVector2();
             SendPacketToClient(ping);
         }
@@ -694,7 +694,7 @@ namespace HermesProxy.World.Client
             roll.Min = packet.ReadInt32();
             roll.Max = packet.ReadInt32();
             roll.Result = packet.ReadInt32();
-            roll.Roller = packet.ReadGuid().To128();
+            roll.Roller = packet.ReadGuid().To128(GetSession().GameState);
             roll.RollerWowAccount = GetSession().GetGameAccountGuidForPlayer(roll.Roller);
             SendPacketToClient(roll);
         }

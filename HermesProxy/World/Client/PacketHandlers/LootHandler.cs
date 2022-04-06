@@ -15,7 +15,7 @@ namespace HermesProxy.World.Client
         {
             LootResponse loot = new();
             GetSession().GameState.LastLootTargetGuid = packet.ReadGuid();
-            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128();
+            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState);
             loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
             loot.AcquireReason = (LootType)packet.ReadUInt8();
             if (loot.AcquireReason == LootType.None)
@@ -49,7 +49,7 @@ namespace HermesProxy.World.Client
         {
             LootReleaseResponse loot = new();
             WowGuid64 owner = packet.ReadGuid();
-            loot.Owner = owner.To128();
+            loot.Owner = owner.To128(GetSession().GameState);
             loot.LootObj = owner.ToLootGuid();
             packet.ReadBool(); // unk
             SendPacketToClient(loot);
@@ -59,7 +59,7 @@ namespace HermesProxy.World.Client
         void HandleLootRemoved(WorldPacket packet)
         {
             LootRemoved loot = new();
-            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128();
+            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState);
             loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
             loot.LootListID = packet.ReadUInt8();
             SendPacketToClient(loot);
@@ -125,7 +125,7 @@ namespace HermesProxy.World.Client
             WowGuid64 owner = packet.ReadGuid();
             loot.LootObj = owner.ToLootGuid();
             loot.Item.LootListID = (byte)packet.ReadUInt32();
-            loot.Player = packet.ReadGuid().To128();
+            loot.Player = packet.ReadGuid().To128(GetSession().GameState);
             loot.Item.Loot.ItemID = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesSeed = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesID = packet.ReadUInt32();
@@ -156,7 +156,7 @@ namespace HermesProxy.World.Client
             loot.Item.Loot.RandomPropertiesSeed = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesID = packet.ReadUInt32();
             loot.Item.Quantity = 1;
-            loot.Winner = packet.ReadGuid().To128();
+            loot.Winner = packet.ReadGuid().To128(GetSession().GameState);
             loot.Roll = packet.ReadUInt8();
             loot.RollType = (RollType)packet.ReadUInt8();
             if (loot.RollType == RollType.Need)
@@ -194,7 +194,7 @@ namespace HermesProxy.World.Client
                 return;
 
             LootList list = new LootList();
-            list.Owner = GetSession().GameState.LastLootTargetGuid.To128();
+            list.Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState);
             list.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
             list.Master = GetSession().GameState.CurrentPlayerGuid;
             SendPacketToClient(list);
@@ -204,7 +204,7 @@ namespace HermesProxy.World.Client
             byte count = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)
             {
-                WowGuid128 guid = packet.ReadGuid().To128();
+                WowGuid128 guid = packet.ReadGuid().To128(GetSession().GameState);
                 loot.Players.Add(guid);
             }
             SendPacketToClient(loot);

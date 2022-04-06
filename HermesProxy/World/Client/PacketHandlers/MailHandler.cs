@@ -43,7 +43,7 @@ namespace HermesProxy.World.Client
                 for (var i = 0; i < count; ++i)
                 {
                     MailNextTimeEntry mail = new MailNextTimeEntry();
-                    mail.SenderGuid = packet.ReadGuid().To128();
+                    mail.SenderGuid = packet.ReadGuid().To128(GetSession().GameState);
                     mail.AltSenderID = packet.ReadInt32();
                     mail.AltSenderType = (sbyte)packet.ReadInt32();
                     mail.StationeryID = packet.ReadInt32();
@@ -78,7 +78,7 @@ namespace HermesProxy.World.Client
                 switch (mail.SenderType) // Read GUID if MailType.Normal, int32 (entry) if not
                 {
                     case MailType.Normal:
-                        mail.SenderCharacter = packet.ReadGuid().To128();
+                        mail.SenderCharacter = packet.ReadGuid().To128(GetSession().GameState);
                         break;
                     case MailType.Item:
                         if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))

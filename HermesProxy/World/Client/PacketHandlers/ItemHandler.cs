@@ -22,7 +22,7 @@ namespace HermesProxy.World.Client
         void HandleBuySucceeded(WorldPacket packet)
         {
             BuySucceeded buy = new BuySucceeded();
-            buy.VendorGUID = packet.ReadGuid().To128();
+            buy.VendorGUID = packet.ReadGuid().To128(GetSession().GameState);
             buy.Slot = packet.ReadUInt32();
             buy.NewQuantity = packet.ReadInt32();
             buy.QuantityBought = packet.ReadUInt32();
@@ -32,7 +32,7 @@ namespace HermesProxy.World.Client
         void HandleItemPushResult(WorldPacket packet)
         {
             ItemPushResult item = new ItemPushResult();
-            item.PlayerGUID = packet.ReadGuid().To128();
+            item.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
             if (packet.ReadUInt32() == 1)
                 item.DisplayText = ItemPushResult.DisplayType.Normal;
             else
@@ -55,14 +55,14 @@ namespace HermesProxy.World.Client
         void HandleReadItemResultOk(WorldPacket packet)
         {
             ReadItemResultOK read = new ReadItemResultOK();
-            read.ItemGUID = packet.ReadGuid().To128();
+            read.ItemGUID = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(read);
         }
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_FAILED)]
         void HandleReadItemResultFailed(WorldPacket packet)
         {
             ReadItemResultFailed read = new ReadItemResultFailed();
-            read.ItemGUID = packet.ReadGuid().To128();
+            read.ItemGUID = packet.ReadGuid().To128(GetSession().GameState);
             read.Subcode = 2;
             SendPacketToClient(read);
         }
@@ -70,7 +70,7 @@ namespace HermesProxy.World.Client
         void HandleBuyFailed(WorldPacket packet)
         {
             BuyFailed fail = new BuyFailed();
-            fail.VendorGUID = packet.ReadGuid().To128();
+            fail.VendorGUID = packet.ReadGuid().To128(GetSession().GameState);
             fail.Slot = packet.ReadUInt32();
             fail.Reason = (BuyResult)packet.ReadUInt8();
             SendPacketToClient(fail);
@@ -83,8 +83,8 @@ namespace HermesProxy.World.Client
             if (failure.BagResult == InventoryResult.Ok)
                 return;
 
-            failure.Item[0] = packet.ReadGuid().To128();
-            failure.Item[1] = packet.ReadGuid().To128();
+            failure.Item[0] = packet.ReadGuid().To128(GetSession().GameState);
+            failure.Item[1] = packet.ReadGuid().To128(GetSession().GameState);
             failure.ContainerBSlot = packet.ReadUInt8();
 
             switch (failure.BagResult)
@@ -94,9 +94,9 @@ namespace HermesProxy.World.Client
                     failure.Level = packet.ReadInt32();
                     break;
                 case InventoryResult.EventAutoEquipBindConfirm:
-                    failure.SrcContainer = packet.ReadGuid().To128();
+                    failure.SrcContainer = packet.ReadGuid().To128(GetSession().GameState);
                     failure.SrcSlot = packet.ReadInt32();
-                    failure.DstContainer = packet.ReadGuid().To128();
+                    failure.DstContainer = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 case InventoryResult.ItemMaxLimitCategoryCountExceeded:
                 case InventoryResult.ItemMaxLimitCategorySocketedExceeded:
@@ -117,7 +117,7 @@ namespace HermesProxy.World.Client
         void HandleItemCooldown(WorldPacket packet)
         {
             ItemCooldown item = new ItemCooldown();
-            item.ItemGuid = packet.ReadGuid().To128();
+            item.ItemGuid = packet.ReadGuid().To128(GetSession().GameState);
             item.SpellID = packet.ReadUInt32();
             item.Cooldown = 30000;
             SendPacketToClient(item);

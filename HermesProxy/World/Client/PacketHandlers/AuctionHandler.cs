@@ -14,7 +14,7 @@ namespace HermesProxy.World.Client
         void HandleAuctionHello(WorldPacket packet)
         {
             AuctionHelloResponse auction = new AuctionHelloResponse();
-            auction.Guid = packet.ReadGuid().To128();
+            auction.Guid = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = auction.Guid;
             auction.AuctionHouseID = packet.ReadUInt32();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
@@ -65,13 +65,13 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                item.Flags = packet.ReadUInt32();
 
-            item.Owner = packet.ReadGuid().To128();
+            item.Owner = packet.ReadGuid().To128(GetSession().GameState);
             item.OwnerAccountID = GetSession().GetGameAccountGuidForPlayer(item.Owner);
             item.MinBid = packet.ReadUInt32();
             item.MinIncrement = packet.ReadUInt32();
             item.BuyoutPrice = packet.ReadUInt32();
             item.DurationLeft = packet.ReadInt32();
-            item.Bidder = packet.ReadGuid().To128();
+            item.Bidder = packet.ReadGuid().To128(GetSession().GameState);
             item.BidAmount = packet.ReadUInt32();
 
             if (item.Item.ItemID == 0)
@@ -131,7 +131,7 @@ namespace HermesProxy.World.Client
                     auction.BagResult = (InventoryResult)packet.ReadInt32();
                     break;
                 case AuctionHouseError.HigherBid:
-                    auction.Guid = packet.ReadGuid().To128();
+                    auction.Guid = packet.ReadGuid().To128(GetSession().GameState);
                     auction.Money = packet.ReadUInt32();
                     auction.MinIncrement = packet.ReadUInt32();
                     break;

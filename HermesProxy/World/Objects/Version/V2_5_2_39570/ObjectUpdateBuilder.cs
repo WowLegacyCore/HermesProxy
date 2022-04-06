@@ -639,7 +639,7 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                         data.WriteVector3(moveSpline.FinalFacingSpot);  // FaceSpot
                         break;
                     case Enums.SplineTypeModern.FacingTarget:
-                        data.WritePackedGuid128(moveSpline.FinalFacingGuid.To128()); // FaceGUID
+                        data.WritePackedGuid128(moveSpline.FinalFacingGuid); // FaceGUID
                         break;
                     case Enums.SplineTypeModern.FacingAngle:
                         data.WriteFloat(moveSpline.FinalOrientation);   // FaceDirection

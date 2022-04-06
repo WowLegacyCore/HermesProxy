@@ -14,7 +14,7 @@ namespace HermesProxy.World.Client
         void HandlePetSpellsMessage(WorldPacket packet)
         {
             WowGuid guid = packet.ReadGuid();
-            GetSession().GameState.CurrentPetGuid = guid.To128();
+            GetSession().GameState.CurrentPetGuid = guid.To128(GetSession().GameState);
             GetSession().GameState.LastClientPetCastGuid = null;
             GetSession().GameState.LastClientPetCastSpellId = 0;
             GetSession().GameState.LastClientPetCastHasStarted = false;
@@ -28,7 +28,7 @@ namespace HermesProxy.World.Client
             }
 
             PetSpells spells = new();
-            spells.PetGUID = guid.To128();
+            spells.PetGUID = guid.To128(GetSession().GameState);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                 spells.CreatureFamily = packet.ReadUInt16();
 
@@ -78,7 +78,7 @@ namespace HermesProxy.World.Client
         void HandlePetActionSound(WorldPacket packet)
         {
             PetActionSound sound = new PetActionSound();
-            sound.UnitGUID = packet.ReadGuid().To128();
+            sound.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
             sound.Action = packet.ReadUInt32();
             SendPacketToClient(sound);
         }
@@ -91,14 +91,14 @@ namespace HermesProxy.World.Client
             int UNIT_FIELD_SUMMON = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_SUMMON);
             if (UNIT_FIELD_SUMMON >= 0 && updateFields.ContainsKey(UNIT_FIELD_SUMMON))
             {
-                WowGuid128 guid = GetGuidValue(updateFields, UnitField.UNIT_FIELD_SUMMON).To128();
+                WowGuid128 guid = GetGuidValue(updateFields, UnitField.UNIT_FIELD_SUMMON).To128(GetSession().GameState);
                 if (!guid.IsEmpty())
                     pets.Guids.Add(guid);
             }
             SendPacketToClient(pets);
 
             PetStableList stable = new PetStableList();
-            stable.StableMaster = packet.ReadGuid().To128();
+            stable.StableMaster = packet.ReadGuid().To128(GetSession().GameState);
             byte count = packet.ReadUInt8();
             stable.NumStableSlots = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)

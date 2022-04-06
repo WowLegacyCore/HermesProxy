@@ -13,20 +13,16 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GAME_OBJECT_DESPAWN)]
         void HandleGameObjectDespawn(WorldPacket packet)
         {
-            // disabled because mangos reuses same guid on respawn
-            // object will remain invisible forever if we've sent despawn
-            /*
             GameObjectDespawn despawn = new GameObjectDespawn();
-            despawn.ObjectGUID = packet.ReadGuid().To128();
+            despawn.ObjectGUID = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(despawn);
-            */
         }
 
         [PacketHandler(Opcode.SMSG_GAME_OBJECT_RESET_STATE)]
         void HandleGameObjectResetState(WorldPacket packet)
         {
             GameObjectResetState reset = new GameObjectResetState();
-            reset.ObjectGUID = packet.ReadGuid().To128();
+            reset.ObjectGUID = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(reset);
         }
 
@@ -34,7 +30,7 @@ namespace HermesProxy.World.Client
         void HandleGameObjectCustomAnim(WorldPacket packet)
         {
             GameObjectCustomAnim anim = new GameObjectCustomAnim();
-            anim.ObjectGUID = packet.ReadGuid().To128();
+            anim.ObjectGUID = packet.ReadGuid().To128(GetSession().GameState);
             anim.CustomAnim = packet.ReadUInt32();
             SendPacketToClient(anim);
         }

@@ -16,7 +16,7 @@ namespace HermesProxy.World.Client
         void HandleBattlefieldListVanilla(WorldPacket packet)
         {
             BattlefieldList bglist = new BattlefieldList();
-            bglist.BattlemasterGuid = packet.ReadGuid().To128();
+            bglist.BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = GameData.GetBattlegroundIdFromMapId(packet.ReadUInt32());
             packet.ReadUInt8(); // bracket id
@@ -33,7 +33,7 @@ namespace HermesProxy.World.Client
         void HandleBattlefieldListTBC(WorldPacket packet)
         {
             BattlefieldList bglist = new BattlefieldList();
-            bglist.BattlemasterGuid = packet.ReadGuid().To128();
+            bglist.BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = packet.ReadUInt32();
             packet.ReadUInt8(); // bracket id
@@ -50,7 +50,7 @@ namespace HermesProxy.World.Client
         void HandleBattlefieldListWotLK(WorldPacket packet)
         {
             BattlefieldList bglist = new BattlefieldList();
-            bglist.BattlemasterGuid = packet.ReadGuid().To128();
+            bglist.BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.PvpAnywhere = packet.ReadBool(); // from UI
             bglist.BattlemasterListID = packet.ReadUInt32();
@@ -246,7 +246,7 @@ namespace HermesProxy.World.Client
             for (int i = 0; i < count; i++)
             {
                 PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
-                player.PlayerGUID = packet.ReadGuid().To128();
+                player.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
                 player.Rank = packet.ReadInt32();
                 player.Kills = packet.ReadUInt32();
                 player.Honor = new();
@@ -308,7 +308,7 @@ namespace HermesProxy.World.Client
             for (int i = 0; i < count; i++)
             {
                 PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
-                player.PlayerGUID = packet.ReadGuid().To128();
+                player.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
                 player.Kills = packet.ReadUInt32();
 
                 if (pvp.ArenaTeams == null)
@@ -354,7 +354,7 @@ namespace HermesProxy.World.Client
         BattlegroundPlayerPosition ReadBattlegroundPlayerPosition(WorldPacket packet)
         {
             BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
-            position.Guid = packet.ReadGuid().To128();
+            position.Guid = packet.ReadGuid().To128(GetSession().GameState);
             position.Pos = packet.ReadVector2();
             return position;
         }
@@ -429,7 +429,7 @@ namespace HermesProxy.World.Client
         void HandleBattlegroundPlayerLeftOrJoined(WorldPacket packet)
         {
             BattlegroundPlayerLeftOrJoined player = new BattlegroundPlayerLeftOrJoined(packet.GetUniversalOpcode(false));
-            player.Guid = packet.ReadGuid().To128();
+            player.Guid = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(player);
         }
 
@@ -437,7 +437,7 @@ namespace HermesProxy.World.Client
         void HandleAreaSpiritHealerTime(WorldPacket packet)
         {
             AreaSpiritHealerTime healer = new AreaSpiritHealerTime();
-            healer.HealerGuid = packet.ReadGuid().To128();
+            healer.HealerGuid = packet.ReadGuid().To128(GetSession().GameState);
             healer.TimeLeft = packet.ReadUInt32();
             SendPacketToClient(healer);
         }
@@ -447,7 +447,7 @@ namespace HermesProxy.World.Client
         {
             PvPCredit credit = new PvPCredit();
             credit.OriginalHonor = packet.ReadInt32();
-            credit.Target = packet.ReadGuid().To128();
+            credit.Target = packet.ReadGuid().To128(GetSession().GameState);
             credit.Rank = packet.ReadUInt32();
             SendPacketToClient(credit);
         }
