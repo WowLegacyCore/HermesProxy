@@ -81,4 +81,41 @@ namespace HermesProxy.World.Enums
         Sheathe             = 0x40000000,
         Immune              = 0x80000000
     }
+
+    [Flags]
+    public enum UnitFlags2 : uint
+    {
+        FeignDeath                      = 0x00000001,
+        HideBody                        = 0x00000002,   // TITLE Hide Body DESCRIPTION Hide unit model (show only player equip)
+        IgnoreReputation                = 0x00000004,
+        ComprehendLang                  = 0x00000008,
+        MirrorImage                     = 0x00000010,
+        DontFadeIn                      = 0x00000020,   // TITLE Don't Fade In DESCRIPTION Unit model instantly appears when summoned (does not fade in)
+        ForceMovement                   = 0x00000040,
+        DisarmOffhand                   = 0x00000080,
+        DisablePredStats                = 0x00000100,   // Player has disabled predicted stats (Used by raid frames)
+        AllowChangingTalents            = 0x00000200,   // Allows changing talents outside rest area
+        DisarmRanged                    = 0x00000400,   // this does not disable ranged weapon display (maybe additional flag needed?)
+        RegeneratePower                 = 0x00000800,
+        RestrictPartyInteraction        = 0x00001000,   // Restrict interaction to party or raid
+        PreventSpellClick               = 0x00002000,   // Prevent spellclick
+        InteractWhileHostile            = 0x00004000,   // TITLE Interact while Hostile
+        CannotTurn                      = 0x00008000,   // TITLE Cannot Turn
+        Unk2                            = 0x00010000,
+        PlayDeathAnim                   = 0x00020000,   // Plays special death animation upon death
+        AllowCheatSpells                = 0x00040000,   // Allows casting spells with AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL
+        SuppressHighlight               = 0x00080000,   // TITLE Suppress highlight when targeted or moused over
+        TreatAsRaidUnit                 = 0x00100000,   // TITLE Treat as Raid Unit For Helpful Spells (Instances ONLY)
+        LargeAOI                        = 0x00200000,   // TITLE Large (AOI)
+        GiganticAOI                     = 0x00400000,   // TITLE Gigantic (AOI)
+        NoActions                       = 0x00800000,
+        AIOnlySwimIfTargetSwim          = 0x01000000,   // TITLE AI will only swim if target swims
+        NoCombatLogWithNPCs             = 0x02000000,   // TITLE Don't generate combat log when engaged with NPC's
+        UntargetableByClient            = 0x04000000,   // TITLE Untargetable By Client
+        AttackerIgnoresMinimumRanges    = 0x08000000,   // TITLE Attacker Ignores Minimum Ranges
+        UninteractibleIfHostile         = 0x10000000,   // TITLE Uninteractible If Hostile
+        Unused11                        = 0x20000000,
+        InfiniteAOI                     = 0x40000000,   // TITLE Infinite (AOI)
+        Unused13                        = 0x80000000,
+    }
 }

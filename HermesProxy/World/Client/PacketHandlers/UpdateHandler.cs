@@ -1563,6 +1563,14 @@ namespace HermesProxy.World.Client
                     if (flags.HasFlag(UnitDynamicFlagsLegacy.Tapped) && flags.HasFlag(UnitDynamicFlagsLegacy.TappedByPlayer))
                         flags &= ~(UnitDynamicFlagsLegacy.Tapped | UnitDynamicFlagsLegacy.TappedByPlayer);
                     updateData.ObjectData.DynamicFlags = (uint)flags.CastFlags<UnitDynamicFlagsModern>();
+
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    {
+                        if (updateData.UnitData.Flags2 == null)
+                            updateData.UnitData.Flags2 = (uint)UnitFlags2.RegeneratePower;
+                        if (flags.HasAnyFlag(UnitDynamicFlagsLegacy.AppearDead))
+                            updateData.UnitData.Flags2 |= (uint)UnitFlags2.FeignDeath;
+                    }
                 }
                 int UNIT_CHANNEL_SPELL = LegacyVersion.GetUpdateField(UnitField.UNIT_CHANNEL_SPELL);
                 if (UNIT_CHANNEL_SPELL >= 0 && updateMaskArray[UNIT_CHANNEL_SPELL])
