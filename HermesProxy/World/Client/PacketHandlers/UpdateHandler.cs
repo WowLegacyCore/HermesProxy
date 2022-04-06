@@ -22,6 +22,7 @@ namespace HermesProxy.World.Client
             GetSession().GameState.ObjectCacheLegacy.Remove(guid);
             GetSession().GameState.ObjectCacheModern.Remove(guid);
             GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+            GetSession().GameState.StoreObjectDestroyTime(guid, Time.UnixTime);
 
             UpdateObject updateObject = new UpdateObject(GetSession().GameState);
             updateObject.DestroyedGuids.Add(guid);
@@ -98,6 +99,14 @@ namespace HermesProxy.World.Client
                     {
                         var guid = packet.ReadPackedGuid().To128();
                         PrintString($"Guid = {guid.ToString()}", i);
+
+                        // This is awful but i cannot think of another way to
+                        // delay the create while preserving the order of updates.
+                        // It's needed because mangos reuses the same guid for
+                        // respawning objects, and the new client bugs out if
+                        // you send a create too soon after the destroy packet.
+                        if (GetSession().GameState.MustDelayObjectCreate(guid))
+                            System.Threading.Thread.Sleep(1000);
 
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject2, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);

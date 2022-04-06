@@ -13,9 +13,13 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GAME_OBJECT_DESPAWN)]
         void HandleGameObjectDespawn(WorldPacket packet)
         {
+            // disabled because mangos reuses same guid on respawn
+            // object will remain invisible forever if we've sent despawn
+            /*
             GameObjectDespawn despawn = new GameObjectDespawn();
             despawn.ObjectGUID = packet.ReadGuid().To128();
             SendPacketToClient(despawn);
+            */
         }
 
         [PacketHandler(Opcode.SMSG_GAME_OBJECT_RESET_STATE)]
