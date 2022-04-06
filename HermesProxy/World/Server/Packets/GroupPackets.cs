@@ -989,4 +989,36 @@ namespace HermesProxy.World.Server.Packets
         public int Max;
         public int Result;
     }
+
+    class ChangeSubGroup : ClientPacket
+    {
+        public ChangeSubGroup(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TargetGUID = _worldPacket.ReadPackedGuid128();
+            PartyIndex = _worldPacket.ReadInt8();
+            NewSubGroup = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 TargetGUID;
+        public sbyte PartyIndex;
+        public byte NewSubGroup;
+    }
+
+    class SwapSubGroups : ClientPacket
+    {
+        public SwapSubGroups(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PartyIndex = _worldPacket.ReadInt8();
+            FirstTarget = _worldPacket.ReadPackedGuid128();
+            SecondTarget = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 FirstTarget;
+        public WowGuid128 SecondTarget;
+        public sbyte PartyIndex;
+    }
 }

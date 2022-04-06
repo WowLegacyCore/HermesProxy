@@ -56,7 +56,7 @@ namespace HermesProxy.World.Enums
     }
 
     [Flags]
-    public enum GroupUpdateFlagVanilla: uint
+    public enum GroupUpdateFlagVanilla : uint
     {
         None             = 0x00000000,
         Status           = 0x00000001,
@@ -81,4 +81,31 @@ namespace HermesProxy.World.Enums
         PetAuras         = 0x00080000,
         PetAurasNegative = 0x00100000,
     }
+
+    [Flags]
+    public enum GroupUpdateFlagTBC : uint
+    {
+        None             = 0x00000000,       // nothing
+        Status           = 0x00000001,       // uint16, flags
+        CurrentHealth    = 0x00000002,       // uint16
+        MaxHealth        = 0x00000004,       // uint16
+        PowerType        = 0x00000008,       // uint8
+        CurrentPower     = 0x00000010,       // uint16
+        MaxPower         = 0x00000020,       // uint16
+        Level            = 0x00000040,       // uint16
+        Zone             = 0x00000080,       // uint16
+        Position         = 0x00000100,       // uint16, uint16
+        Auras            = 0x00000200,       // uint64 mask, for each bit set uint16 spellid + uint8 unk
+        PetGuid          = 0x00000400,       // uint64 pet guid
+        PetName          = 0x00000800,       // pet name, nullptr terminated string
+        PetModelId       = 0x00001000,       // uint16, model id
+        PetCurrentHealth = 0x00002000,       // uint16 pet cur health
+        PetMaxHealth     = 0x00004000,       // uint16 pet max health
+        PetPowerType     = 0x00008000,       // uint8 pet power type
+        PetCurrentPower  = 0x00010000,       // uint16 pet cur power
+        PetMaxPower      = 0x00020000,       // uint16 pet max power
+        PetAuras         = 0x00040000,       // uint64 mask, for each bit set uint16 spellid + uint8 unk, pet auras...
+        Pet              = 0x0007FC00,       // all pet flags
+        Full             = 0x0007FFFF,       // all known flags
+    };
 }

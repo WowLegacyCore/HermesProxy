@@ -47,10 +47,10 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public WowGuid128 BattlemasterGuid;
-        public int Verification;
+        public int Verification = 121761856;
         public uint BattlemasterListID;
-        public byte MinLevel;
-        public byte MaxLevel;
+        public byte MinLevel = 70;
+        public byte MaxLevel = 70;
         public List<int> BattlefieldInstances = new();
         public bool PvpAnywhere;
         public bool HasRandomWinToday;

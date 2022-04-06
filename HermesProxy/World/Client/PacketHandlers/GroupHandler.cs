@@ -63,7 +63,7 @@ namespace HermesProxy.World.Client
         }
 
         [PacketHandler(Opcode.SMSG_GROUP_LIST, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
-        void HandleGroupList(WorldPacket packet)
+        void HandleGroupListVanilla(WorldPacket packet)
         {
             PartyUpdate party = new PartyUpdate();
             party.SequenceNum = GetSession().GameState.GroupUpdateCounter++;
@@ -130,6 +130,88 @@ namespace HermesProxy.World.Client
                 party.LootSettings.Method = GetSession().GameState.CurrentGroupLootMethod = (LootMethod)packet.ReadUInt8();
                 party.LootSettings.LootMaster = packet.ReadGuid().To128(GetSession().GameState);
                 party.LootSettings.Threshold = packet.ReadUInt8();
+            }
+            else
+            {
+                GetSession().GameState.CurrentGroupLeader = null;
+                GetSession().GameState.CurrentGroupLootMethod = LootMethod.FreeForAll;
+                party.PartyFlags = GroupFlags.Destroyed;
+                party.PartyGUID = WowGuid128.Empty;
+                party.LeaderGUID = WowGuid128.Empty;
+                party.MyIndex = -1;
+            }
+
+            SendPacketToClient(party);
+        }
+
+        [PacketHandler(Opcode.SMSG_GROUP_LIST, ClientVersionBuild.V2_0_1_6180)]
+        void HandleGroupListTBC(WorldPacket packet)
+        {
+            PartyUpdate party = new PartyUpdate();
+            party.SequenceNum = GetSession().GameState.GroupUpdateCounter++;
+            bool isRaid = packet.ReadBool();
+            bool isBattleground = packet.ReadBool();
+            byte ownSubGroup = packet.ReadUInt8();
+            byte ownGroupFlags = packet.ReadUInt8();
+            party.PartyGUID = packet.ReadGuid().To128(GetSession().GameState);
+
+            GetSession().GameState.CurrentGroupMembers = new List<WowGuid128>();
+            uint membersCount = packet.ReadUInt32();
+            if (membersCount > 0)
+            {
+                if (isRaid)
+                    party.PartyFlags |= GroupFlags.Raid;
+
+                if (isBattleground)
+                {
+                    party.PartyFlags |= GroupFlags.FakeRaid;
+                    party.PartyIndex = 1;
+                    party.PartyType = GroupType.PvP;
+                }
+                else
+                    party.PartyType = GroupType.Normal;
+
+                PartyPlayerInfo player = new PartyPlayerInfo();
+                player.GUID = GetSession().GameState.CurrentPlayerGuid;
+                player.Name = GetSession().GameState.GetPlayerName(player.GUID);
+                player.Subgroup = ownSubGroup;
+                player.Flags = (GroupMemberFlags)ownGroupFlags;
+                player.Status = GroupMemberOnlineStatus.Online;
+                party.PlayerList.Add(player);
+
+                bool allAssist = true;
+                for (uint i = 0; i < membersCount; i++)
+                {
+                    PartyPlayerInfo member = new PartyPlayerInfo();
+                    member.Name = packet.ReadCString();
+                    member.GUID = packet.ReadGuid().To128(GetSession().GameState);
+                    member.Status = (GroupMemberOnlineStatus)packet.ReadUInt8();
+                    member.Subgroup = packet.ReadUInt8();
+                    member.Flags = (GroupMemberFlags)packet.ReadUInt8();
+                    member.ClassId = GetSession().GameState.GetUnitClass(member.GUID);
+                    if (!member.Flags.HasAnyFlag(GroupMemberFlags.Assistant))
+                        allAssist = false;
+                    party.PlayerList.Add(member);
+                    GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+                }
+
+                if (allAssist)
+                    party.PartyFlags |= GroupFlags.EveryoneAssistant;
+
+                party.LeaderGUID = GetSession().GameState.CurrentGroupLeader = packet.ReadGuid().To128(GetSession().GameState);
+
+                party.LootSettings = new PartyLootSettings();
+                party.LootSettings.Method = GetSession().GameState.CurrentGroupLootMethod = (LootMethod)packet.ReadUInt8();
+                party.LootSettings.LootMaster = packet.ReadGuid().To128(GetSession().GameState);
+                party.LootSettings.Threshold = packet.ReadUInt8();
+
+                party.DifficultySettings = new PartyDifficultySettings();
+                party.DifficultySettings.DungeonDifficultyID = packet.ReadUInt8();
+
+                if (ModernVersion.GetExpansionVersion() > 1)
+                    party.DifficultySettings.RaidDifficultyID = 4;
+                else
+                    party.DifficultySettings.RaidDifficultyID = 9;
             }
             else
             {
@@ -467,6 +549,153 @@ namespace HermesProxy.World.Client
             SendPacketToClient(state);
         }
 
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS, ClientVersionBuild.V2_0_1_6180)]
+        void HandlePartyMemberStatsTbc(WorldPacket packet)
+        {
+            if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&
+               (GetSession().GameState.HasWsgAllyFlagCarrier || GetSession().GameState.HasWsgHordeFlagCarrier))
+            {
+                if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
+                {
+                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    SendPacket(packet2);
+                    _requestBgPlayerPosCounter = 0;
+                }
+            }
+
+            PartyMemberPartialState state = new PartyMemberPartialState();
+            state.AffectedGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            var updateFlags = (GroupUpdateFlagTBC)packet.ReadUInt32();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Status))
+                state.StatusFlags = packet.ReadUInt16();// GroupMemberOnlineStatus
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.CurrentHealth))
+                state.CurrentHealth = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.MaxHealth))
+                state.MaxHealth = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PowerType))
+                state.PowerType = packet.ReadUInt8();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.CurrentPower))
+                state.CurrentPower = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.MaxPower))
+                state.MaxPower = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Level))
+                state.Level = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Zone))
+                state.ZoneID = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Position))
+            {
+                state.Position = new PartyMemberPartialState.Vector3_UInt16();
+                state.Position.X = packet.ReadInt16();
+                state.Position.Y = packet.ReadInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Auras))
+            {
+                if (state.Auras == null)
+                    state.Auras = new List<PartyMemberAuraStates>();
+
+                var auraMask = packet.ReadUInt64();
+
+                for (byte i = 0; i < LegacyVersion.GetAuraSlotsCount(); ++i)
+                {
+                    if ((auraMask & (1ul << i)) == 0)
+                        continue;
+
+                    PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                    aura.SpellId = packet.ReadUInt16();
+                    packet.ReadUInt8(); // unk
+                    if (aura.SpellId != 0)
+                    {
+                        aura.ActiveFlags = 1;
+                        aura.AuraFlags = (ushort)AuraFlagsModern.Positive;
+                    }
+                    state.Auras.Add(aura);
+                }
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetGuid))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
+            }
+
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetName))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.NewPetName = packet.ReadCString();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetModelId))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.DisplayID = packet.ReadUInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetCurrentHealth))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.Health = packet.ReadUInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetMaxHealth))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.MaxHealth = packet.ReadUInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetPowerType))
+                packet.ReadUInt8(); // Pet Power Type
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetCurrentPower))
+                packet.ReadInt16(); // Pet Current Power
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetMaxPower))
+                packet.ReadInt16(); // Pet Max Power
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetAuras))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                if (state.Pet.Auras == null)
+                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+
+                var auraMask = packet.ReadUInt64();
+
+                for (byte i = 0; i < LegacyVersion.GetAuraSlotsCount(); ++i)
+                {
+                    if ((auraMask & (1ul << i)) == 0)
+                        continue;
+
+                    PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                    aura.SpellId = packet.ReadUInt16();
+                    packet.ReadUInt8(); // unk
+                    if (aura.SpellId != 0)
+                    {
+                        aura.ActiveFlags = 1;
+                        aura.AuraFlags = (ushort)AuraFlagsModern.Positive;
+                    }
+                    state.Pet.Auras.Add(aura);
+                }
+            }
+
+            SendPacketToClient(state);
+        }
+
         [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS_FULL, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandlePartyMemberStatsFull(WorldPacket packet)
         {
@@ -670,6 +899,163 @@ namespace HermesProxy.World.Client
                     {
                         aura.ActiveFlags = 1;
                         aura.AuraFlags = (ushort)AuraFlagsModern.Negative;
+                    }
+                    state.Pet.Auras.Add(aura);
+                }
+            }
+
+            SendPacketToClient(state);
+        }
+
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS_FULL, ClientVersionBuild.V2_0_1_6180)]
+        void HandlePartyMemberStatsFullTBC(WorldPacket packet)
+        {
+            if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&
+               (GetSession().GameState.HasWsgAllyFlagCarrier || GetSession().GameState.HasWsgHordeFlagCarrier))
+            {
+                if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
+                {
+                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    SendPacket(packet2);
+                    _requestBgPlayerPosCounter = 0;
+                }
+            }
+
+            PartyMemberFullState state = new PartyMemberFullState();
+            if (GetSession().GameState.IsInBattleground())
+            {
+                state.PartyType[0] = 0;
+                state.PartyType[1] = 2;
+            }
+            else
+            {
+                state.PartyType[0] = 1;
+                state.PartyType[1] = 0;
+            }
+
+            state.MemberGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
+            var updateFlags = (GroupUpdateFlagTBC)packet.ReadUInt32();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Status))
+                state.StatusFlags = (GroupMemberOnlineStatus)packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.CurrentHealth))
+                state.CurrentHealth = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.MaxHealth))
+                state.MaxHealth = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PowerType))
+                state.PowerType = packet.ReadUInt8();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.CurrentPower))
+                state.CurrentPower = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.MaxPower))
+                state.MaxPower = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Level))
+                state.Level = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Zone))
+                state.ZoneID = packet.ReadUInt16();
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Position))
+            {
+                state.PositionX = packet.ReadInt16();
+                state.PositionY = packet.ReadInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.Auras))
+            {
+                if (state.Auras == null)
+                    state.Auras = new List<PartyMemberAuraStates>();
+
+                var auraMask = packet.ReadUInt64();
+
+                for (byte i = 0; i < LegacyVersion.GetAuraSlotsCount(); ++i)
+                {
+                    if ((auraMask & (1ul << i)) == 0)
+                        continue;
+
+                    PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                    aura.SpellId = packet.ReadUInt16();
+                    packet.ReadUInt8(); // unk
+                    if (aura.SpellId != 0)
+                    {
+                        aura.ActiveFlags = 1;
+                        aura.AuraFlags = (ushort)AuraFlagsModern.Positive;
+                    }
+                    state.Auras.Add(aura);
+                }
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetGuid))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
+            }
+
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetName))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.NewPetName = packet.ReadCString();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetModelId))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.DisplayID = packet.ReadUInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetCurrentHealth))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.Health = packet.ReadUInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetMaxHealth))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                state.Pet.MaxHealth = packet.ReadUInt16();
+            }
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetPowerType))
+                packet.ReadUInt8(); // Pet Power Type
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetCurrentPower))
+                packet.ReadInt16(); // Pet Current Power
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetMaxPower))
+                packet.ReadInt16(); // Pet Max Power
+
+            if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetAuras))
+            {
+                if (state.Pet == null)
+                    state.Pet = new PartyMemberPetStats();
+                if (state.Pet.Auras == null)
+                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+
+                var auraMask = packet.ReadUInt64();
+
+                for (byte i = 0; i < LegacyVersion.GetAuraSlotsCount(); ++i)
+                {
+                    if ((auraMask & (1ul << i)) == 0)
+                        continue;
+
+                    PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                    aura.SpellId = packet.ReadUInt16();
+                    packet.ReadUInt8(); // unk
+                    if (aura.SpellId != 0)
+                    {
+                        aura.ActiveFlags = 1;
+                        aura.AuraFlags = (ushort)AuraFlagsModern.Positive;
                     }
                     state.Pet.Auras.Add(aura);
                 }

@@ -159,5 +159,23 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(request.TargetGUID.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_GROUP_CHANGE_SUB_GROUP)]
+        void HandleGroupChangeSubGroup(ChangeSubGroup group)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GROUP_CHANGE_SUB_GROUP);
+            packet.WriteCString(GetSession().GameState.GetPlayerName(group.TargetGUID));
+            packet.WriteUInt8(group.NewSubGroup);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GROUP_SWAP_SUB_GROUP)]
+        void HandleGroupSwapSubGroup(SwapSubGroups group)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GROUP_SWAP_SUB_GROUP);
+            packet.WriteCString(GetSession().GameState.GetPlayerName(group.FirstTarget));
+            packet.WriteCString(GetSession().GameState.GetPlayerName(group.SecondTarget));
+            SendPacketToServer(packet);
+        }
     }
 }
