@@ -1318,6 +1318,9 @@ namespace HermesProxy.World.Client
                     updateData.UnitData.SexId = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 16) & 0xFF);
                     updateData.UnitData.DisplayPower = (byte)((updates[UNIT_FIELD_BYTES_0].UInt32Value >> 24) & 0xFF);
 
+                    if (guid.GetHighType() == HighGuidType.Pet && updateData.UnitData.DisplayPower == (uint)PowerType.Focus)
+                        GetSession().GameState.HunterPetGuids.Add(guid);
+
                     if (objectType == ObjectType.Unit)
                         GetSession().GameState.StoreCreatureClass(guid.GetEntry(), (Class)updateData.UnitData.ClassId);
                     else
@@ -1331,16 +1334,23 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_POWER1 + i])
                         {
-                            if (powerUpdate != null && guid == GetSession().GameState.CurrentPlayerGuid)
+                            if (powerUpdate != null && 
+                               (guid == GetSession().GameState.CurrentPlayerGuid || guid == GetSession().GameState.CurrentPetGuid))
                                 powerUpdate.Powers.Add(new PowerUpdatePower(updates[UNIT_FIELD_POWER1 + i].Int32Value, (byte)i));
 
-                            Class classId = Class.None;
-                            if (updateData.UnitData.ClassId != null)
-                                classId = (Class)updateData.UnitData.ClassId;
+                            sbyte powerSlot;
+                            if (GetSession().GameState.HunterPetGuids.Contains(guid))
+                                powerSlot = ClassPowerTypes.GetPowerSlotForPet((PowerType)i);
                             else
-                                classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
-
-                            sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
+                            {
+                                Class classId;
+                                if (updateData.UnitData.ClassId != null)
+                                    classId = (Class)updateData.UnitData.ClassId;
+                                else
+                                    classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
+                                powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
+                            }
+                                
                             if (powerSlot >= 0)
                                 updateData.UnitData.Power[powerSlot] = updates[UNIT_FIELD_POWER1 + i].Int32Value;
                         }
@@ -1353,13 +1363,18 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_MAXPOWER1 + i])
                         {
-                            Class classId = Class.None;
+                            Class classId;
                             if (updateData.UnitData.ClassId != null)
                                 classId = (Class)updateData.UnitData.ClassId;
                             else
                                 classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
 
-                            sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
+                            sbyte powerSlot;
+                            if (GetSession().GameState.HunterPetGuids.Contains(guid))
+                                powerSlot = ClassPowerTypes.GetPowerSlotForPet((PowerType)i);
+                            else
+                                powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
+
                             if (powerSlot >= 0)
                                 updateData.UnitData.MaxPower[powerSlot] = updates[UNIT_FIELD_MAXPOWER1 + i].Int32Value;
 

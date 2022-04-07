@@ -607,4 +607,16 @@ namespace HermesProxy.World.Server.Packets
         public byte PackSlot;
         public byte Slot;
     }
+
+    public class SetAmmo : ClientPacket
+    {
+        public SetAmmo(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ItemId = _worldPacket.ReadUInt32();
+        }
+
+        public uint ItemId;
+    }
 }

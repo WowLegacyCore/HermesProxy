@@ -176,5 +176,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(slot);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_SET_AMMO)]
+        void HandleSetAmmo(SetAmmo ammo)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_AMMO);
+            packet.WriteUInt32(ammo.ItemId);
+            SendPacketToServer(packet);
+        }
     }
 }

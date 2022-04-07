@@ -1,4 +1,6 @@
-﻿using HermesProxy.World.Client;
+﻿using Framework.Util;
+using HermesProxy.Enums;
+using HermesProxy.World.Client;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -147,6 +149,19 @@ namespace HermesProxy.World.Objects
             }
 
             return result;
+        }
+        public static WowGuid GetGuidValue(this Dictionary<int, UpdateField> UpdateFields, int field)
+        {
+            if (!LegacyVersion.AddedInVersion(ClientVersionBuild.V6_0_2_19033))
+            {
+                var parts = UpdateFields.GetArray<uint>(field, 2);
+                return new WowGuid64(Utilities.MAKE_PAIR64(parts[0], parts[1]));
+            }
+            else
+            {
+                var parts = UpdateFields.GetArray<uint>(field, 4);
+                return new WowGuid128(Utilities.MAKE_PAIR64(parts[0], parts[1]), Utilities.MAKE_PAIR64(parts[2], parts[3]));
+            }
         }
 
         /// <summary>

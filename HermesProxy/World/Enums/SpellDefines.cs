@@ -34,6 +34,7 @@ namespace HermesProxy.World.Enums
         Absorb = 10,
         Reflect = 11
     }
+    [Flags]
     public enum SpellCastTargetFlags
     {
         None           = 0x00000000,

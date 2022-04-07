@@ -109,5 +109,17 @@ namespace HermesProxy.World.Objects
 
             return -1;
         }
+        public static sbyte GetPowerSlotForPet(PowerType power)
+        {
+            switch (power)
+            {
+                case PowerType.Focus:
+                    return 0;
+                case PowerType.Happiness:
+                    return 3;
+            }
+
+            return -1;
+        }
     }
 }

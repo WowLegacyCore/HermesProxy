@@ -40,15 +40,23 @@ namespace HermesProxy.World.Client
             item.Created = packet.ReadUInt32() == 1;
             if (packet.ReadUInt32() == 0)
                 item.DisplayText = ItemPushResult.DisplayType.Hidden;
-            item.SlotInBag = packet.ReadUInt8();
-            item.Slot = (byte)packet.ReadUInt32();
+            item.Slot = packet.ReadUInt8();
+            item.SlotInBag = packet.ReadInt32();
             item.Item.ItemID = packet.ReadUInt32();
             item.Item.RandomPropertiesSeed = packet.ReadUInt32();
             item.Item.RandomPropertiesID = packet.ReadUInt32();
             item.Quantity = packet.ReadUInt32();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 item.QuantityInInventory = packet.ReadUInt32();
-            item.ItemGUID = WowGuid128.Empty;
+            else
+                item.QuantityInInventory = item.Quantity;
+
+            if (item.Slot == Enums.Classic.InventorySlots.Bag0 && item.SlotInBag >= 0 &&
+                item.PlayerGUID == GetSession().GameState.CurrentPlayerGuid)
+                item.ItemGUID = GetSession().GameState.GetInventorySlotItem(item.SlotInBag).To128(GetSession().GameState);
+            else
+                item.ItemGUID = WowGuid128.Empty;
+
             SendPacketToClient(item);
         }
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_OK)]

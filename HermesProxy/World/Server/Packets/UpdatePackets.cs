@@ -186,6 +186,9 @@ namespace HermesProxy.World.Server.Packets
                     UnitData.ScaleDuration = 100;
                 if (UnitData.LookAtControllerID == null)
                     UnitData.LookAtControllerID = -1;
+                if (UnitData.ChannelObject == null &&
+                    Guid == GlobalSession.GameState.CurrentPlayerGuid)
+                    UnitData.ChannelObject = WowGuid128.Empty;
             }
             if (PlayerData != null)
             {

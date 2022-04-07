@@ -77,7 +77,19 @@ namespace HermesProxy
         public Dictionary<uint, uint> DailyQuestsDone = new Dictionary<uint, uint>();
         public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
         public Dictionary<WowGuid64, ushort> ObjectSpawnCount = new Dictionary<WowGuid64, ushort>();
+        public HashSet<WowGuid128> HunterPetGuids = new HashSet<WowGuid128>();
 
+        public WowGuid64 GetInventorySlotItem(int slot)
+        {
+            int PLAYER_FIELD_INV_SLOT_HEAD = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_INV_SLOT_HEAD);
+            if (PLAYER_FIELD_INV_SLOT_HEAD >= 0)
+            {
+                var updates = GetCachedObjectFieldsLegacy(CurrentPlayerGuid);
+                if (updates != null)
+                    return updates.GetGuidValue(PLAYER_FIELD_INV_SLOT_HEAD + slot * 2).To64();
+            }
+            return WowGuid64.Empty;
+        }
         public ushort GetObjectSpawnCounter(WowGuid64 guid)
         {
             ushort count;
