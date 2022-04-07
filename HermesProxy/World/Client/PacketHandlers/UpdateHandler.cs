@@ -2521,7 +2521,7 @@ namespace HermesProxy.World.Client
                     updateData.GameObjectData.Flags = updates[GAMEOBJECT_FLAGS].UInt32Value;
                 }
                 int GAMEOBJECT_ROTATION = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_ROTATION);
-                if (GAMEOBJECT_ROTATION >= 0 && updateData.CreateData != null)
+                if (GAMEOBJECT_ROTATION >= 0 && updateData.CreateData != null && updateData.CreateData.MoveInfo != null)
                 {
                     for (int i = 0; i < 4; i++)
                     {

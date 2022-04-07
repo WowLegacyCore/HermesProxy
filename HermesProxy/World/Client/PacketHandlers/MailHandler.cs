@@ -248,7 +248,7 @@ namespace HermesProxy.World.Client
             mail.Command = (MailActionType)packet.ReadUInt32();
             mail.ErrorCode = (MailErrorType)packet.ReadUInt32();
             if (mail.ErrorCode == MailErrorType.Equip)
-                mail.BagResult = (InventoryResult)packet.ReadUInt32();
+                mail.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt32());
             else if (mail.Command == MailActionType.AttachmentExpired)
             {
                 mail.AttachID = packet.ReadUInt32();

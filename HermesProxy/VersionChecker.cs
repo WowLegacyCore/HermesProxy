@@ -256,6 +256,14 @@ namespace HermesProxy
                 return (QuestGiverStatusModern)Enum.Parse(typeof(QuestGiverStatusModern), ((QuestGiverStatusVanilla)status).ToString());
         }
 
+        public static InventoryResult ConvertInventoryResult(uint result)
+        {
+            if (RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                return (InventoryResult)Enum.Parse(typeof(InventoryResult), ((InventoryResultVanilla)result).ToString());
+
+            return (InventoryResult)result;
+        }
+
         public static int GetQuestLogSize()
         {
             return AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 25 : 20;  // 2.0.0.5849 Alpha

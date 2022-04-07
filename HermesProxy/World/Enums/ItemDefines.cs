@@ -199,6 +199,77 @@ namespace HermesProxy.World.Enums
         ReputationRequire = 12
     }
 
+    public enum InventoryResultVanilla
+    {
+        Ok = 0,
+        CantEquipLevel,
+        CantEquipSkill,
+        WrongSlot,
+        BagFull,
+        BagInBag,
+        TradeEquippedBag,
+        AmmoOnly,
+        ProficiencyNeeded,
+        NoSlotAvailable,
+        CantEquipEver,
+        CantEquipEver2,
+        NoSlotAvailable2,
+        Equipped2handed,
+        TwoHandSkillNotFound,
+        WrongBagType,
+        WrongBagType2,
+        ItemMaxCount,
+        NoSlotAvailable3,
+        CantStack,
+        NotEquippable,
+        CantSwap,
+        SlotEmpty,
+        ItemNotFound,
+        DropBoundItem,
+        OutOfRange,
+        TooFewToSplit,
+        SplitFailed,
+        SpellFailedReagentsGeneric,
+        NotEnoughMoney,
+        NotABag,
+        DestroyNonemptyBag,
+        NotOwner,
+        OnlyOneQuiver,
+        NoBankSlot,
+        NoBankHere,
+        ItemLocked,
+        GenericStunned,
+        PlayerDead,
+        ClientLockedOut,
+        InternalBagError,
+        OnlyOneBolt,
+        OnlyOneAmmo,
+        CantWrapStackable,
+        CantWrapEquipped,
+        CantWrapWrapped,
+        CantWrapBound,
+        CantWrapUnique,
+        CantWrapBags,
+        LootGone,
+        InvFull,
+        BankFull,
+        VendorSoldOut,
+        BagFull2,
+        ItemNotFound2,
+        CantStack2,
+        BagFull3,
+        VendorSoldOut2,
+        ObjectIsBusy,
+        CantBeDisenchanted,
+        NotInCombat,
+        NotWhileDisarmed,
+        BagFull4,
+        CantEquipRank,
+        CantEquipReputation,
+        TooManySpecialBags,
+        LootCantLootThatNow,
+    };
+
     public enum InventoryResult
     {
         Ok = 0,
@@ -297,20 +368,11 @@ namespace HermesProxy.World.Enums
         ScalingStatItemLevelTooLow = 93, // Your Level Is Too Low To Use That Item
         CantBuyQuantity = 94, // You Can'T Buy The Specified Quantity Of That Item.
         ItemIsBattlePayLocked = 95, // Your Purchased Item Is Still Waiting To Be Unlocked
-        ReagentBankFull = 96, // Your Reagent Bank Is Full
-        ReagentBankLocked = 97,
-        WrongBagType3 = 98, // That Item Doesn'T Go In That Container.
-        CantUseItem = 99, // You Can'T Use That Item.
-        CantBeObliterated = 100,// You Can'T Obliterate That Item
-        GuildBankConjuredItem = 101,// You Cannot Store Conjured Items In The Guild Bank
-        BagFull6 = 102,// That Bag Is Full.
-        CantBeScrapped = 103,// You Can'T Scrap That Item
-        BagFull7 = 104,// That Bag Is Full.
-        NotInPetBattle = 105,// You Cannot Do That While In A Pet Battle
-        BagFull8 = 106,// That Bag Is Full.
-        CantDoThatRightNow = 107,// You Can'T Do That Right Now.
-        CantDoThatRightNow2 = 108,// You Can'T Do That Right Now.
-        NotInNpe = 109,// Not Available During The Tutorial
-        ItemCooldown = 110,// Item Is Not Ready Yet.
+        WrongBagType3 = 96, // That Item Doesn'T Go In That Container.
+        CantUseItem = 97, // You Can'T Use That Item.
+        CantBeObliterated = 98,// You Can'T Obliterate That Item
+        GuildBankConjuredItem = 99,// You Cannot Store Conjured Items In The Guild Bank
+        CantDoThatRightNow = 100,// You Can'T Do That Right Now.
+        BagFull6 = 101,// That Bag Is Full.
     }
 }

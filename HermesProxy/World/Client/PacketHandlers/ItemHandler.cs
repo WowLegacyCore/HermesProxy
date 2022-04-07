@@ -83,11 +83,32 @@ namespace HermesProxy.World.Client
             fail.Reason = (BuyResult)packet.ReadUInt8();
             SendPacketToClient(fail);
         }
-        [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE)]
+        [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandleInventoryChangeFailureVanilla(WorldPacket packet)
+        {
+            InventoryChangeFailure failure = new();
+            failure.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt8());
+            if (failure.BagResult == InventoryResult.Ok)
+                return;
+
+            switch (failure.BagResult)
+            {
+                case InventoryResult.CantEquipLevel:
+                    failure.Level = packet.ReadInt32();
+                    break;
+            }
+
+            failure.Item[0] = packet.ReadGuid().To128(GetSession().GameState);
+            failure.Item[1] = packet.ReadGuid().To128(GetSession().GameState);
+            failure.ContainerBSlot = packet.ReadUInt8();
+
+            SendPacketToClient(failure);
+        }
+        [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE, ClientVersionBuild.V2_0_1_6180)]
         void HandleInventoryChangeFailure(WorldPacket packet)
         {
             InventoryChangeFailure failure = new();
-            failure.BagResult = (InventoryResult)packet.ReadUInt8();
+            failure.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt8());
             if (failure.BagResult == InventoryResult.Ok)
                 return;
 

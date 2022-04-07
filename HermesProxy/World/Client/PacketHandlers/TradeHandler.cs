@@ -27,7 +27,7 @@ namespace HermesProxy.World.Client
                         trade.Id = packet.ReadUInt32();
                     break;
                 case TradeStatus.Failed:
-                    trade.BagResult = (InventoryResult)packet.ReadUInt32();
+                    trade.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt32());
                     trade.FailureForYou = packet.ReadBool();
                     trade.ItemID = packet.ReadUInt32();
                     break;

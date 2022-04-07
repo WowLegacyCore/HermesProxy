@@ -128,7 +128,7 @@ namespace HermesProxy.World.Client
                        auction.MinIncrement = packet.ReadUInt32();
                     break;
                 case AuctionHouseError.Inventory:
-                    auction.BagResult = (InventoryResult)packet.ReadInt32();
+                    auction.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt32());
                     break;
                 case AuctionHouseError.HigherBid:
                     auction.Guid = packet.ReadGuid().To128(GetSession().GameState);

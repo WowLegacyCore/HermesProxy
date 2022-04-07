@@ -344,7 +344,7 @@ namespace HermesProxy.World.Client
         {
             QuestGiverQuestFailed quest = new QuestGiverQuestFailed();
             quest.QuestID = packet.ReadUInt32();
-            quest.Reason = (InventoryResult)packet.ReadUInt32();
+            quest.Reason = LegacyVersion.ConvertInventoryResult(packet.ReadUInt32());
             SendPacketToClient(quest);
         }
 
