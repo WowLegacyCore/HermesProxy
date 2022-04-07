@@ -155,12 +155,12 @@ namespace HermesProxy.World.Objects
             if (!LegacyVersion.AddedInVersion(ClientVersionBuild.V6_0_2_19033))
             {
                 var parts = UpdateFields.GetArray<uint>(field, 2);
-                return new WowGuid64(Utilities.MAKE_PAIR64(parts[0], parts[1]));
+                return new WowGuid64(MathFunctions.MakePair64(parts[0], parts[1]));
             }
             else
             {
                 var parts = UpdateFields.GetArray<uint>(field, 4);
-                return new WowGuid128(Utilities.MAKE_PAIR64(parts[0], parts[1]), Utilities.MAKE_PAIR64(parts[2], parts[3]));
+                return new WowGuid128(MathFunctions.MakePair64(parts[0], parts[1]), MathFunctions.MakePair64(parts[2], parts[3]));
             }
         }
 

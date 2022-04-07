@@ -169,13 +169,6 @@ namespace System.Collections.Generic
             return first.Where(x => second.Count(y => comparer(x, y)) == 1);
         }
 
-        public static uint[] ToBlockRange(this BitSet array)
-        {
-            uint[] blockValues = new uint[array.Length / 32 + 1];
-            array.CopyTo(blockValues, 0);
-            return blockValues;
-        }
-
         public static void Clear(this Array array)
         {
             Array.Clear(array, 0, array.Length);
