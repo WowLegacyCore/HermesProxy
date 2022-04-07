@@ -520,4 +520,17 @@ namespace HermesProxy.World.Server.Packets
         public MovementInfo MoveInfo;
         public int SplineID;
     }
+    class MoveTimeSkipped : ClientPacket
+    {
+        public MoveTimeSkipped(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            MoverGUID = _worldPacket.ReadPackedGuid128();
+            TimeSkipped = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 MoverGUID;
+        public uint TimeSkipped;
+    }
 }

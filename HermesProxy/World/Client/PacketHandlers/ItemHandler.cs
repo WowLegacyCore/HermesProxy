@@ -151,5 +151,14 @@ namespace HermesProxy.World.Client
             item.Cooldown = 30000;
             SendPacketToClient(item);
         }
+        [PacketHandler(Opcode.SMSG_SELL_RESPONSE)]
+        void HandleSellResponse(WorldPacket packet)
+        {
+            SellResponse sell = new SellResponse();
+            sell.VendorGUID = packet.ReadGuid().To128(GetSession().GameState);
+            sell.ItemGUID = packet.ReadGuid().To128(GetSession().GameState);
+            sell.Reason = packet.ReadUInt8();
+            SendPacketToClient(sell);
+        }
     }
 }

@@ -1207,7 +1207,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         SMSG_RESYNC_RUNES                                     = 0x487,
         SMSG_RWHOIS                                           = 0x1FE,
         SMSG_SCRIPT_MESSAGE                                   = 0x2B6,
-        SMSG_SELL_ITEM                                        = 0x1A1,
+        SMSG_SELL_RESPONSE                                        = 0x1A1,
         SMSG_SEND_KNOWN_SPELLS                                = 0x12A,
         SMSG_SEND_UNLEARN_SPELLS                              = 0x41E,
         SMSG_SERVERINFO                                       = 0x4F5,

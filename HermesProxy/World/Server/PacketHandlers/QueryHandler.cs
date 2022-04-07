@@ -9,6 +9,12 @@ namespace HermesProxy.World.Server
     public partial class WorldSocket
     {
         // Handlers for CMSG opcodes coming from the modern client
+        [PacketHandler(Opcode.CMSG_QUERY_TIME)]
+        void HandleQueryTime(EmptyClientPacket queryTime)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_TIME);
+            SendPacketToServer(packet);
+        }
         [PacketHandler(Opcode.CMSG_QUERY_QUEST_INFO)]
         void HandleQueryQuestInfo(QueryQuestInfo queryQuest)
         {

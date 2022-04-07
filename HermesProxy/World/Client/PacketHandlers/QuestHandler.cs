@@ -348,6 +348,14 @@ namespace HermesProxy.World.Client
             SendPacketToClient(quest);
         }
 
+        [PacketHandler(Opcode.SMSG_QUEST_GIVER_INVALID_QUEST)]
+        void HandleQuestGiverInvalidQuest(WorldPacket packet)
+        {
+            QuestGiverInvalidQuest quest = new QuestGiverInvalidQuest();
+            quest.Reason = (QuestFailedReasons)packet.ReadUInt32();
+            SendPacketToClient(quest);
+        }
+
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_COMPLETE)]
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_FAILED)]
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_FAILED_TIMER)]

@@ -974,7 +974,7 @@ namespace HermesProxy.World.Enums.V2_4_3_8606
         SMSG_RESURRECT_REQUEST                                = 0x15B,
         SMSG_RWHOIS                                           = 0x1FE,
         SMSG_SCRIPT_MESSAGE                                   = 0x2B6,
-        SMSG_SELL_ITEM                                        = 0x1A1,
+        SMSG_SELL_RESPONSE                                        = 0x1A1,
         SMSG_SEND_KNOWN_SPELLS                                = 0x12A,
         SMSG_SEND_UNLEARN_SPELLS                              = 0x41D,
         SMSG_SERVERTIME                                       = 0x049,

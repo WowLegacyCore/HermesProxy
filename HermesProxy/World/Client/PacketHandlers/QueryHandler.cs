@@ -13,6 +13,15 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_QUERY_TIME_RESPONSE)]
+        void HandleQueryTimeResponse(WorldPacket packet)
+        {
+            QueryTimeResponse response = new QueryTimeResponse();
+            response.CurrentTime = packet.ReadInt32();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.ReadInt32(); // Next Daily Quest Reset Time
+            SendPacketToClient(response);
+        }
         [PacketHandler(Opcode.SMSG_QUERY_QUEST_INFO_RESPONSE)]
         void HandleQueryQuestInfoResponse(WorldPacket packet)
         {

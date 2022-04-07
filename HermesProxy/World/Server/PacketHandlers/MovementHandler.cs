@@ -169,5 +169,17 @@ namespace HermesProxy.World.Server
                 packet.WriteFloat(0); // Spline Type
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_MOVE_TIME_SKIPPED)]
+        void HandleMoveSplineDone(MoveTimeSkipped movement)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_TIME_SKIPPED);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                packet.WritePackedGuid(movement.MoverGUID.To64());
+            else
+                packet.WriteGuid(movement.MoverGUID.To64());
+            packet.WriteUInt32(movement.TimeSkipped);
+            SendPacketToServer(packet);
+        }
     }
 }

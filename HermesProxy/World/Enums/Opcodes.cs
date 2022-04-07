@@ -2888,7 +2888,6 @@ namespace HermesProxy.World.Enums
         SMSG_SCRIPT_CAST,
         SMSG_SCRIPT_MESSAGE,
         SMSG_SEASON_INFO,
-        SMSG_SELL_ITEM,
         SMSG_SELL_RESPONSE,
         SMSG_SEND_ITEM_PASSIVES,
         SMSG_SEND_KNOWN_SPELLS,
