@@ -145,5 +145,13 @@ namespace HermesProxy.World.Server
             packet.WriteBool(show.Showing);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_INSPECT)]
+        void HandleInspect(Inspect inspect)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_INSPECT);
+            packet.WriteGuid(inspect.Target.To64());
+            SendPacketToServer(packet);
+        }
     }
 }

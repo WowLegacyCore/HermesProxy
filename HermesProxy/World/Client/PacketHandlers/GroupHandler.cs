@@ -348,7 +348,7 @@ namespace HermesProxy.World.Client
 
         uint _requestBgPlayerPosCounter = 0;
 
-        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_PARTIAL_STATE, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandlePartyMemberStats(WorldPacket packet)
         {
             if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&
@@ -549,7 +549,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(state);
         }
 
-        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS, ClientVersionBuild.V2_0_1_6180)]
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_PARTIAL_STATE, ClientVersionBuild.V2_0_1_6180)]
         void HandlePartyMemberStatsTbc(WorldPacket packet)
         {
             if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&
@@ -696,7 +696,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(state);
         }
 
-        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS_FULL, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_FULL_STATE, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandlePartyMemberStatsFull(WorldPacket packet)
         {
             if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&
@@ -907,7 +907,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(state);
         }
 
-        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_STATS_FULL, ClientVersionBuild.V2_0_1_6180)]
+        [PacketHandler(Opcode.SMSG_PARTY_MEMBER_FULL_STATE, ClientVersionBuild.V2_0_1_6180)]
         void HandlePartyMemberStatsFullTBC(WorldPacket packet)
         {
             if (GetSession().GameState.CurrentMapId == (uint)BattlegroundMapID.WarsongGulch &&

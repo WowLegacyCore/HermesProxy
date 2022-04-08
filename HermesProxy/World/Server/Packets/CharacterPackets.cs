@@ -613,4 +613,220 @@ namespace HermesProxy.World.Server.Packets
 
         public bool Showing;
     }
+
+    public class Inspect : ClientPacket
+    {
+        public Inspect(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Target = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 Target;
+    }
+
+    public class InspectResult : ServerPacket
+    {
+        public InspectResult() : base(Opcode.SMSG_INSPECT_RESULT) { }
+
+        public override void Write()
+        {
+            DisplayInfo.Write(_worldPacket);
+            _worldPacket.WriteInt32(Glyphs.Count);
+            _worldPacket.WriteInt32(Talents.Count);
+            _worldPacket.WriteInt32(ItemLevel);
+            _worldPacket.WriteUInt8(LifetimeMaxRank);
+            _worldPacket.WriteUInt16(TodayHK);
+            _worldPacket.WriteUInt16(YesterdayHK);
+            _worldPacket.WriteUInt32(LifetimeHK);
+            _worldPacket.WriteUInt32(HonorLevel);
+
+            for (int i = 0; i < Glyphs.Count; ++i)
+                _worldPacket.WriteUInt16(Glyphs[i]);
+
+            for (int i = 0; i < Talents.Count; ++i)
+                _worldPacket.WriteUInt8(Talents[i]);
+
+            _worldPacket.WriteBit(GuildData != null);
+            _worldPacket.WriteBit(AzeriteLevel.HasValue);
+            _worldPacket.FlushBits();
+
+            foreach (PVPBracketData bracket in Bracket)
+                bracket.Write(_worldPacket);
+
+            if (GuildData != null)
+                GuildData.Write(_worldPacket);
+
+            if (AzeriteLevel.HasValue)
+                _worldPacket.WriteUInt32((uint)AzeriteLevel);
+        }
+
+        public PlayerModelDisplayInfo DisplayInfo = new();
+        public List<ushort> Glyphs = new();
+        public List<byte> Talents = new();
+        public InspectGuildData GuildData;
+        public Array<PVPBracketData> Bracket = new(6, default);
+        public uint? AzeriteLevel;
+        public int ItemLevel;
+        public uint LifetimeHK;
+        public uint HonorLevel = 1;
+        public ushort TodayHK;
+        public ushort YesterdayHK;
+        public byte LifetimeMaxRank;
+    }
+
+    public class PlayerModelDisplayInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(GUID);
+            data.WriteUInt32(SpecializationID);
+            data.WriteInt32(Items.Count);
+            data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteUInt8((byte)SexId);
+            data.WriteUInt8((byte)RaceId);
+            data.WriteUInt8((byte)ClassId);
+            data.WriteInt32(Customizations.Count);
+            data.WriteString(Name);
+
+            foreach (var customization in Customizations)
+            {
+                data.WriteUInt32(customization.ChrCustomizationOptionID);
+                data.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
+
+            foreach (InspectItemData item in Items)
+                item.Write(data);
+        }
+
+        public WowGuid128 GUID;
+        public List<InspectItemData> Items = new();
+        public string Name;
+        public uint SpecializationID;
+        public Gender SexId;
+        public Race RaceId;
+        public Class ClassId;
+        public List<ChrCustomizationChoice> Customizations = new();
+
+    }
+
+    public class InspectItemData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(CreatorGUID);
+            data.WriteUInt8(Index);
+            data.WriteInt32(AzeritePowers.Count);
+            data.WriteInt32(AzeriteEssences.Count);
+            foreach (var id in AzeritePowers)
+                data.WriteInt32(id);
+
+            Item.Write(data);
+            data.WriteBit(Usable);
+            data.WriteBits(Enchants.Count, 4);
+            data.WriteBits(Gems.Count, 2);
+            data.FlushBits();
+
+            foreach (var azeriteEssenceData in AzeriteEssences)
+                azeriteEssenceData.Write(data);
+
+            foreach (var enchantData in Enchants)
+                enchantData.Write(data);
+
+            foreach (var gem in Gems)
+                gem.Write(data);
+        }
+
+        public WowGuid128 CreatorGUID = WowGuid128.Empty;
+        public ItemInstance Item = new();
+        public byte Index;
+        public bool Usable;
+        public List<InspectEnchantData> Enchants = new();
+        public List<ItemGemData> Gems = new();
+        public List<int> AzeritePowers = new();
+        public List<AzeriteEssenceData> AzeriteEssences = new();
+    }
+
+    public struct InspectEnchantData
+    {
+        public InspectEnchantData(uint id, byte index)
+        {
+            Id = id;
+            Index = index;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Id);
+            data.WriteUInt8(Index);
+        }
+
+        public uint Id;
+        public byte Index;
+    }
+
+    public struct AzeriteEssenceData
+    {
+        public uint Index;
+        public uint AzeriteEssenceID;
+        public uint Rank;
+        public bool SlotUnlocked;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Index);
+            data.WriteUInt32(AzeriteEssenceID);
+            data.WriteUInt32(Rank);
+            data.WriteBit(SlotUnlocked);
+            data.FlushBits();
+        }
+    }
+
+    public class InspectGuildData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(GuildGUID);
+            data.WriteInt32(NumGuildMembers);
+            data.WriteInt32(AchievementPoints);
+        }
+
+        public WowGuid128 GuildGUID = WowGuid128.Empty;
+        public int NumGuildMembers;
+        public int AchievementPoints;
+    }
+
+    public struct PVPBracketData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(Bracket);
+            data.WriteInt32(Rating);
+            data.WriteInt32(Rank);
+            data.WriteInt32(WeeklyPlayed);
+            data.WriteInt32(WeeklyWon);
+            data.WriteInt32(SeasonPlayed);
+            data.WriteInt32(SeasonWon);
+            data.WriteInt32(WeeklyBestRating);
+            data.WriteInt32(SeasonBestRating);
+            data.WriteInt32(PvpTierID);
+            data.WriteInt32(UnkBCC);
+            data.WriteBit(Disqualified);
+            data.FlushBits();
+        }
+
+        public int Rating;
+        public int Rank;
+        public int WeeklyPlayed;
+        public int WeeklyWon;
+        public int SeasonPlayed;
+        public int SeasonWon;
+        public int WeeklyBestRating;
+        public int SeasonBestRating;
+        public int PvpTierID;
+        public int UnkBCC;
+        public byte Bracket;
+        public bool Disqualified;
+    }
 }

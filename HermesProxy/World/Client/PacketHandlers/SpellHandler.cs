@@ -619,6 +619,7 @@ namespace HermesProxy.World.Client
                 SpellCooldownStruct cd = new();
                 cd.SpellID = packet.ReadUInt32();
                 cd.ForcedCooldown = packet.ReadUInt32();
+                cooldown.SpellCooldowns.Add(cd);
             }
             SendPacketToClient(cooldown);
         }

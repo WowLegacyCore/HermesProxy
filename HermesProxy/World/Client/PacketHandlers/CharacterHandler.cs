@@ -362,5 +362,92 @@ namespace HermesProxy.World.Client
             updatePacket.ObjectUpdates.Add(updateData);
             SendPacketToClient(updatePacket);
         }
+
+        [PacketHandler(Opcode.SMSG_INSPECT_RESULT)]
+        [PacketHandler(Opcode.SMSG_INSPECT_TALENT)]
+        void HandleInspectResult(WorldPacket packet)
+        {
+            InspectResult inspect = new InspectResult();
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_INSPECT_RESULT)
+                inspect.DisplayInfo.GUID = packet.ReadGuid().To128(GetSession().GameState);
+            else
+                inspect.DisplayInfo.GUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+
+            PlayerCache cache;
+            if (!GetSession().GameState.CachedPlayers.TryGetValue(inspect.DisplayInfo.GUID, out cache))
+                return;
+
+            inspect.DisplayInfo.Name = cache.Name;
+            inspect.DisplayInfo.ClassId = cache.ClassId;
+            inspect.DisplayInfo.RaceId = cache.RaceId;
+            inspect.DisplayInfo.SexId = cache.SexId;
+
+            var updates = GetSession().GameState.GetCachedObjectFieldsLegacy(inspect.DisplayInfo.GUID);
+            if (updates != null)
+            {
+                int PLAYER_VISIBLE_ITEM_1_0 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_0);
+                if (PLAYER_VISIBLE_ITEM_1_0 >= 0) // vanilla and tbc
+                {
+                    byte offset = (byte)(LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 16 : 12);
+                    for (byte i = 0; i < 19; i++)
+                    {
+                        if (updates.ContainsKey(PLAYER_VISIBLE_ITEM_1_0 + i * offset))
+                        {
+                            uint itemId = updates[PLAYER_VISIBLE_ITEM_1_0 + i * offset].UInt32Value;
+                            if (itemId != 0)
+                            {
+                                InspectItemData itemData = new InspectItemData();
+                                itemData.Index = i;
+                                itemData.Item.ItemID = itemId;
+                                inspect.DisplayInfo.Items.Add(itemData);
+                            }
+                        }
+                    }
+                }
+                int PLAYER_VISIBLE_ITEM_1_ENTRYID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_VISIBLE_ITEM_1_ENTRYID);
+                if (PLAYER_VISIBLE_ITEM_1_ENTRYID >= 0) // wotlk
+                {
+                    int offset = 2;
+                    for (byte i = 0; i < 19; i++)
+                    {
+                        if (updates.ContainsKey(PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset))
+                        {
+                            uint itemId = updates[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset].UInt32Value;
+                            if (itemId != 0)
+                            {
+                                InspectItemData itemData = new InspectItemData();
+                                itemData.Index = i;
+                                itemData.Item.ItemID = itemId;
+                                inspect.DisplayInfo.Items.Add(itemData);
+                            }
+                        }
+                    }
+                }
+                int PLAYER_GUILDID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILDID);
+                if (PLAYER_GUILDID >= 0 && updates.ContainsKey(PLAYER_GUILDID))
+                {
+                    inspect.GuildData = new InspectGuildData();
+                    inspect.GuildData.GuildGUID = WowGuid128.Create(HighGuidType703.Guild, updates[PLAYER_GUILDID].UInt32Value);
+                }
+                int PLAYER_FIELD_BYTES = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BYTES);
+                if (PLAYER_FIELD_BYTES >= 0 && updates.ContainsKey(PLAYER_FIELD_BYTES))
+                {
+                    inspect.LifetimeMaxRank = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 24) & 0xFF);
+                }
+            }
+
+            // TODO: format seems to be different in new client
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_INSPECT_TALENT)
+            {
+                uint talentsCount = packet.ReadUInt32();
+                for (uint i = 0; i < talentsCount; i++)
+                {
+                    byte talent = packet.ReadUInt8();
+                    inspect.Talents.Add(talent);
+                }
+            }
+
+            SendPacketToClient(inspect);
+        }
     }
 }
