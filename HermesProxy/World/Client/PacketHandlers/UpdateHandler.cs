@@ -1765,7 +1765,9 @@ namespace HermesProxy.World.Client
                     int aurasCount = LegacyVersion.GetAuraSlotsCount();
                     for (byte i = 0; i < aurasCount; i++)
                     {
-                        if (updateMaskArray[UNIT_FIELD_AURA + i])
+                        if (updateMaskArray[UNIT_FIELD_AURA + i] ||
+                            updateMaskArray[UNIT_FIELD_AURALEVELS + i / 4] ||
+                            updateMaskArray[UNIT_FIELD_AURAAPPLICATIONS + i / 4])
                         {
                             AuraInfo aura = new AuraInfo();
                             aura.Slot = i;
@@ -1780,7 +1782,8 @@ namespace HermesProxy.World.Client
                                     aura.AuraData.Remaining = duration;
                                 }
                             }
-                            auraUpdate.Auras.Add(aura);
+                            if (aura.AuraData != null || updateMaskArray[UNIT_FIELD_AURA + i])
+                                auraUpdate.Auras.Add(aura);
                         }
                     }
                 }

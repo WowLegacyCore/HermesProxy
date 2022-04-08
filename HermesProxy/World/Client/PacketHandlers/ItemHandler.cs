@@ -160,5 +160,15 @@ namespace HermesProxy.World.Client
             sell.Reason = packet.ReadUInt8();
             SendPacketToClient(sell);
         }
+        [PacketHandler(Opcode.SMSG_ITEM_ENCHANT_TIME_UPDATE)]
+        void HandleItemEnchantTimeUpdate(WorldPacket packet)
+        {
+            ItemEnchantTimeUpdate enchant = new ItemEnchantTimeUpdate();
+            enchant.ItemGuid = packet.ReadGuid().To128(GetSession().GameState);
+            enchant.Slot = packet.ReadUInt32();
+            enchant.DurationLeft = packet.ReadUInt32();
+            enchant.OwnerGuid = packet.ReadGuid().To128(GetSession().GameState);
+            SendPacketToClient(enchant);
+        }
     }
 }
