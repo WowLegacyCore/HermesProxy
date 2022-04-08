@@ -94,7 +94,7 @@ namespace HermesProxy.World.Client
                 else
                     party.PartyType = GroupType.Normal;
 
-                party.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+                party.PartyGUID = GetSession().GameState.CurrentGroupGuid = WowGuid128.Create(HighGuidType703.Party, 1000);
 
                 PartyPlayerInfo player = new PartyPlayerInfo();
                 player.GUID = GetSession().GameState.CurrentPlayerGuid;
@@ -136,7 +136,7 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.CurrentGroupLeader = null;
                 GetSession().GameState.CurrentGroupLootMethod = LootMethod.FreeForAll;
                 party.PartyFlags = GroupFlags.Destroyed;
-                party.PartyGUID = WowGuid128.Empty;
+                party.PartyGUID = GetSession().GameState.CurrentGroupGuid = WowGuid128.Empty;
                 party.LeaderGUID = WowGuid128.Empty;
                 party.MyIndex = -1;
             }
@@ -153,7 +153,7 @@ namespace HermesProxy.World.Client
             bool isBattleground = packet.ReadBool();
             byte ownSubGroup = packet.ReadUInt8();
             byte ownGroupFlags = packet.ReadUInt8();
-            party.PartyGUID = packet.ReadGuid().To128(GetSession().GameState);
+            party.PartyGUID = GetSession().GameState.CurrentGroupGuid = packet.ReadGuid().To128(GetSession().GameState);
 
             GetSession().GameState.CurrentGroupMembers = new List<WowGuid128>();
             uint membersCount = packet.ReadUInt32();
@@ -218,7 +218,7 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.CurrentGroupLeader = null;
                 GetSession().GameState.CurrentGroupLootMethod = LootMethod.FreeForAll;
                 party.PartyFlags = GroupFlags.Destroyed;
-                party.PartyGUID = WowGuid128.Empty;
+                party.PartyGUID = GetSession().GameState.CurrentGroupGuid = WowGuid128.Empty;
                 party.LeaderGUID = WowGuid128.Empty;
                 party.MyIndex = -1;
             }
@@ -250,7 +250,7 @@ namespace HermesProxy.World.Client
                 ReadyCheckStarted ready = new ReadyCheckStarted();
                 ready.InitiatorGUID = GetSession().GameState.CurrentGroupLeader;
                 ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
-                ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+                ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
                 SendPacketToClient(ready);
             }
             else
@@ -258,7 +258,7 @@ namespace HermesProxy.World.Client
                 ReadyCheckResponse ready = new ReadyCheckResponse();
                 ready.Player = packet.ReadGuid().To128(GetSession().GameState);
                 ready.IsReady = packet.ReadBool();
-                ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+                ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
                 SendPacketToClient(ready);
 
                 GetSession().GameState.GroupReadyCheckResponses++;
@@ -267,7 +267,7 @@ namespace HermesProxy.World.Client
                     GetSession().GameState.GroupReadyCheckResponses = 0;
                     ReadyCheckCompleted completed = new ReadyCheckCompleted();
                     completed.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
-                    completed.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+                    completed.PartyGUID = GetSession().GameState.CurrentGroupGuid;
                     SendPacketToClient(completed);
                 }
             }
@@ -277,12 +277,9 @@ namespace HermesProxy.World.Client
         void HandleRaidReadyCheck(WorldPacket packet)
         {
             ReadyCheckStarted ready = new ReadyCheckStarted();
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                ready.InitiatorGUID = packet.ReadGuid().To128(GetSession().GameState);
-            else
-                ready.InitiatorGUID = WowGuid128.Empty;
+            ready.InitiatorGUID = packet.ReadGuid().To128(GetSession().GameState);
             ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
-            ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+            ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
             SendPacketToClient(ready);
         }
 
@@ -292,8 +289,18 @@ namespace HermesProxy.World.Client
             ReadyCheckResponse ready = new ReadyCheckResponse();
             ready.Player = packet.ReadGuid().To128(GetSession().GameState);
             ready.IsReady = packet.ReadBool();
-            ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+            ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
             SendPacketToClient(ready);
+
+            GetSession().GameState.GroupReadyCheckResponses++;
+            if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.CurrentGroupMembers.Count)
+            {
+                GetSession().GameState.GroupReadyCheckResponses = 0;
+                ReadyCheckCompleted completed = new ReadyCheckCompleted();
+                completed.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+                completed.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+                SendPacketToClient(completed);
+            }
         }
 
         [PacketHandler(Opcode.MSG_RAID_READY_CHECK_FINISHED, ClientVersionBuild.V2_0_1_6180)]
@@ -301,7 +308,7 @@ namespace HermesProxy.World.Client
         {
             ReadyCheckCompleted ready = new ReadyCheckCompleted();
             ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
-            ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+            ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
             SendPacketToClient(ready);
         }
 

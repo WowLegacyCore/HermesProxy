@@ -38,6 +38,7 @@ namespace HermesProxy
         public uint GroupReadyCheckResponses;
         public LootMethod CurrentGroupLootMethod;
         public List<WowGuid128> CurrentGroupMembers = new();
+        public WowGuid128 CurrentGroupGuid;
         public WowGuid128 CurrentGroupLeader;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;

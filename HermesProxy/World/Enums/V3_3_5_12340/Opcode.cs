@@ -1107,7 +1107,7 @@ namespace HermesProxy.World.Enums.V3_3_5_12340
         SMSG_PAGE_TEXT                                        = 0x1DF,
         SMSG_PARTY_COMMAND_RESULT                             = 0x07F,
         SMSG_PARTY_KILL_LOG                                   = 0x1F5,
-        SMSG_PARTY_MEMBER_PARTIAL_STATE                               = 0x07E,
+        SMSG_PARTY_MEMBER_PARTIAL_STATE                       = 0x07E,
         SMSG_PARTY_MEMBER_FULL_STATE                          = 0x2F2,
         SMSG_PAUSE_MIRROR_TIMER                               = 0x1DA,
         SMSG_PETGODMODE                                       = 0x01D,
