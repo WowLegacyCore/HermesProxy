@@ -15,9 +15,7 @@ namespace HermesProxy.World.Client
         {
             WowGuid guid = packet.ReadGuid();
             GetSession().GameState.CurrentPetGuid = guid.To128(GetSession().GameState);
-            GetSession().GameState.LastClientPetCastGuid = null;
-            GetSession().GameState.LastClientPetCastSpellId = 0;
-            GetSession().GameState.LastClientPetCastHasStarted = false;
+            GetSession().GameState.CurrentClientPetCast = null;
 
             // Equal to "Clear spells" pre cataclysm
             if (guid.IsEmpty())

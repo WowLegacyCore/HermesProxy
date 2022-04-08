@@ -47,12 +47,10 @@ namespace HermesProxy
         public WowGuid128 CurrentInteractedWithGO;
         public uint LastWhoRequestId;
         public WowGuid128 CurrentPetGuid;
-        public uint LastClientCastSpellId;
-        public bool LastClientCastHasStarted;
-        public WowGuid128 LastClientCastGuid;
-        public uint LastClientPetCastSpellId;
-        public WowGuid128 LastClientPetCastGuid;
-        public bool LastClientPetCastHasStarted;
+        public ClientCastRequest CurrentClientCast;
+        public ClientCastRequest CurrentClientPetCast;
+        public List<ClientCastRequest> PendingClientCasts = new List<ClientCastRequest>();
+        public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
         public WowGuid64 LastLootTargetGuid;
         public List<int> ActionButtons = new();
         public Dictionary<byte, int> CurrentPlayerAuras = new();
@@ -362,6 +360,15 @@ namespace HermesProxy
             ObjectCacheMutex.ReleaseMutex();
             return null;
         }
+    }
+    public class ClientCastRequest
+    {
+        public bool HasStarted;
+        public uint SpellId;
+        public uint SpellXSpellVisualId;
+        public long Timestamp;
+        public WowGuid128 ClientGUID;
+        public WowGuid128 ServerGUID;
     }
     public class ArenaTeamData
     {
