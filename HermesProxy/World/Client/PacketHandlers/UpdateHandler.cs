@@ -979,14 +979,14 @@ namespace HermesProxy.World.Client
             if (!updates.ContainsKey(UNIT_FIELD_AURA + i))
                 return null;
 
-            int spellId = updates[UNIT_FIELD_AURA + i].Int32Value;
+            uint spellId = updates[UNIT_FIELD_AURA + i].UInt32Value;
             if (spellId == 0)
                 return null;
 
             AuraDataInfo data = new AuraDataInfo();
             data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetCounter());
             data.SpellID = spellId;
-            data.SpellXSpellVisualID = GameData.GetSpellVisual((uint)spellId);
+            data.SpellXSpellVisualID = GameData.GetSpellVisual(spellId);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
@@ -1018,6 +1018,9 @@ namespace HermesProxy.World.Client
                 data.Applications = (byte)((updates[stacksIndex].UInt32Value >> ((i % 4) * 8)) & 0xFF);
             else
                 data.Applications = 0;
+
+            if (GameData.StackableAuras.Contains(spellId))
+                data.Applications++;
 
             return data;
         }

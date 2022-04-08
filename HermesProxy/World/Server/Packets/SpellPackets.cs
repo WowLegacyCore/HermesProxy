@@ -280,7 +280,7 @@ namespace HermesProxy.World.Server.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid128(CastID);
-            data.WriteInt32(SpellID);
+            data.WriteUInt32(SpellID);
             data.WriteUInt32(SpellXSpellVisualID);
             data.WriteUInt16((ushort)Flags);
             data.WriteUInt32(ActiveFlags);
@@ -318,7 +318,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public WowGuid128 CastID;
-        public int SpellID;
+        public uint SpellID;
         public uint SpellXSpellVisualID;
         public AuraFlagsModern Flags;
         public uint ActiveFlags;

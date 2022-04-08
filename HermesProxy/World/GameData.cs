@@ -24,6 +24,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
+        public static HashSet<uint> StackableAuras = new HashSet<uint>();
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
@@ -241,6 +242,7 @@ namespace HermesProxy.World
             LoadUnitDisplayScales();
             LoadTransports();
             LoadDispellSpells();
+            LoadStackableAuras();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
@@ -485,6 +487,32 @@ namespace HermesProxy.World
 
                     uint spellId = UInt32.Parse(fields[0]);
                     DispellSpells.Add(spellId);
+                }
+            }
+        }
+
+        public static void LoadStackableAuras()
+        {
+            if (LegacyVersion.GetExpansionVersion() > 2)
+                return;
+
+            var path = Path.Combine("CSV", $"StackableAuras{LegacyVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    StackableAuras.Add(spellId);
                 }
             }
         }
