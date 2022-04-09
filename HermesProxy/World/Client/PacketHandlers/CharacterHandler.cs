@@ -314,7 +314,7 @@ namespace HermesProxy.World.Client
                 log.Amount = packet.ReadInt32();
                 log.GroupBonus = packet.ReadFloat();
             }
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_0_8089) && packet.CanRead())
                 log.RAFBonus = packet.ReadUInt8();
             SendPacketToClient(log);
         }

@@ -290,8 +290,19 @@ namespace HermesProxy.World.Client
             }
             else
             {
+                if (GetSession().InstanceSocket == null &&
+                   !GetSession().GameState.IsConnectedToInstance)
+                {
+                    Log.Print(LogType.Error, $"Can't send opcode {packet.GetUniversalOpcode()} ({packet.GetOpcode()}) before entering world!");
+                    return;
+                }
+
                 // block these packets until connected to instance
-                while (GetSession().InstanceSocket == null) { };
+                while (GetSession().InstanceSocket == null)
+                {
+                    Log.Print(LogType.Network, $"Waiting to send {packet.GetUniversalOpcode()} ({packet.GetOpcode()}).");
+                    System.Threading.Thread.Sleep(200);
+                };
                 GetSession().InstanceSocket.SendPacket(packet);
             }
         }

@@ -432,6 +432,13 @@ namespace Framework.IO
             BitValue = 0;
         }
 
+        public void ResetReadPos()
+        {
+            readStream.BaseStream.Position = 0;
+            readStream.BaseStream.Seek(0, SeekOrigin.Begin);
+            ResetBitPos();
+        }
+
         public byte[] ReadToEnd()
         {
             Stream stream = GetCurrentStream();

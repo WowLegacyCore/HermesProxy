@@ -611,13 +611,26 @@ namespace HermesProxy.World.Client
         void HandleSpellCooldown(WorldPacket packet)
         {
             SpellCooldownPkt cooldown = new();
-            cooldown.Caster = packet.ReadGuid().To128(GetSession().GameState);
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                cooldown.Flags = packet.ReadUInt8();
-            while (packet.CanRead())
+            try
             {
+                cooldown.Caster = packet.ReadGuid().To128(GetSession().GameState);
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    cooldown.Flags = packet.ReadUInt8();
+                while (packet.CanRead())
+                {
+                    SpellCooldownStruct cd = new();
+                    cd.SpellID = packet.ReadUInt32();
+                    cd.ForcedCooldown = packet.ReadUInt32();
+                    cooldown.SpellCooldowns.Add(cd);
+                }
+            }
+            catch (ArgumentOutOfRangeException ex) // wrong structure from arcemu
+            {
+                // https://github.com/arcemu/arcemu/blob/2_4_3/src/arcemu-world/Spell.cpp#L1554
+                packet.ResetReadPos();
                 SpellCooldownStruct cd = new();
                 cd.SpellID = packet.ReadUInt32();
+                cooldown.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
                 cd.ForcedCooldown = packet.ReadUInt32();
                 cooldown.SpellCooldowns.Add(cd);
             }

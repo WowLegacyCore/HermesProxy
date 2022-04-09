@@ -18,7 +18,7 @@ namespace HermesProxy.World.Client
         {
             QueryTimeResponse response = new QueryTimeResponse();
             response.CurrentTime = packet.ReadInt32();
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) && packet.CanRead())
                 packet.ReadInt32(); // Next Daily Quest Reset Time
             SendPacketToClient(response);
         }

@@ -70,6 +70,7 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(playerLogin.Guid.To64());
             SendPacketToServer(packet);
             SendConnectToInstance(ConnectToSerial.WorldAttempt1);
+            GetSession().GameState.IsConnectedToInstance = true;
         }
 
         [PacketHandler(Opcode.CMSG_LOGOUT_REQUEST)]

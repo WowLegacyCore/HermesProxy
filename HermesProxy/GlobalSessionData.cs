@@ -27,6 +27,7 @@ namespace HermesProxy
         public bool IsWaitingForTaxiStart;
         public bool IsWaitingForNewWorld;
         public bool IsFirstEnterWorld;
+        public bool IsConnectedToInstance;
         public bool IsInWorld;
         public uint? CurrentMapId;
         public uint CurrentTaxiNode;
