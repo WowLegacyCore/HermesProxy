@@ -449,5 +449,43 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(inspect);
         }
+
+        [PacketHandler(Opcode.MSG_INSPECT_HONOR_STATS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        void HandleInspectHonorStatsVanilla(WorldPacket packet)
+        {
+            InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic();
+            inspect.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
+            inspect.LifetimeHighestRank = packet.ReadUInt8();
+            inspect.TodayHonorableKills = packet.ReadUInt16();
+            inspect.TodayDishonorableKills = packet.ReadUInt16();
+            inspect.YesterdayHonorableKills = packet.ReadUInt16();
+            inspect.YesterdayDishonorableKills = packet.ReadUInt16();
+            inspect.LastWeekHonorableKills = packet.ReadUInt16();
+            packet.ReadUInt16(); // Last Week Dishonorable Kills
+            inspect.ThisWeekHonorableKills = packet.ReadUInt16();
+            packet.ReadUInt16(); // This Week Dishonorable Kills
+            inspect.LifetimeHonorableKills = packet.ReadUInt32();
+            inspect.LifetimeDishonorableKills = packet.ReadUInt32();
+            inspect.YesterdayHonor = packet.ReadUInt32();
+            packet.ReadUInt32(); // Last Week Honor
+            packet.ReadUInt32(); // This Week Honor
+            packet.ReadUInt32(); // Last Week Rank
+            inspect.RankProgress = packet.ReadUInt8();
+            SendPacketToClient(inspect);
+        }
+
+        [PacketHandler(Opcode.MSG_INSPECT_HONOR_STATS, ClientVersionBuild.V2_0_1_6180)]
+        void HandleInspectHonorStatsTBC(WorldPacket packet)
+        {
+            InspectHonorStatsResultTBC inspect = new InspectHonorStatsResultTBC();
+            inspect.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
+            inspect.LifetimeHighestRank = packet.ReadUInt8();
+            packet.ReadUInt16(); // Today Honorable Kills
+            inspect.YesterdayHonorableKills = packet.ReadUInt16();
+            packet.ReadUInt32(); // Today Honor
+            packet.ReadUInt32(); // Yesterday Honor
+            inspect.LifetimeHonorableKills = (ushort)packet.ReadUInt32();
+            SendPacketToClient(inspect);
+        }
     }
 }

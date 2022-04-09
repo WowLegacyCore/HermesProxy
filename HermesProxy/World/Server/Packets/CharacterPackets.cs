@@ -829,4 +829,72 @@ namespace HermesProxy.World.Server.Packets
         public byte Bracket;
         public bool Disqualified;
     }
+
+    public class InspectHonorStatsResultClassic : ServerPacket
+    {
+        public InspectHonorStatsResultClassic() : base(Opcode.SMSG_INSPECT_HONOR_STATS) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(PlayerGUID);
+            _worldPacket.WriteUInt8(LifetimeHighestRank);
+            _worldPacket.WriteUInt16(TodayHonorableKills);
+            _worldPacket.WriteUInt16(TodayDishonorableKills);
+            _worldPacket.WriteUInt16(YesterdayHonorableKills);
+            _worldPacket.WriteUInt16(YesterdayDishonorableKills);
+            _worldPacket.WriteUInt32(LastWeekHonorableKills);
+            _worldPacket.WriteUInt32(ThisWeekHonorableKills);
+            _worldPacket.WriteUInt32(LifetimeHonorableKills);
+            _worldPacket.WriteUInt32(LifetimeDishonorableKills);
+            _worldPacket.WriteUInt32(YesterdayHonor);
+            _worldPacket.WriteUInt8(RankProgress);
+        }
+
+        public WowGuid128 PlayerGUID;
+        public byte LifetimeHighestRank;
+        public ushort TodayHonorableKills;
+        public ushort TodayDishonorableKills;
+        public ushort YesterdayHonorableKills;
+        public ushort YesterdayDishonorableKills;
+        public uint LastWeekHonorableKills;
+        public uint ThisWeekHonorableKills;
+        public uint LifetimeHonorableKills;
+        public uint LifetimeDishonorableKills;
+        public uint YesterdayHonor;
+        public byte RankProgress;
+    }
+
+    public class InspectHonorStatsResultTBC : ServerPacket
+    {
+        public InspectHonorStatsResultTBC() : base(Opcode.SMSG_INSPECT_HONOR_STATS) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(PlayerGUID);
+            _worldPacket.WriteUInt8(LifetimeHighestRank);
+            _worldPacket.WriteUInt16(Unused1);
+            _worldPacket.WriteUInt16(YesterdayHonorableKills);
+            _worldPacket.WriteUInt16(Unused3);
+            _worldPacket.WriteUInt16(LifetimeHonorableKills);
+            _worldPacket.WriteUInt32(Unused4);
+            _worldPacket.WriteUInt32(Unused5);
+            _worldPacket.WriteUInt32(Unused6);
+            _worldPacket.WriteUInt32(Unused7);
+            _worldPacket.WriteUInt32(Unused8);
+            _worldPacket.WriteUInt8(Unused9);
+        }
+
+        public WowGuid128 PlayerGUID;
+        public byte LifetimeHighestRank;
+        public ushort Unused1;
+        public ushort YesterdayHonorableKills;
+        public ushort Unused3;
+        public ushort LifetimeHonorableKills;
+        public uint Unused4;
+        public uint Unused5;
+        public uint Unused6;
+        public uint Unused7;
+        public uint Unused8;
+        public byte Unused9;
+    }
 }

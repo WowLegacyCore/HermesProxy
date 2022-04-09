@@ -154,5 +154,24 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(inspect.Target.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_INSPECT_HONOR_STATS)]
+        void HandleInspectHonorStats(Inspect inspect)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_INSPECT_HONOR_STATS);
+            packet.WriteGuid(inspect.Target.To64());
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_INSPECT_ARENA_TEAMS)]
+        void HandleInspectArenaTeams(Inspect inspect)
+        {
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                WorldPacket packet = new WorldPacket(Opcode.MSG_INSPECT_ARENA_TEAMS);
+                packet.WriteGuid(inspect.Target.To64());
+                SendPacketToServer(packet);
+            }
+        }
     }
 }
