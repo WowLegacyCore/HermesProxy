@@ -842,11 +842,16 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt16(TodayDishonorableKills);
             _worldPacket.WriteUInt16(YesterdayHonorableKills);
             _worldPacket.WriteUInt16(YesterdayDishonorableKills);
-            _worldPacket.WriteUInt32(LastWeekHonorableKills);
-            _worldPacket.WriteUInt32(ThisWeekHonorableKills);
+            _worldPacket.WriteUInt16(LastWeekHonorableKills);
+            _worldPacket.WriteUInt16(LastWeekDishonorableKills);
+            _worldPacket.WriteUInt16(ThisWeekHonorableKills);
+            _worldPacket.WriteUInt16(ThisWeekDishonorableKills);
             _worldPacket.WriteUInt32(LifetimeHonorableKills);
             _worldPacket.WriteUInt32(LifetimeDishonorableKills);
             _worldPacket.WriteUInt32(YesterdayHonor);
+            _worldPacket.WriteUInt32(LastWeekHonor);
+            _worldPacket.WriteUInt32(ThisWeekHonor);
+            _worldPacket.WriteUInt32(Standing);
             _worldPacket.WriteUInt8(RankProgress);
         }
 
@@ -856,11 +861,16 @@ namespace HermesProxy.World.Server.Packets
         public ushort TodayDishonorableKills;
         public ushort YesterdayHonorableKills;
         public ushort YesterdayDishonorableKills;
-        public uint LastWeekHonorableKills;
-        public uint ThisWeekHonorableKills;
+        public ushort LastWeekHonorableKills;
+        public ushort LastWeekDishonorableKills;
+        public ushort ThisWeekHonorableKills;
+        public ushort ThisWeekDishonorableKills;
         public uint LifetimeHonorableKills;
         public uint LifetimeDishonorableKills;
         public uint YesterdayHonor;
+        public uint LastWeekHonor;
+        public uint ThisWeekHonor;
+        public uint Standing;
         public byte RankProgress;
     }
 
@@ -896,5 +906,80 @@ namespace HermesProxy.World.Server.Packets
         public uint Unused7;
         public uint Unused8;
         public byte Unused9;
+    }
+
+    public class InspectPvP : ServerPacket
+    {
+        public InspectPvP() : base(Opcode.SMSG_INSPECT_PVP) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(PlayerGUID);
+            _worldPacket.WriteBits(Brackets.Count, 3);
+            _worldPacket.WriteBits(ArenaTeams.Count, 2);
+            _worldPacket.FlushBits();
+
+            foreach (var bracket in Brackets)
+                bracket.Write(_worldPacket);
+
+            foreach (var team in ArenaTeams)
+                team.Write(_worldPacket);
+        }
+
+        public WowGuid128 PlayerGUID;
+        public List<PvPBracketInspectData> Brackets = new List<PvPBracketInspectData>();
+        public List<ArenaTeamInspectData> ArenaTeams = new List<ArenaTeamInspectData>();
+    }
+
+    public class PvPBracketInspectData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(Bracket);
+            data.WriteInt32(Rating);
+            data.WriteInt32(Rank);
+            data.WriteInt32(WeeklyPlayed);
+            data.WriteInt32(WeeklyWon);
+            data.WriteInt32(SeasonPlayed);
+            data.WriteInt32(SeasonWon); ;
+            data.WriteInt32(WeeklyBestRating);
+            data.WriteInt32(SeasonBestRating);
+            data.WriteInt32(PvpTierID);
+            data.WriteInt32(WeeklyBestWinPvpTierID);
+            data.WriteBool(Disqualified);
+        }
+
+        public byte Bracket;
+        public int Rating;
+        public int Rank;
+        public int WeeklyPlayed;
+        public int WeeklyWon;
+        public int SeasonPlayed;
+        public int SeasonWon;
+        public int WeeklyBestRating;
+        public int SeasonBestRating;
+        public int PvpTierID;
+        public int WeeklyBestWinPvpTierID;
+        public bool Disqualified;
+    }
+
+    public class ArenaTeamInspectData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid128(TeamGuid);
+            data.WriteInt32(TeamRating);
+            data.WriteInt32(TeamGamesPlayed);
+            data.WriteInt32(TeamGamesWon);
+            data.WriteInt32(PersonalGamesPlayed);
+            data.WriteInt32(PersonalRating);
+        }
+
+        public WowGuid128 TeamGuid = WowGuid128.Empty;
+        public int TeamRating;
+        public int TeamGamesPlayed;
+        public int TeamGamesWon;
+        public int PersonalGamesPlayed;
+        public int PersonalRating;
     }
 }

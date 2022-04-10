@@ -82,4 +82,92 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write() { }
     }
+
+    class RaidInstanceInfo : ServerPacket
+    {
+        public RaidInstanceInfo() : base(Opcode.SMSG_RAID_INSTANCE_INFO) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(LockList.Count);
+
+            foreach (InstanceLock lockInfos in LockList)
+                lockInfos.Write(_worldPacket);
+        }
+
+        public List<InstanceLock> LockList = new();
+    }
+
+    public class InstanceLock
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(MapID);
+            data.WriteUInt32((uint)DifficultyID);
+            data.WriteUInt64(InstanceID);
+            data.WriteInt32(TimeRemaining);
+            data.WriteUInt32(CompletedMask);
+
+            data.WriteBit(Locked);
+            data.WriteBit(Extended);
+            data.FlushBits();
+        }
+
+        public uint MapID;
+        public Difficulty DifficultyID;
+        public ulong InstanceID;
+        public int TimeRemaining;
+        public uint CompletedMask = 1;
+
+        public bool Locked = true;
+        public bool Extended;
+    }
+
+    class InstanceSaveCreated : ServerPacket
+    {
+        public InstanceSaveCreated() : base(Opcode.SMSG_INSTANCE_SAVE_CREATED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(Gm);
+            _worldPacket.FlushBits();
+        }
+
+        public bool Gm;
+    }
+
+    class RaidGroupOnly : ServerPacket
+    {
+        public RaidGroupOnly() : base(Opcode.SMSG_RAID_GROUP_ONLY) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Delay);
+            _worldPacket.WriteUInt32((uint)Reason);
+        }
+
+        public int Delay;
+        public RaidGroupReason Reason;
+    }
+
+    class RaidInstanceMessage : ServerPacket
+    {
+        public RaidInstanceMessage() : base(Opcode.SMSG_RAID_INSTANCE_MESSAGE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Type);
+            _worldPacket.WriteUInt32(MapID);
+            _worldPacket.WriteUInt32((uint)DifficultyID);
+            _worldPacket.WriteBit(Locked);
+            _worldPacket.WriteBit(Extended);
+            _worldPacket.FlushBits();
+        }
+
+        public InstanceResetWarningType Type;
+        public uint MapID;
+        public Difficulty DifficultyID;
+        public bool Locked;
+        public bool Extended;
+    }
 }

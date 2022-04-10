@@ -282,14 +282,14 @@ namespace HermesProxy.World.Server.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(DungeonDifficultyID);
-            data.WriteUInt32(RaidDifficultyID);
-            data.WriteUInt32(LegacyRaidDifficultyID);
+            data.WriteUInt32((uint)DungeonDifficultyID);
+            data.WriteUInt32((uint)RaidDifficultyID);
+            data.WriteUInt32((uint)LegacyRaidDifficultyID);
         }
 
-        public uint DungeonDifficultyID;
-        public uint RaidDifficultyID;
-        public uint LegacyRaidDifficultyID;
+        public Difficulty DungeonDifficultyID;
+        public Difficulty RaidDifficultyID;
+        public Difficulty LegacyRaidDifficultyID;
     }
 
     class LeaveGroup : ClientPacket

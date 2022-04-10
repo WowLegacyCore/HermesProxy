@@ -78,12 +78,12 @@ namespace HermesProxy.World.Client
                     party.PartyFlags |= GroupFlags.Raid;
 
                 party.DifficultySettings = new PartyDifficultySettings();
-                party.DifficultySettings.DungeonDifficultyID = 1;
+                party.DifficultySettings.DungeonDifficultyID = Difficulty.Normal;
 
                 if (ModernVersion.GetExpansionVersion() > 1)
-                    party.DifficultySettings.RaidDifficultyID = 4;
+                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid25N;
                 else
-                    party.DifficultySettings.RaidDifficultyID = 9;
+                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
 
                 if (GetSession().GameState.IsInBattleground())
                 {
@@ -206,12 +206,12 @@ namespace HermesProxy.World.Client
                 party.LootSettings.Threshold = packet.ReadUInt8();
 
                 party.DifficultySettings = new PartyDifficultySettings();
-                party.DifficultySettings.DungeonDifficultyID = packet.ReadUInt8();
+                party.DifficultySettings.DungeonDifficultyID = (Difficulty)packet.ReadUInt8();
 
                 if (ModernVersion.GetExpansionVersion() > 1)
-                    party.DifficultySettings.RaidDifficultyID = 4;
+                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid25N;
                 else
-                    party.DifficultySettings.RaidDifficultyID = 9;
+                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
             }
             else
             {

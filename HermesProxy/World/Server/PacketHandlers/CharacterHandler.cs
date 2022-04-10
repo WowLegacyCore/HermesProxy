@@ -163,7 +163,7 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
-        [PacketHandler(Opcode.CMSG_INSPECT_ARENA_TEAMS)]
+        [PacketHandler(Opcode.CMSG_INSPECT_PVP)]
         void HandleInspectArenaTeams(Inspect inspect)
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
@@ -171,6 +171,15 @@ namespace HermesProxy.World.Server
                 WorldPacket packet = new WorldPacket(Opcode.MSG_INSPECT_ARENA_TEAMS);
                 packet.WriteGuid(inspect.Target.To64());
                 SendPacketToServer(packet);
+            }
+            else
+            {
+                InspectPvP pvp = new InspectPvP();
+                pvp.PlayerGUID = inspect.Target;
+                pvp.ArenaTeams.Add(new ArenaTeamInspectData());
+                pvp.ArenaTeams.Add(new ArenaTeamInspectData());
+                pvp.ArenaTeams.Add(new ArenaTeamInspectData());
+                SendPacket(pvp);
             }
         }
     }

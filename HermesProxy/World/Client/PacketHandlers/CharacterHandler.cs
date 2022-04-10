@@ -453,38 +453,108 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_INSPECT_HONOR_STATS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleInspectHonorStatsVanilla(WorldPacket packet)
         {
-            InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic();
-            inspect.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
-            inspect.LifetimeHighestRank = packet.ReadUInt8();
-            inspect.TodayHonorableKills = packet.ReadUInt16();
-            inspect.TodayDishonorableKills = packet.ReadUInt16();
-            inspect.YesterdayHonorableKills = packet.ReadUInt16();
-            inspect.YesterdayDishonorableKills = packet.ReadUInt16();
-            inspect.LastWeekHonorableKills = packet.ReadUInt16();
-            packet.ReadUInt16(); // Last Week Dishonorable Kills
-            inspect.ThisWeekHonorableKills = packet.ReadUInt16();
-            packet.ReadUInt16(); // This Week Dishonorable Kills
-            inspect.LifetimeHonorableKills = packet.ReadUInt32();
-            inspect.LifetimeDishonorableKills = packet.ReadUInt32();
-            inspect.YesterdayHonor = packet.ReadUInt32();
-            packet.ReadUInt32(); // Last Week Honor
-            packet.ReadUInt32(); // This Week Honor
-            packet.ReadUInt32(); // Last Week Rank
-            inspect.RankProgress = packet.ReadUInt8();
-            SendPacketToClient(inspect);
+            WowGuid128 playerGuid = packet.ReadGuid().To128(GetSession().GameState);
+            byte lifetimeHighestRank = packet.ReadUInt8();
+            ushort todayHonorableKills = packet.ReadUInt16();
+            ushort todayDishonorableKills = packet.ReadUInt16();
+            ushort yesterdayHonorableKills = packet.ReadUInt16();
+            ushort yesterdayDishonorableKills = packet.ReadUInt16();
+            ushort lastWeekHonorableKills = packet.ReadUInt16();
+            ushort lastWeekDishonorableKills = packet.ReadUInt16();
+            ushort thisWeekHonorableKills = packet.ReadUInt16();
+            ushort thisWeekDishonorableKills = packet.ReadUInt16();
+            uint lifetimeHonorableKills = packet.ReadUInt32();
+            uint lifetimeDishonorableKills = packet.ReadUInt32();
+            uint yesterdayHonor = packet.ReadUInt32();
+            uint lastWeekHonor = packet.ReadUInt32();
+            uint thisWeekHonor = packet.ReadUInt32();
+            uint standing = packet.ReadUInt32();
+            byte rankProgress = packet.ReadUInt8();
+
+            if (ModernVersion.GetExpansionVersion() == 1)
+            {
+                InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic();
+                inspect.PlayerGUID = playerGuid;
+                inspect.LifetimeHighestRank = lifetimeHighestRank;
+                inspect.TodayHonorableKills = todayHonorableKills;
+                inspect.TodayDishonorableKills = todayDishonorableKills;
+                inspect.YesterdayHonorableKills = yesterdayHonorableKills;
+                inspect.YesterdayDishonorableKills = yesterdayDishonorableKills;
+                inspect.LastWeekHonorableKills = lastWeekHonorableKills;
+                inspect.LastWeekDishonorableKills = lastWeekDishonorableKills;
+                inspect.ThisWeekHonorableKills = thisWeekHonorableKills;
+                inspect.ThisWeekDishonorableKills = thisWeekDishonorableKills;
+                inspect.LifetimeHonorableKills = lifetimeHonorableKills;
+                inspect.LifetimeDishonorableKills = lifetimeDishonorableKills;
+                inspect.YesterdayHonor = yesterdayHonor;
+                inspect.LastWeekHonor = lastWeekHonor;
+                inspect.ThisWeekHonor = thisWeekHonor;
+                inspect.Standing = standing;
+                inspect.RankProgress = rankProgress;
+                SendPacketToClient(inspect);
+            }
+            else
+            {
+                InspectHonorStatsResultTBC inspect = new InspectHonorStatsResultTBC();
+                inspect.PlayerGUID = playerGuid;
+                inspect.LifetimeHighestRank = lifetimeHighestRank;
+                inspect.YesterdayHonorableKills = yesterdayHonorableKills;
+                inspect.LifetimeHonorableKills = (ushort)lifetimeHonorableKills;
+                SendPacketToClient(inspect);
+            }
         }
 
         [PacketHandler(Opcode.MSG_INSPECT_HONOR_STATS, ClientVersionBuild.V2_0_1_6180)]
         void HandleInspectHonorStatsTBC(WorldPacket packet)
         {
-            InspectHonorStatsResultTBC inspect = new InspectHonorStatsResultTBC();
+            WowGuid128 playerGuid = packet.ReadGuid().To128(GetSession().GameState);
+            byte lifetimeHighestRank = packet.ReadUInt8();
+            ushort todayHonorableKills = packet.ReadUInt16();
+            ushort yesterdayHonorableKills = packet.ReadUInt16();
+            uint todayHonor = packet.ReadUInt32();
+            uint yesterdayHonor = packet.ReadUInt32();
+            uint lifetimeHonorableKills = packet.ReadUInt32();
+
+            if (ModernVersion.GetExpansionVersion() == 1)
+            {
+                InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic();
+                inspect.PlayerGUID = playerGuid;
+                inspect.LifetimeHighestRank = lifetimeHighestRank;
+                inspect.TodayHonorableKills = todayHonorableKills;
+                inspect.YesterdayHonorableKills = yesterdayHonorableKills;
+                inspect.LifetimeHonorableKills = lifetimeHonorableKills;
+                inspect.YesterdayHonor = yesterdayHonor;
+                inspect.LastWeekHonor = todayHonor;
+                SendPacketToClient(inspect);
+            }
+            else
+            {
+                InspectHonorStatsResultTBC inspect = new InspectHonorStatsResultTBC();
+                inspect.PlayerGUID = playerGuid;
+                inspect.LifetimeHighestRank = lifetimeHighestRank;
+                inspect.YesterdayHonorableKills = yesterdayHonorableKills;
+                inspect.LifetimeHonorableKills = (ushort)lifetimeHonorableKills;
+                SendPacketToClient(inspect);
+            }
+        }
+
+        [PacketHandler(Opcode.MSG_INSPECT_ARENA_TEAMS)]
+        void HandleInspectArenaTeams(WorldPacket packet)
+        {
+            InspectPvP inspect = new InspectPvP();
             inspect.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
-            inspect.LifetimeHighestRank = packet.ReadUInt8();
-            packet.ReadUInt16(); // Today Honorable Kills
-            inspect.YesterdayHonorableKills = packet.ReadUInt16();
-            packet.ReadUInt32(); // Today Honor
-            packet.ReadUInt32(); // Yesterday Honor
-            inspect.LifetimeHonorableKills = (ushort)packet.ReadUInt32();
+            ArenaTeamInspectData team = new ArenaTeamInspectData();
+            byte slot = packet.ReadUInt8();
+            uint teamId = packet.ReadUInt32();
+            team.TeamGuid = WowGuid128.Create(HighGuidType703.ArenaTeam, teamId);
+            team.TeamRating = packet.ReadInt32();
+            team.TeamGamesPlayed = packet.ReadInt32();
+            team.TeamGamesWon = packet.ReadInt32();
+            team.PersonalGamesPlayed = packet.ReadInt32();
+            team.PersonalRating = packet.ReadInt32();
+            GetSession().GameState.StoreArenaTeamDataForPlayer(inspect.PlayerGUID, slot, team);
+            for (byte i = 0; i < 3; i++)
+                inspect.ArenaTeams.Add(GetSession().GameState.GetArenaTeamDataForPlayer(inspect.PlayerGUID, slot));
             SendPacketToClient(inspect);
         }
     }

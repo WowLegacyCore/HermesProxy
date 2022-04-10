@@ -181,6 +181,7 @@ namespace HermesProxy.World
                 case HighGuidType703.BattlePet:
                 case HighGuidType703.CommerceObj:
                 case HighGuidType703.ClientSession:
+                case HighGuidType703.ArenaTeam:
                     return GlobalCreate(type, counter);
                 case HighGuidType703.Player:
                 case HighGuidType703.Item:   // This is not exactly correct, there are 2 more unknown parts in highguid: (high >> 10 & 0xFF), (high >> 18 & 0xFFFFFF)

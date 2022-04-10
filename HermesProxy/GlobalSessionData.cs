@@ -5,6 +5,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server;
 using System.Collections.Generic;
+using ArenaTeamInspectData = HermesProxy.World.Server.Packets.ArenaTeamInspectData;
 
 namespace HermesProxy
 {
@@ -78,7 +79,22 @@ namespace HermesProxy
         public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
         public Dictionary<WowGuid64, ushort> ObjectSpawnCount = new Dictionary<WowGuid64, ushort>();
         public HashSet<WowGuid128> HunterPetGuids = new HashSet<WowGuid128>();
+        public Dictionary<WowGuid128, Array<ArenaTeamInspectData>> PlayerArenaTeams = new Dictionary<WowGuid128, Array<ArenaTeamInspectData>>();
 
+        public ArenaTeamInspectData GetArenaTeamDataForPlayer(WowGuid128 guid, byte slot)
+        {
+            if (PlayerArenaTeams.ContainsKey(guid))
+                return PlayerArenaTeams[guid][slot];
+
+            return new ArenaTeamInspectData();
+        }
+        public void StoreArenaTeamDataForPlayer(WowGuid128 guid, byte slot, ArenaTeamInspectData team)
+        {
+            if (!PlayerArenaTeams.ContainsKey(guid))
+                PlayerArenaTeams.Add(guid, new Array<ArenaTeamInspectData>(3, new ArenaTeamInspectData()));
+
+            PlayerArenaTeams[guid][slot] = team;
+        }
         public WowGuid64 GetInventorySlotItem(int slot)
         {
             int PLAYER_FIELD_INV_SLOT_HEAD = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_INV_SLOT_HEAD);
