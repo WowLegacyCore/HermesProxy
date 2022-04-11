@@ -2009,14 +2009,20 @@ namespace HermesProxy.World.Client
                     hairColor = (byte)((updates[PLAYER_BYTES].UInt32Value >> 24) & 0xFF);
                 }
 
-                byte? restState = null;
+                RestInfo restInfo = isCreate && guid == GetSession().GameState.CurrentPlayerGuid ? new RestInfo() : null;
+                if (restInfo != null)
+                    restInfo.StateID = (uint)RestState.Normal;
 
                 int PLAYER_BYTES_2 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_BYTES_2);
                 if (PLAYER_BYTES_2 >= 0 && updateMaskArray[PLAYER_BYTES_2])
                 {
                     facialHair = (byte)(updates[PLAYER_BYTES_2].UInt32Value & 0xFF);
                     updateData.PlayerData.NumBankSlots = (byte)((updates[PLAYER_BYTES_2].UInt32Value >> 16) & 0xFF);
-                    restState = (byte)((updates[PLAYER_BYTES_2].UInt32Value >> 24) & 0xFF);
+
+                    if (restInfo == null && guid == GetSession().GameState.CurrentPlayerGuid)
+                        restInfo = new RestInfo();
+                    if (restInfo != null)
+                        restInfo.StateID = (byte)((updates[PLAYER_BYTES_2].UInt32Value >> 24) & 0xFF);
                 }
 
                 if (skin != null && face != null && hairStyle != null && hairColor != null && facialHair != null)
@@ -2052,10 +2058,14 @@ namespace HermesProxy.World.Client
                 int PLAYER_REST_STATE_EXPERIENCE = LegacyVersion.GetUpdateField(PlayerField.PLAYER_REST_STATE_EXPERIENCE);
                 if (PLAYER_REST_STATE_EXPERIENCE >= 0 && updateMaskArray[PLAYER_REST_STATE_EXPERIENCE])
                 {
-                    RestInfo restInfo = new RestInfo();
-                    restInfo.StateID = restState;
-                    restInfo.Threshold = updates[PLAYER_REST_STATE_EXPERIENCE].UInt32Value;
+                    if (restInfo == null && guid == GetSession().GameState.CurrentPlayerGuid)
+                        restInfo = new RestInfo();
+                    if (restInfo != null)
+                        restInfo.Threshold = updates[PLAYER_REST_STATE_EXPERIENCE].UInt32Value;
                 }
+
+                if (restInfo != null)
+                    updateData.ActivePlayerData.RestInfo[(byte)RestType.XP] = restInfo;
 
                 int PLAYER_BYTES_3 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_BYTES_3);
                 if (PLAYER_BYTES_3 >= 0 && updateMaskArray[PLAYER_BYTES_3])

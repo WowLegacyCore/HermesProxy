@@ -18,8 +18,8 @@ namespace HermesProxy.World.Objects
     }
     public class RestInfo
     {
-        public uint? Threshold;
         public uint? StateID;
+        public uint? Threshold;
     }
     public class PVPInfo
     {

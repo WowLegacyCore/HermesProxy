@@ -120,12 +120,25 @@ namespace HermesProxy.World.Enums
         NotEnoughCurrency = 25,
     }
 
+    public enum RestType : byte
+    {
+        XP = 0,
+        Honor = 1,
+        Max
+    };
+
     public enum RestFlag
     {
         Tavern = 0x01,
         City = 0x02,
         FactionArea = 0x04
     }
+
+    public enum RestState
+    {
+        Rested = 0x01,
+        Normal = 0x02,
+    };
 
     public enum ChatFlags
     {

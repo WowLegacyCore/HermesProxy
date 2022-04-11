@@ -1373,8 +1373,10 @@ namespace HermesProxy.World.Objects.Version.V2_5_2_39570
                     int sizePerEntry = 2;
                     if (activeData.RestInfo[i] != null)
                     {
-                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)activeData.RestInfo[i].Threshold);
-                        m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)activeData.RestInfo[i].StateID);
+                        if (activeData.RestInfo[i].StateID != null)
+                            m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry, (uint)activeData.RestInfo[i].StateID);
+                        if (activeData.RestInfo[i].Threshold != null)
+                            m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 1, (uint)activeData.RestInfo[i].Threshold);
                     }
                 }
                 for (int i = 0; i < 7; i++)
