@@ -31,10 +31,10 @@ namespace HermesProxy.World.Client
                 spells.CreatureFamily = packet.ReadUInt16();
 
             spells.TimeLimit = packet.ReadUInt32();
-
-            PetModeFlags petModeFlags;
-            ReadPetFlags(packet, out spells.ReactState, out spells.CommandState, out petModeFlags);
-            spells.Flag = (byte)petModeFlags;
+            spells.ReactState = (ReactStates)packet.ReadUInt8();
+            spells.CommandState = (CommandStates)packet.ReadUInt8();
+            packet.ReadUInt8(); // unused
+            spells.Flag = packet.ReadUInt8();
 
             const int maxCreatureSpells = 10;
             for (int i = 0; i < maxCreatureSpells; i++) // Read pet/vehicle spell ids
@@ -62,14 +62,6 @@ namespace HermesProxy.World.Client
             }
             
             SendPacketToClient(spells);
-        }
-
-        void ReadPetFlags(WorldPacket packet, out ReactStates reactState, out CommandStates commandState, out PetModeFlags petModeFlags)
-        {
-            var raw = packet.ReadUInt32();
-            reactState = (ReactStates)((raw >> 8) & 0xFF);
-            commandState = (CommandStates)((raw >> 16) & 0xFF);
-            petModeFlags = (PetModeFlags)(raw & 0xFFFF0000);
         }
 
         [PacketHandler(Opcode.SMSG_PET_ACTION_SOUND)]
