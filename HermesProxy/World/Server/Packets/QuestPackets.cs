@@ -698,4 +698,76 @@ namespace HermesProxy.World.Server.Packets
 
         public uint QuestID;
     }
+
+    class QuestConfirmAccept : ServerPacket
+    {
+        public QuestConfirmAccept() : base(Opcode.SMSG_QUEST_CONFIRM_ACCEPT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WritePackedGuid128(InitiatedBy);
+
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 10);
+            _worldPacket.WriteString(QuestTitle);
+        }
+
+        public WowGuid128 InitiatedBy;
+        public uint QuestID;
+        public string QuestTitle;
+    }
+
+    class QuestConfirmAcceptResponse : ClientPacket
+    {
+        public QuestConfirmAcceptResponse(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestID = _worldPacket.ReadUInt32();
+        }
+
+        public uint QuestID;
+    }
+
+    class PushQuestToParty : ClientPacket
+    {
+        public PushQuestToParty(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestID = _worldPacket.ReadUInt32();
+        }
+
+        public uint QuestID;
+    }
+
+    class QuestPushResult : ServerPacket
+    {
+        public QuestPushResult() : base(Opcode.SMSG_QUEST_PUSH_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(SenderGUID);
+            _worldPacket.WriteUInt8((byte)Result);
+        }
+
+        public WowGuid128 SenderGUID;
+        public QuestPushReason Result;
+    }
+
+    class QuestPushResultResponse : ClientPacket
+    {
+        public QuestPushResultResponse(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SenderGUID = _worldPacket.ReadPackedGuid128();
+            QuestID = _worldPacket.ReadUInt32();
+            Result = (QuestPushReason)_worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 SenderGUID;
+        public uint QuestID;
+        public QuestPushReason Result;
+    }
 }

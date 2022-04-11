@@ -34,5 +34,19 @@ namespace HermesProxy.World.Client
             anim.CustomAnim = packet.ReadUInt32();
             SendPacketToClient(anim);
         }
+
+        [PacketHandler(Opcode.SMSG_FISH_NOT_HOOKED)]
+        void HandleFishNotHooked(WorldPacket packet)
+        {
+            FishNotHooked fish = new FishNotHooked();
+            SendPacketToClient(fish);
+        }
+
+        [PacketHandler(Opcode.SMSG_FISH_ESCAPED)]
+        void HandleFishEscaped(WorldPacket packet)
+        {
+            FishEscaped fish = new FishEscaped();
+            SendPacketToClient(fish);
+        }
     }
 }

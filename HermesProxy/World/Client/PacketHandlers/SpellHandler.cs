@@ -624,8 +624,9 @@ namespace HermesProxy.World.Client
                     cooldown.SpellCooldowns.Add(cd);
                 }
             }
-            catch (ArgumentOutOfRangeException ex) // wrong structure from arcemu
+            catch (ArgumentOutOfRangeException ex)
             {
+                // wrong structure from arcemu
                 // https://github.com/arcemu/arcemu/blob/2_4_3/src/arcemu-world/Spell.cpp#L1554
                 packet.ResetReadPos();
                 SpellCooldownStruct cd = new();

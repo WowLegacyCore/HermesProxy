@@ -430,5 +430,24 @@ namespace HermesProxy.World.Client
                 SendPacket(query);
             }
         }
+
+        [PacketHandler(Opcode.SMSG_QUEST_CONFIRM_ACCEPT)]
+        void HandleQuestConfirmAccept(WorldPacket packet)
+        {
+            QuestConfirmAccept quest = new QuestConfirmAccept();
+            quest.QuestID = packet.ReadUInt32();
+            quest.QuestTitle = packet.ReadCString();
+            quest.InitiatedBy = packet.ReadGuid().To128(GetSession().GameState);
+            SendPacketToClient(quest);
+        }
+
+        [PacketHandler(Opcode.MSG_QUEST_PUSH_RESULT)]
+        void HandleQuestPushResult(WorldPacket packet)
+        {
+            QuestPushResult quest = new QuestPushResult();
+            quest.SenderGUID = packet.ReadGuid().To128(GetSession().GameState);
+            quest.Result = (QuestPushReason)packet.ReadUInt8();
+            SendPacketToClient(quest);
+        }
     }
 }

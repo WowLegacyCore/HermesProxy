@@ -143,4 +143,22 @@ namespace HermesProxy.World.Enums
         FailedSpell = 28,       // "You Haven'T Learned The Required Spell."
         HasInProgress = 30        // "Progress Bar Objective Not Completed"
     }
+
+    public enum QuestPushReason
+    {
+        Success = 0,
+        Invalid = 1,
+        Accepted = 2,
+        Declined = 3,
+        Busy = 4,
+        Dead = 5,
+        LogFull = 6,
+        OnQuest = 7,
+        AlreadyDone = 8,
+        NotDaily = 9,
+        TimerExpired = 10,
+        NotInParty = 11,
+        DifferentServerDaily = 12,
+        NotAllowed = 13
+    }
 }

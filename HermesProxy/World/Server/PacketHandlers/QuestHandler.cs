@@ -135,5 +135,27 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(quest.QuestID);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_QUEST_CONFIRM_ACCEPT)]
+        void HandleQuestConfirmAcceptResponse(QuestConfirmAcceptResponse quest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_CONFIRM_ACCEPT);
+            packet.WriteUInt32(quest.QuestID);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_PUSH_QUEST_TO_PARTY)]
+        void HandlePushQuestToParty(PushQuestToParty quest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_PUSH_QUEST_TO_PARTY);
+            packet.WriteUInt32(quest.QuestID);
+            SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_QUEST_PUSH_RESULT)]
+        void HandleQuestPushResult(QuestPushResultResponse quest)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_QUEST_PUSH_RESULT);
+            packet.WriteGuid(quest.SenderGUID.To64());
+            packet.WriteUInt8((byte)quest.Result);
+            SendPacketToServer(packet);
+        }
     }
 }

@@ -88,4 +88,18 @@ namespace HermesProxy.World.Server.Packets
         public uint CustomAnim;
         public bool PlayAsDespawn;
     }
+
+    class FishNotHooked : ServerPacket
+    {
+        public FishNotHooked() : base(Opcode.SMSG_FISH_NOT_HOOKED) { }
+
+        public override void Write() { }
+    }
+
+    class FishEscaped : ServerPacket
+    {
+        public FishEscaped() : base(Opcode.SMSG_FISH_ESCAPED) { }
+
+        public override void Write() { }
+    }
 }

@@ -331,7 +331,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.Item:
                     {
                         int ITEM_END = LegacyVersion.GetUpdateField(ItemField.ITEM_END);
-                        System.Diagnostics.Trace.Assert(ITEM_END > 0);
                         if (mask.Length < ITEM_END)
                             mask.Length = ITEM_END;
                         break;
@@ -339,7 +338,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.Container:
                     {
                         int CONTAINER_END = LegacyVersion.GetUpdateField(ContainerField.CONTAINER_END);
-                        System.Diagnostics.Trace.Assert(CONTAINER_END > 0);
                         if (mask.Length < CONTAINER_END)
                             mask.Length = CONTAINER_END;
                         break;
@@ -347,7 +345,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.Unit:
                     {
                         int UNIT_END = LegacyVersion.GetUpdateField(UnitField.UNIT_END);
-                        System.Diagnostics.Trace.Assert(UNIT_END > 0);
                         if (mask.Length < UNIT_END)
                             mask.Length = UNIT_END;
                         break;
@@ -355,7 +352,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.Player:
                     {
                         int PLAYER_END = LegacyVersion.GetUpdateField(PlayerField.PLAYER_END);
-                        System.Diagnostics.Trace.Assert(PLAYER_END > 0);
                         if (mask.Length < PLAYER_END)
                             mask.Length = PLAYER_END;
                         break;
@@ -363,7 +359,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.GameObject:
                     {
                         int GAMEOBJECT_END = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_END);
-                        System.Diagnostics.Trace.Assert(GAMEOBJECT_END > 0);
                         if (mask.Length < GAMEOBJECT_END)
                             mask.Length = GAMEOBJECT_END;
                         break;
@@ -371,7 +366,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.DynamicObject:
                     {
                         int DYNAMICOBJECT_END = LegacyVersion.GetUpdateField(DynamicObjectField.DYNAMICOBJECT_END);
-                        System.Diagnostics.Trace.Assert(DYNAMICOBJECT_END > 0);
                         if (mask.Length < DYNAMICOBJECT_END)
                             mask.Length = DYNAMICOBJECT_END;
                         break;
@@ -379,7 +373,6 @@ namespace HermesProxy.World.Client
                     case ObjectType.Corpse:
                     {
                         int CORPSE_END = LegacyVersion.GetUpdateField(CorpseField.CORPSE_END);
-                        System.Diagnostics.Trace.Assert(CORPSE_END > 0);
                         if (mask.Length < CORPSE_END)
                             mask.Length = CORPSE_END;
                         break;
