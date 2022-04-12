@@ -520,10 +520,14 @@ namespace HermesProxy.World
         #region HotFixes
         // Stores
         public const uint HotfixAreaTriggerBegin = 100000;
+        public const uint HotfixSkillLineBegin = 110000;
+        public const uint HotfixSkillRaceClassInfoBegin = 120000;
         public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
         public static void LoadHotfixes()
         {
             LoadAreaTriggerHotfixes();
+            LoadSkillLineHotfixes();
+            LoadSkillRaceClassInfoHotfixes();
         }
         
         public static void LoadAreaTriggerHotfixes()
@@ -590,6 +594,109 @@ namespace HermesProxy.World
                     record.HotfixContent.WriteUInt16(at.ShapeId);
                     record.HotfixContent.WriteUInt16(at.ActionSetId);
                     record.HotfixContent.WriteUInt8(at.Flags);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSkillLineHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SkillLine{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    string displayName = fields[0];
+                    string alternateVerb = fields[1];
+                    string description = fields[2];
+                    string hordeDisplayName = fields[3];
+                    string neutralDisplayName = fields[4];
+                    uint id = UInt32.Parse(fields[5]);
+                    byte categoryID = Byte.Parse(fields[6]);
+                    uint spellIconFileID = UInt32.Parse(fields[7]);
+                    byte canLink = Byte.Parse(fields[8]);
+                    uint parentSkillLineID = UInt32.Parse(fields[9]);
+                    uint parentTierIndex = UInt32.Parse(fields[10]);
+                    ushort flags = UInt16.Parse(fields[11]);
+                    uint spellBookSpellID = UInt32.Parse(fields[12]);
+                    
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SkillLine;
+                    record.HotfixId = HotfixSkillLineBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteCString(displayName);
+                    record.HotfixContent.WriteCString(alternateVerb);
+                    record.HotfixContent.WriteCString(description);
+                    record.HotfixContent.WriteCString(hordeDisplayName);
+                    record.HotfixContent.WriteCString(neutralDisplayName);
+                    record.HotfixContent.WriteUInt32(id);
+                    record.HotfixContent.WriteUInt8(categoryID);
+                    record.HotfixContent.WriteUInt32(spellIconFileID);
+                    record.HotfixContent.WriteUInt8(canLink);
+                    record.HotfixContent.WriteUInt32(parentSkillLineID);
+                    record.HotfixContent.WriteUInt32(parentTierIndex);
+                    record.HotfixContent.WriteUInt16(flags);
+                    record.HotfixContent.WriteUInt32(spellBookSpellID);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSkillRaceClassInfoHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SkillRaceClassInfo{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    ulong raceMask = UInt64.Parse(fields[1]);
+                    ushort skillId = UInt16.Parse(fields[2]);
+                    uint classMask = UInt32.Parse(fields[3]);
+                    ushort flags = UInt16.Parse(fields[4]);
+                    byte availability = Byte.Parse(fields[5]);
+                    byte minLevel = Byte.Parse(fields[6]);
+                    ushort skillTierId = UInt16.Parse(fields[7]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SkillRaceClassInfo;
+                    record.HotfixId = HotfixSkillRaceClassInfoBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt64(raceMask);
+                    record.HotfixContent.WriteUInt16(skillId);
+                    record.HotfixContent.WriteUInt32(classMask);
+                    record.HotfixContent.WriteUInt16(flags);
+                    record.HotfixContent.WriteUInt8(availability);
+                    record.HotfixContent.WriteUInt8(minLevel);
+                    record.HotfixContent.WriteUInt16(skillTierId);
                     Hotfixes.Add(record.HotfixId, record);
                 }
             }
