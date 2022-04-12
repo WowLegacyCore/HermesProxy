@@ -605,7 +605,7 @@ namespace HermesProxy.World.Enums.V1_12_1_5875
         SMSG_GROUP_NEW_LEADER                                 = 0x079,
         SMSG_GROUP_UNINVITE                                   = 0x077,
         SMSG_GUILD_COMMAND_RESULT                             = 0x093,
-        SMSG_GUILD_DECLINE                                    = 0x086,
+        SMSG_GUILD_INVITE_DECLINED                            = 0x086,
         SMSG_GUILD_EVENT                                      = 0x092,
         SMSG_GUILD_INFO                                       = 0x088,
         SMSG_GUILD_INVITE                                     = 0x083,

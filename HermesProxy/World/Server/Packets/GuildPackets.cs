@@ -650,6 +650,26 @@ namespace HermesProxy.World.Server.Packets
         public override void Read() { }
     }
 
+    public class GuildInviteDeclined : ServerPacket
+    {
+        public GuildInviteDeclined() : base(Opcode.SMSG_GUILD_INVITE_DECLINED) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
+            _worldPacket.WriteBit(AutoDecline);
+            _worldPacket.FlushBits();
+
+            _worldPacket.WriteUInt32(InviterVirtualRealmAddress);
+            _worldPacket.WriteString(InviterName);
+
+        }
+
+        public bool AutoDecline;
+        public uint InviterVirtualRealmAddress;
+        public string InviterName;
+    }
+
     public class GuildSetRankPermissions : ClientPacket
     {
         public GuildSetRankPermissions(WorldPacket packet) : base(packet) { }

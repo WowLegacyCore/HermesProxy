@@ -770,7 +770,7 @@ namespace HermesProxy.World.Enums.V2_4_3_8606
         SMSG_GROUP_UNINVITE                                   = 0x077,
         SMSG_GUILD_BANK_QUERY_RESULTS                         = 0x3E7,
         SMSG_GUILD_COMMAND_RESULT                             = 0x093,
-        SMSG_GUILD_DECLINE                                    = 0x086,
+        SMSG_GUILD_INVITE_DECLINED                            = 0x086,
         SMSG_GUILD_EVENT                                      = 0x092,
         SMSG_GUILD_INFO                                       = 0x088,
         SMSG_GUILD_INVITE                                     = 0x083,

@@ -347,5 +347,14 @@ namespace HermesProxy.World.Client
             emblem.Error = (GuildEmblemError)packet.ReadUInt32();
             SendPacketToClient(emblem);
         }
+
+        [PacketHandler(Opcode.SMSG_GUILD_INVITE_DECLINED)]
+        void HandleGuildInviteDeclined(WorldPacket packet)
+        {
+            GuildInviteDeclined invite = new();
+            invite.InviterName = packet.ReadCString();
+            invite.InviterVirtualRealmAddress = GetSession().RealmId.GetAddress();
+            SendPacketToClient(invite);
+        }
     }
 }
