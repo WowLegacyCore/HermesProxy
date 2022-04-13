@@ -522,12 +522,26 @@ namespace HermesProxy.World
         public const uint HotfixAreaTriggerBegin = 100000;
         public const uint HotfixSkillLineBegin = 110000;
         public const uint HotfixSkillRaceClassInfoBegin = 120000;
+        public const uint HotfixSkillLineAbilityBegin = 130000;
+        public const uint HotfixSpellBegin = 140000;
+        public const uint HotfixSpellNameBegin = 150000;
+        public const uint HotfixSpellLevelsBegin = 160000;
+        public const uint HotfixSpellAuraOptionsBegin = 170000;
+        public const uint HotfixSpellMiscBegin = 180000;
+        public const uint HotfixSpellEffectBegin = 190000;
         public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
         public static void LoadHotfixes()
         {
             LoadAreaTriggerHotfixes();
             LoadSkillLineHotfixes();
             LoadSkillRaceClassInfoHotfixes();
+            LoadSkillLineAbilityHotfixes();
+            LoadSpellHotfixes();
+            LoadSpellNameHotfixes();
+            LoadSpellLevelsHotfixes();
+            LoadSpellAuraOptionsHotfixes();
+            LoadSpellMiscHotfixes();
+            LoadSpellEffectHotfixes();
         }
         
         public static void LoadAreaTriggerHotfixes()
@@ -697,6 +711,422 @@ namespace HermesProxy.World
                     record.HotfixContent.WriteUInt8(availability);
                     record.HotfixContent.WriteUInt8(minLevel);
                     record.HotfixContent.WriteUInt16(skillTierId);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSkillLineAbilityHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SkillLineAbility{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    ulong raceMask = UInt64.Parse(fields[0]);
+                    uint id = UInt32.Parse(fields[1]);
+                    ushort skillId = UInt16.Parse(fields[2]);
+                    uint spellId = UInt32.Parse(fields[3]);
+                    ushort minSkillLineRank = UInt16.Parse(fields[4]);
+                    uint classMask = UInt32.Parse(fields[5]);
+                    uint supercedesSpellId = UInt32.Parse(fields[6]);
+                    byte acquireMethod = Byte.Parse(fields[7]);
+                    ushort trivialSkillLineRankHigh = UInt16.Parse(fields[8]);
+                    ushort trivialSkillLineRankLow = UInt16.Parse(fields[9]);
+                    byte flags = Byte.Parse(fields[10]);
+                    byte numSkillUps = Byte.Parse(fields[11]);
+                    ushort uniqueBit = UInt16.Parse(fields[12]);
+                    ushort tradeSkillCategoryId = UInt16.Parse(fields[13]);
+                    ushort skillUpSkillLineId = UInt16.Parse(fields[14]);
+                    uint characterPoints1 = UInt32.Parse(fields[15]);
+                    uint characterPoints2 = UInt32.Parse(fields[16]);
+
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SkillLineAbility;
+                    record.HotfixId = HotfixSkillLineAbilityBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt64(raceMask);
+                    record.HotfixContent.WriteUInt32(id);
+                    record.HotfixContent.WriteUInt16(skillId);
+                    record.HotfixContent.WriteUInt32(spellId);
+                    record.HotfixContent.WriteUInt16(minSkillLineRank);
+                    record.HotfixContent.WriteUInt32(classMask);
+                    record.HotfixContent.WriteUInt32(supercedesSpellId);
+                    record.HotfixContent.WriteUInt8(acquireMethod);
+                    record.HotfixContent.WriteUInt16(trivialSkillLineRankHigh);
+                    record.HotfixContent.WriteUInt16(trivialSkillLineRankLow);
+                    record.HotfixContent.WriteUInt8(flags);
+                    record.HotfixContent.WriteUInt8(numSkillUps);
+                    record.HotfixContent.WriteUInt16(uniqueBit);
+                    record.HotfixContent.WriteUInt16(tradeSkillCategoryId);
+                    record.HotfixContent.WriteUInt16(skillUpSkillLineId);
+                    record.HotfixContent.WriteUInt32(characterPoints1);
+                    record.HotfixContent.WriteUInt32(characterPoints2);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"Spell{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    string nameSubText = fields[1];
+                    string description = fields[2];
+                    string auraDescription = fields[3];
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.Spell;
+                    record.HotfixId = HotfixSpellBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteCString(nameSubText);
+                    record.HotfixContent.WriteCString(description);
+                    record.HotfixContent.WriteCString(auraDescription);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellNameHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SpellName{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    string name = fields[1];
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SpellName;
+                    record.HotfixId = HotfixSpellNameBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteCString(name);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellLevelsHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SpellLevels{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    byte difficultyId = Byte.Parse(fields[1]);
+                    ushort baseLevel = UInt16.Parse(fields[2]);
+                    ushort maxLevel = UInt16.Parse(fields[3]);
+                    ushort spellLevel = UInt16.Parse(fields[4]);
+                    byte maxPassiveAuraLevel = Byte.Parse(fields[5]);
+                    uint spellId = UInt32.Parse(fields[6]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SpellLevels;
+                    record.HotfixId = HotfixSpellLevelsBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt8(difficultyId);
+                    record.HotfixContent.WriteUInt16(baseLevel);
+                    record.HotfixContent.WriteUInt16(maxLevel);
+                    record.HotfixContent.WriteUInt16(spellLevel);
+                    record.HotfixContent.WriteUInt8(maxPassiveAuraLevel);
+                    record.HotfixContent.WriteUInt32(spellId);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellAuraOptionsHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SpellAuraOptions{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    byte difficultyId = Byte.Parse(fields[1]);
+                    uint cumulatievAura = UInt32.Parse(fields[2]);
+                    uint procCategoryRecovery = UInt32.Parse(fields[3]);
+                    byte procChance = Byte.Parse(fields[4]);
+                    uint procCharges = UInt32.Parse(fields[5]);
+                    ushort spellProcsPerMinuteId = UInt16.Parse(fields[6]);
+                    uint procTypeMask0 = UInt32.Parse(fields[7]);
+                    uint procTypeMask1 = UInt32.Parse(fields[8]);
+                    uint spellId = UInt32.Parse(fields[9]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SpellAuraOptions;
+                    record.HotfixId = HotfixSpellAuraOptionsBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt8(difficultyId);
+                    record.HotfixContent.WriteUInt32(cumulatievAura);
+                    record.HotfixContent.WriteUInt32(procCategoryRecovery);
+                    record.HotfixContent.WriteUInt8(procChance);
+                    record.HotfixContent.WriteUInt32(procCharges);
+                    record.HotfixContent.WriteUInt16(spellProcsPerMinuteId);
+                    record.HotfixContent.WriteUInt32(procTypeMask0);
+                    record.HotfixContent.WriteUInt32(procTypeMask1);
+                    record.HotfixContent.WriteUInt32(spellId);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellMiscHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SpellMisc{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    byte difficultyId = Byte.Parse(fields[1]);
+                    ushort castingTimeIndex = UInt16.Parse(fields[2]);
+                    ushort durationIndex = UInt16.Parse(fields[3]);
+                    ushort rangeIndex = UInt16.Parse(fields[4]);
+                    byte schoolMask = Byte.Parse(fields[5]);
+                    float speed = Single.Parse(fields[6]);
+                    float launchDelay = Single.Parse(fields[7]);
+                    float minDuration = Single.Parse(fields[8]);
+                    uint spellIconFileDataId = UInt32.Parse(fields[9]);
+                    uint activeIconFileDataId = UInt32.Parse(fields[10]);
+                    uint attributes1 = UInt32.Parse(fields[11]);
+                    uint attributes2 = UInt32.Parse(fields[12]);
+                    uint attributes3 = UInt32.Parse(fields[13]);
+                    uint attributes4 = UInt32.Parse(fields[14]);
+                    uint attributes5 = UInt32.Parse(fields[15]);
+                    uint attributes6 = UInt32.Parse(fields[16]);
+                    uint attributes7 = UInt32.Parse(fields[17]);
+                    uint attributes8 = UInt32.Parse(fields[18]);
+                    uint attributes9 = UInt32.Parse(fields[19]);
+                    uint attributes10 = UInt32.Parse(fields[20]);
+                    uint attributes11 = UInt32.Parse(fields[21]);
+                    uint attributes12 = UInt32.Parse(fields[22]);
+                    uint attributes13 = UInt32.Parse(fields[23]);
+                    uint attributes14 = UInt32.Parse(fields[24]);
+                    uint spellId = UInt32.Parse(fields[25]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SpellMisc;
+                    record.HotfixId = HotfixSpellMiscBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt8(difficultyId);
+                    record.HotfixContent.WriteUInt16(castingTimeIndex);
+                    record.HotfixContent.WriteUInt16(durationIndex);
+                    record.HotfixContent.WriteUInt16(rangeIndex);
+                    record.HotfixContent.WriteUInt8(schoolMask);
+                    record.HotfixContent.WriteFloat(speed);
+                    record.HotfixContent.WriteFloat(launchDelay);
+                    record.HotfixContent.WriteFloat(minDuration);
+                    record.HotfixContent.WriteUInt32(spellIconFileDataId);
+                    record.HotfixContent.WriteUInt32(activeIconFileDataId);
+                    record.HotfixContent.WriteUInt32(attributes1);
+                    record.HotfixContent.WriteUInt32(attributes2);
+                    record.HotfixContent.WriteUInt32(attributes3);
+                    record.HotfixContent.WriteUInt32(attributes4);
+                    record.HotfixContent.WriteUInt32(attributes5);
+                    record.HotfixContent.WriteUInt32(attributes6);
+                    record.HotfixContent.WriteUInt32(attributes7);
+                    record.HotfixContent.WriteUInt32(attributes8);
+                    record.HotfixContent.WriteUInt32(attributes9);
+                    record.HotfixContent.WriteUInt32(attributes10);
+                    record.HotfixContent.WriteUInt32(attributes11);
+                    record.HotfixContent.WriteUInt32(attributes12);
+                    record.HotfixContent.WriteUInt32(attributes13);
+                    record.HotfixContent.WriteUInt32(attributes14);
+                    record.HotfixContent.WriteUInt32(spellId);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellEffectHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SpellEffect{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    uint difficultyId = UInt32.Parse(fields[1]);
+                    uint effectIndex = UInt32.Parse(fields[2]);
+                    uint effect = UInt32.Parse(fields[3]);
+                    float effectAmplitude = Single.Parse(fields[4]);
+                    uint effectAttributes = UInt32.Parse(fields[5]);
+                    short effectAura = Int16.Parse(fields[6]);
+                    int effectAuraPeriod = Int32.Parse(fields[7]);
+                    int effectBasePoints = Int32.Parse(fields[8]);
+                    float effectBonusCoefficient = Single.Parse(fields[9]);
+                    float effectChainAmplitude = Single.Parse(fields[10]);
+                    int effectChainTargets = Int32.Parse(fields[11]);
+                    int effectDieSides = Int32.Parse(fields[12]);
+                    int effectItemType = Int32.Parse(fields[13]);
+                    int effectMechanic = Int32.Parse(fields[14]);
+                    float effectPointsPerResource = Single.Parse(fields[15]);
+                    float effectPosFacing = Single.Parse(fields[16]);
+                    float effectRealPointsPerLevel = Single.Parse(fields[17]);
+                    int EffectTriggerSpell = Int32.Parse(fields[18]);
+                    float bonusCoefficientFromAP = Single.Parse(fields[19]);
+                    float pvpMultiplier = Single.Parse(fields[20]);
+                    float coefficient = Single.Parse(fields[21]);
+                    float variance = Single.Parse(fields[22]);
+                    float resourceCoefficient = Single.Parse(fields[23]);
+                    float groupSizeBasePointsCoefficient = Single.Parse(fields[24]);
+                    int effectMiscValue1 = Int32.Parse(fields[25]);
+                    int effectMiscValue2 = Int32.Parse(fields[26]);
+                    uint effectRadiusIndex1 = UInt32.Parse(fields[27]);
+                    uint effectRadiusIndex2 = UInt32.Parse(fields[28]);
+                    int effectSpellClassMask1 = Int32.Parse(fields[29]);
+                    int effectSpellClassMask2 = Int32.Parse(fields[30]);
+                    int effectSpellClassMask3 = Int32.Parse(fields[31]);
+                    int effectSpellClassMask4 = Int32.Parse(fields[32]);
+                    short implicitTarget1 = Int16.Parse(fields[33]);
+                    short implicitTarget2 = Int16.Parse(fields[34]);
+                    uint spellId = UInt32.Parse(fields[35]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SpellEffect;
+                    record.HotfixId = HotfixSpellEffectBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt32(difficultyId);
+                    record.HotfixContent.WriteUInt32(effectIndex);
+                    record.HotfixContent.WriteUInt32(effect);
+                    record.HotfixContent.WriteFloat(effectAmplitude);
+                    record.HotfixContent.WriteUInt32(effectAttributes);
+                    record.HotfixContent.WriteInt16(effectAura);
+                    record.HotfixContent.WriteInt32(effectAuraPeriod);
+                    record.HotfixContent.WriteInt32(effectBasePoints);
+                    record.HotfixContent.WriteFloat(effectBonusCoefficient);
+                    record.HotfixContent.WriteFloat(effectChainAmplitude);
+                    record.HotfixContent.WriteInt32(effectChainTargets);
+                    record.HotfixContent.WriteInt32(effectDieSides);
+                    record.HotfixContent.WriteInt32(effectItemType);
+                    record.HotfixContent.WriteInt32(effectMechanic);
+                    record.HotfixContent.WriteFloat(effectPointsPerResource);
+                    record.HotfixContent.WriteFloat(effectPosFacing);
+                    record.HotfixContent.WriteFloat(effectRealPointsPerLevel);
+                    record.HotfixContent.WriteInt32(EffectTriggerSpell);
+                    record.HotfixContent.WriteFloat(bonusCoefficientFromAP);
+                    record.HotfixContent.WriteFloat(pvpMultiplier);
+                    record.HotfixContent.WriteFloat(coefficient);
+                    record.HotfixContent.WriteFloat(variance);
+                    record.HotfixContent.WriteFloat(resourceCoefficient);
+                    record.HotfixContent.WriteFloat(groupSizeBasePointsCoefficient);
+                    record.HotfixContent.WriteInt32(effectMiscValue1);
+                    record.HotfixContent.WriteInt32(effectMiscValue2);
+                    record.HotfixContent.WriteUInt32(effectRadiusIndex1);
+                    record.HotfixContent.WriteUInt32(effectRadiusIndex2);
+                    record.HotfixContent.WriteInt32(effectSpellClassMask1);
+                    record.HotfixContent.WriteInt32(effectSpellClassMask2);
+                    record.HotfixContent.WriteInt32(effectSpellClassMask3);
+                    record.HotfixContent.WriteInt32(effectSpellClassMask4);
+                    record.HotfixContent.WriteInt16(implicitTarget1);
+                    record.HotfixContent.WriteInt16(implicitTarget2);
+                    record.HotfixContent.WriteUInt32(spellId);
                     Hotfixes.Add(record.HotfixId, record);
                 }
             }
