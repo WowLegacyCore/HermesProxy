@@ -294,6 +294,10 @@ namespace HermesProxy.World.Server.Packets
         {
             SlashCmd = chatType;
             _Language = language;
+            _ChatFlags = chatFlags;
+            ChatText = message;
+            Channel = channelName;
+            AchievementID = achievementId;
 
             SenderGUID = sender != null ? sender : WowGuid128.Empty;
             if (String.IsNullOrEmpty(senderName) && sender != null)
@@ -311,16 +315,14 @@ namespace HermesProxy.World.Server.Packets
             else
                 TargetName = receiverName;
 
-            _ChatFlags = chatFlags;
-            ChatText = message;
-            Channel = channelName;
-            AchievementID = achievementId;
-            SenderVirtualAddress = globalSession.RealmId.GetAddress();
-            TargetVirtualAddress = globalSession.RealmId.GetAddress();
+            if (!SenderGUID.IsEmpty())
+                SenderVirtualAddress = globalSession.RealmId.GetAddress();
+            if (!TargetGUID.IsEmpty())
+                TargetVirtualAddress = globalSession.RealmId.GetAddress();
 
             if (language == (uint)Language.Addon)
             {
-                char tab = (char)9;
+                char tab = '\t';
                 if (ChatText.Contains(tab))
                 {
                     string[] parts = ChatText.Split(tab);

@@ -190,6 +190,14 @@ namespace HermesProxy.World.Client
                     break;
             }
 
+            switch (chatType)
+            {
+                case ChatMessageTypeVanilla.BattlegroundAlliance:
+                case ChatMessageTypeVanilla.BattlegroundHorde:
+                    Utility.Swap(ref sender, ref receiver);
+                    break;
+            }
+
             uint textLength = packet.ReadUInt32();
             string text = packet.ReadString(textLength);
             ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
@@ -284,6 +292,14 @@ namespace HermesProxy.World.Client
                     packet.ReadGuid(); // Sender GUID
                     break;
                 }
+            }
+
+            switch (chatType)
+            {
+                case ChatMessageTypeWotLK.BattlegroundAlliance:
+                case ChatMessageTypeWotLK.BattlegroundHorde:
+                    Utility.Swap(ref sender, ref receiver);
+                    break;
             }
 
             uint textLength = packet.ReadUInt32();

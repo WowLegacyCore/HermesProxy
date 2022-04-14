@@ -192,7 +192,7 @@ namespace HermesProxy.World.Server
         void HandleAddonMessage(ChatAddonMessage packet)
         {
             uint language = (uint)Language.Addon;
-            string text = packet.Params.Prefix + ((char)9) + packet.Params.Text;
+            string text = packet.Params.Prefix + '\t' + packet.Params.Text;
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
@@ -210,7 +210,7 @@ namespace HermesProxy.World.Server
         void HandleAddonMessageTargeted(ChatAddonMessageTargeted packet)
         {
             uint language = (uint)Language.Addon;
-            string text = packet.Params.Prefix + ((char)9) + packet.Params.Text;
+            string text = packet.Params.Prefix + '\t' + packet.Params.Text;
             string channelName = packet.ChannelGuid.IsEmpty() ? "" :
                 GetSession().GameState.GetChannelName((int)packet.ChannelGuid.GetCounter());
 
