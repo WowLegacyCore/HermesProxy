@@ -6,6 +6,8 @@
     <StartupObject>HermesProxy.Server</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
+    <Copyright>Copyright © brotalnia 2022</Copyright>
+    <Authors>brotalnia</Authors>
   </PropertyGroup>
   
   <ItemGroup>
