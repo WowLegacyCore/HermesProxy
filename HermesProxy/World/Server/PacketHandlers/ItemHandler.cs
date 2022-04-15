@@ -99,9 +99,11 @@ namespace HermesProxy.World.Server
         }
 
         [PacketHandler(Opcode.CMSG_AUTO_EQUIP_ITEM)]
+        [PacketHandler(Opcode.CMSG_AUTOSTORE_BANK_ITEM)]
+        [PacketHandler(Opcode.CMSG_AUTOBANK_ITEM)]
         void HandleAutoEquipItem(AutoEquipItem item)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTO_EQUIP_ITEM);
+            WorldPacket packet = new WorldPacket(item.GetUniversalOpcode());
             byte containerSlot = item.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.PackSlot) : item.PackSlot;
             byte slot = item.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.Slot) : item.Slot;
             packet.WriteUInt8(containerSlot);
