@@ -529,10 +529,11 @@ namespace HermesProxy.World
         public const uint HotfixSpellAuraOptionsBegin = 170000;
         public const uint HotfixSpellMiscBegin = 180000;
         public const uint HotfixSpellEffectBegin = 190000;
-        public const uint HotfixItemSparseBegin = 200000;
-        public const uint HotfixCreatureDisplayInfoBegin = 210000;
-        public const uint HotfixCreatureDisplayInfoExtraBegin = 220000;
-        public const uint HotfixCreatureDisplayInfoOptionBegin = 230000;
+        public const uint HotfixSpellXSpellVisualBegin = 200000;
+        public const uint HotfixItemSparseBegin = 210000;
+        public const uint HotfixCreatureDisplayInfoBegin = 220000;
+        public const uint HotfixCreatureDisplayInfoExtraBegin = 230000;
+        public const uint HotfixCreatureDisplayInfoOptionBegin = 240000;
         public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
         public static void LoadHotfixes()
         {
@@ -546,6 +547,7 @@ namespace HermesProxy.World
             LoadSpellAuraOptionsHotfixes();
             LoadSpellMiscHotfixes();
             LoadSpellEffectHotfixes();
+            LoadSpellXSpellVisualHotfixes();
             LoadItemSparseHotfixes();
             LoadCreatureDisplayInfoHotfixes();
             LoadCreatureDisplayInfoExtraHotfixes();
@@ -1134,6 +1136,68 @@ namespace HermesProxy.World
                     record.HotfixContent.WriteInt32(effectSpellClassMask4);
                     record.HotfixContent.WriteInt16(implicitTarget1);
                     record.HotfixContent.WriteInt16(implicitTarget2);
+                    record.HotfixContent.WriteUInt32(spellId);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadSpellXSpellVisualHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"SpellXSpellVisual{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    byte difficultyId = Byte.Parse(fields[1]);
+                    uint spellVisualId = UInt32.Parse(fields[2]);
+                    float probability = Single.Parse(fields[3]);
+                    byte flags = Byte.Parse(fields[4]);
+                    byte priority = Byte.Parse(fields[5]);
+                    int spellIconFileId = Int32.Parse(fields[6]);
+                    int activeIconFileId = Int32.Parse(fields[7]);
+                    ushort viewerUnitConditionId = UInt16.Parse(fields[8]);
+                    uint viewerPlayerConditionId = UInt32.Parse(fields[9]);
+                    ushort casterUnitConditionId = UInt16.Parse(fields[10]);
+                    uint casterPlayerConditionId = UInt32.Parse(fields[11]);
+                    uint spellId = UInt32.Parse(fields[12]);
+
+                    if (SpellVisuals.ContainsKey(spellId))
+                        SpellVisuals[spellId] = id;
+                    else
+                        SpellVisuals.Add(spellId, id);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.TableHash = DB2Hash.SpellXSpellVisual;
+                    record.HotfixId = HotfixSpellXSpellVisualBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.Status = HotfixStatus.Valid;
+                    record.HotfixContent.WriteUInt32(id);
+                    record.HotfixContent.WriteUInt8(difficultyId);
+                    record.HotfixContent.WriteUInt32(spellVisualId);
+                    record.HotfixContent.WriteFloat(probability);
+                    record.HotfixContent.WriteUInt8(flags);
+                    record.HotfixContent.WriteUInt8(priority);
+                    record.HotfixContent.WriteInt32(spellIconFileId);
+                    record.HotfixContent.WriteInt32(activeIconFileId);
+                    record.HotfixContent.WriteUInt16(viewerUnitConditionId);
+                    record.HotfixContent.WriteUInt32(viewerPlayerConditionId);
+                    record.HotfixContent.WriteUInt16(casterUnitConditionId);
+                    record.HotfixContent.WriteUInt32(casterPlayerConditionId);
                     record.HotfixContent.WriteUInt32(spellId);
                     Hotfixes.Add(record.HotfixId, record);
                 }
