@@ -170,7 +170,7 @@ namespace HermesProxy.World.Client
                 else
                     message = $"Your auction of {name} sold.";
 
-                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", message, "", ChatFlags.None, 0);
+                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
                 SendPacketToClient(chat);
             }
         }
@@ -202,7 +202,7 @@ namespace HermesProxy.World.Client
             else
                 message = $"You have been outbid on {name}.";
 
-            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", message, "", ChatFlags.None, 0);
+            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
             SendPacketToClient(chat);
         }
     }

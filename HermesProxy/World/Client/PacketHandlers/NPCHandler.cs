@@ -178,7 +178,7 @@ namespace HermesProxy.World.Client
             buy.SpellID = packet.ReadUInt32();
             buy.TrainerFailedReason = packet.ReadUInt32();
             SendPacketToClient(buy);
-            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).", "", ChatFlags.None, 0);
+            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).");
             SendPacketToClient(chat);
         }
 

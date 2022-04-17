@@ -202,8 +202,12 @@ namespace HermesProxy.World.Client
             string text = packet.ReadString(textLength);
             ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
 
+            string addonPrefix = "";
+            if (!ChatPkt.CheckAddonPrefix(GetSession().GameState.AddonPrefixes, ref language, ref text, ref addonPrefix))
+                return;
+
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
-            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, language, sender, senderName, receiver, "", text, channelName, chatFlags);
+            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, text, language, sender, senderName, receiver, "", channelName, chatFlags, addonPrefix);
             SendPacketToClient(chat);
         }
 
@@ -310,8 +314,12 @@ namespace HermesProxy.World.Client
             if (chatType == ChatMessageTypeWotLK.Achievement || chatType == ChatMessageTypeWotLK.GuildAchievement)
                 achievementId = packet.ReadUInt32();
 
+            string addonPrefix = "";
+            if (!ChatPkt.CheckAddonPrefix(GetSession().GameState.AddonPrefixes, ref language, ref text, ref addonPrefix))
+                return;
+
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
-            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, language, sender, senderName, receiver, receiverName, text, channelName, chatFlags, achievementId);
+            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, text, language, sender, senderName, receiver, receiverName, channelName, chatFlags, addonPrefix, achievementId);
             SendPacketToClient(chat);
         }
 

@@ -235,5 +235,18 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(emote.Target.To64());
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_CHAT_REGISTER_ADDON_PREFIXES)]
+        void HandleChatRegisterAddonPrefixes(ChatRegisterAddonPrefixes addons)
+        {
+            foreach (var prefix in addons.Prefixes)
+                GetSession().GameState.AddonPrefixes.Add(prefix);
+        }
+
+        [PacketHandler(Opcode.CMSG_CHAT_UNREGISTER_ALL_ADDON_PREFIXES)]
+        void HandleChatUnregisterAllAddonPrefixes(EmptyClientPacket addons)
+        {
+            GetSession().GameState.AddonPrefixes.Clear();
+        }
     }
 }

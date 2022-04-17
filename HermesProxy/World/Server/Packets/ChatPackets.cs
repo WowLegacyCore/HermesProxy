@@ -290,7 +290,7 @@ namespace HermesProxy.World.Server.Packets
 
     public class ChatPkt : ServerPacket
     {
-        public ChatPkt(GlobalSessionData globalSession, ChatMessageTypeModern chatType, uint language, WowGuid128 sender, string senderName, WowGuid128 receiver, string receiverName, string message, string channelName, ChatFlags chatFlags, uint achievementId = 0) : base(Opcode.SMSG_CHAT)
+        public ChatPkt(GlobalSessionData globalSession, ChatMessageTypeModern chatType, string message, uint language = 0, WowGuid128 sender = null, string senderName = "", WowGuid128 receiver = null, string receiverName = "", string channelName = "", ChatFlags chatFlags = ChatFlags.None, string addonPrefix = "", uint achievementId = 0) : base(Opcode.SMSG_CHAT)
         {
             SlashCmd = chatType;
             _Language = language;
@@ -298,6 +298,7 @@ namespace HermesProxy.World.Server.Packets
             ChatText = message;
             Channel = channelName;
             AchievementID = achievementId;
+            Prefix = addonPrefix;
 
             SenderGUID = sender != null ? sender : WowGuid128.Empty;
             if (String.IsNullOrEmpty(senderName) && sender != null)
@@ -319,18 +320,26 @@ namespace HermesProxy.World.Server.Packets
                 SenderVirtualAddress = globalSession.RealmId.GetAddress();
             if (!TargetGUID.IsEmpty())
                 TargetVirtualAddress = globalSession.RealmId.GetAddress();
-
+        }
+        public static bool CheckAddonPrefix(HashSet<string> registeredPrefixes, ref uint language, ref string text, ref string addonPrefix)
+        {
             if (language == (uint)Language.Addon)
             {
+                language = (uint)Language.AddonBfA;
                 char tab = '\t';
-                if (ChatText.Contains(tab))
+                if (text.Contains(tab))
                 {
-                    string[] parts = ChatText.Split(tab);
-                    Prefix = parts[0];
-                    ChatText = string.Join(" ", parts.Skip(1).ToList());
+                    string[] parts = text.Split(tab);
+                    addonPrefix = parts[0];
+                    text = string.Join(" ", parts.Skip(1).ToList());
+
+                    if (!registeredPrefixes.Contains(addonPrefix))
+                        return false;
                 }
-                _Language = (uint)Language.AddonBfA;
+                else
+                    return false;
             }
+            return true;
         }
         public override void Write()
         {
@@ -493,5 +502,20 @@ namespace HermesProxy.World.Server.Packets
 
         public uint ZoneID;
         public string MessageText = "";
+    }
+
+    class ChatRegisterAddonPrefixes : ClientPacket
+    {
+        public ChatRegisterAddonPrefixes(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            int count = _worldPacket.ReadInt32();
+
+            for (int i = 0; i < count && i < 64; ++i)
+                Prefixes.Add(_worldPacket.ReadString(_worldPacket.ReadBits<uint>(5)));
+        }
+
+        public List<string> Prefixes = new List<string>();
     }
 }

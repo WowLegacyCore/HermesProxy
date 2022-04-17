@@ -115,7 +115,7 @@ namespace HermesProxy.World.Client
             string name = GetSession().GameState.GetPlayerName(guid);
             if (!String.IsNullOrEmpty(name))
             {
-                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, 0, null, "", null, "", $"{name} has declined your guild invitation.", "", ChatFlags.None, 0);
+                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"{name} has declined your guild invitation.");
                 SendPacketToClient(chat);
             }
         }
