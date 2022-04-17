@@ -64,7 +64,6 @@ namespace HermesProxy.World.Server
 
         ZLib.z_stream _compressionStream;
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
-        AccountDataManager _accountDataMgr;
         GlobalSessionData _globalSession;
         System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
 
@@ -706,7 +705,7 @@ namespace HermesProxy.World.Server
                 SendClientCacheVersion(0);
                 SendAvailableHotfixes();
                 SendBnetConnectionState(1);
-                _accountDataMgr = new AccountDataManager(GetSession().Username, RealmManager.Instance.GetRealm(_realmId).Name);
+                GetSession().AccountDataMgr = new AccountDataManager(GetSession().Username, RealmManager.Instance.GetRealm(_realmId).Name);
                 GetSession().RealmSocket = this;
             }
             else
@@ -1035,7 +1034,7 @@ namespace HermesProxy.World.Server
             System.Diagnostics.Trace.Assert(_connectType == ConnectionType.Realm);
 
             WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
-            _accountDataMgr.LoadAllData(guid);
+            GetSession().AccountDataMgr.LoadAllData(guid);
 
             AccountDataTimes accountData = new AccountDataTimes();
             accountData.PlayerGuid = guid;
@@ -1044,7 +1043,7 @@ namespace HermesProxy.World.Server
             int count = ModernVersion.GetAccountDataCount();
             accountData.AccountTimes = new long[count];
             for (int i = 0; i < count; i++)
-                accountData.AccountTimes[i] = _accountDataMgr.Data[i] != null ? _accountDataMgr.Data[i].Timestamp : 0;
+                accountData.AccountTimes[i] = GetSession().AccountDataMgr.Data[i] != null ? GetSession().AccountDataMgr.Data[i].Timestamp : 0;
 
             SendPacket(accountData);
         }

@@ -417,6 +417,7 @@ namespace HermesProxy
         public uint Build;
         public Framework.Realm.RealmId RealmId;
         public GameSessionData GameState = new();
+        public AccountDataManager AccountDataMgr;
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;
         public AuthClient AuthClient;

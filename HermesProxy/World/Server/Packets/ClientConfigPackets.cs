@@ -147,4 +147,28 @@ namespace HermesProxy.World.Server.Packets
 
         public bool Enable;
     }
+
+    class SaveCUFProfiles : ClientPacket
+    {
+        public SaveCUFProfiles(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Data = _worldPacket.ReadToEnd();
+        }
+
+        public byte[] Data;
+    }
+
+    public class LoadCUFProfiles : ServerPacket
+    {
+        public LoadCUFProfiles() : base(Opcode.SMSG_LOAD_CUF_PROFILES, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBytes(Data);
+        }
+
+        public byte[] Data;
+    }
 }

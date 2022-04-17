@@ -42,14 +42,8 @@ namespace HermesProxy.World.Server
             return false;
         }
 
-        public string GetFullFileName(WowGuid128 guid, uint type)
+        public string GetAccountDataDirectory()
         {
-            string file;
-            if (IsGlobalDataType(type))
-                file = $"data-{type}.bin";
-            else
-                file = $"data-{type}-{guid.GetLowValue()}-{guid.GetHighValue()}.bin";
-
             string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             path = Path.Combine(path, "AccountData");
             path = Path.Combine(path, _accountName);
@@ -58,6 +52,18 @@ namespace HermesProxy.World.Server
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
+            return path;
+        }
+
+        public string GetFullFileName(WowGuid128 guid, uint type)
+        {
+            string file;
+            if (IsGlobalDataType(type))
+                file = $"data-{type}.bin";
+            else
+                file = $"data-{type}-{guid.GetLowValue()}-{guid.GetHighValue()}.bin";
+
+            string path = GetAccountDataDirectory();
             path = Path.Combine(path, file);
             return path;
         }
@@ -127,6 +133,36 @@ namespace HermesProxy.World.Server
                 writer.Write(uncompressedSize);
                 writer.Write(compressedData.Length);
                 writer.Write(compressedData);
+            }
+        }
+
+        public byte[] LoadCUFProfiles()
+        {
+            string fileName = GetAccountDataDirectory();
+            fileName = Path.Combine(fileName, "cuf.bin");
+
+            if (File.Exists(fileName))
+            {
+                using (FileStream file = File.OpenRead(fileName))
+                {
+                    using (BinaryReader reader = new BinaryReader(file))
+                    {
+                        return File.ReadAllBytes(fileName);
+                    }
+                }
+            }
+
+            return new byte[4];
+        }
+
+        public void SaveCUFProfiles(byte[] data)
+        {
+            string fileName = GetAccountDataDirectory();
+            fileName = Path.Combine(fileName, "cuf.bin");
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
+            {
+                writer.Write(data);
             }
         }
     }

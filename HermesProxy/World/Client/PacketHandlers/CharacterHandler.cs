@@ -233,6 +233,10 @@ namespace HermesProxy.World.Client
                 info.InstanceGroupSize = 5;
             }
             SendPacketToClient(info);
+
+            LoadCUFProfiles cuf = new LoadCUFProfiles();
+            cuf.Data = GetSession().AccountDataMgr.LoadCUFProfiles();
+            SendPacketToClient(cuf);
         }
 
         [PacketHandler(Opcode.SMSG_CHARACTER_LOGIN_FAILED)]
