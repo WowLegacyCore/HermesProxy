@@ -1046,6 +1046,11 @@ namespace HermesProxy.World.Client
             mod.ModifierData.Add(data);
             spell.Modifiers.Add(mod);
             SendPacketToClient(spell);
+
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_SET_FLAT_SPELL_MODIFIER)
+                GetSession().GameState.SetFlatSpellMod(mod.ModIndex, data.ClassIndex, data.ModifierValue);
+            else
+                GetSession().GameState.SetPctSpellMod(mod.ModIndex, data.ClassIndex, data.ModifierValue);
         }
     }
 }
