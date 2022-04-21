@@ -120,7 +120,7 @@ namespace HermesProxy.World.Client
                                 auraUpdates.Add(auraUpdate);
                         }
                         else
-                            Log.Print(LogType.Error, $"Received broken create object 1 without movement section for {guid}");
+                            Log.Print(LogType.Error, $"Broken create1 without position for {guid}");
                         
                         break;
                     }
@@ -146,7 +146,7 @@ namespace HermesProxy.World.Client
                                 auraUpdates.Add(auraUpdate);
                         }
                         else
-                            Log.Print(LogType.Error, $"Received broken create object 2 without movement section for {guid}");
+                            Log.Print(LogType.Error, $"Broken create2 without position for {guid}");
 
                         break;
                     }

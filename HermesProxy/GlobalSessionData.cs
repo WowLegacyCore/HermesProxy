@@ -84,6 +84,10 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
+        public sbyte GetCurrentPartyIndex()
+        {
+            return (sbyte)(IsInBattleground() ? 1 : 0);
+        }
         public void SetFlatSpellMod(byte spellMod, byte spellMask, int amount)
         {
             if (FlatSpellMods.ContainsKey(spellMod))

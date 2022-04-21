@@ -238,7 +238,7 @@ namespace HermesProxy.World.Client
         {
             GroupNewLeader party = new GroupNewLeader();
             party.Name = packet.ReadCString();
-            party.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+            party.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
             SendPacketToClient(party);
         }
 
@@ -249,7 +249,7 @@ namespace HermesProxy.World.Client
             {
                 ReadyCheckStarted ready = new ReadyCheckStarted();
                 ready.InitiatorGUID = GetSession().GameState.CurrentGroupLeader;
-                ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+                ready.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
                 ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
                 SendPacketToClient(ready);
             }
@@ -266,7 +266,7 @@ namespace HermesProxy.World.Client
                 {
                     GetSession().GameState.GroupReadyCheckResponses = 0;
                     ReadyCheckCompleted completed = new ReadyCheckCompleted();
-                    completed.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+                    completed.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
                     completed.PartyGUID = GetSession().GameState.CurrentGroupGuid;
                     SendPacketToClient(completed);
                 }
@@ -278,7 +278,7 @@ namespace HermesProxy.World.Client
         {
             ReadyCheckStarted ready = new ReadyCheckStarted();
             ready.InitiatorGUID = packet.ReadGuid().To128(GetSession().GameState);
-            ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+            ready.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
             ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
             SendPacketToClient(ready);
         }
@@ -297,7 +297,7 @@ namespace HermesProxy.World.Client
             {
                 GetSession().GameState.GroupReadyCheckResponses = 0;
                 ReadyCheckCompleted completed = new ReadyCheckCompleted();
-                completed.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+                completed.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
                 completed.PartyGUID = GetSession().GameState.CurrentGroupGuid;
                 SendPacketToClient(completed);
             }
@@ -307,7 +307,7 @@ namespace HermesProxy.World.Client
         void HandleRaidReadyCheckFinished(WorldPacket packet)
         {
             ReadyCheckCompleted ready = new ReadyCheckCompleted();
-            ready.PartyIndex = (sbyte)(GetSession().GameState.IsInBattleground() ? 1 : 0);
+            ready.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
             ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
             SendPacketToClient(ready);
         }
@@ -319,6 +319,7 @@ namespace HermesProxy.World.Client
             if (isFullUpdate)
             {
                 SendRaidTargetUpdateAll update = new SendRaidTargetUpdateAll();
+                update.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
                 while (packet.CanRead())
                 {
                     sbyte symbol = packet.ReadInt8();
@@ -330,6 +331,7 @@ namespace HermesProxy.World.Client
             else
             {
                 SendRaidTargetUpdateSingle update = new SendRaidTargetUpdateSingle();
+                update.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     update.ChangedBy = packet.ReadGuid().To128(GetSession().GameState);
