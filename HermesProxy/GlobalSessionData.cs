@@ -51,6 +51,7 @@ namespace HermesProxy
         public uint LastWhoRequestId;
         public WowGuid128 CurrentPetGuid;
         public ClientCastRequest CurrentClientCast;
+        public ClientCastRequest CurrentClientMeleeCast;
         public ClientCastRequest CurrentClientPetCast;
         public List<ClientCastRequest> PendingClientCasts = new List<ClientCastRequest>();
         public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();

@@ -104,37 +104,66 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAST_SPELL)]
         void HandleCastSpell(CastSpell cast)
         {
-            ClientCastRequest castRequest = new ClientCastRequest();
-            castRequest.Timestamp = Time.UnixTime;
-            castRequest.SpellId = cast.Cast.SpellID;
-            castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
-            castRequest.ClientGUID = cast.Cast.CastID;
-            castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, 10000 + cast.Cast.CastID.GetCounter());
-
-            if (GetSession().GameState.CurrentClientCast != null)
+            if (GameData.MeleeSpells.Contains(cast.Cast.SpellID))
             {
-                if (GetSession().GameState.CurrentClientCast.HasStarted)
+                ClientCastRequest castRequest = new ClientCastRequest();
+                castRequest.Timestamp = Time.UnixTime;
+                castRequest.SpellId = cast.Cast.SpellID;
+                castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
+                castRequest.ClientGUID = cast.Cast.CastID;
+                
+                if (GetSession().GameState.CurrentClientMeleeCast != null)
                 {
+                    castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, 10000 + cast.Cast.CastID.GetCounter());
                     SendCastRequestFailed(castRequest, false);
+                    return;
                 }
                 else
                 {
-                    if (GetSession().GameState.CurrentClientCast.Timestamp + 10 < castRequest.Timestamp)
+                    castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, cast.Cast.SpellID + GetSession().GameState.CurrentPlayerGuid.GetCounter());
+
+                    SpellPrepare prepare = new SpellPrepare();
+                    prepare.ClientCastID = cast.Cast.CastID;
+                    prepare.ServerCastID = castRequest.ServerGUID;
+                    SendPacket(prepare);
+
+                    GetSession().GameState.CurrentClientMeleeCast = castRequest;
+                } 
+            }
+            else
+            {
+                ClientCastRequest castRequest = new ClientCastRequest();
+                castRequest.Timestamp = Time.UnixTime;
+                castRequest.SpellId = cast.Cast.SpellID;
+                castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
+                castRequest.ClientGUID = cast.Cast.CastID;
+                castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, 10000 + cast.Cast.CastID.GetCounter());
+
+                if (GetSession().GameState.CurrentClientCast != null)
+                {
+                    if (GetSession().GameState.CurrentClientCast.HasStarted)
                     {
-                        SendCastRequestFailed(GetSession().GameState.CurrentClientCast, false);
-                        GetSession().GameState.CurrentClientCast = null;
-                        foreach (var pending in GetSession().GameState.PendingClientCasts)
-                            SendCastRequestFailed(pending, false);
-                        GetSession().GameState.PendingClientCasts.Clear();
                         SendCastRequestFailed(castRequest, false);
                     }
                     else
-                        GetSession().GameState.PendingClientCasts.Add(castRequest);
+                    {
+                        if (GetSession().GameState.CurrentClientCast.Timestamp + 10 < castRequest.Timestamp)
+                        {
+                            SendCastRequestFailed(GetSession().GameState.CurrentClientCast, false);
+                            GetSession().GameState.CurrentClientCast = null;
+                            foreach (var pending in GetSession().GameState.PendingClientCasts)
+                                SendCastRequestFailed(pending, false);
+                            GetSession().GameState.PendingClientCasts.Clear();
+                            SendCastRequestFailed(castRequest, false);
+                        }
+                        else
+                            GetSession().GameState.PendingClientCasts.Add(castRequest);
+                    }
+                    return;
                 }
-                return;
-            }
 
-            GetSession().GameState.CurrentClientCast = castRequest;
+                GetSession().GameState.CurrentClientCast = castRequest;
+            }
 
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
 

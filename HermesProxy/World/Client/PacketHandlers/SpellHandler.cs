@@ -123,89 +123,68 @@ namespace HermesProxy.World.Client
             SendPacketToClient(spells);
         }
 
-        [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
+        [PacketHandler(Opcode.SMSG_CAST_FAILED)]
         void HandleCastFailed(WorldPacket packet)
-        {
-            uint spellId = packet.ReadUInt32();
-            var status = packet.ReadUInt8();
-            if (status != 2)
-                return;
-
-            if (GetSession().GameState.CurrentClientCast == null ||
-                GetSession().GameState.CurrentClientCast.SpellId != spellId)
-                return;
-
-            CastFailed failed = new();
-            failed.SpellID = GetSession().GameState.CurrentClientCast.SpellId;
-            failed.SpellXSpellVisualID = GetSession().GameState.CurrentClientCast.SpellXSpellVisualId;
-            uint reason = packet.ReadUInt8();
-            failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
-            failed.CastID = GetSession().GameState.CurrentClientCast.ServerGUID;
-
-            if (!GetSession().GameState.CurrentClientCast.HasStarted)
-            {
-                SpellPrepare prepare2 = new SpellPrepare();
-                prepare2.ClientCastID = GetSession().GameState.CurrentClientCast.ClientGUID;
-                prepare2.ServerCastID = GetSession().GameState.CurrentClientCast.ServerGUID;
-                SendPacketToClient(prepare2);
-            }
-
-            GetSession().GameState.CurrentClientCast = null;
-
-            if (packet.CanRead())
-                failed.FailedArg1 = packet.ReadInt32();
-            if (packet.CanRead())
-                failed.FailedArg2 = packet.ReadInt32();
-
-            SendPacketToClient(failed);
-
-            foreach (var pending in GetSession().GameState.PendingClientCasts)
-                GetSession().InstanceSocket.SendCastRequestFailed(pending, false);
-            GetSession().GameState.PendingClientCasts.Clear();
-        }
-
-        [PacketHandler(Opcode.SMSG_CAST_FAILED, ClientVersionBuild.V2_0_1_6180)]
-        void HandleCastFailedTBC(WorldPacket packet)
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
 
             uint spellId = packet.ReadUInt32();
-
-            if (GetSession().GameState.CurrentClientCast == null ||
-                GetSession().GameState.CurrentClientCast.SpellId != spellId)
-                return;
-
-            CastFailed failed = new();
-            failed.SpellID = spellId;
-            failed.SpellXSpellVisualID = GameData.GetSpellVisual(failed.SpellID);
-            uint reason = packet.ReadUInt8();
-            failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
-            failed.CastID = GetSession().GameState.CurrentClientCast.ServerGUID;
-
-            if (!GetSession().GameState.CurrentClientCast.HasStarted)
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                SpellPrepare prepare2 = new SpellPrepare();
-                prepare2.ClientCastID = GetSession().GameState.CurrentClientCast.ClientGUID;
-                prepare2.ServerCastID = GetSession().GameState.CurrentClientCast.ServerGUID;
-                SendPacketToClient(prepare2);
+                var status = packet.ReadUInt8();
+                if (status != 2)
+                    return;
             }
 
-            GetSession().GameState.CurrentClientCast = null;
-
-            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+            uint reason = packet.ReadUInt8();
+            if (LegacyVersion.InVersion(ClientVersionBuild.V2_0_1_6180, ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
-
+            int arg1 = 0;
+            int arg2 = 0;
             if (packet.CanRead())
-                failed.FailedArg1 = packet.ReadInt32();
+                arg1 = packet.ReadInt32();
             if (packet.CanRead())
-                failed.FailedArg2 = packet.ReadInt32();
+                arg2 = packet.ReadInt32();
 
-            SendPacketToClient(failed);
+            if (GetSession().GameState.CurrentClientMeleeCast != null &&
+                GetSession().GameState.CurrentClientMeleeCast.SpellId == spellId)
+            {
+                CastFailed failed = new();
+                failed.SpellID = GetSession().GameState.CurrentClientMeleeCast.SpellId;
+                failed.SpellXSpellVisualID = GetSession().GameState.CurrentClientMeleeCast.SpellXSpellVisualId;
+                failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
+                failed.CastID = GetSession().GameState.CurrentClientMeleeCast.ServerGUID;
+                failed.FailedArg1 = arg1;
+                failed.FailedArg2 = arg2;
+                SendPacketToClient(failed);
+                GetSession().GameState.CurrentClientMeleeCast = null;
+            }
+            else if (GetSession().GameState.CurrentClientCast != null &&
+                    GetSession().GameState.CurrentClientCast.SpellId == spellId)
+            {
+                if (!GetSession().GameState.CurrentClientCast.HasStarted)
+                {
+                    SpellPrepare prepare2 = new SpellPrepare();
+                    prepare2.ClientCastID = GetSession().GameState.CurrentClientCast.ClientGUID;
+                    prepare2.ServerCastID = GetSession().GameState.CurrentClientCast.ServerGUID;
+                    SendPacketToClient(prepare2);
+                }
 
-            foreach (var pending in GetSession().GameState.PendingClientCasts)
-                GetSession().InstanceSocket.SendCastRequestFailed(pending, false);
-            GetSession().GameState.PendingClientCasts.Clear();
+                CastFailed failed = new();
+                failed.SpellID = GetSession().GameState.CurrentClientCast.SpellId;
+                failed.SpellXSpellVisualID = GetSession().GameState.CurrentClientCast.SpellXSpellVisualId;
+                failed.Reason = LegacyVersion.ConvertSpellCastResult(reason);
+                failed.CastID = GetSession().GameState.CurrentClientCast.ServerGUID;
+                failed.FailedArg1 = arg1;
+                failed.FailedArg2 = arg2;
+                SendPacketToClient(failed);
+
+                GetSession().GameState.CurrentClientCast = null;
+                foreach (var pending in GetSession().GameState.PendingClientCasts)
+                    GetSession().InstanceSocket.SendCastRequestFailed(pending, false);
+                GetSession().GameState.PendingClientCasts.Clear();
+            }
         }
 
         [PacketHandler(Opcode.SMSG_PET_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
@@ -405,6 +384,15 @@ namespace HermesProxy.World.Client
                 spell.Cast.CastID = GetSession().GameState.CurrentClientCast.ServerGUID;
                 spell.Cast.SpellXSpellVisualID = GetSession().GameState.CurrentClientCast.SpellXSpellVisualId;
                 GetSession().GameState.CurrentClientCast = null;
+
+            }
+            else if (GetSession().GameState.CurrentPlayerGuid == spell.Cast.CasterUnit &&
+                GetSession().GameState.CurrentClientMeleeCast != null &&
+                GetSession().GameState.CurrentClientMeleeCast.SpellId == spell.Cast.SpellID)
+            {
+                spell.Cast.CastID = GetSession().GameState.CurrentClientMeleeCast.ServerGUID;
+                spell.Cast.SpellXSpellVisualID = GetSession().GameState.CurrentClientMeleeCast.SpellXSpellVisualId;
+                GetSession().GameState.CurrentClientMeleeCast = null;
 
             }
             else if (GetSession().GameState.CurrentPetGuid == spell.Cast.CasterUnit &&
