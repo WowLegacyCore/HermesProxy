@@ -51,6 +51,7 @@ namespace HermesProxy
         public uint LastWhoRequestId;
         public WowGuid128 CurrentPetGuid;
         public ClientCastRequest CurrentClientCast;
+        public ClientCastRequest CurrentClientMeleeCast;
         public ClientCastRequest CurrentClientPetCast;
         public List<ClientCastRequest> PendingClientCasts = new List<ClientCastRequest>();
         public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
@@ -81,7 +82,55 @@ namespace HermesProxy
         public HashSet<WowGuid128> HunterPetGuids = new HashSet<WowGuid128>();
         public Dictionary<WowGuid128, Array<ArenaTeamInspectData>> PlayerArenaTeams = new Dictionary<WowGuid128, Array<ArenaTeamInspectData>>();
         public HashSet<string> AddonPrefixes = new HashSet<string>();
+        public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
+        public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
+        public sbyte GetCurrentPartyIndex()
+        {
+            return (sbyte)(IsInBattleground() ? 1 : 0);
+        }
+        public void SetFlatSpellMod(byte spellMod, byte spellMask, int amount)
+        {
+            if (FlatSpellMods.ContainsKey(spellMod))
+            {
+                if (FlatSpellMods[spellMod].ContainsKey(spellMask))
+                {
+                    FlatSpellMods[spellMod][spellMask] = amount;
+
+                }
+                else
+                {
+                    FlatSpellMods[spellMod].Add(spellMask, amount);
+                }
+            }
+            else
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(spellMask, amount);
+                FlatSpellMods.Add(spellMod, dict);
+            }
+        }
+        public void SetPctSpellMod(byte spellMod, byte spellMask, int amount)
+        {
+            if (PctSpellMods.ContainsKey(spellMod))
+            {
+                if (PctSpellMods[spellMod].ContainsKey(spellMask))
+                {
+                    PctSpellMods[spellMod][spellMask] = amount;
+
+                }
+                else
+                {
+                    PctSpellMods[spellMod].Add(spellMask, amount);
+                }
+            }
+            else
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(spellMask, amount);
+                PctSpellMods.Add(spellMod, dict);
+            }
+        }
         public ArenaTeamInspectData GetArenaTeamDataForPlayer(WowGuid128 guid, byte slot)
         {
             if (PlayerArenaTeams.ContainsKey(guid))
@@ -380,6 +429,7 @@ namespace HermesProxy
             return null;
         }
     }
+
     public class ClientCastRequest
     {
         public bool HasStarted;

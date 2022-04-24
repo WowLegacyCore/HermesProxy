@@ -1,4 +1,5 @@
 ﻿using Framework.GameMath;
+using Framework.Logging;
 using Framework.Util;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
@@ -112,9 +113,15 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        updateObject.ObjectUpdates.Add(updateData);
-                        if (auraUpdate.Auras.Count != 0)
-                            auraUpdates.Add(auraUpdate);
+                        if (updateData.CreateData.MoveInfo != null || !guid.IsWorldObject() )
+                        {
+                            updateObject.ObjectUpdates.Add(updateData);
+                            if (auraUpdate.Auras.Count != 0)
+                                auraUpdates.Add(auraUpdate);
+                        }
+                        else
+                            Log.Print(LogType.Error, $"Broken create1 without position for {guid}");
+                        
                         break;
                     }
                     case UpdateTypeLegacy.CreateObject2:
@@ -132,9 +139,15 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
-                        updateObject.ObjectUpdates.Add(updateData);
-                        if (auraUpdate.Auras.Count != 0)
-                            auraUpdates.Add(auraUpdate);
+                        if (updateData.CreateData.MoveInfo != null || !guid.IsWorldObject())
+                        {
+                            updateObject.ObjectUpdates.Add(updateData);
+                            if (auraUpdate.Auras.Count != 0)
+                                auraUpdates.Add(auraUpdate);
+                        }
+                        else
+                            Log.Print(LogType.Error, $"Broken create2 without position for {guid}");
+
                         break;
                     }
                     case UpdateTypeLegacy.NearObjects:
@@ -162,6 +175,41 @@ namespace HermesProxy.World.Client
                 {
                     activePlayerUpdateIndex = i;
                     break;
+                }
+            }
+
+            // resend spell mods on player create
+            if (activePlayerUpdateIndex >= 0)
+            {
+                foreach (var modItr in GetSession().GameState.FlatSpellMods)
+                {
+                    foreach (var dataItr in modItr.Value)
+                    {
+                        SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
+                        SpellModifierInfo mod = new SpellModifierInfo();
+                        SpellModifierData data = new SpellModifierData();
+                        data.ClassIndex = dataItr.Key;
+                        mod.ModIndex = modItr.Key;
+                        data.ModifierValue = dataItr.Value;
+                        mod.ModifierData.Add(data);
+                        spell.Modifiers.Add(mod);
+                        SendPacketToClient(spell);
+                    }
+                }
+                foreach (var modItr in GetSession().GameState.PctSpellMods)
+                {
+                    foreach (var dataItr in modItr.Value)
+                    {
+                        SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
+                        SpellModifierInfo mod = new SpellModifierInfo();
+                        SpellModifierData data = new SpellModifierData();
+                        data.ClassIndex = dataItr.Key;
+                        mod.ModIndex = modItr.Key;
+                        data.ModifierValue = dataItr.Value;
+                        mod.ModifierData.Add(data);
+                        spell.Modifiers.Add(mod);
+                        SendPacketToClient(spell);
+                    }
                 }
             }
 

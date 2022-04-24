@@ -50,6 +50,24 @@ namespace HermesProxy.World
             }
         }
 
+        public bool IsWorldObject()
+        {
+            switch (GetHighType())
+            {
+                case HighGuidType.Player:
+                case HighGuidType.Transport:
+                case HighGuidType.MOTransport:
+                case HighGuidType.Creature:
+                case HighGuidType.Vehicle:
+                case HighGuidType.Pet:
+                case HighGuidType.GameObject:
+                case HighGuidType.DynamicObject:
+                case HighGuidType.Corpse:
+                    return true;
+            }
+            return false;
+        }
+
         public bool IsTransport()
         {
             switch (GetHighType())

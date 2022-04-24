@@ -25,6 +25,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
         public static HashSet<uint> StackableAuras = new HashSet<uint>();
+        public static HashSet<uint> MeleeSpells = new HashSet<uint>();
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
@@ -243,6 +244,7 @@ namespace HermesProxy.World
             LoadTransports();
             LoadDispellSpells();
             LoadStackableAuras();
+            LoadMeleeSpells();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
@@ -513,6 +515,29 @@ namespace HermesProxy.World
 
                     uint spellId = UInt32.Parse(fields[0]);
                     StackableAuras.Add(spellId);
+                }
+            }
+        }
+
+        public static void LoadMeleeSpells()
+        {
+            var path = Path.Combine("CSV", $"MeleeSpells{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    MeleeSpells.Add(spellId);
                 }
             }
         }
