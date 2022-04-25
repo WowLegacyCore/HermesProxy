@@ -321,7 +321,10 @@ namespace HermesProxy.World.Server
 
         private void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
         {
-            GetSession().WorldClient.SendPacketToServer(packet, delayUntilOpcode);
+            if (GetSession().WorldClient != null)
+                GetSession().WorldClient.SendPacketToServer(packet, delayUntilOpcode);
+            else
+                Log.Print(LogType.Error, $"Attempt to send opcode {packet.GetUniversalOpcode(false)} ({packet.GetOpcode()}) while WorldClient is disconnected!");
         }
 
         public PacketHandler GetHandler(Opcode opcode)

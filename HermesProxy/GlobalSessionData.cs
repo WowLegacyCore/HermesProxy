@@ -57,7 +57,9 @@ namespace HermesProxy
         public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
         public WowGuid64 LastLootTargetGuid;
         public List<int> ActionButtons = new();
-        public Dictionary<byte, int> CurrentPlayerAuras = new();
+        public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationLeft = new();
+        public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationFull = new();
+        public Dictionary<WowGuid128, Dictionary<byte, WowGuid128>> UnitAuraCaster = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, uint> PlayerGuildIds = new();
         public System.Threading.Mutex ObjectCacheMutex = new System.Threading.Mutex();
@@ -220,18 +222,90 @@ namespace HermesProxy
                 return BattleFieldQueueTypes[queueSlot];
             return 0;
         }
-        public void StoreAuraDuration(byte slot, int duration)
+        public void StoreAuraDurationLeft(WowGuid128 guid, byte slot, int duration)
         {
-            if (CurrentPlayerAuras.ContainsKey(slot))
-                CurrentPlayerAuras[slot] = duration;
+            if (UnitAuraDurationLeft.ContainsKey(guid))
+            {
+                if (UnitAuraDurationLeft[guid].ContainsKey(slot))
+                    UnitAuraDurationLeft[guid][slot] = duration;
+                else
+                    UnitAuraDurationLeft[guid].Add(slot, duration);
+            }
             else
-                CurrentPlayerAuras.Add(slot, duration);
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(slot, duration);
+                UnitAuraDurationLeft.Add(guid, dict);
+            }
         }
-        public int GetAuraDuration(byte slot)
+        public void StoreAuraDurationFull(WowGuid128 guid, byte slot, int duration)
         {
-            if (CurrentPlayerAuras.ContainsKey(slot))
-                return CurrentPlayerAuras[slot];
-            return -1;
+            if (UnitAuraDurationFull.ContainsKey(guid))
+            {
+                if (UnitAuraDurationFull[guid].ContainsKey(slot))
+                    UnitAuraDurationFull[guid][slot] = duration;
+                else
+                    UnitAuraDurationFull[guid].Add(slot, duration);
+            }
+            else
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(slot, duration);
+                UnitAuraDurationFull.Add(guid, dict);
+            }
+        }
+        public void ClearAuraDuration(WowGuid128 guid, byte slot)
+        {
+            if (UnitAuraDurationLeft.ContainsKey(guid) &&
+                UnitAuraDurationLeft[guid].ContainsKey(slot))
+                UnitAuraDurationLeft[guid].Remove(slot);
+
+            if (UnitAuraDurationFull.ContainsKey(guid) &&
+                UnitAuraDurationFull[guid].ContainsKey(slot))
+                UnitAuraDurationFull[guid].Remove(slot);
+        }
+        public void GetAuraDuration(WowGuid128 guid, byte slot, out int left, out int full)
+        {
+            if (UnitAuraDurationLeft.ContainsKey(guid) &&
+                UnitAuraDurationLeft[guid].ContainsKey(slot))
+                left = UnitAuraDurationLeft[guid][slot];
+            else
+                left = -1;
+
+            if (UnitAuraDurationFull.ContainsKey(guid) &&
+                UnitAuraDurationFull[guid].ContainsKey(slot))
+                full = UnitAuraDurationFull[guid][slot];
+            else
+                full = left;
+        }
+        public void StoreAuraCaster(WowGuid128 target, byte slot, WowGuid128 caster)
+        {
+            if (UnitAuraCaster.ContainsKey(target))
+            {
+                if (UnitAuraCaster[target].ContainsKey(slot))
+                    UnitAuraCaster[target][slot] = caster;
+                else
+                    UnitAuraCaster[target].Add(slot, caster);
+            }
+            else
+            {
+                Dictionary<byte, WowGuid128> dict = new Dictionary<byte, WowGuid128>();
+                dict.Add(slot, caster);
+                UnitAuraCaster.Add(target, dict);
+            }
+        }
+        public void ClearAuraCaster(WowGuid128 guid, byte slot)
+        {
+            if (UnitAuraCaster.ContainsKey(guid) &&
+                UnitAuraCaster[guid].ContainsKey(slot))
+                UnitAuraCaster[guid].Remove(slot);
+        }
+        public WowGuid128 GetAuraCaster(WowGuid128 target, byte slot)
+        {
+            if (UnitAuraCaster.ContainsKey(target) &&
+                UnitAuraCaster[target].ContainsKey(slot))
+                return UnitAuraCaster[target][slot];
+            return null;
         }
         public void StorePlayerGuildId(WowGuid128 guid, uint guildId)
         {

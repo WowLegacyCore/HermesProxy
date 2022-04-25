@@ -1878,15 +1878,23 @@ namespace HermesProxy.World.Client
                             AuraInfo aura = new AuraInfo();
                             aura.Slot = i;
                             aura.AuraData = ReadAuraSlot(i, guid, updates);
-                            if (aura.AuraData != null && guid == GetSession().GameState.CurrentPlayerGuid)
+                            if (aura.AuraData != null)
                             {
-                                int duration = GetSession().GameState.GetAuraDuration(i);
-                                if (duration > 0)
+                                int durationLeft;
+                                int durationFull;
+                                GetSession().GameState.GetAuraDuration(guid, i, out durationLeft, out durationFull);
+                                if (durationLeft > 0 && durationFull > 0)
                                 {
                                     aura.AuraData.Flags |= AuraFlagsModern.Duration;
-                                    aura.AuraData.Duration = duration;
-                                    aura.AuraData.Remaining = duration;
+                                    aura.AuraData.Duration = durationFull;
+                                    aura.AuraData.Remaining = durationLeft;
                                 }
+                                aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, i);
+                            }
+                            else if (updateMaskArray[UNIT_FIELD_AURA + i])
+                            {
+                                GetSession().GameState.ClearAuraDuration(guid, i);
+                                GetSession().GameState.ClearAuraCaster(guid, i);
                             }
                             if (aura.AuraData != null || updateMaskArray[UNIT_FIELD_AURA + i])
                                 auraUpdate.Auras.Add(aura);

@@ -985,17 +985,18 @@ namespace HermesProxy.World.Client
         {
             byte slot = packet.ReadUInt8();
             int duration = packet.ReadInt32();
-            GetSession().GameState.StoreAuraDuration(slot, duration);
+            WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
+            GetSession().GameState.StoreAuraDurationLeft(guid, slot, duration);
             if (duration <= 0)
                 return;
 
-            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
+            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(guid);
             if (updateFields == null)
                 return;
 
             AuraInfo aura = new AuraInfo();
             aura.Slot = slot;
-            aura.AuraData = ReadAuraSlot(slot, GetSession().GameState.CurrentPlayerGuid, updateFields);
+            aura.AuraData = ReadAuraSlot(slot, guid, updateFields);
             if (aura.AuraData == null)
                 return;
 
@@ -1003,7 +1004,51 @@ namespace HermesProxy.World.Client
             aura.AuraData.Duration = duration;
             aura.AuraData.Remaining = duration;
 
-            AuraUpdate update = new AuraUpdate(GetSession().GameState.CurrentPlayerGuid, false);
+            AuraUpdate update = new AuraUpdate(guid, false);
+            update.Auras.Add(aura);
+            SendPacketToClient(update);
+        }
+
+        [PacketHandler(Opcode.SMSG_SET_EXTRA_AURA_INFO)]
+        [PacketHandler(Opcode.SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE)]
+        void HandleSetExtraAuraInfo(WorldPacket packet)
+        {
+            WowGuid128 guid = packet.ReadPackedGuid().To128(GetSession().GameState);
+            if (!packet.CanRead())
+                return;
+
+            byte slot = packet.ReadUInt8();
+            uint spellId = packet.ReadUInt32();
+            int durationFull = packet.ReadInt32();
+            int durationLeft = packet.ReadInt32();
+            GetSession().GameState.StoreAuraDurationFull(guid, slot, durationFull);
+            GetSession().GameState.StoreAuraDurationLeft(guid, slot, durationLeft);
+            if (durationFull <= 0 && durationLeft <= 0)
+                return;
+
+            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(guid);
+            if (updateFields == null)
+                return;
+
+            AuraInfo aura = new AuraInfo();
+            aura.Slot = slot;
+            aura.AuraData = ReadAuraSlot(slot, guid, updateFields);
+            if (aura.AuraData == null)
+                return;
+            if (aura.AuraData.SpellID != spellId)
+                return;
+
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE)
+            {
+                GetSession().GameState.StoreAuraCaster(guid, slot, GetSession().GameState.CurrentPlayerGuid);
+                aura.AuraData.CastUnit = GetSession().GameState.CurrentPlayerGuid;
+            }
+
+            aura.AuraData.Flags |= AuraFlagsModern.Duration;
+            aura.AuraData.Duration = durationFull;
+            aura.AuraData.Remaining = durationLeft;
+
+            AuraUpdate update = new AuraUpdate(guid, false);
             update.Auras.Add(aura);
             SendPacketToClient(update);
         }
