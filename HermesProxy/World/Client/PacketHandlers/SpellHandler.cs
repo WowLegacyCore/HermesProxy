@@ -1021,8 +1021,13 @@ namespace HermesProxy.World.Client
             uint spellId = packet.ReadUInt32();
             int durationFull = packet.ReadInt32();
             int durationLeft = packet.ReadInt32();
+
             GetSession().GameState.StoreAuraDurationFull(guid, slot, durationFull);
             GetSession().GameState.StoreAuraDurationLeft(guid, slot, durationLeft);
+
+            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE)
+                GetSession().GameState.StoreAuraCaster(guid, slot, GetSession().GameState.CurrentPlayerGuid);
+
             if (durationFull <= 0 && durationLeft <= 0)
                 return;
 
@@ -1038,12 +1043,7 @@ namespace HermesProxy.World.Client
             if (aura.AuraData.SpellID != spellId)
                 return;
 
-            if (packet.GetUniversalOpcode(false) == Opcode.SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE)
-            {
-                GetSession().GameState.StoreAuraCaster(guid, slot, GetSession().GameState.CurrentPlayerGuid);
-                aura.AuraData.CastUnit = GetSession().GameState.CurrentPlayerGuid;
-            }
-
+            aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, slot);
             aura.AuraData.Flags |= AuraFlagsModern.Duration;
             aura.AuraData.Duration = durationFull;
             aura.AuraData.Remaining = durationLeft;
