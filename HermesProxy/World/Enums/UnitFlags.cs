@@ -75,7 +75,7 @@ namespace HermesProxy.World.Enums
         Possessed           = 0x01000000,
         NotSelectable       = 0x02000000,
         Skinnable           = 0x04000000,
-        Mount               = 0x08000000,
+        AurasVisible        = 0x08000000,
         Unk28               = 0x10000000,
         PreventAnim         = 0x20000000,
         Sheathe             = 0x40000000,
