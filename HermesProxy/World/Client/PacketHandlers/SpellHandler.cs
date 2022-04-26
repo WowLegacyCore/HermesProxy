@@ -1070,20 +1070,27 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SET_PCT_SPELL_MODIFIER)]
         void HandleSetSpellModifier(WorldPacket packet)
         {
-            SetSpellModifier spell = new SetSpellModifier(packet.GetUniversalOpcode(false));
-            SpellModifierInfo mod = new SpellModifierInfo();
-            SpellModifierData data = new SpellModifierData();
-            data.ClassIndex = packet.ReadUInt8();
-            mod.ModIndex = packet.ReadUInt8();
-            data.ModifierValue = packet.ReadInt32();
-            mod.ModifierData.Add(data);
-            spell.Modifiers.Add(mod);
-            SendPacketToClient(spell);
+            byte classIndex = packet.ReadUInt8();
+            byte modIndex = packet.ReadUInt8();
+            int modValue = packet.ReadInt32();
+
+            if (GetSession().GameState.CurrentPlayerCreateTime != 0)
+            {
+                SetSpellModifier spell = new SetSpellModifier(packet.GetUniversalOpcode(false));
+                SpellModifierInfo mod = new SpellModifierInfo();
+                SpellModifierData data = new SpellModifierData();
+                data.ClassIndex = classIndex;
+                mod.ModIndex = modIndex;
+                data.ModifierValue = modValue;
+                mod.ModifierData.Add(data);
+                spell.Modifiers.Add(mod);
+                SendPacketToClient(spell);
+            }
 
             if (packet.GetUniversalOpcode(false) == Opcode.SMSG_SET_FLAT_SPELL_MODIFIER)
-                GetSession().GameState.SetFlatSpellMod(mod.ModIndex, data.ClassIndex, data.ModifierValue);
+                GetSession().GameState.SetFlatSpellMod(modIndex, classIndex, modValue);
             else
-                GetSession().GameState.SetPctSpellMod(mod.ModIndex, data.ClassIndex, data.ModifierValue);
+                GetSession().GameState.SetPctSpellMod(modIndex, classIndex, modValue);
         }
     }
 }
