@@ -87,6 +87,19 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
+        public byte GetItemSpellSlot(WowGuid128 guid, uint spellId)
+        {
+            int OBJECT_FIELD_ENTRY = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_ENTRY);
+            if (OBJECT_FIELD_ENTRY < 0)
+                return 0;
+
+            var updates = GetCachedObjectFieldsLegacy(guid);
+            if (updates == null)
+                return 0;
+
+            uint itemId = updates[OBJECT_FIELD_ENTRY].UInt32Value;
+            return GameData.GetItemEffectSlot(itemId, spellId);
+        }
         public sbyte GetCurrentPartyIndex()
         {
             return (sbyte)(IsInBattleground() ? 1 : 0);

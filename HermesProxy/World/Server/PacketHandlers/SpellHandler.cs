@@ -273,7 +273,7 @@ namespace HermesProxy.World.Server
             byte slot = use.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.Slot) : use.Slot;
             packet.WriteUInt8(containerSlot);
             packet.WriteUInt8(slot);
-            packet.WriteUInt8(0); // spell count
+            packet.WriteUInt8(GetSession().GameState.GetItemSpellSlot(use.CastItem, use.Cast.SpellID));
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 packet.WriteUInt8(0); // cast count;
