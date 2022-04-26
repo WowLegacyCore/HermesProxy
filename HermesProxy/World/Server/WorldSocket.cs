@@ -736,7 +736,7 @@ namespace HermesProxy.World.Server
             if (code == BattlenetRpcErrorCode.Ok)
             {
                 response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.ActiveExpansionLevel = (byte)0;
+                response.SuccessInfo.ActiveExpansionLevel = (byte)(LegacyVersion.GetExpansionVersion() - 1);
                 response.SuccessInfo.AccountExpansionLevel = (byte)0;
                 response.SuccessInfo.VirtualRealmAddress = _realmId.GetAddress();
                 response.SuccessInfo.Time = (uint)Time.UnixTime;
