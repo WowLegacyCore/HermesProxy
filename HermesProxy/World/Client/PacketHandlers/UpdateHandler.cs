@@ -181,35 +181,41 @@ namespace HermesProxy.World.Client
             // resend spell mods on player create
             if (activePlayerUpdateIndex >= 0)
             {
-                foreach (var modItr in GetSession().GameState.FlatSpellMods)
+                if (GetSession().GameState.FlatSpellMods.Count > 0)
                 {
-                    foreach (var dataItr in modItr.Value)
+                    SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
+                    foreach (var modItr in GetSession().GameState.FlatSpellMods)
                     {
-                        SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
                         SpellModifierInfo mod = new SpellModifierInfo();
-                        SpellModifierData data = new SpellModifierData();
-                        data.ClassIndex = dataItr.Key;
                         mod.ModIndex = modItr.Key;
-                        data.ModifierValue = dataItr.Value;
-                        mod.ModifierData.Add(data);
+                        foreach (var dataItr in modItr.Value)
+                        {
+                            SpellModifierData data = new SpellModifierData();
+                            data.ClassIndex = dataItr.Key;
+                            data.ModifierValue = dataItr.Value;
+                            mod.ModifierData.Add(data);
+                        }
                         spell.Modifiers.Add(mod);
-                        SendPacketToClient(spell);
                     }
+                    SendPacketToClient(spell);
                 }
-                foreach (var modItr in GetSession().GameState.PctSpellMods)
+                if (GetSession().GameState.PctSpellMods.Count > 0)
                 {
-                    foreach (var dataItr in modItr.Value)
+                    SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
+                    foreach (var modItr in GetSession().GameState.PctSpellMods)
                     {
-                        SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
                         SpellModifierInfo mod = new SpellModifierInfo();
-                        SpellModifierData data = new SpellModifierData();
-                        data.ClassIndex = dataItr.Key;
                         mod.ModIndex = modItr.Key;
-                        data.ModifierValue = dataItr.Value;
-                        mod.ModifierData.Add(data);
+                        foreach (var dataItr in modItr.Value)
+                        {
+                            SpellModifierData data = new SpellModifierData();
+                            data.ClassIndex = dataItr.Key;
+                            data.ModifierValue = dataItr.Value;
+                            mod.ModifierData.Add(data);
+                        }
                         spell.Modifiers.Add(mod);
-                        SendPacketToClient(spell);
                     }
+                    SendPacketToClient(spell);
                 }
             }
 
