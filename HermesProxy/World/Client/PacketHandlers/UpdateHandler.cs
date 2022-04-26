@@ -737,66 +737,19 @@ namespace HermesProxy.World.Client
                 moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
                 var moveFlags = moveInfo.Flags;
 
-                var speeds = 6;
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    speeds = 9;
-                else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    speeds = 8;
-
-                for (var i = 0; i < speeds; ++i)
+                moveInfo.WalkSpeed = packet.ReadFloat();
+                moveInfo.RunSpeed = packet.ReadFloat();
+                moveInfo.RunBackSpeed = packet.ReadFloat();
+                moveInfo.SwimSpeed = packet.ReadFloat();
+                moveInfo.SwimBackSpeed = packet.ReadFloat();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 {
-                    var speedType = (SpeedType)i;
-                    var speed = packet.ReadFloat();
-
-                    switch (speedType)
-                    {
-                        case SpeedType.Walk:
-                        {
-                            moveInfo.WalkSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Run:
-                        {
-                            moveInfo.RunSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.RunBack:
-                        {
-                            moveInfo.RunBackSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Swim:
-                        {
-                            moveInfo.SwimSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.SwimBack:
-                        {
-                            moveInfo.SwimBackSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Turn:
-                        {
-                            moveInfo.TurnRate = speed;
-                            break;
-                        }
-                        case SpeedType.Fly:
-                        {
-                            moveInfo.FlightSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.FlyBack:
-                        {
-                            moveInfo.FlightBackSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Pitch:
-                        {
-                            moveInfo.PitchRate = speed;
-                            break;
-                        }
-                    }
+                    moveInfo.FlightSpeed = packet.ReadFloat();
+                    moveInfo.FlightBackSpeed = packet.ReadFloat();
                 }
+                moveInfo.TurnRate = packet.ReadFloat();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    moveInfo.PitchRate = packet.ReadFloat();
 
                 if (moveFlags.HasAnyFlag(MovementFlagWotLK.SplineEnabled))
                 {
