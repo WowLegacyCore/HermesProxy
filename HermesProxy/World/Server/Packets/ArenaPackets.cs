@@ -164,4 +164,38 @@ namespace HermesProxy.World.Server.Packets
         public uint BorderColor;
         public string TeamName;
     }
+
+    class BattlemasterJoinArena : ClientPacket
+    {
+        public BattlemasterJoinArena(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+            TeamSizeIndex = _worldPacket.ReadUInt8();
+            Roles = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 Guid;
+        public byte TeamSizeIndex;
+        public byte Roles;
+    }
+
+    class BattlemasterJoinSkirmish : ClientPacket
+    {
+        public BattlemasterJoinSkirmish(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+            Roles = _worldPacket.ReadUInt8();
+            TeamSizeIndex = _worldPacket.ReadUInt8();
+            AsGroup = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 Guid;
+        public byte Roles;
+        public byte TeamSizeIndex;
+        public bool AsGroup;
+    }
 }

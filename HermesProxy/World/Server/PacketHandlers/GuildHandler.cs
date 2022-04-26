@@ -100,9 +100,19 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_INVITE_BY_NAME)]
         void HandleGuildInviteByName(GuildInviteByName invite)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_INVITE_BY_NAME);
-            packet.WriteCString(invite.Name);
-            SendPacketToServer(packet);
+            if (invite.ArenaTeamSize == 0)
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_INVITE_BY_NAME);
+                packet.WriteCString(invite.Name);
+                SendPacketToServer(packet);
+            }
+            else
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_INVITE);
+                packet.WriteUInt32(GetSession().GameState.GetCurrentArenaTeamIdFromSize(invite.ArenaTeamSize));
+                packet.WriteCString(invite.Name);
+                SendPacketToServer(packet);
+            }
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_SET_RANK_PERMISSIONS)]

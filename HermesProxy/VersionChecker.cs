@@ -607,5 +607,19 @@ namespace HermesProxy
             }
             return 0;
         }
+
+        public static uint GetArenaTeamIndexFromSize(uint size)
+        {
+            switch (size)
+            {
+                case 2:
+                    return 0;
+                case 3:
+                    return 1;
+                case 5:
+                    return 2;
+            }
+            return 0;
+        }
     }
 }

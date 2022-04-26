@@ -61,6 +61,7 @@ namespace HermesProxy.World.Client
 
             var count = packet.ReadUInt32();
             arena.TeamSize = packet.ReadUInt32();
+            GetSession().GameState.StoreCurrentArenaTeamIdForSize(arena.TeamSize, arena.TeamId);
 
             for (var i = 0; i < count; i++)
             {

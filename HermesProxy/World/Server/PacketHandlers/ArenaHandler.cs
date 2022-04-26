@@ -53,5 +53,27 @@ namespace HermesProxy.World.Server
                 SendPacket(response);
             }
         }
+
+        [PacketHandler(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA)]
+        void HandleBattlematerJoinArena(BattlemasterJoinArena join)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
+            packet.WriteGuid(join.Guid.To64());
+            packet.WriteUInt8(join.TeamSizeIndex);
+            packet.WriteBool(true); // As Group
+            packet.WriteBool(true); // Is Rated
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_BATTLEMASTER_JOIN_SKIRMISH)]
+        void HandleBattlematerJoinSkirmish(BattlemasterJoinSkirmish join)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
+            packet.WriteGuid(join.Guid.To64());
+            packet.WriteUInt8(join.TeamSizeIndex);
+            packet.WriteBool(join.AsGroup);
+            packet.WriteBool(false); // Is Rated
+            SendPacketToServer(packet);
+        }
     }
 }
