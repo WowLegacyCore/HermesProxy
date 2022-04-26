@@ -234,7 +234,14 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(info);
 
-            LoadCUFProfiles cuf = new LoadCUFProfiles();
+            SetAllTaskProgress tasks = new();
+            SendPacketToClient(tasks);
+
+            InitialSetup setup = new();
+            setup.ServerExpansionLevel = (byte)(LegacyVersion.GetExpansionVersion() - 1);
+            SendPacketToClient(setup);
+
+            LoadCUFProfiles cuf = new();
             cuf.Data = GetSession().AccountDataMgr.LoadCUFProfiles();
             SendPacketToClient(cuf);
         }
