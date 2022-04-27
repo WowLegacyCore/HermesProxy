@@ -100,7 +100,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_INVITE_BY_NAME)]
         void HandleGuildInviteByName(GuildInviteByName invite)
         {
-            if (invite.ArenaTeamSize == 0)
+            if (invite.ArenaTeamId == 0)
             {
                 WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_INVITE_BY_NAME);
                 packet.WriteCString(invite.Name);
@@ -109,7 +109,7 @@ namespace HermesProxy.World.Server
             else
             {
                 WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_INVITE);
-                packet.WriteUInt32(GetSession().GameState.GetCurrentArenaTeamIdFromSize(invite.ArenaTeamSize));
+                packet.WriteUInt32(invite.ArenaTeamId);
                 packet.WriteCString(invite.Name);
                 SendPacketToServer(packet);
             }

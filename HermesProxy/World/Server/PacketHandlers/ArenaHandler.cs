@@ -59,7 +59,7 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
             packet.WriteGuid(join.Guid.To64());
-            packet.WriteUInt8(join.TeamSizeIndex);
+            packet.WriteUInt8(join.TeamIndex);
             packet.WriteBool(true); // As Group
             packet.WriteBool(true); // Is Rated
             SendPacketToServer(packet);
@@ -70,9 +70,28 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
             packet.WriteGuid(join.Guid.To64());
-            packet.WriteUInt8(join.TeamSizeIndex);
+            packet.WriteUInt8(join.TeamSize);
             packet.WriteBool(join.AsGroup);
             packet.WriteBool(false); // Is Rated
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_REMOVE)]
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_LEADER)]
+        void HandleArenaUnimplemented(ArenaTeamRemove arena)
+        {
+            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            packet.WriteUInt32(arena.TeamId);
+            packet.WriteCString(GetSession().GameState.GetPlayerName(arena.PlayerGuid));
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_DISBAND)]
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_LEAVE)]
+        void HandleArenaTeamLeave(ArenaTeamLeave arena)
+        {
+            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            packet.WriteUInt32(arena.TeamId);
             SendPacketToServer(packet);
         }
     }

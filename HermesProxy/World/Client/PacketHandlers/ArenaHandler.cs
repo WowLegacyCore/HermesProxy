@@ -61,17 +61,18 @@ namespace HermesProxy.World.Client
 
             var count = packet.ReadUInt32();
             arena.TeamSize = packet.ReadUInt32();
-            GetSession().GameState.StoreCurrentArenaTeamIdForSize(arena.TeamSize, arena.TeamId);
 
             for (var i = 0; i < count; i++)
             {
                 ArenaTeamMember member = new ArenaTeamMember();
+                PlayerCache cache = new PlayerCache();
                 member.MemberGUID = packet.ReadGuid().To128(GetSession().GameState);
                 member.Online = packet.ReadBool();
-                member.Name = packet.ReadCString();
+                member.Name = cache.Name = packet.ReadCString();
                 member.Captain = packet.ReadInt32();
-                member.Level = packet.ReadUInt8();
-                member.ClassId = (Class)packet.ReadUInt8();
+                member.Level = cache.Level = packet.ReadUInt8();
+                member.ClassId = cache.ClassId = (Class)packet.ReadUInt8();
+                GetSession().GameState.UpdatePlayerCache(member.MemberGUID, cache);
                 member.WeekGamesPlayed = packet.ReadUInt32();
                 member.WeekGamesWon = packet.ReadUInt32();
                 member.SeasonGamesPlayed = packet.ReadUInt32();

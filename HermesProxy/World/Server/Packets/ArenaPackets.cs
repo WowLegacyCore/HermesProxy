@@ -172,12 +172,12 @@ namespace HermesProxy.World.Server.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid128();
-            TeamSizeIndex = _worldPacket.ReadUInt8();
+            TeamIndex = _worldPacket.ReadUInt8();
             Roles = _worldPacket.ReadUInt8();
         }
 
         public WowGuid128 Guid;
-        public byte TeamSizeIndex;
+        public byte TeamIndex;
         public byte Roles;
     }
 
@@ -189,13 +189,41 @@ namespace HermesProxy.World.Server.Packets
         {
             Guid = _worldPacket.ReadPackedGuid128();
             Roles = _worldPacket.ReadUInt8();
-            TeamSizeIndex = _worldPacket.ReadUInt8();
+            TeamSize = _worldPacket.ReadUInt8();
             AsGroup = _worldPacket.HasBit();
+            Requeue = _worldPacket.HasBit();
         }
 
         public WowGuid128 Guid;
         public byte Roles;
-        public byte TeamSizeIndex;
+        public byte TeamSize;
         public bool AsGroup;
+        public bool Requeue;
+    }
+
+    public class ArenaTeamRemove : ClientPacket
+    {
+        public ArenaTeamRemove(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TeamId = _worldPacket.ReadUInt32();
+            PlayerGuid = _worldPacket.ReadPackedGuid128();
+        }
+
+        public uint TeamId;
+        public WowGuid128 PlayerGuid;
+    }
+
+    public class ArenaTeamLeave : ClientPacket
+    {
+        public ArenaTeamLeave(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            TeamId = _worldPacket.ReadUInt32();
+        }
+
+        public uint TeamId;
     }
 }

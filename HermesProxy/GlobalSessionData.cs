@@ -39,7 +39,7 @@ namespace HermesProxy
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
         public LootMethod CurrentGroupLootMethod;
-        public List<WowGuid128> CurrentGroupMembers = new();
+        public HashSet<WowGuid128> CurrentGroupMembers = new();
         public WowGuid128 CurrentGroupGuid;
         public WowGuid128 CurrentGroupLeader;
         public WowGuid128 CurrentPlayerGuid;
@@ -73,7 +73,6 @@ namespace HermesProxy
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
         public Dictionary<uint, ArenaTeamData> ArenaTeams = new();
-        public Dictionary<uint, uint> CurrentArenaTeamIdBySize = new Dictionary<uint, uint>();
         public World.Server.Packets.MailListResult PendingMailListPacket;
         public HashSet<uint> RequestedItemTextIds = new HashSet<uint>();
         public Dictionary<uint, string> ItemTexts = new Dictionary<uint, string>();
@@ -160,20 +159,6 @@ namespace HermesProxy
                 PlayerArenaTeams.Add(guid, new Array<ArenaTeamInspectData>(3, new ArenaTeamInspectData()));
 
             PlayerArenaTeams[guid][slot] = team;
-        }
-        public uint GetCurrentArenaTeamIdFromSize(uint size)
-        {
-            uint teamId;
-            if (CurrentArenaTeamIdBySize.TryGetValue(size, out teamId))
-                return teamId;
-            return 0;
-        }
-        public void StoreCurrentArenaTeamIdForSize(uint size, uint teamId)
-        {
-            if (CurrentArenaTeamIdBySize.ContainsKey(size))
-                CurrentArenaTeamIdBySize[size] = teamId;
-            else
-                CurrentArenaTeamIdBySize.Add(size, teamId);
         }
         public WowGuid64 GetInventorySlotItem(int slot)
         {

@@ -70,7 +70,7 @@ namespace HermesProxy.World.Client
             bool isRaid = packet.ReadBool();
             byte ownSubGroupAndFlags = packet.ReadUInt8();
 
-            GetSession().GameState.CurrentGroupMembers = new List<WowGuid128>();
+            GetSession().GameState.CurrentGroupMembers = new HashSet<WowGuid128>();
             uint membersCount = packet.ReadUInt32();
             if (membersCount > 0)
             {
@@ -117,8 +117,12 @@ namespace HermesProxy.World.Client
                     member.ClassId = GetSession().GameState.GetUnitClass(member.GUID);
                     if (!member.Flags.HasAnyFlag(GroupMemberFlags.Assistant))
                         allAssist = false;
-                    party.PlayerList.Add(member);
-                    GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+
+                    if (!GetSession().GameState.CurrentGroupMembers.Contains(member.GUID))
+                    {
+                        party.PlayerList.Add(member);
+                        GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+                    }
                 }
 
                 if (allAssist)
@@ -155,7 +159,7 @@ namespace HermesProxy.World.Client
             byte ownGroupFlags = packet.ReadUInt8();
             party.PartyGUID = GetSession().GameState.CurrentGroupGuid = packet.ReadGuid().To128(GetSession().GameState);
 
-            GetSession().GameState.CurrentGroupMembers = new List<WowGuid128>();
+            GetSession().GameState.CurrentGroupMembers = new HashSet<WowGuid128>();
             uint membersCount = packet.ReadUInt32();
             if (membersCount > 0)
             {
@@ -191,8 +195,12 @@ namespace HermesProxy.World.Client
                     member.ClassId = GetSession().GameState.GetUnitClass(member.GUID);
                     if (!member.Flags.HasAnyFlag(GroupMemberFlags.Assistant))
                         allAssist = false;
-                    party.PlayerList.Add(member);
-                    GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+
+                    if (!GetSession().GameState.CurrentGroupMembers.Contains(member.GUID))
+                    {
+                        party.PlayerList.Add(member);
+                        GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+                    }
                 }
 
                 if (allAssist)

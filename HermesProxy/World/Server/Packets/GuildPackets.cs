@@ -592,11 +592,11 @@ namespace HermesProxy.World.Server.Packets
             Name = _worldPacket.ReadString(nameLen);
 
             if (isArena)
-                ArenaTeamSize = _worldPacket.ReadUInt32();
+                ArenaTeamId = _worldPacket.ReadUInt32();
         }
 
         public string Name;
-        public uint ArenaTeamSize;
+        public uint ArenaTeamId;
     }
 
     public class GuildInvite : ServerPacket
