@@ -53,6 +53,7 @@ namespace HermesProxy
         public ClientCastRequest CurrentClientCast;
         public ClientCastRequest CurrentClientMeleeCast;
         public ClientCastRequest CurrentClientPetCast;
+        public uint[] CurrentArenaTeamIds = new uint[3];
         public List<ClientCastRequest> PendingClientCasts = new List<ClientCastRequest>();
         public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
         public WowGuid64 LastLootTargetGuid;

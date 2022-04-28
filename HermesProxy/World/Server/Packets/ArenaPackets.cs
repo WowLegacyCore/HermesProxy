@@ -226,4 +226,84 @@ namespace HermesProxy.World.Server.Packets
 
         public uint TeamId;
     }
+
+    class ArenaTeamEvent : ServerPacket
+    {
+        public ArenaTeamEvent() : base(Opcode.SMSG_ARENA_TEAM_EVENT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Event);
+            _worldPacket.WriteBits(Param1.GetByteCount(), 9);
+            _worldPacket.WriteBits(Param2.GetByteCount(), 9);
+            _worldPacket.WriteBits(Param3.GetByteCount(), 9);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(Param1);
+            _worldPacket.WriteString(Param2);
+            _worldPacket.WriteString(Param3);
+        }
+
+        public ArenaTeamEventModern Event;
+        public string Param1 = "";
+        public string Param2 = "";
+        public string Param3 = "";
+    }
+
+    class ArenaTeamCommandResult : ServerPacket
+    {
+        public ArenaTeamCommandResult() : base(Opcode.SMSG_ARENA_TEAM_COMMAND_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Action);
+            _worldPacket.WriteUInt8((byte)Error);
+            _worldPacket.WriteBits(TeamName.GetByteCount(), 7);
+            _worldPacket.WriteBits(PlayerName.GetByteCount(), 6);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(TeamName);
+            _worldPacket.WriteString(PlayerName);
+        }
+
+        public ArenaTeamCommandType Action;
+        public ArenaTeamCommandErrorModern Error;
+        public string TeamName;
+        public string PlayerName;
+    }
+
+    class ArenaTeamInvite : ServerPacket
+    {
+        public ArenaTeamInvite() : base(Opcode.SMSG_ARENA_TEAM_INVITE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(PlayerGuid);
+            _worldPacket.WriteUInt32(PlayerVirtualAddress);
+            _worldPacket.WritePackedGuid128(TeamGuid);
+            _worldPacket.WriteBits(PlayerName.GetByteCount(), 6);
+            _worldPacket.WriteBits(TeamName.GetByteCount(), 7);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(PlayerName);
+            _worldPacket.WriteString(TeamName);
+        }
+
+        public WowGuid128 PlayerGuid;
+        public uint PlayerVirtualAddress;
+        public WowGuid128 TeamGuid;
+        public string PlayerName;
+        public string TeamName;
+    }
+
+    public class ArenaTeamAccept : ClientPacket
+    {
+        public ArenaTeamAccept(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PlayerGuid = _worldPacket.ReadPackedGuid128();
+            TeamGuid = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 PlayerGuid;
+        public WowGuid128 TeamGuid;
+    }
 }

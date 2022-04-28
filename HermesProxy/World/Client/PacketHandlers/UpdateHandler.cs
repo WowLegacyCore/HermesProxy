@@ -2481,7 +2481,7 @@ namespace HermesProxy.World.Client
                 int PLAYER_FIELD_ARENA_TEAM_INFO_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_ARENA_TEAM_INFO_1_1);
                 if (PLAYER_FIELD_ARENA_TEAM_INFO_1_1 >= 0)
                 {
-                    //int teamIdOffset = 0;
+                    int teamIdOffset = 0;
                     //int teamMemberOffset = 1;
                     int teamGamesWeekOffset = 2;
                     int teamGamesSeasonOffset = 3;
@@ -2491,15 +2491,30 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 3; i++)
                     {
                         int startOffset = PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + i * sizePerEntry;
-                        /*
-                        if (updateMaskArray[startOffset + teamIdOffset])
+                        
+                        if (updateMaskArray[startOffset + teamIdOffset] &&
+                            guid == GetSession().GameState.CurrentPlayerGuid)
                         {
-                            if (updateData.ActivePlayerData.PvpInfo[i] == null)
-                                updateData.ActivePlayerData.PvpInfo[i] = new PVPInfo();
+                            uint teamId = GetSession().GameState.CurrentArenaTeamIds[i] = updates[startOffset + teamIdOffset].UInt32Value;
 
-                            updateData.ActivePlayerData.PvpInfo[i].TeamID = updates[startOffset + teamIdOffset].Int32Value;
+                            if (teamId != 0)
+                            {
+                                WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
+                                packet.WriteUInt32(teamId);
+                                SendPacketToServer(packet);
+
+                                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
+                                packet2.WriteUInt32(teamId);
+                                SendPacketToServer(packet2);
+                            }
+                            else
+                            {
+                                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
+                                response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex((uint)i);
+                                SendPacketToClient(response);
+                            }
                         }
-                        */
+                        
                         /*
                         if (updateMaskArray[startOffset + teamMemberOffset])
                         {

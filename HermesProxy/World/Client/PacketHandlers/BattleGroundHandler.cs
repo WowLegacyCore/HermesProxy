@@ -119,15 +119,17 @@ namespace HermesProxy.World.Client
                     }
                     case BattleGroundStatus.InProgress:
                     {
-                        BattlegroundInit init = new BattlegroundInit();
-                        init.Milliseconds = 1154756799;
-                        SendPacketToClient(init);
-
                         BattlefieldStatusActive active = new BattlefieldStatusActive();
                         active.Hdr = hdr;
                         active.Mapid = mapId;
                         active.ShutdownTimer = packet.ReadUInt32();
                         active.StartTimer = packet.ReadUInt32();
+                        if (active.ShutdownTimer == 0)
+                        {
+                            BattlegroundInit init = new BattlegroundInit();
+                            init.Milliseconds = 1154756799;
+                            SendPacketToClient(init);
+                        }
                         SendPacketToClient(active);
                         break;
                     }
@@ -201,10 +203,6 @@ namespace HermesProxy.World.Client
                     }
                     case BattleGroundStatus.InProgress:
                     {
-                        BattlegroundInit init = new BattlegroundInit();
-                        init.Milliseconds = 1154756799;
-                        SendPacketToClient(init);
-
                         BattlefieldStatusActive active = new BattlefieldStatusActive();
                         active.Hdr = hdr;
                         active.Mapid = packet.ReadUInt32();
@@ -213,6 +211,12 @@ namespace HermesProxy.World.Client
                         active.ShutdownTimer = packet.ReadUInt32();
                         active.StartTimer = packet.ReadUInt32();
                         active.ArenaFaction = packet.ReadUInt8();
+                        if (active.ShutdownTimer == 0)
+                        {
+                            BattlegroundInit init = new BattlegroundInit();
+                            init.Milliseconds = 1154756799;
+                            SendPacketToClient(init);
+                        }
                         SendPacketToClient(active);
                         break;
                     }
@@ -321,6 +325,7 @@ namespace HermesProxy.World.Client
                 else
                 {
                     player.Faction = packet.ReadBool();
+                    pvp.PlayerCount[player.Faction ? 1 : 0]++;
                 }
 
                 player.DamageDone = packet.ReadUInt32();

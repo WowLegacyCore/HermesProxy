@@ -15,7 +15,8 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ARENA_TEAM_ROSTER)]
         void HandleArenaTeamRoster(ArenaTeamRosterRequest arena)
         {
-            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180) ||
+                GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex] == 0)
             {
                 ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
                 response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamIndex);
@@ -24,11 +25,11 @@ namespace HermesProxy.World.Server
             else
             {
                 WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
-                packet.WriteUInt32(arena.TeamIndex + 1);
+                packet.WriteUInt32(GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex]);
                 SendPacketToServer(packet);
 
                 WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
-                packet2.WriteUInt32(arena.TeamIndex + 1);
+                packet2.WriteUInt32(GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex]);
                 SendPacketToServer(packet2);
             }
         }
@@ -92,6 +93,14 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
             packet.WriteUInt32(arena.TeamId);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_ACCEPT)]
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_DECLINE)]
+        void HandleArenaTeamInviteResponse(ArenaTeamAccept arena)
+        {
+            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
             SendPacketToServer(packet);
         }
     }
