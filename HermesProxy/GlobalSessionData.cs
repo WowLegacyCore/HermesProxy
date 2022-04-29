@@ -38,10 +38,7 @@ namespace HermesProxy
         public bool IsPassingOnLoot;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
-        public LootMethod CurrentGroupLootMethod;
-        public HashSet<WowGuid128> CurrentGroupMembers = new();
-        public WowGuid128 CurrentGroupGuid;
-        public WowGuid128 CurrentGroupLeader;
+        public World.Server.Packets.PartyUpdate[] CurrentGroups = new World.Server.Packets.PartyUpdate[2];
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public uint CurrentGuildCreateTime;
@@ -88,6 +85,47 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
+        public uint GetCurrentGroupSize()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return 0;
+
+            // Don't count self.
+            return (uint)(group.PlayerList.Count > 1 ? group.PlayerList.Count - 1 : 0);
+        }
+        public WowGuid128 GetCurrentGroupLeader()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return WowGuid128.Empty;
+
+            return group.LeaderGUID;
+        }
+        public LootMethod GetCurrentLootMethod()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return LootMethod.FreeForAll;
+
+            return group.LootSettings.Method;
+        }
+        public WowGuid128 GetCurrentGroupGuid()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return WowGuid128.Empty;
+
+            return group.PartyGUID;
+        }
+        public World.Server.Packets.PartyUpdate GetCurrentGroup()
+        {
+            return CurrentGroups[GetCurrentPartyIndex()];
+        }
+        public sbyte GetCurrentPartyIndex()
+        {
+            return (sbyte)(IsInBattleground() ? 1 : 0);
+        }
         public byte GetItemSpellSlot(WowGuid128 guid, uint spellId)
         {
             int OBJECT_FIELD_ENTRY = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_ENTRY);
@@ -100,10 +138,6 @@ namespace HermesProxy
 
             uint itemId = updates[OBJECT_FIELD_ENTRY].UInt32Value;
             return GameData.GetItemEffectSlot(itemId, spellId);
-        }
-        public sbyte GetCurrentPartyIndex()
-        {
-            return (sbyte)(IsInBattleground() ? 1 : 0);
         }
         public void SetFlatSpellMod(byte spellMod, byte spellMask, int amount)
         {
@@ -210,7 +244,26 @@ namespace HermesProxy
             if (CurrentMapId == null)
                 return false;
 
-            return GameData.GetBattlegroundIdFromMapId((uint)CurrentMapId) != 0;
+            uint bgId = GameData.GetBattlegroundIdFromMapId((uint)CurrentMapId);
+            if (bgId != 0)
+            {
+                // Only if we are properly queued for the BG.
+                foreach (var queue in BattleFieldQueueTypes)
+                {
+                    if (LegacyVersion.RemovedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+                    {
+                        if (queue.Value == CurrentMapId)
+                            return true;
+                    }
+                    else
+                    {
+                        if (queue.Value == bgId)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
         }
         public long GetBattleFieldQueueTime(uint queueSlot)
         {

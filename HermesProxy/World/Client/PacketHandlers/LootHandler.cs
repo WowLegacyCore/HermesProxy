@@ -23,7 +23,7 @@ namespace HermesProxy.World.Client
                 loot.FailureReason = (LootError)packet.ReadUInt8();
                 return;
             }
-            loot.LootMethod = GetSession().GameState.CurrentGroupLootMethod;
+            loot.LootMethod = GetSession().GameState.GetCurrentLootMethod();
 
             loot.Coins = packet.ReadUInt32();
 

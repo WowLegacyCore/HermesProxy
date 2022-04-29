@@ -68,11 +68,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SET_EVERYONE_IS_ASSISTANT)]
         void HandleSetAssistantLeader(SetEveryoneIsAssistant assist)
         {
-            var groupMembers = GetSession().GameState.CurrentGroupMembers;
+            var groupMembers = GetSession().GameState.GetCurrentGroup().PlayerList;
             foreach (var member in groupMembers)
             {
+                if (member.GUID == GetSession().GameState.CurrentPlayerGuid)
+                    continue;
+
                 WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ASSISTANT_LEADER);
-                packet.WriteGuid(member.To64());
+                packet.WriteGuid(member.GUID.To64());
                 packet.WriteBool(assist.Apply);
                 SendPacketToServer(packet);
             }

@@ -142,10 +142,30 @@ namespace HermesProxy.World.Client
             }
             else
             {
+                uint queuedMapId = GetSession().GameState.GetBattleFieldQueueType(hdr.Ticket.Id);
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180) &&
+                    queuedMapId == GetSession().GameState.CurrentMapId)
+                {
+                    // Clear BG group properly on vanilla servers.
+                    var bgGroup = GetSession().GameState.CurrentGroups[1];
+                    if (bgGroup != null)
+                    {
+                        PartyUpdate party = new PartyUpdate();
+                        party.SequenceNum = GetSession().GameState.GroupUpdateCounter++;
+                        party.PartyFlags = GroupFlags.FakeRaid | GroupFlags.Destroyed;
+                        party.PartyIndex = 1;
+                        party.PartyGUID = bgGroup.PartyGUID;
+                        party.LeaderGUID = WowGuid128.Empty;
+                        party.MyIndex = -1;
+                        GetSession().GameState.CurrentGroups[1] = null;
+                        SendPacketToClient(party);
+                    }
+                }
+
                 BattlefieldStatusFailed failed = new BattlefieldStatusFailed();
                 failed.Ticket = hdr.Ticket;
                 failed.Reason = 30;
-                failed.BattlefieldListId = GameData.GetBattlegroundIdFromMapId(GetSession().GameState.GetBattleFieldQueueType(hdr.Ticket.Id));
+                failed.BattlefieldListId = GameData.GetBattlegroundIdFromMapId(queuedMapId);
                 SendPacketToClient(failed);
                 GetSession().GameState.BattleFieldQueueTimes.Remove(hdr.Ticket.Id);
             }
