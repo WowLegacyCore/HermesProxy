@@ -73,6 +73,14 @@ namespace HermesProxy.World.Client
             SendPacketToClient(sound);
         }
 
+        [PacketHandler(Opcode.SMSG_PET_BROKEN)]
+        void HandlePetBroken(WorldPacket packet)
+        {
+            PrintNotification notify = new PrintNotification();
+            notify.NotifyText = "Your pet has run away";
+            SendPacketToClient(notify);
+        }
+
         [PacketHandler(Opcode.MSG_LIST_STABLED_PETS)]
         void HandleListStabledPets(WorldPacket packet)
         {

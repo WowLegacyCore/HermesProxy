@@ -104,7 +104,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAST_SPELL)]
         void HandleCastSpell(CastSpell cast)
         {
-            if (GameData.MeleeSpells.Contains(cast.Cast.SpellID))
+            if (GameData.NextMeleeAndAutoRepeatSpells.Contains(cast.Cast.SpellID))
             {
                 ClientCastRequest castRequest = new ClientCastRequest();
                 castRequest.Timestamp = Time.UnixTime;
@@ -112,7 +112,7 @@ namespace HermesProxy.World.Server
                 castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
                 castRequest.ClientGUID = cast.Cast.CastID;
                 
-                if (GetSession().GameState.CurrentClientMeleeCast != null)
+                if (GetSession().GameState.CurrentClientSpecialCast != null)
                 {
                     castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, 10000 + cast.Cast.CastID.GetCounter());
                     SendCastRequestFailed(castRequest, false);
@@ -127,7 +127,7 @@ namespace HermesProxy.World.Server
                     prepare.ServerCastID = castRequest.ServerGUID;
                     SendPacket(prepare);
 
-                    GetSession().GameState.CurrentClientMeleeCast = castRequest;
+                    GetSession().GameState.CurrentClientSpecialCast = castRequest;
                 } 
             }
             else
@@ -139,18 +139,18 @@ namespace HermesProxy.World.Server
                 castRequest.ClientGUID = cast.Cast.CastID;
                 castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, 10000 + cast.Cast.CastID.GetCounter());
 
-                if (GetSession().GameState.CurrentClientCast != null)
+                if (GetSession().GameState.CurrentClientNormalCast != null)
                 {
-                    if (GetSession().GameState.CurrentClientCast.HasStarted)
+                    if (GetSession().GameState.CurrentClientNormalCast.HasStarted)
                     {
                         SendCastRequestFailed(castRequest, false);
                     }
                     else
                     {
-                        if (GetSession().GameState.CurrentClientCast.Timestamp + 10 < castRequest.Timestamp)
+                        if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10 < castRequest.Timestamp)
                         {
-                            SendCastRequestFailed(GetSession().GameState.CurrentClientCast, false);
-                            GetSession().GameState.CurrentClientCast = null;
+                            SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
+                            GetSession().GameState.CurrentClientNormalCast = null;
                             foreach (var pending in GetSession().GameState.PendingClientCasts)
                                 SendCastRequestFailed(pending, false);
                             GetSession().GameState.PendingClientCasts.Clear();
@@ -162,7 +162,7 @@ namespace HermesProxy.World.Server
                     return;
                 }
 
-                GetSession().GameState.CurrentClientCast = castRequest;
+                GetSession().GameState.CurrentClientNormalCast = castRequest;
             }
 
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
@@ -243,18 +243,18 @@ namespace HermesProxy.World.Server
             castRequest.ClientGUID = use.Cast.CastID;
             castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, use.Cast.SpellID, 10000 + use.Cast.CastID.GetCounter());
 
-            if (GetSession().GameState.CurrentClientCast != null)
+            if (GetSession().GameState.CurrentClientNormalCast != null)
             {
-                if (GetSession().GameState.CurrentClientCast.HasStarted)
+                if (GetSession().GameState.CurrentClientNormalCast.HasStarted)
                 {
                     SendCastRequestFailed(castRequest, false);
                 }
                 else
                 {
-                    if (GetSession().GameState.CurrentClientCast.Timestamp + 10 < castRequest.Timestamp)
+                    if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10 < castRequest.Timestamp)
                     {
-                        SendCastRequestFailed(GetSession().GameState.CurrentClientCast, false);
-                        GetSession().GameState.CurrentClientCast = null;
+                        SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
+                        GetSession().GameState.CurrentClientNormalCast = null;
                         foreach (var pending in GetSession().GameState.PendingClientCasts)
                             SendCastRequestFailed(pending, false);
                         GetSession().GameState.PendingClientCasts.Clear();
@@ -266,7 +266,7 @@ namespace HermesProxy.World.Server
                 return;
             }
 
-            GetSession().GameState.CurrentClientCast = castRequest;
+            GetSession().GameState.CurrentClientNormalCast = castRequest;
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_USE_ITEM);
             byte containerSlot = use.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.PackSlot) : use.PackSlot;
@@ -305,6 +305,36 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AURA);
             packet.WriteUInt32(aura.SpellID);
             SendPacketToServer(packet);
+        }
+        [PacketHandler(Opcode.CMSG_CANCEL_MOUNT_AURA)]
+        void HandleCancelMountAura(EmptyClientPacket cancel)
+        {
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_MOUNT_AURA);
+                SendPacketToServer(packet);
+            }
+            else
+            {
+                WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
+                var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(guid);
+                if (updateFields == null)
+                    return;
+
+                for (byte i = 0; i < 32; i++)
+                {
+                    var aura = GetSession().WorldClient.ReadAuraSlot(i, guid, updateFields);
+                    if (aura == null)
+                        continue;
+
+                    if (GameData.MountAuras.Contains(aura.SpellID))
+                    {
+                        WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AURA);
+                        packet.WriteUInt32(aura.SpellID);
+                        SendPacketToServer(packet);
+                    }
+                }
+            }
         }
         [PacketHandler(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL)]
         void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell aura)
