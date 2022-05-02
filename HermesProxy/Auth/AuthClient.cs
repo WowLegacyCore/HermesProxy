@@ -180,7 +180,7 @@ namespace HermesProxy.Auth
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
-            buffer.WriteUInt8(6);
+            buffer.WriteUInt8((byte)(LegacyVersion.GetExpansionVersion() > 1 ? 8 : 3));
             buffer.WriteUInt16((UInt16)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
             buffer.WriteUInt8(0);
@@ -188,13 +188,13 @@ namespace HermesProxy.Auth
             buffer.WriteUInt8(LegacyVersion.GetMajorPatchVersion());
             buffer.WriteUInt8(LegacyVersion.GetMinorPatchVersion());
             buffer.WriteUInt16((ushort)Settings.ServerBuild);
-            buffer.WriteBytes(Encoding.ASCII.GetBytes("68x"));
+            buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedPlatfom.Reverse()));
             buffer.WriteUInt8(0);
-            buffer.WriteBytes(Encoding.ASCII.GetBytes("niW"));
+            buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedOS.Reverse()));
             buffer.WriteUInt8(0);
             buffer.WriteBytes(Encoding.ASCII.GetBytes(_locale.Reverse()));
             buffer.WriteUInt32((uint)0x3c);
-            buffer.WriteUInt32(0); // IP
+            buffer.WriteUInt32(16777343); // IP (127.0.0.1)
             buffer.WriteUInt8((byte)_username.Length);
             buffer.WriteBytes(Encoding.ASCII.GetBytes(_username.ToUpper()));
             SendPacket(buffer);
@@ -217,12 +217,12 @@ namespace HermesProxy.Auth
             byte challenge_nLen = packet.ReadUInt8();
             byte[] challenge_N = packet.ReadBytes(32);
             byte[] challenge_salt = packet.ReadBytes(32);
-            byte[] challenge_unk3 = packet.ReadBytes(16);
+            byte[] challenge_version = packet.ReadBytes(16);
             byte challenge_securityFlags = packet.ReadUInt8();
 
             //Console.WriteLine("Received logon challenge");
 
-            BigInteger N, A, B, a, u, x, S, salt, unk1, g, k;
+            BigInteger N, A, B, a, u, x, S, salt, versionChallenge, g, k;
             k = new BigInteger(3);
 
             #region Receive and initialize
@@ -231,13 +231,13 @@ namespace HermesProxy.Auth
             g = challenge_g.ToBigInteger();
             N = challenge_N.ToBigInteger();            // modulus
             salt = challenge_salt.ToBigInteger();
-            unk1 = challenge_unk3.ToBigInteger();
+            versionChallenge = challenge_version.ToBigInteger();
 
             //Console.WriteLine("---====== Received from server: ======---");
             //Console.WriteLine($"B={B.ToCleanByteArray().ToHexString()}");
             //Console.WriteLine($"N={N.ToCleanByteArray().ToHexString()}");
             //Console.WriteLine($"salt={challenge_salt.ToHexString()}");
-
+            //Console.WriteLine($"versionChallenge={challenge_version.ToHexString()}");
             #endregion
 
             #region Hash password
