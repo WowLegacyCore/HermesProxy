@@ -454,7 +454,8 @@ namespace HermesProxy.World.Client
                 for (uint i = 0; i < talentsCount; i++)
                 {
                     byte talent = packet.ReadUInt8();
-                    inspect.Talents.Add(talent);
+                    if (i < 25)
+                        inspect.Talents.Add(talent);
                 }
             }
 
