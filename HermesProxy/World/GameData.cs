@@ -27,7 +27,8 @@ namespace HermesProxy.World
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
         public static HashSet<uint> StackableAuras = new HashSet<uint>();
         public static HashSet<uint> MountAuras = new HashSet<uint>();
-        public static HashSet<uint> NextMeleeAndAutoRepeatSpells = new HashSet<uint>();
+        public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
+        public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
@@ -618,7 +619,7 @@ namespace HermesProxy.World
                     string[] fields = csvParser.ReadFields();
 
                     uint spellId = UInt32.Parse(fields[0]);
-                    NextMeleeAndAutoRepeatSpells.Add(spellId);
+                    NextMeleeSpells.Add(spellId);
                 }
             }
         }
@@ -641,7 +642,7 @@ namespace HermesProxy.World
                     string[] fields = csvParser.ReadFields();
 
                     uint spellId = UInt32.Parse(fields[0]);
-                    NextMeleeAndAutoRepeatSpells.Add(spellId);
+                    AutoRepeatSpells.Add(spellId);
                 }
             }
         }

@@ -587,6 +587,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CANCEL_AUTO_REPEAT)]
         void HandleCancelAutoRepeat(WorldPacket packet)
         {
+            if (GetSession().GameState.CurrentClientSpecialCast != null &&
+                GameData.AutoRepeatSpells.Contains(GetSession().GameState.CurrentClientSpecialCast.SpellId))
+            {
+                GetSession().GameState.CurrentClientSpecialCast = null;
+            }
+
             CancelAutoRepeat cancel = new CancelAutoRepeat();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 cancel.Guid = packet.ReadPackedGuid().To128(GetSession().GameState);

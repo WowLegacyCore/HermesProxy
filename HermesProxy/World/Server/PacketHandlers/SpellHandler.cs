@@ -104,7 +104,8 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAST_SPELL)]
         void HandleCastSpell(CastSpell cast)
         {
-            if (GameData.NextMeleeAndAutoRepeatSpells.Contains(cast.Cast.SpellID))
+            if (GameData.NextMeleeSpells.Contains(cast.Cast.SpellID) ||
+                GameData.AutoRepeatSpells.Contains(cast.Cast.SpellID))
             {
                 ClientCastRequest castRequest = new ClientCastRequest();
                 castRequest.Timestamp = Time.UnixTime;
