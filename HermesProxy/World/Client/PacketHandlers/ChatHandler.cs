@@ -454,5 +454,14 @@ namespace HermesProxy.World.Client
             message.MessageText = packet.ReadCString();
             SendPacketToClient(message);
         }
+
+        [PacketHandler(Opcode.SMSG_CHAT_SERVER_MESSAGE)]
+        void HandleChatServerMessage(WorldPacket packet)
+        {
+            ChatServerMessage message = new ChatServerMessage();
+            message.MessageID = packet.ReadInt32();
+            message.StringParam = packet.ReadCString();
+            SendPacketToClient(message);
+        }
     }
 }
