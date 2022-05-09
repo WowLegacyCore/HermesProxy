@@ -329,7 +329,6 @@ namespace HermesProxy.World.Client
                 toast.Quantity = 1;
                 toast.Type = 0;
                 toast.ItemReward.ItemID = itemId;
-                toast.ItemQuantity = itemCount;
             }
             else
             {
@@ -372,38 +371,25 @@ namespace HermesProxy.World.Client
             uint itemId = packet.ReadUInt32();
             uint count = packet.ReadUInt32();
 
-            string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
-            {
-                WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
-                query.WriteUInt32(itemId);
-                query.WriteGuid(WowGuid64.Empty);
-                SendPacket(query);
-                return;
-            }
-
             QuestObjective objective = GameData.GetQuestObjectiveForItem(itemId);
             if (objective == null)
-                return;
-
-            short? currentCount = null;
-            var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
-            int questsCount = LegacyVersion.GetQuestLogSize();
-            for (int i = 0; i < questsCount; i++)
             {
-                QuestLog logEntry = ReadQuestLogEntry(i, null, updateFields);
-                if (logEntry == null)
-                    continue;
-                if (logEntry.QuestID != objective.QuestID)
-                    continue;
-                currentCount = logEntry.ObjectiveProgress[objective.StorageIndex];
-            }
-            if (currentCount == null)
-                return;
+                var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
+                int questsCount = LegacyVersion.GetQuestLogSize();
+                for (int i = 0; i < questsCount; i++)
+                {
+                    QuestLog logEntry = ReadQuestLogEntry(i, null, updateFields);
+                    if (logEntry == null || logEntry.QuestID == null)
+                        continue;
 
-            PrintNotification notify = new PrintNotification();
-            notify.NotifyText = "|cffffd000" + name + ": " + (count + currentCount) + "/" + objective.Amount;
-            SendPacketToClient(notify);
+                    if (GameData.GetQuestTemplate((uint)logEntry.QuestID) == null)
+                    {
+                        WorldPacket packet2 = new WorldPacket(Opcode.CMSG_QUERY_QUEST_INFO);
+                        packet2.WriteUInt32((uint)logEntry.QuestID);
+                        SendPacketToServer(packet2);
+                    }
+                }
+            }
         }
 
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_ADD_KILL)]
@@ -415,20 +401,13 @@ namespace HermesProxy.World.Client
             uint required = packet.ReadUInt32();
             WowGuid64 guid = packet.ReadGuid();
 
-            CreatureTemplate template = GameData.GetCreatureTemplate(creatureId);
-            if (template != null)
-            {
-                PrintNotification notify = new PrintNotification();
-                notify.NotifyText = "|cffffd000" + template.Name[0] + " slain: " + count + "/" + required;
-                SendPacketToClient(notify);
-            }
-            else
-            {
-                WorldPacket query = new WorldPacket(Opcode.CMSG_QUERY_CREATURE);
-                query.WriteUInt32(creatureId);
-                query.WriteGuid(guid);
-                SendPacket(query);
-            }
+            QuestUpdateAddCredit credit = new QuestUpdateAddCredit();
+            credit.QuestID = questId;
+            credit.ObjectID = (int)creatureId;
+            credit.Count = (ushort)count;
+            credit.Required = (ushort)required;
+            credit.ObjectiveType = QuestObjectiveType.Monster;
+            SendPacketToClient(credit);
         }
 
         [PacketHandler(Opcode.SMSG_QUEST_CONFIRM_ACCEPT)]

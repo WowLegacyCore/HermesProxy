@@ -88,7 +88,8 @@ namespace HermesProxy.World.Client
                 weather.Intensity = packet.ReadFloat();
                 weather.WeatherID = Weather.ConvertWeatherTypeToWeatherState(type, weather.Intensity);
                 packet.ReadUInt32(); // sound
-                weather.Abrupt = packet.ReadBool();
+                if (packet.CanRead())
+                    weather.Abrupt = packet.ReadBool();
             }
             else
             {

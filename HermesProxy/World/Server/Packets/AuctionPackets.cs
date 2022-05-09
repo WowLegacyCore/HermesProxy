@@ -497,6 +497,5 @@ namespace HermesProxy.World.Server.Packets
         public ulong MinIncrement;                          //< the sum of outbid is (1% of current bid) * 5, if the bid is too small, then this value is 1 copper.
         public ulong Money;                                 //< the amount of money that the player bid in copper
         public uint DesiredDelay;
-
     }
 }

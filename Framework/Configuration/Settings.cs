@@ -15,7 +15,7 @@ namespace Framework
         public static readonly string ServerAddress = Conf.GetString("ServerAddress", "127.0.0.1");
         public static readonly int ServerPort = Conf.GetInt("ServerPort", 3724);
         public static readonly string ReportedOS = Conf.GetString("ReportedOS", "OSX");
-        public static readonly string ReportedPlatfom = Conf.GetString("ReportedPlatfom", "PPC");
+        public static readonly string ReportedPlatform = Conf.GetString("ReportedPlatform", "PPC");
         public static readonly string ExternalAddress = Conf.GetString("ExternalAddress", "127.0.0.1");
         public static readonly int RestPort = Conf.GetInt("RestPort", 8081);
         public static readonly int BNetPort = Conf.GetInt("BNetPort", 1119);

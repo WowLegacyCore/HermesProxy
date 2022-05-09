@@ -188,7 +188,7 @@ namespace HermesProxy.Auth
             buffer.WriteUInt8(LegacyVersion.GetMajorPatchVersion());
             buffer.WriteUInt8(LegacyVersion.GetMinorPatchVersion());
             buffer.WriteUInt16((ushort)Settings.ServerBuild);
-            buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedPlatfom.Reverse()));
+            buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedPlatform.Reverse()));
             buffer.WriteUInt8(0);
             buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedOS.Reverse()));
             buffer.WriteUInt8(0);

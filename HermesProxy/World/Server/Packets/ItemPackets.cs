@@ -155,7 +155,7 @@ namespace HermesProxy.World.Server.Packets
         public uint BattlePetBreedQuality;
         public int BattlePetLevel;
         public WowGuid128 ItemGUID;
-        public bool Pushed = true;
+        public bool Pushed;
         public DisplayType DisplayText;
         public bool Created;
         public bool IsBonusRoll;
@@ -164,8 +164,9 @@ namespace HermesProxy.World.Server.Packets
         public enum DisplayType
         {
             Hidden = 0,
-            Normal = 1,
-            EncounterLoot = 2
+            Received = 1,
+            EncounterLoot = 2,
+            Loot = 3,
         }
     }
 
