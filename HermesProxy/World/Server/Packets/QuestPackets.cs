@@ -712,7 +712,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt8((byte)ObjectiveType);
         }
 
-        public WowGuid128 VictimGUID = WowGuid128.Empty;
+        public WowGuid128 VictimGUID;
         public int ObjectID;
         public uint QuestID;
         public ushort Count;

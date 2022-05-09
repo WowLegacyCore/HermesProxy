@@ -189,7 +189,7 @@ namespace HermesProxy.World.Client
                 reqId[i] = packet.ReadEntry();
                 bool isGo = reqId[i].Value;
 
-                int creatureOrGoId = reqId[i].Key * (isGo ? -1 : 1); ;
+                int creatureOrGoId = reqId[i].Key;
                 int creatureOrGoAmount = packet.ReadInt32();
 
                 if (creatureOrGoId != 0 && creatureOrGoAmount != 0)
@@ -239,6 +239,13 @@ namespace HermesProxy.World.Client
                     objective.Amount = requiredItemCount[i];
                     quest.Objectives.Add(objective);
                 }
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                string objectiveText = packet.ReadCString();
+                if (quest.Objectives.Count > i)
+                    quest.Objectives[i].Description = objectiveText;
             }
 
             // Placeholders

@@ -395,18 +395,14 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_ADD_KILL)]
         void HandleQuestUpdateAddKill(WorldPacket packet)
         {
-            uint questId = packet.ReadUInt32();
-            uint creatureId = packet.ReadUInt32();
-            uint count = packet.ReadUInt32();
-            uint required = packet.ReadUInt32();
-            WowGuid64 guid = packet.ReadGuid();
-
             QuestUpdateAddCredit credit = new QuestUpdateAddCredit();
-            credit.QuestID = questId;
-            credit.ObjectID = (int)creatureId;
-            credit.Count = (ushort)count;
-            credit.Required = (ushort)required;
-            credit.ObjectiveType = QuestObjectiveType.Monster;
+            credit.QuestID = packet.ReadUInt32();
+            var entry = packet.ReadEntry();
+            credit.ObjectID = entry.Key;
+            credit.ObjectiveType = entry.Value ? QuestObjectiveType.GameObject : QuestObjectiveType.Monster;
+            credit.Count = (ushort)packet.ReadUInt32();
+            credit.Required = (ushort)packet.ReadUInt32();
+            credit.VictimGUID = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(credit);
         }
 
