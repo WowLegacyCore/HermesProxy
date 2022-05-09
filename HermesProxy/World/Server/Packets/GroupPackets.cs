@@ -155,7 +155,7 @@ namespace HermesProxy.World.Server.Packets
         public uint? RolesDesired;
     }
 
-    class PartyUpdate : ServerPacket
+    public class PartyUpdate : ServerPacket
     {
         public PartyUpdate() : base(Opcode.SMSG_PARTY_UPDATE) { }
 
@@ -235,7 +235,7 @@ namespace HermesProxy.World.Server.Packets
         public bool VoiceChatSilenced;
     }
 
-    class PartyLFGInfo
+    public class PartyLFGInfo
     {
         public void Write(WorldPacket data)
         {
@@ -264,7 +264,7 @@ namespace HermesProxy.World.Server.Packets
         public bool MyFirstReward;
     }
 
-    class PartyLootSettings
+    public class PartyLootSettings
     {
         public void Write(WorldPacket data)
         {
@@ -278,7 +278,7 @@ namespace HermesProxy.World.Server.Packets
         public byte Threshold;
     }
 
-    class PartyDifficultySettings
+    public class PartyDifficultySettings
     {
         public void Write(WorldPacket data)
         {

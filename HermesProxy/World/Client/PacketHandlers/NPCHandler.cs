@@ -32,7 +32,7 @@ namespace HermesProxy.World.Client
                 ClientGossipOption option = new ClientGossipOption();
                 option.OptionIndex = packet.ReadInt32();
                 option.OptionIcon = packet.ReadUInt8();
-                bool hasBox = packet.ReadBool();
+                option.OptionFlags = (byte)(packet.ReadBool() ? 1 : 0); // Code Box
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     option.OptionCost = packet.ReadInt32();

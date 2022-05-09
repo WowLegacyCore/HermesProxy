@@ -698,6 +698,43 @@ namespace HermesProxy.World.Server.Packets
 
         public uint QuestID;
     }
+    public class QuestUpdateAddCredit : ServerPacket
+    {
+        public QuestUpdateAddCredit() : base(Opcode.SMSG_QUEST_UPDATE_ADD_CREDIT, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(VictimGUID);
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(ObjectID);
+            _worldPacket.WriteUInt16(Count);
+            _worldPacket.WriteUInt16(Required);
+            _worldPacket.WriteUInt8((byte)ObjectiveType);
+        }
+
+        public WowGuid128 VictimGUID;
+        public int ObjectID;
+        public uint QuestID;
+        public ushort Count;
+        public ushort Required;
+        public QuestObjectiveType ObjectiveType;
+    }
+
+    class QuestUpdateAddCreditSimple : ServerPacket
+    {
+        public QuestUpdateAddCreditSimple() : base(Opcode.SMSG_QUEST_UPDATE_ADD_CREDIT_SIMPLE, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteInt32(ObjectID);
+            _worldPacket.WriteUInt8((byte)ObjectiveType);
+        }
+
+        public uint QuestID;
+        public int ObjectID;
+        public QuestObjectiveType ObjectiveType;
+    }
 
     class QuestConfirmAccept : ServerPacket
     {

@@ -33,30 +33,58 @@ namespace HermesProxy.World.Client
         {
             ItemPushResult item = new ItemPushResult();
             item.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
-            if (packet.ReadUInt32() == 1)
-                item.DisplayText = ItemPushResult.DisplayType.Normal;
-            else
-                item.DisplayText = ItemPushResult.DisplayType.EncounterLoot;
+            bool fromNPC = packet.ReadUInt32() == 1;
             item.Created = packet.ReadUInt32() == 1;
-            if (packet.ReadUInt32() == 0)
+            bool showInChat = packet.ReadUInt32() == 1;
+            
+            if (fromNPC && !item.Created)
+            {
+                item.DisplayText = ItemPushResult.DisplayType.Received;
+                item.Pushed = true;
+            }
+            else if (!showInChat)
                 item.DisplayText = ItemPushResult.DisplayType.Hidden;
+            else
+                item.DisplayText = ItemPushResult.DisplayType.Loot;
+
             item.Slot = packet.ReadUInt8();
             item.SlotInBag = packet.ReadInt32();
             item.Item.ItemID = packet.ReadUInt32();
             item.Item.RandomPropertiesSeed = packet.ReadUInt32();
             item.Item.RandomPropertiesID = packet.ReadUInt32();
             item.Quantity = packet.ReadUInt32();
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 item.QuantityInInventory = packet.ReadUInt32();
             else
-                item.QuantityInInventory = item.Quantity;
+            {
+                uint currentCount = 0;
+                QuestObjective objective = GameData.GetQuestObjectiveForItem(item.Item.ItemID);
+                if (objective != null)
+                {
+                    var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
+                    int questsCount = LegacyVersion.GetQuestLogSize();
+                    for (int i = 0; i < questsCount; i++)
+                    {
+                        QuestLog logEntry = ReadQuestLogEntry(i, null, updateFields);
+                        if (logEntry == null)
+                            continue;
+                        if (logEntry.QuestID != objective.QuestID)
+                            continue;
+
+                        currentCount = (uint)logEntry.ObjectiveProgress[objective.StorageIndex];
+                        break;
+                    }
+                }
+                item.QuantityInInventory = item.Quantity + currentCount;
+            }
 
             if (item.Slot == Enums.Classic.InventorySlots.Bag0 && item.SlotInBag >= 0 &&
                 item.PlayerGUID == GetSession().GameState.CurrentPlayerGuid)
                 item.ItemGUID = GetSession().GameState.GetInventorySlotItem(item.SlotInBag).To128(GetSession().GameState);
             else
                 item.ItemGUID = WowGuid128.Empty;
-
+            
             SendPacketToClient(item);
         }
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_OK)]

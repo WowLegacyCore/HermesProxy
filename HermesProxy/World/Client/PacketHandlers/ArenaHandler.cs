@@ -65,12 +65,14 @@ namespace HermesProxy.World.Client
             for (var i = 0; i < count; i++)
             {
                 ArenaTeamMember member = new ArenaTeamMember();
+                PlayerCache cache = new PlayerCache();
                 member.MemberGUID = packet.ReadGuid().To128(GetSession().GameState);
                 member.Online = packet.ReadBool();
-                member.Name = packet.ReadCString();
+                member.Name = cache.Name = packet.ReadCString();
                 member.Captain = packet.ReadInt32();
-                member.Level = packet.ReadUInt8();
-                member.ClassId = (Class)packet.ReadUInt8();
+                member.Level = cache.Level = packet.ReadUInt8();
+                member.ClassId = cache.ClassId = (Class)packet.ReadUInt8();
+                GetSession().GameState.UpdatePlayerCache(member.MemberGUID, cache);
                 member.WeekGamesPlayed = packet.ReadUInt32();
                 member.WeekGamesWon = packet.ReadUInt32();
                 member.SeasonGamesPlayed = packet.ReadUInt32();
@@ -97,6 +99,60 @@ namespace HermesProxy.World.Client
                 arena.PlayerRating = team.Rank;
             }
 
+            SendPacketToClient(arena);
+        }
+
+        [PacketHandler(Opcode.SMSG_ARENA_TEAM_EVENT)]
+        void HandleArenaTeamEvent(WorldPacket packet)
+        {
+            ArenaTeamEvent arena = new ArenaTeamEvent();
+            var eventType = (ArenaTeamEventLegacy)packet.ReadUInt8();
+            arena.Event = (ArenaTeamEventModern)Enum.Parse(typeof(ArenaTeamEventModern), eventType.ToString());
+            byte count = packet.ReadUInt8();
+            for (byte i = 0; i < count; i++)
+            {
+                string str = packet.ReadCString();
+                switch (i)
+                {
+                    case 0:
+                        arena.Param1 = str;
+                        break;
+                    case 1:
+                        arena.Param2 = str;
+                        break;
+                    case 2:
+                        arena.Param3 = str;
+                        break;
+                }
+            }
+            if (packet.CanRead())
+                packet.ReadGuid();
+            SendPacketToClient(arena);
+        }
+
+        [PacketHandler(Opcode.SMSG_ARENA_TEAM_COMMAND_RESULT)]
+        void HandleArenaTeamCommandResult(WorldPacket packet)
+        {
+            ArenaTeamCommandResult arena = new ArenaTeamCommandResult();
+            arena.Action = (ArenaTeamCommandType)packet.ReadUInt32();
+            arena.TeamName = packet.ReadCString();
+            arena.PlayerName = packet.ReadCString();
+            var errorType = (ArenaTeamCommandErrorLegacy)packet.ReadUInt32();
+            arena.Error = (ArenaTeamCommandErrorModern)Enum.Parse(typeof(ArenaTeamCommandErrorModern), errorType.ToString());
+            SendPacketToClient(arena);
+        }
+
+        [PacketHandler(Opcode.SMSG_ARENA_TEAM_INVITE)]
+        void HandleArenaTeamInvite(WorldPacket packet)
+        {
+            ArenaTeamInvite arena = new ArenaTeamInvite();
+            arena.PlayerName = packet.ReadCString();
+            arena.TeamName = packet.ReadCString();
+            arena.PlayerGuid = GetSession().GameState.GetPlayerGuidByName(arena.PlayerName);
+            if (arena.PlayerGuid == null)
+                arena.PlayerGuid = WowGuid128.Empty;
+            arena.PlayerVirtualAddress = GetSession().RealmId.GetAddress();
+            arena.TeamGuid = WowGuid128.Create(HighGuidType703.ArenaTeam, 1);
             SendPacketToClient(arena);
         }
     }

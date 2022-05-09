@@ -321,7 +321,10 @@ namespace HermesProxy.World.Server
 
         private void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
         {
-            GetSession().WorldClient.SendPacketToServer(packet, delayUntilOpcode);
+            if (GetSession().WorldClient != null)
+                GetSession().WorldClient.SendPacketToServer(packet, delayUntilOpcode);
+            else
+                Log.Print(LogType.Error, $"Attempt to send opcode {packet.GetUniversalOpcode(false)} ({packet.GetOpcode()}) while WorldClient is disconnected!");
         }
 
         public PacketHandler GetHandler(Opcode opcode)
@@ -371,6 +374,7 @@ namespace HermesProxy.World.Server
 
                 packetSize = (int)(compressedSize + 12);
                 opcode = (ushort)Opcodes.GetOpcodeValueForVersion(Opcode.SMSG_COMPRESSED_PACKET, Framework.Settings.ClientBuild);
+                System.Diagnostics.Trace.Assert(opcode != 0);
 
                 data = buffer.GetData();
             }
@@ -733,7 +737,7 @@ namespace HermesProxy.World.Server
             if (code == BattlenetRpcErrorCode.Ok)
             {
                 response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.ActiveExpansionLevel = (byte)0;
+                response.SuccessInfo.ActiveExpansionLevel = (byte)(LegacyVersion.GetExpansionVersion() - 1);
                 response.SuccessInfo.AccountExpansionLevel = (byte)0;
                 response.SuccessInfo.VirtualRealmAddress = _realmId.GetAddress();
                 response.SuccessInfo.Time = (uint)Time.UnixTime;

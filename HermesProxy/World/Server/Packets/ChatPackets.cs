@@ -504,6 +504,22 @@ namespace HermesProxy.World.Server.Packets
         public string MessageText = "";
     }
 
+    class ChatServerMessage : ServerPacket
+    {
+        public ChatServerMessage() : base(Opcode.SMSG_CHAT_SERVER_MESSAGE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(MessageID);
+
+            _worldPacket.WriteBits(StringParam.GetByteCount(), 11);
+            _worldPacket.WriteString(StringParam);
+        }
+
+        public int MessageID;
+        public string StringParam = "";
+    }
+
     class ChatRegisterAddonPrefixes : ClientPacket
     {
         public ChatRegisterAddonPrefixes(WorldPacket packet) : base(packet) { }

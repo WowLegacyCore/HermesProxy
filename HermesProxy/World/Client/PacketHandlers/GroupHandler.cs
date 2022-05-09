@@ -69,8 +69,12 @@ namespace HermesProxy.World.Client
             party.SequenceNum = GetSession().GameState.GroupUpdateCounter++;
             bool isRaid = packet.ReadBool();
             byte ownSubGroupAndFlags = packet.ReadUInt8();
+            party.PartyIndex = (byte)(isRaid && GetSession().GameState.IsInBattleground() ? 1 : 0);
+            party.PartyGUID = WowGuid128.Create(HighGuidType703.Party, (ulong)(1000 + party.PartyIndex));
+            if (party.PartyIndex != 0)
+                party.PartyFlags |= GroupFlags.FakeRaid;
 
-            GetSession().GameState.CurrentGroupMembers = new List<WowGuid128>();
+            var uniqueMembers = new HashSet<WowGuid128>();
             uint membersCount = packet.ReadUInt32();
             if (membersCount > 0)
             {
@@ -85,16 +89,10 @@ namespace HermesProxy.World.Client
                 else
                     party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
 
-                if (GetSession().GameState.IsInBattleground())
-                {
-                    party.PartyFlags |= GroupFlags.FakeRaid;
-                    party.PartyIndex = 1;
+                if (party.PartyIndex != 0)
                     party.PartyType = GroupType.PvP;
-                }
                 else
                     party.PartyType = GroupType.Normal;
-
-                party.PartyGUID = GetSession().GameState.CurrentGroupGuid = WowGuid128.Create(HighGuidType703.Party, 1000);
 
                 PartyPlayerInfo player = new PartyPlayerInfo();
                 player.GUID = GetSession().GameState.CurrentPlayerGuid;
@@ -117,28 +115,33 @@ namespace HermesProxy.World.Client
                     member.ClassId = GetSession().GameState.GetUnitClass(member.GUID);
                     if (!member.Flags.HasAnyFlag(GroupMemberFlags.Assistant))
                         allAssist = false;
-                    party.PlayerList.Add(member);
-                    GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+
+                    if (!uniqueMembers.Contains(member.GUID))
+                    {
+                        party.PlayerList.Add(member);
+                        uniqueMembers.Add(member.GUID);
+                    }
                 }
 
                 if (allAssist)
                     party.PartyFlags |= GroupFlags.EveryoneAssistant;
 
-                party.LeaderGUID = GetSession().GameState.CurrentGroupLeader = packet.ReadGuid().To128(GetSession().GameState);
+                party.LeaderGUID = packet.ReadGuid().To128(GetSession().GameState);
 
                 party.LootSettings = new PartyLootSettings();
-                party.LootSettings.Method = GetSession().GameState.CurrentGroupLootMethod = (LootMethod)packet.ReadUInt8();
+                party.LootSettings.Method = (LootMethod)packet.ReadUInt8();
                 party.LootSettings.LootMaster = packet.ReadGuid().To128(GetSession().GameState);
                 party.LootSettings.Threshold = packet.ReadUInt8();
+                GetSession().GameState.CurrentGroups[party.PartyIndex] = party;
             }
             else
             {
-                GetSession().GameState.CurrentGroupLeader = null;
-                GetSession().GameState.CurrentGroupLootMethod = LootMethod.FreeForAll;
-                party.PartyFlags = GroupFlags.Destroyed;
-                party.PartyGUID = GetSession().GameState.CurrentGroupGuid = WowGuid128.Empty;
+                party.PartyFlags |= GroupFlags.Destroyed;
+                if (party.PartyIndex == 0)
+                    party.PartyGUID = WowGuid128.Empty;
                 party.LeaderGUID = WowGuid128.Empty;
                 party.MyIndex = -1;
+                GetSession().GameState.CurrentGroups[party.PartyIndex] = null;
             }
 
             SendPacketToClient(party);
@@ -153,21 +156,20 @@ namespace HermesProxy.World.Client
             bool isBattleground = packet.ReadBool();
             byte ownSubGroup = packet.ReadUInt8();
             byte ownGroupFlags = packet.ReadUInt8();
-            party.PartyGUID = GetSession().GameState.CurrentGroupGuid = packet.ReadGuid().To128(GetSession().GameState);
+            party.PartyIndex = (byte)(isBattleground ? 1 : 0);
+            party.PartyGUID = packet.ReadGuid().To128(GetSession().GameState);
+            if (party.PartyIndex != 0)
+                party.PartyFlags |= GroupFlags.FakeRaid;
 
-            GetSession().GameState.CurrentGroupMembers = new List<WowGuid128>();
+            var uniqueMembers = new HashSet<WowGuid128>();
             uint membersCount = packet.ReadUInt32();
             if (membersCount > 0)
             {
                 if (isRaid)
                     party.PartyFlags |= GroupFlags.Raid;
 
-                if (isBattleground)
-                {
-                    party.PartyFlags |= GroupFlags.FakeRaid;
-                    party.PartyIndex = 1;
+                if (party.PartyIndex != 0)
                     party.PartyType = GroupType.PvP;
-                }
                 else
                     party.PartyType = GroupType.Normal;
 
@@ -191,17 +193,21 @@ namespace HermesProxy.World.Client
                     member.ClassId = GetSession().GameState.GetUnitClass(member.GUID);
                     if (!member.Flags.HasAnyFlag(GroupMemberFlags.Assistant))
                         allAssist = false;
-                    party.PlayerList.Add(member);
-                    GetSession().GameState.CurrentGroupMembers.Add(member.GUID);
+
+                    if (!uniqueMembers.Contains(member.GUID))
+                    {
+                        party.PlayerList.Add(member);
+                        uniqueMembers.Add(member.GUID);
+                    }
                 }
 
                 if (allAssist)
                     party.PartyFlags |= GroupFlags.EveryoneAssistant;
 
-                party.LeaderGUID = GetSession().GameState.CurrentGroupLeader = packet.ReadGuid().To128(GetSession().GameState);
+                party.LeaderGUID = packet.ReadGuid().To128(GetSession().GameState);
 
                 party.LootSettings = new PartyLootSettings();
-                party.LootSettings.Method = GetSession().GameState.CurrentGroupLootMethod = (LootMethod)packet.ReadUInt8();
+                party.LootSettings.Method = (LootMethod)packet.ReadUInt8();
                 party.LootSettings.LootMaster = packet.ReadGuid().To128(GetSession().GameState);
                 party.LootSettings.Threshold = packet.ReadUInt8();
 
@@ -212,15 +218,17 @@ namespace HermesProxy.World.Client
                     party.DifficultySettings.RaidDifficultyID = Difficulty.Raid25N;
                 else
                     party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
+
+                GetSession().GameState.CurrentGroups[party.PartyIndex] = party;
             }
             else
             {
-                GetSession().GameState.CurrentGroupLeader = null;
-                GetSession().GameState.CurrentGroupLootMethod = LootMethod.FreeForAll;
-                party.PartyFlags = GroupFlags.Destroyed;
-                party.PartyGUID = GetSession().GameState.CurrentGroupGuid = WowGuid128.Empty;
+                party.PartyFlags |= GroupFlags.Destroyed;
+                if (party.PartyIndex  == 0)
+                    party.PartyGUID = WowGuid128.Empty;
                 party.LeaderGUID = WowGuid128.Empty;
                 party.MyIndex = -1;
+                GetSession().GameState.CurrentGroups[party.PartyIndex] = null;
             }
 
             SendPacketToClient(party);
@@ -248,9 +256,9 @@ namespace HermesProxy.World.Client
             if (!packet.CanRead())
             {
                 ReadyCheckStarted ready = new ReadyCheckStarted();
-                ready.InitiatorGUID = GetSession().GameState.CurrentGroupLeader;
+                ready.InitiatorGUID = GetSession().GameState.GetCurrentGroupLeader();
                 ready.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
-                ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+                ready.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
                 SendPacketToClient(ready);
             }
             else
@@ -258,16 +266,16 @@ namespace HermesProxy.World.Client
                 ReadyCheckResponse ready = new ReadyCheckResponse();
                 ready.Player = packet.ReadGuid().To128(GetSession().GameState);
                 ready.IsReady = packet.ReadBool();
-                ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+                ready.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
                 SendPacketToClient(ready);
 
                 GetSession().GameState.GroupReadyCheckResponses++;
-                if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.CurrentGroupMembers.Count)
+                if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.GetCurrentGroupSize())
                 {
                     GetSession().GameState.GroupReadyCheckResponses = 0;
                     ReadyCheckCompleted completed = new ReadyCheckCompleted();
                     completed.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
-                    completed.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+                    completed.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
                     SendPacketToClient(completed);
                 }
             }
@@ -279,7 +287,7 @@ namespace HermesProxy.World.Client
             ReadyCheckStarted ready = new ReadyCheckStarted();
             ready.InitiatorGUID = packet.ReadGuid().To128(GetSession().GameState);
             ready.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
-            ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+            ready.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
             SendPacketToClient(ready);
         }
 
@@ -289,16 +297,16 @@ namespace HermesProxy.World.Client
             ReadyCheckResponse ready = new ReadyCheckResponse();
             ready.Player = packet.ReadGuid().To128(GetSession().GameState);
             ready.IsReady = packet.ReadBool();
-            ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+            ready.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
             SendPacketToClient(ready);
 
             GetSession().GameState.GroupReadyCheckResponses++;
-            if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.CurrentGroupMembers.Count)
+            if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.GetCurrentGroupSize())
             {
                 GetSession().GameState.GroupReadyCheckResponses = 0;
                 ReadyCheckCompleted completed = new ReadyCheckCompleted();
                 completed.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
-                completed.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+                completed.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
                 SendPacketToClient(completed);
             }
         }
@@ -308,7 +316,7 @@ namespace HermesProxy.World.Client
         {
             ReadyCheckCompleted ready = new ReadyCheckCompleted();
             ready.PartyIndex = GetSession().GameState.GetCurrentPartyIndex();
-            ready.PartyGUID = GetSession().GameState.CurrentGroupGuid;
+            ready.PartyGUID = GetSession().GameState.GetCurrentGroupGuid();
             SendPacketToClient(ready);
         }
 

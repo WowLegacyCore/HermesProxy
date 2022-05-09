@@ -355,6 +355,53 @@ namespace HermesProxy.World.Server.Packets
         public uint? InstanceGroupSize;
     }
 
+    public class SetAllTaskProgress : ServerPacket
+    {
+        public SetAllTaskProgress() : base(Opcode.SMSG_SET_ALL_TASK_PROGRESS, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Tasks.Count);
+            foreach (var task in Tasks)
+                task.Write(_worldPacket);
+        }
+
+        public List<TaskProgress> Tasks = new List<TaskProgress>();
+    }
+
+    public class TaskProgress
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TaskID);
+            data.WriteUInt32(FailureTime);
+            data.WriteUInt32(Flags);
+            data.WriteUInt32(Unk);
+            data.WriteInt32(Progress.Count);
+            foreach (ushort progress in Progress)
+                data.WriteUInt16(progress);
+        }
+        public uint TaskID;
+        public uint FailureTime;
+        public uint Flags;
+        public uint Unk;
+        public List<ushort> Progress = new List<ushort>();
+    }
+
+    public class InitialSetup : ServerPacket
+    {
+        public InitialSetup() : base(Opcode.SMSG_INITIAL_SETUP, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(ServerExpansionLevel);
+            _worldPacket.WriteUInt8(ServerExpansionTier);
+        }
+
+        public byte ServerExpansionLevel;
+        public byte ServerExpansionTier;
+    }
+
     public class RepopRequest : ClientPacket
     {
         public RepopRequest(WorldPacket packet) : base(packet) { }
@@ -401,6 +448,20 @@ namespace HermesProxy.World.Server.Packets
         public int ActualMapID;
         public int MapID;
         public bool Valid;
+    }
+
+    public class DeathReleaseLoc : ServerPacket
+    {
+        public DeathReleaseLoc() : base(Opcode.SMSG_DEATH_RELEASE_LOC) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteVector3(Location);
+        }
+
+        public int MapID;
+        public Vector3 Location;
     }
 
     public class ReclaimCorpse : ClientPacket

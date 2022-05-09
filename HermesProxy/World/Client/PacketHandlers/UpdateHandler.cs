@@ -181,35 +181,41 @@ namespace HermesProxy.World.Client
             // resend spell mods on player create
             if (activePlayerUpdateIndex >= 0)
             {
-                foreach (var modItr in GetSession().GameState.FlatSpellMods)
+                if (GetSession().GameState.FlatSpellMods.Count > 0)
                 {
-                    foreach (var dataItr in modItr.Value)
+                    SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
+                    foreach (var modItr in GetSession().GameState.FlatSpellMods)
                     {
-                        SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
                         SpellModifierInfo mod = new SpellModifierInfo();
-                        SpellModifierData data = new SpellModifierData();
-                        data.ClassIndex = dataItr.Key;
                         mod.ModIndex = modItr.Key;
-                        data.ModifierValue = dataItr.Value;
-                        mod.ModifierData.Add(data);
+                        foreach (var dataItr in modItr.Value)
+                        {
+                            SpellModifierData data = new SpellModifierData();
+                            data.ClassIndex = dataItr.Key;
+                            data.ModifierValue = dataItr.Value;
+                            mod.ModifierData.Add(data);
+                        }
                         spell.Modifiers.Add(mod);
-                        SendPacketToClient(spell);
                     }
+                    SendPacketToClient(spell);
                 }
-                foreach (var modItr in GetSession().GameState.PctSpellMods)
+                if (GetSession().GameState.PctSpellMods.Count > 0)
                 {
-                    foreach (var dataItr in modItr.Value)
+                    SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
+                    foreach (var modItr in GetSession().GameState.PctSpellMods)
                     {
-                        SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
                         SpellModifierInfo mod = new SpellModifierInfo();
-                        SpellModifierData data = new SpellModifierData();
-                        data.ClassIndex = dataItr.Key;
                         mod.ModIndex = modItr.Key;
-                        data.ModifierValue = dataItr.Value;
-                        mod.ModifierData.Add(data);
+                        foreach (var dataItr in modItr.Value)
+                        {
+                            SpellModifierData data = new SpellModifierData();
+                            data.ClassIndex = dataItr.Key;
+                            data.ModifierValue = dataItr.Value;
+                            mod.ModifierData.Add(data);
+                        }
                         spell.Modifiers.Add(mod);
-                        SendPacketToClient(spell);
                     }
+                    SendPacketToClient(spell);
                 }
             }
 
@@ -731,66 +737,19 @@ namespace HermesProxy.World.Client
                 moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
                 var moveFlags = moveInfo.Flags;
 
-                var speeds = 6;
-                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    speeds = 9;
-                else if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                    speeds = 8;
-
-                for (var i = 0; i < speeds; ++i)
+                moveInfo.WalkSpeed = packet.ReadFloat();
+                moveInfo.RunSpeed = packet.ReadFloat();
+                moveInfo.RunBackSpeed = packet.ReadFloat();
+                moveInfo.SwimSpeed = packet.ReadFloat();
+                moveInfo.SwimBackSpeed = packet.ReadFloat();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 {
-                    var speedType = (SpeedType)i;
-                    var speed = packet.ReadFloat();
-
-                    switch (speedType)
-                    {
-                        case SpeedType.Walk:
-                        {
-                            moveInfo.WalkSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Run:
-                        {
-                            moveInfo.RunSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.RunBack:
-                        {
-                            moveInfo.RunBackSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Swim:
-                        {
-                            moveInfo.SwimSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.SwimBack:
-                        {
-                            moveInfo.SwimBackSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Turn:
-                        {
-                            moveInfo.TurnRate = speed;
-                            break;
-                        }
-                        case SpeedType.Fly:
-                        {
-                            moveInfo.FlightSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.FlyBack:
-                        {
-                            moveInfo.FlightBackSpeed = speed;
-                            break;
-                        }
-                        case SpeedType.Pitch:
-                        {
-                            moveInfo.PitchRate = speed;
-                            break;
-                        }
-                    }
+                    moveInfo.FlightSpeed = packet.ReadFloat();
+                    moveInfo.FlightBackSpeed = packet.ReadFloat();
                 }
+                moveInfo.TurnRate = packet.ReadFloat();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    moveInfo.PitchRate = packet.ReadFloat();
 
                 if (moveFlags.HasAnyFlag(MovementFlagWotLK.SplineEnabled))
                 {
@@ -1878,15 +1837,23 @@ namespace HermesProxy.World.Client
                             AuraInfo aura = new AuraInfo();
                             aura.Slot = i;
                             aura.AuraData = ReadAuraSlot(i, guid, updates);
-                            if (aura.AuraData != null && guid == GetSession().GameState.CurrentPlayerGuid)
+                            if (aura.AuraData != null)
                             {
-                                int duration = GetSession().GameState.GetAuraDuration(i);
-                                if (duration > 0)
+                                int durationLeft;
+                                int durationFull;
+                                GetSession().GameState.GetAuraDuration(guid, i, out durationLeft, out durationFull);
+                                if (durationLeft > 0 && durationFull > 0)
                                 {
                                     aura.AuraData.Flags |= AuraFlagsModern.Duration;
-                                    aura.AuraData.Duration = duration;
-                                    aura.AuraData.Remaining = duration;
+                                    aura.AuraData.Duration = durationFull;
+                                    aura.AuraData.Remaining = durationLeft;
                                 }
+                                aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, i);
+                            }
+                            else if (updateMaskArray[UNIT_FIELD_AURA + i])
+                            {
+                                GetSession().GameState.ClearAuraDuration(guid, i);
+                                GetSession().GameState.ClearAuraCaster(guid, i);
                             }
                             if (aura.AuraData != null || updateMaskArray[UNIT_FIELD_AURA + i])
                                 auraUpdate.Auras.Add(aura);
@@ -2514,7 +2481,7 @@ namespace HermesProxy.World.Client
                 int PLAYER_FIELD_ARENA_TEAM_INFO_1_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_ARENA_TEAM_INFO_1_1);
                 if (PLAYER_FIELD_ARENA_TEAM_INFO_1_1 >= 0)
                 {
-                    //int teamIdOffset = 0;
+                    int teamIdOffset = 0;
                     //int teamMemberOffset = 1;
                     int teamGamesWeekOffset = 2;
                     int teamGamesSeasonOffset = 3;
@@ -2524,15 +2491,30 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 3; i++)
                     {
                         int startOffset = PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + i * sizePerEntry;
-                        /*
-                        if (updateMaskArray[startOffset + teamIdOffset])
+                        
+                        if (updateMaskArray[startOffset + teamIdOffset] &&
+                            guid == GetSession().GameState.CurrentPlayerGuid)
                         {
-                            if (updateData.ActivePlayerData.PvpInfo[i] == null)
-                                updateData.ActivePlayerData.PvpInfo[i] = new PVPInfo();
+                            uint teamId = GetSession().GameState.CurrentArenaTeamIds[i] = updates[startOffset + teamIdOffset].UInt32Value;
 
-                            updateData.ActivePlayerData.PvpInfo[i].TeamID = updates[startOffset + teamIdOffset].Int32Value;
+                            if (teamId != 0)
+                            {
+                                WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
+                                packet.WriteUInt32(teamId);
+                                SendPacketToServer(packet);
+
+                                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
+                                packet2.WriteUInt32(teamId);
+                                SendPacketToServer(packet2);
+                            }
+                            else
+                            {
+                                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
+                                response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex((uint)i);
+                                SendPacketToClient(response);
+                            }
                         }
-                        */
+                        
                         /*
                         if (updateMaskArray[startOffset + teamMemberOffset])
                         {

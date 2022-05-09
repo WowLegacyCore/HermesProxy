@@ -53,6 +53,15 @@ namespace HermesProxy.World.Client
             SendPacketToClient(bound);
         }
 
+        [PacketHandler(Opcode.SMSG_DEATH_RELEASE_LOC)]
+        void HandleDeathReleaseLoc(WorldPacket packet)
+        {
+            DeathReleaseLoc death = new();
+            death.MapID = packet.ReadInt32();
+            death.Location = packet.ReadVector3();
+            SendPacketToClient(death);
+        }
+
         [PacketHandler(Opcode.SMSG_CORPSE_RECLAIM_DELAY)]
         void HandleCorpseReclaimDelay(WorldPacket packet)
         {
@@ -79,7 +88,8 @@ namespace HermesProxy.World.Client
                 weather.Intensity = packet.ReadFloat();
                 weather.WeatherID = Weather.ConvertWeatherTypeToWeatherState(type, weather.Intensity);
                 packet.ReadUInt32(); // sound
-                weather.Abrupt = packet.ReadBool();
+                if (packet.CanRead())
+                    weather.Abrupt = packet.ReadBool();
             }
             else
             {

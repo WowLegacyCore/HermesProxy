@@ -15,7 +15,8 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ARENA_TEAM_ROSTER)]
         void HandleArenaTeamRoster(ArenaTeamRosterRequest arena)
         {
-            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180) ||
+                GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex] == 0)
             {
                 ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
                 response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamIndex);
@@ -24,11 +25,11 @@ namespace HermesProxy.World.Server
             else
             {
                 WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
-                packet.WriteUInt32(arena.TeamIndex + 1);
+                packet.WriteUInt32(GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex]);
                 SendPacketToServer(packet);
 
                 WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
-                packet2.WriteUInt32(arena.TeamIndex + 1);
+                packet2.WriteUInt32(GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex]);
                 SendPacketToServer(packet2);
             }
         }
@@ -52,6 +53,55 @@ namespace HermesProxy.World.Server
                 response.Emblem.TeamName = team.Name;
                 SendPacket(response);
             }
+        }
+
+        [PacketHandler(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA)]
+        void HandleBattlematerJoinArena(BattlemasterJoinArena join)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
+            packet.WriteGuid(join.Guid.To64());
+            packet.WriteUInt8(join.TeamIndex);
+            packet.WriteBool(true); // As Group
+            packet.WriteBool(true); // Is Rated
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_BATTLEMASTER_JOIN_SKIRMISH)]
+        void HandleBattlematerJoinSkirmish(BattlemasterJoinSkirmish join)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
+            packet.WriteGuid(join.Guid.To64());
+            packet.WriteUInt8(join.TeamSize);
+            packet.WriteBool(join.AsGroup);
+            packet.WriteBool(false); // Is Rated
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_REMOVE)]
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_LEADER)]
+        void HandleArenaUnimplemented(ArenaTeamRemove arena)
+        {
+            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            packet.WriteUInt32(arena.TeamId);
+            packet.WriteCString(GetSession().GameState.GetPlayerName(arena.PlayerGuid));
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_DISBAND)]
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_LEAVE)]
+        void HandleArenaTeamLeave(ArenaTeamLeave arena)
+        {
+            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            packet.WriteUInt32(arena.TeamId);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_ACCEPT)]
+        [PacketHandler(Opcode.CMSG_ARENA_TEAM_DECLINE)]
+        void HandleArenaTeamInviteResponse(ArenaTeamAccept arena)
+        {
+            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            SendPacketToServer(packet);
         }
     }
 }

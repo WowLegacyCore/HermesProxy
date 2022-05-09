@@ -18,6 +18,7 @@ namespace HermesProxy.World
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
+        public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new Dictionary<uint, Dictionary<uint, byte>>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
@@ -25,7 +26,9 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
         public static HashSet<uint> StackableAuras = new HashSet<uint>();
-        public static HashSet<uint> MeleeSpells = new HashSet<uint>();
+        public static HashSet<uint> MountAuras = new HashSet<uint>();
+        public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
+        public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
 
         // From Server
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
@@ -110,6 +113,31 @@ namespace HermesProxy.World
                 if (item.Value.DisplayId == displayId)
                     return item.Key;
             }
+            return 0;
+        }
+
+        private static void SaveItemEffectSlot(uint itemId, uint spellId, byte slot)
+        {
+            if (ItemEffects.ContainsKey(itemId))
+            {
+                if (ItemEffects[itemId].ContainsKey(spellId))
+                    ItemEffects[itemId][spellId] = slot;
+                else
+                    ItemEffects[itemId].Add(spellId, slot);
+            }
+            else
+            {
+                Dictionary<uint, byte> dict = new Dictionary<uint, byte>();
+                dict.Add(spellId, slot);
+                ItemEffects.Add(itemId, dict);
+            }
+        }
+
+        public static byte GetItemEffectSlot(uint itemId, uint spellId)
+        {
+            if (ItemEffects.ContainsKey(itemId) &&
+                ItemEffects[itemId].ContainsKey(spellId))
+                return ItemEffects[itemId][spellId];
             return 0;
         }
 
@@ -237,6 +265,7 @@ namespace HermesProxy.World
             LoadBroadcastTexts();
             LoadItemTemplates();
             LoadBattlegrounds();
+            LoadItemEffects();
             LoadSpellVisuals();
             LoadLearnSpells();
             LoadGems();
@@ -244,7 +273,9 @@ namespace HermesProxy.World
             LoadTransports();
             LoadDispellSpells();
             LoadStackableAuras();
+            LoadMountAuras();
             LoadMeleeSpells();
+            LoadAutoRepeatSpells();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
@@ -336,6 +367,31 @@ namespace HermesProxy.World
                     }
                     System.Diagnostics.Trace.Assert(bg.MapIds.Count != 0);
                     Battlegrounds.Add(bgId, bg);
+                }
+            }
+        }
+
+        public static void LoadItemEffects()
+        {
+            var path = Path.Combine("CSV", $"ItemEffects{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint itemId = UInt32.Parse(fields[0]);
+                    uint spellId = UInt32.Parse(fields[1]);
+                    byte slot = Byte.Parse(fields[2]);
+                    SaveItemEffectSlot(itemId, spellId, slot);
                 }
             }
         }
@@ -519,6 +575,32 @@ namespace HermesProxy.World
             }
         }
 
+        public static void LoadMountAuras()
+        {
+            if (LegacyVersion.GetExpansionVersion() > 1)
+                return;
+
+            var path = Path.Combine("CSV", $"MountAuras.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    MountAuras.Add(spellId);
+                }
+            }
+        }
+
         public static void LoadMeleeSpells()
         {
             var path = Path.Combine("CSV", $"MeleeSpells{ModernVersion.GetExpansionVersion()}.csv");
@@ -537,7 +619,30 @@ namespace HermesProxy.World
                     string[] fields = csvParser.ReadFields();
 
                     uint spellId = UInt32.Parse(fields[0]);
-                    MeleeSpells.Add(spellId);
+                    NextMeleeSpells.Add(spellId);
+                }
+            }
+        }
+
+        public static void LoadAutoRepeatSpells()
+        {
+            var path = Path.Combine("CSV", $"AutoRepeatSpells{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    AutoRepeatSpells.Add(spellId);
                 }
             }
         }

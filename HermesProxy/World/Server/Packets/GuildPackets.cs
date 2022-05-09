@@ -587,10 +587,16 @@ namespace HermesProxy.World.Server.Packets
         public override void Read()
         {
             uint nameLen = _worldPacket.ReadBits<uint>(9);
+            bool isArena = _worldPacket.HasBit();
+
             Name = _worldPacket.ReadString(nameLen);
+
+            if (isArena)
+                ArenaTeamId = _worldPacket.ReadUInt32();
         }
 
         public string Name;
+        public uint ArenaTeamId;
     }
 
     public class GuildInvite : ServerPacket

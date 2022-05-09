@@ -219,24 +219,25 @@ namespace HermesProxy.World.Client
             uint language = packet.ReadUInt32();
             WowGuid128 sender = packet.ReadGuid().To128(GetSession().GameState);
             string senderName = "";
-            WowGuid128 receiver = null;
+            WowGuid128 receiver;
             string receiverName = "";
             string channelName = "";
 
-            packet.ReadInt32(); // Constant time
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_1_0_6692))
+                packet.ReadInt32(); // Constant time
 
             switch (chatType)
             {
                 case ChatMessageTypeWotLK.Achievement:
                 case ChatMessageTypeWotLK.GuildAchievement:
                 {
-                    packet.ReadGuid(); // Sender GUID again
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 }
                 case ChatMessageTypeWotLK.WhisperForeign:
                 {
-                    packet.ReadInt32(); // Name Length
-                    senderName = packet.ReadCString();
+                    uint senderNameLength = packet.ReadUInt32();
+                    senderName = packet.ReadString(senderNameLength);
                     receiver = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 }
@@ -244,16 +245,16 @@ namespace HermesProxy.World.Client
                 case ChatMessageTypeWotLK.BattlegroundAlliance:
                 case ChatMessageTypeWotLK.BattlegroundHorde:
                 {
-                    var target = packet.ReadGuid(); // Sender GUID
-                    switch (target.GetHighType())
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
+                    switch (receiver.GetHighType())
                     {
                         case HighGuidType.Creature:
                         case HighGuidType.Vehicle:
                         case HighGuidType.GameObject:
                         case HighGuidType.Transport:
                         case HighGuidType.Pet:
-                            packet.ReadInt32(); // Sender Name Length
-                            senderName = packet.ReadCString();
+                            uint senderNameLength = packet.ReadUInt32();
+                            senderName = packet.ReadString(senderNameLength);
                             break;
                     }
                     break;
@@ -267,8 +268,8 @@ namespace HermesProxy.World.Client
                 case ChatMessageTypeWotLK.RaidBossWhisper:
                 case ChatMessageTypeWotLK.BattleNet:
                 {
-                    packet.ReadInt32(); // Name Length
-                    senderName = packet.ReadCString();
+                    uint senderNameLength = packet.ReadUInt32();
+                    senderName = packet.ReadString(senderNameLength);
                     receiver = packet.ReadGuid().To128(GetSession().GameState);
                     switch (receiver.GetHighType())
                     {
@@ -276,24 +277,25 @@ namespace HermesProxy.World.Client
                         case HighGuidType.Vehicle:
                         case HighGuidType.GameObject:
                         case HighGuidType.Transport:
-                            packet.ReadInt32(); // Receiver Name Length
-                            receiverName = packet.ReadCString();
+                            uint receiverNameLength = packet.ReadUInt32();
+                            receiverName = packet.ReadString(receiverNameLength);
                             break;
                     }
                     break;
                 }
                 default:
                 {
-                    if (packet.GetUniversalOpcode(false) == Opcode.SMSG_GM_MESSAGECHAT)
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056) &&
+                        packet.GetUniversalOpcode(false) == Opcode.SMSG_GM_MESSAGECHAT)
                     {
-                        packet.ReadInt32(); // GMNameLength
-                        packet.ReadCString(); // GMSenderName
+                        uint gmNameLength = packet.ReadUInt32();
+                        packet.ReadString(gmNameLength);
                     }
 
                     if (chatType == ChatMessageTypeWotLK.Channel)
                         channelName = packet.ReadCString();
 
-                    packet.ReadGuid(); // Sender GUID
+                    receiver = packet.ReadGuid().To128(GetSession().GameState);
                     break;
                 }
             }
@@ -309,6 +311,13 @@ namespace HermesProxy.World.Client
             uint textLength = packet.ReadUInt32();
             string text = packet.ReadString(textLength);
             ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
+
+            if (LegacyVersion.InVersion(ClientVersionBuild.V2_0_1_6180, ClientVersionBuild.V3_0_2_9056) &&
+                packet.GetUniversalOpcode(false) == Opcode.SMSG_GM_MESSAGECHAT)
+            {
+                uint gmNameLength = packet.ReadUInt32();
+                packet.ReadString(gmNameLength);
+            }
 
             uint achievementId = 0;
             if (chatType == ChatMessageTypeWotLK.Achievement || chatType == ChatMessageTypeWotLK.GuildAchievement)
@@ -443,6 +452,15 @@ namespace HermesProxy.World.Client
             message.ZoneID = packet.ReadUInt32();
             packet.ReadUInt32(); // message length
             message.MessageText = packet.ReadCString();
+            SendPacketToClient(message);
+        }
+
+        [PacketHandler(Opcode.SMSG_CHAT_SERVER_MESSAGE)]
+        void HandleChatServerMessage(WorldPacket packet)
+        {
+            ChatServerMessage message = new ChatServerMessage();
+            message.MessageID = packet.ReadInt32();
+            message.StringParam = packet.ReadCString();
             SendPacketToClient(message);
         }
     }

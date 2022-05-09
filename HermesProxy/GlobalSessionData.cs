@@ -38,10 +38,7 @@ namespace HermesProxy
         public bool IsPassingOnLoot;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
-        public LootMethod CurrentGroupLootMethod;
-        public List<WowGuid128> CurrentGroupMembers = new();
-        public WowGuid128 CurrentGroupGuid;
-        public WowGuid128 CurrentGroupLeader;
+        public World.Server.Packets.PartyUpdate[] CurrentGroups = new World.Server.Packets.PartyUpdate[2];
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public uint CurrentGuildCreateTime;
@@ -50,14 +47,17 @@ namespace HermesProxy
         public WowGuid128 CurrentInteractedWithGO;
         public uint LastWhoRequestId;
         public WowGuid128 CurrentPetGuid;
-        public ClientCastRequest CurrentClientCast;
-        public ClientCastRequest CurrentClientMeleeCast;
+        public uint[] CurrentArenaTeamIds = new uint[3];
+        public ClientCastRequest CurrentClientNormalCast;  // regular spell casts
+        public ClientCastRequest CurrentClientSpecialCast; // next melee or auto repeat spells
         public ClientCastRequest CurrentClientPetCast;
         public List<ClientCastRequest> PendingClientCasts = new List<ClientCastRequest>();
         public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
         public WowGuid64 LastLootTargetGuid;
         public List<int> ActionButtons = new();
-        public Dictionary<byte, int> CurrentPlayerAuras = new();
+        public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationLeft = new();
+        public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationFull = new();
+        public Dictionary<WowGuid128, Dictionary<byte, WowGuid128>> UnitAuraCaster = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, uint> PlayerGuildIds = new();
         public System.Threading.Mutex ObjectCacheMutex = new System.Threading.Mutex();
@@ -85,9 +85,59 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
+        public uint GetCurrentGroupSize()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return 0;
+
+            // Don't count self.
+            return (uint)(group.PlayerList.Count > 1 ? group.PlayerList.Count - 1 : 0);
+        }
+        public WowGuid128 GetCurrentGroupLeader()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return WowGuid128.Empty;
+
+            return group.LeaderGUID;
+        }
+        public LootMethod GetCurrentLootMethod()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return LootMethod.FreeForAll;
+
+            return group.LootSettings.Method;
+        }
+        public WowGuid128 GetCurrentGroupGuid()
+        {
+            var group = GetCurrentGroup();
+            if (group == null)
+                return WowGuid128.Empty;
+
+            return group.PartyGUID;
+        }
+        public World.Server.Packets.PartyUpdate GetCurrentGroup()
+        {
+            return CurrentGroups[GetCurrentPartyIndex()];
+        }
         public sbyte GetCurrentPartyIndex()
         {
             return (sbyte)(IsInBattleground() ? 1 : 0);
+        }
+        public byte GetItemSpellSlot(WowGuid128 guid, uint spellId)
+        {
+            int OBJECT_FIELD_ENTRY = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_ENTRY);
+            if (OBJECT_FIELD_ENTRY < 0)
+                return 0;
+
+            var updates = GetCachedObjectFieldsLegacy(guid);
+            if (updates == null)
+                return 0;
+
+            uint itemId = updates[OBJECT_FIELD_ENTRY].UInt32Value;
+            return GameData.GetItemEffectSlot(itemId, spellId);
         }
         public void SetFlatSpellMod(byte spellMod, byte spellMask, int amount)
         {
@@ -194,7 +244,26 @@ namespace HermesProxy
             if (CurrentMapId == null)
                 return false;
 
-            return GameData.GetBattlegroundIdFromMapId((uint)CurrentMapId) != 0;
+            uint bgId = GameData.GetBattlegroundIdFromMapId((uint)CurrentMapId);
+            if (bgId != 0)
+            {
+                // Only if we are properly queued for the BG.
+                foreach (var queue in BattleFieldQueueTypes)
+                {
+                    if (LegacyVersion.RemovedInVersion(Enums.ClientVersionBuild.V2_0_1_6180))
+                    {
+                        if (queue.Value == CurrentMapId)
+                            return true;
+                    }
+                    else
+                    {
+                        if (queue.Value == bgId)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
         }
         public long GetBattleFieldQueueTime(uint queueSlot)
         {
@@ -220,18 +289,90 @@ namespace HermesProxy
                 return BattleFieldQueueTypes[queueSlot];
             return 0;
         }
-        public void StoreAuraDuration(byte slot, int duration)
+        public void StoreAuraDurationLeft(WowGuid128 guid, byte slot, int duration)
         {
-            if (CurrentPlayerAuras.ContainsKey(slot))
-                CurrentPlayerAuras[slot] = duration;
+            if (UnitAuraDurationLeft.ContainsKey(guid))
+            {
+                if (UnitAuraDurationLeft[guid].ContainsKey(slot))
+                    UnitAuraDurationLeft[guid][slot] = duration;
+                else
+                    UnitAuraDurationLeft[guid].Add(slot, duration);
+            }
             else
-                CurrentPlayerAuras.Add(slot, duration);
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(slot, duration);
+                UnitAuraDurationLeft.Add(guid, dict);
+            }
         }
-        public int GetAuraDuration(byte slot)
+        public void StoreAuraDurationFull(WowGuid128 guid, byte slot, int duration)
         {
-            if (CurrentPlayerAuras.ContainsKey(slot))
-                return CurrentPlayerAuras[slot];
-            return -1;
+            if (UnitAuraDurationFull.ContainsKey(guid))
+            {
+                if (UnitAuraDurationFull[guid].ContainsKey(slot))
+                    UnitAuraDurationFull[guid][slot] = duration;
+                else
+                    UnitAuraDurationFull[guid].Add(slot, duration);
+            }
+            else
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(slot, duration);
+                UnitAuraDurationFull.Add(guid, dict);
+            }
+        }
+        public void ClearAuraDuration(WowGuid128 guid, byte slot)
+        {
+            if (UnitAuraDurationLeft.ContainsKey(guid) &&
+                UnitAuraDurationLeft[guid].ContainsKey(slot))
+                UnitAuraDurationLeft[guid].Remove(slot);
+
+            if (UnitAuraDurationFull.ContainsKey(guid) &&
+                UnitAuraDurationFull[guid].ContainsKey(slot))
+                UnitAuraDurationFull[guid].Remove(slot);
+        }
+        public void GetAuraDuration(WowGuid128 guid, byte slot, out int left, out int full)
+        {
+            if (UnitAuraDurationLeft.ContainsKey(guid) &&
+                UnitAuraDurationLeft[guid].ContainsKey(slot))
+                left = UnitAuraDurationLeft[guid][slot];
+            else
+                left = -1;
+
+            if (UnitAuraDurationFull.ContainsKey(guid) &&
+                UnitAuraDurationFull[guid].ContainsKey(slot))
+                full = UnitAuraDurationFull[guid][slot];
+            else
+                full = left;
+        }
+        public void StoreAuraCaster(WowGuid128 target, byte slot, WowGuid128 caster)
+        {
+            if (UnitAuraCaster.ContainsKey(target))
+            {
+                if (UnitAuraCaster[target].ContainsKey(slot))
+                    UnitAuraCaster[target][slot] = caster;
+                else
+                    UnitAuraCaster[target].Add(slot, caster);
+            }
+            else
+            {
+                Dictionary<byte, WowGuid128> dict = new Dictionary<byte, WowGuid128>();
+                dict.Add(slot, caster);
+                UnitAuraCaster.Add(target, dict);
+            }
+        }
+        public void ClearAuraCaster(WowGuid128 guid, byte slot)
+        {
+            if (UnitAuraCaster.ContainsKey(guid) &&
+                UnitAuraCaster[guid].ContainsKey(slot))
+                UnitAuraCaster[guid].Remove(slot);
+        }
+        public WowGuid128 GetAuraCaster(WowGuid128 target, byte slot)
+        {
+            if (UnitAuraCaster.ContainsKey(target) &&
+                UnitAuraCaster[target].ContainsKey(slot))
+                return UnitAuraCaster[target][slot];
+            return null;
         }
         public void StorePlayerGuildId(WowGuid128 guid, uint guildId)
         {

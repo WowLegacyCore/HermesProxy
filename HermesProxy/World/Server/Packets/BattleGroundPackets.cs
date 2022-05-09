@@ -280,6 +280,10 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(Ratings != null);
             _worldPacket.WriteBit(ArenaTeams != null);
             _worldPacket.WriteBit(Winner != null);
+
+            if (ArenaTeams != null)
+                ArenaTeams.Write(_worldPacket);
+
             _worldPacket.WriteInt32(Statistics.Count);
 
             foreach (var count in PlayerCount)
