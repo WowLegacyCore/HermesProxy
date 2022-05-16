@@ -1929,6 +1929,9 @@ namespace HermesProxy.World.Client
                         {
                             updateData.PlayerData.VisibleItems[i] = new VisibleItem();
                             updateData.PlayerData.VisibleItems[i].ItemID = updates[PLAYER_VISIBLE_ITEM_1_0 + i * offset].Int32Value;
+
+                            if (updates.ContainsKey(PLAYER_VISIBLE_ITEM_1_0 + 1 + i * offset))
+                                updateData.PlayerData.VisibleItems[i].ItemVisual = (ushort)GameData.GetItemEnchantVisual(updates[PLAYER_VISIBLE_ITEM_1_0 + 1 + i * offset].UInt32Value);
                         }
                     }
                 }
