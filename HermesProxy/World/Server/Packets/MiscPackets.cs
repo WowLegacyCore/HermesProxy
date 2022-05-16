@@ -749,4 +749,16 @@ namespace HermesProxy.World.Server.Packets
         public int ConquestWeeklyProgressCurrencyID;
         public bool WeeklyRewardChestsEnabled;
     }
+
+    public class InvalidatePlayer : ServerPacket
+    {
+        public InvalidatePlayer() : base(Opcode.SMSG_INVALIDATE_PLAYER) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Guid);
+        }
+
+        public WowGuid128 Guid;
+    }
 }
