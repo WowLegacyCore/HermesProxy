@@ -175,7 +175,7 @@ namespace HermesProxy.World.Client
                     received = sizeof(ushort); // size includes opcode and we have it already
                     while (received != packetSize)
                     {
-                        Log.Print(LogType.Debug, $"Waiting to receive remaining {packetSize - received} bytes.");
+                        //Log.Print(LogType.Debug, $"Waiting to receive remaining {packetSize - received} bytes.");
 
                         int receivedNow = _clientSocket.Receive(buffer, received, packetSize - received, SocketFlags.None);
                         if (receivedNow == 0)

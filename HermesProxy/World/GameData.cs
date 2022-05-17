@@ -19,6 +19,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
         public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new Dictionary<uint, Dictionary<uint, byte>>();
+        public static Dictionary<uint, uint> ItemEnchantVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
@@ -138,6 +139,14 @@ namespace HermesProxy.World
             if (ItemEffects.ContainsKey(itemId) &&
                 ItemEffects[itemId].ContainsKey(spellId))
                 return ItemEffects[itemId][spellId];
+            return 0;
+        }
+
+        public static uint GetItemEnchantVisual(uint enchantId)
+        {
+            uint visualId;
+            if (ItemEnchantVisuals.TryGetValue(enchantId, out visualId))
+                return visualId;
             return 0;
         }
 
@@ -266,6 +275,7 @@ namespace HermesProxy.World
             LoadItemTemplates();
             LoadBattlegrounds();
             LoadItemEffects();
+            LoadItemEnchantVisuals();
             LoadSpellVisuals();
             LoadLearnSpells();
             LoadGems();
@@ -392,6 +402,30 @@ namespace HermesProxy.World
                     uint spellId = UInt32.Parse(fields[1]);
                     byte slot = Byte.Parse(fields[2]);
                     SaveItemEffectSlot(itemId, spellId, slot);
+                }
+            }
+        }
+
+        public static void LoadItemEnchantVisuals()
+        {
+            var path = Path.Combine("CSV", $"ItemEnchantVisuals{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint enchantId = UInt32.Parse(fields[0]);
+                    uint visualId = UInt32.Parse(fields[1]);
+                    ItemEnchantVisuals.Add(enchantId, visualId);
                 }
             }
         }

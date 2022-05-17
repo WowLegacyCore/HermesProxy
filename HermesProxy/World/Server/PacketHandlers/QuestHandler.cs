@@ -5,6 +5,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Collections.Generic;
 
 namespace HermesProxy.World.Server
 {
@@ -59,20 +60,22 @@ namespace HermesProxy.World.Server
                 if (UNIT_NPC_FLAGS < 0)
                     return;
 
+                List<WowGuid128> npcGuids = new List<WowGuid128>();
                 GetSession().GameState.ObjectCacheMutex.WaitOne();
                 foreach (var obj in GetSession().GameState.ObjectCacheModern)
                 {
-                    if (obj.Key.GetObjectType() != ObjectType.Unit)
-                        continue;
-
-                    if (obj.Value.GetUpdateField<uint>(UNIT_NPC_FLAGS).HasAnyFlag(NPCFlags.QuestGiver))
-                    {
-                        WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY);
-                        packet.WriteGuid(obj.Key.To64());
-                        SendPacketToServer(packet);
-                    }
+                    if (obj.Key.GetObjectType() == ObjectType.Unit && 
+                        obj.Value.GetUpdateField<uint>(UNIT_NPC_FLAGS).HasAnyFlag(NPCFlags.QuestGiver))
+                        npcGuids.Add(obj.Key);
                 }
                 GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+
+                foreach (var guid in npcGuids)
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY);
+                    packet.WriteGuid(guid.To64());
+                    SendPacketToServer(packet);
+                }
             }
         }
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_HELLO)]

@@ -246,5 +246,16 @@ namespace HermesProxy.World.Client
             timer.Timer = (MirrorTimerType)packet.ReadUInt32();
             SendPacketToClient(timer);
         }
+
+        [PacketHandler(Opcode.SMSG_INVALIDATE_PLAYER)]
+        void HandleInvalidatePlayer(WorldPacket packet)
+        {
+            InvalidatePlayer invalidate = new();
+            invalidate.Guid = packet.ReadGuid().To128(GetSession().GameState);
+            SendPacketToClient(invalidate);
+
+            if (GetSession().GameState.CachedPlayers.ContainsKey(invalidate.Guid))
+                GetSession().GameState.CachedPlayers.Remove(invalidate.Guid);
+        }
     }
 }
