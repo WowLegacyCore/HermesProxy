@@ -1925,13 +1925,15 @@ namespace HermesProxy.World.Client
                     int offset = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 16 : 12;
                     for (int i = 0; i < 19; i++)
                     {
-                        if (updateMaskArray[PLAYER_VISIBLE_ITEM_1_0 + i * offset])
+                        int itemIdIndex = PLAYER_VISIBLE_ITEM_1_0 + i * offset;
+                        int enchantIdIndex = PLAYER_VISIBLE_ITEM_1_0 + 1 + i * offset;
+                        if (updateMaskArray[itemIdIndex] || updateMaskArray[enchantIdIndex])
                         {
                             updateData.PlayerData.VisibleItems[i] = new VisibleItem();
-                            updateData.PlayerData.VisibleItems[i].ItemID = updates[PLAYER_VISIBLE_ITEM_1_0 + i * offset].Int32Value;
-
-                            if (updates.ContainsKey(PLAYER_VISIBLE_ITEM_1_0 + 1 + i * offset))
-                                updateData.PlayerData.VisibleItems[i].ItemVisual = (ushort)GameData.GetItemEnchantVisual(updates[PLAYER_VISIBLE_ITEM_1_0 + 1 + i * offset].UInt32Value);
+                            if (updates.ContainsKey(itemIdIndex))
+                                updateData.PlayerData.VisibleItems[i].ItemID = updates[itemIdIndex].Int32Value;
+                            if (updates.ContainsKey(enchantIdIndex))
+                                updateData.PlayerData.VisibleItems[i].ItemVisual = (ushort)GameData.GetItemEnchantVisual(updates[enchantIdIndex].UInt32Value);
                         }
                     }
                 }
