@@ -382,7 +382,12 @@ namespace HermesProxy.World.Client
             }
 
             for (int i = 0; i < 24; i++)
+            {
+                if (!packet.CanRead())
+                    break;
+
                 gameObject.Data[i] = packet.ReadInt32();
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 gameObject.Size = packet.ReadFloat();

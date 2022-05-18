@@ -316,6 +316,9 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SPELL_START)]
         void HandleSpellStart(WorldPacket packet)
         {
+            if (GetSession().GameState.CurrentMapId == null)
+                return;
+
             SpellStart spell = new SpellStart();
             spell.Cast = HandleSpellStartOrGo(packet, false);
 
@@ -375,6 +378,9 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SPELL_GO)]
         void HandleSpellGo(WorldPacket packet)
         {
+            if (GetSession().GameState.CurrentMapId == null)
+                return;
+
             SpellGo spell = new SpellGo();
             spell.Cast = HandleSpellStartOrGo(packet, true);
             if (GetSession().GameState.CurrentPlayerGuid == spell.Cast.CasterUnit &&
