@@ -67,7 +67,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < questsCount; i++)
                     {
                         QuestLog logEntry = ReadQuestLogEntry(i, null, updateFields);
-                        if (logEntry == null)
+                        if (logEntry == null || logEntry.QuestID == null)
                             continue;
                         if (logEntry.QuestID != objective.QuestID)
                             continue;
@@ -131,6 +131,14 @@ namespace HermesProxy.World.Client
             failure.ContainerBSlot = packet.ReadUInt8();
 
             SendPacketToClient(failure);
+
+            if (GetSession().GameState.CurrentClientNormalCast != null &&
+               !GetSession().GameState.CurrentClientNormalCast.HasStarted &&
+                GetSession().GameState.CurrentClientNormalCast.ItemGUID == failure.Item[0])
+            {
+                GetSession().InstanceSocket.SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
+                GetSession().GameState.CurrentClientNormalCast = null;
+            }
         }
         [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE, ClientVersionBuild.V2_0_1_6180)]
         void HandleInventoryChangeFailure(WorldPacket packet)
@@ -162,6 +170,14 @@ namespace HermesProxy.World.Client
                     break;
             }
             SendPacketToClient(failure);
+
+            if (GetSession().GameState.CurrentClientNormalCast != null &&
+               !GetSession().GameState.CurrentClientNormalCast.HasStarted &&
+                GetSession().GameState.CurrentClientNormalCast.ItemGUID == failure.Item[0])
+            {
+                GetSession().InstanceSocket.SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
+                GetSession().GameState.CurrentClientNormalCast = null;
+            }
         }
         [PacketHandler(Opcode.SMSG_DURABILITY_DAMAGE_DEATH)]
         void HandleDurabilityDamageDeath(WorldPacket packet)

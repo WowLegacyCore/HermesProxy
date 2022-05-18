@@ -243,6 +243,7 @@ namespace HermesProxy.World.Server
             castRequest.SpellXSpellVisualId = use.Cast.SpellXSpellVisualID;
             castRequest.ClientGUID = use.Cast.CastID;
             castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, use.Cast.SpellID, 10000 + use.Cast.CastID.GetCounter());
+            castRequest.ItemGUID = use.CastItem;
 
             if (GetSession().GameState.CurrentClientNormalCast != null)
             {
