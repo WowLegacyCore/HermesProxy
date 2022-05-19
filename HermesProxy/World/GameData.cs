@@ -16,7 +16,7 @@ namespace HermesProxy.World
     {
         // From CSV
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
-        public static Dictionary<uint, ItemTemplate> ItemTemplateStore = new Dictionary<uint, ItemTemplate>();
+        public static Dictionary<uint, ItemDisplayData> ItemDisplayDataStore = new Dictionary<uint, ItemDisplayData>();
         public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
         public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new Dictionary<uint, Dictionary<uint, byte>>();
         public static Dictionary<uint, uint> ItemEnchantVisuals = new Dictionary<uint, uint>();
@@ -32,6 +32,7 @@ namespace HermesProxy.World
         public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
 
         // From Server
+        public static Dictionary<uint, ItemTemplate> ItemTemplates = new Dictionary<uint, ItemTemplate>();
         public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
         public static Dictionary<uint, QuestTemplate> QuestTemplates = new Dictionary<uint, QuestTemplate>();
         public static Dictionary<uint, string> ItemNames = new Dictionary<uint, string>();
@@ -50,7 +51,28 @@ namespace HermesProxy.World
             string data;
             if (ItemNames.TryGetValue(entry, out data))
                 return data;
+
+            ItemTemplate template = GetItemTemplate(entry);
+            if (template != null)
+                return template.Name[0];
+
             return "";
+        }
+
+        public static void StoreItemTemplate(uint entry, ItemTemplate template)
+        {
+            if (ItemTemplates.ContainsKey(entry))
+                ItemTemplates[entry] = template;
+            else
+                ItemTemplates.Add(entry, template);
+        }
+
+        public static ItemTemplate GetItemTemplate(uint entry)
+        {
+            ItemTemplate data;
+            if (ItemTemplates.TryGetValue(entry, out data))
+                return data;
+            return null;
         }
 
         public static void StoreQuestTemplate(uint entry, QuestTemplate template)
@@ -99,17 +121,17 @@ namespace HermesProxy.World
             return null;
         }
 
-        public static ItemTemplate GetItemTemplate(uint entry)
+        public static ItemDisplayData GetItemDisplayData(uint entry)
         {
-            ItemTemplate data;
-            if (ItemTemplateStore.TryGetValue(entry, out data))
+            ItemDisplayData data;
+            if (ItemDisplayDataStore.TryGetValue(entry, out data))
                 return data;
             return null;
         }
 
         public static uint GetItemIdWithDisplayId(uint displayId)
         {
-            foreach (var item in ItemTemplateStore)
+            foreach (var item in ItemDisplayDataStore)
             {
                 if (item.Value.DisplayId == displayId)
                     return item.Key;
@@ -117,7 +139,7 @@ namespace HermesProxy.World
             return 0;
         }
 
-        private static void SaveItemEffectSlot(uint itemId, uint spellId, byte slot)
+        public static void SaveItemEffectSlot(uint itemId, uint spellId, byte slot)
         {
             if (ItemEffects.ContainsKey(itemId))
             {
@@ -274,7 +296,6 @@ namespace HermesProxy.World
             LoadBroadcastTexts();
             LoadItemTemplates();
             LoadBattlegrounds();
-            LoadItemEffects();
             LoadItemEnchantVisuals();
             LoadSpellVisuals();
             LoadLearnSpells();
@@ -340,11 +361,11 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ItemTemplate item = new ItemTemplate();
+                    ItemDisplayData item = new ItemDisplayData();
                     item.Entry = UInt32.Parse(fields[0]);
                     item.DisplayId = UInt32.Parse(fields[1]);
                     item.InventoryType = Byte.Parse(fields[2]);
-                    ItemTemplateStore.Add(item.Entry, item);
+                    ItemDisplayDataStore.Add(item.Entry, item);
                 }
             }
         }
@@ -377,31 +398,6 @@ namespace HermesProxy.World
                     }
                     System.Diagnostics.Trace.Assert(bg.MapIds.Count != 0);
                     Battlegrounds.Add(bgId, bg);
-                }
-            }
-        }
-
-        public static void LoadItemEffects()
-        {
-            var path = Path.Combine("CSV", $"ItemEffects{ModernVersion.GetExpansionVersion()}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
-            {
-                csvParser.CommentTokens = new string[] { "#" };
-                csvParser.SetDelimiters(new string[] { "," });
-                csvParser.HasFieldsEnclosedInQuotes = false;
-
-                // Skip the row with the column names
-                csvParser.ReadLine();
-
-                while (!csvParser.EndOfData)
-                {
-                    // Read current line fields, pointer moves to the next line.
-                    string[] fields = csvParser.ReadFields();
-
-                    uint itemId = UInt32.Parse(fields[0]);
-                    uint spellId = UInt32.Parse(fields[1]);
-                    byte slot = Byte.Parse(fields[2]);
-                    SaveItemEffectSlot(itemId, spellId, slot);
                 }
             }
         }
@@ -1848,7 +1844,7 @@ namespace HermesProxy.World
         public ushort[] Emotes = new ushort[3];
         public ushort[] EmoteDelays = new ushort[3];
     }
-    public class ItemTemplate
+    public class ItemDisplayData
     {
         public uint Entry;
         public uint DisplayId;

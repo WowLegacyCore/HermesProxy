@@ -579,6 +579,7 @@ namespace HermesProxy
         public long Timestamp;
         public WowGuid128 ClientGUID;
         public WowGuid128 ServerGUID;
+        public WowGuid128 ItemGUID;
     }
     public class ArenaTeamData
     {

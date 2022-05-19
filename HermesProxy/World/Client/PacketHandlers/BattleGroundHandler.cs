@@ -481,7 +481,8 @@ namespace HermesProxy.World.Client
         void HandlePlayerSkinned(WorldPacket packet)
         {
             PlayerSkinned skinned = new PlayerSkinned();
-            skinned.FreeRepop = packet.ReadBool();
+            if (packet.CanRead())
+                skinned.FreeRepop = packet.ReadBool();
             SendPacketToClient(skinned);
         }
     }

@@ -47,6 +47,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadBool(); // Has Transport
 
+            HashSet<uint> missingItemTemplates = new HashSet<uint>();
             List<AuraUpdate> auraUpdates = new List<AuraUpdate>();
             UpdateObject updateObject = new UpdateObject(GetSession().GameState);
 
@@ -113,6 +114,12 @@ namespace HermesProxy.World.Client
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
+                        if (guid.IsItem() && updateData.ObjectData.EntryID != null &&
+                           !GameData.ItemTemplates.ContainsKey((uint)updateData.ObjectData.EntryID))
+                        {
+                            missingItemTemplates.Add((uint)updateData.ObjectData.EntryID);
+                        }
+
                         if (updateData.CreateData.MoveInfo != null || !guid.IsWorldObject() )
                         {
                             updateObject.ObjectUpdates.Add(updateData);
@@ -138,6 +145,12 @@ namespace HermesProxy.World.Client
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject2, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
+
+                        if (guid.IsItem() && updateData.ObjectData.EntryID != null &&
+                           !GameData.ItemTemplates.ContainsKey((uint)updateData.ObjectData.EntryID))
+                        {
+                            missingItemTemplates.Add((uint)updateData.ObjectData.EntryID);
+                        }
 
                         if (updateData.CreateData.MoveInfo != null || !guid.IsWorldObject())
                         {
@@ -166,6 +179,15 @@ namespace HermesProxy.World.Client
             if (updateObject.ObjectUpdates.Count == 0 &&
                 GetSession().GameState.IsWaitingForNewWorld)
                 return;
+
+            foreach (uint itemId in missingItemTemplates)
+            {
+                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ITEM_QUERY_SINGLE);
+                packet2.WriteUInt32(itemId);
+                if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    packet2.WriteGuid(WowGuid64.Empty);
+                SendPacketToServer(packet2);
+            }
 
             int activePlayerUpdateIndex = -1;
             for (int i = 0; i < updateObject.ObjectUpdates.Count; i++)

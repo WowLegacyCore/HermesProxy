@@ -95,6 +95,17 @@ namespace HermesProxy.World
             return GetObjectType() == ObjectType.Unit;
         }
 
+        public bool IsItem()
+        {
+            switch (GetObjectType())
+            {
+                case ObjectType.Item:
+                case ObjectType.Container:
+                    return true;
+            }
+            return false;
+        }
+
         public static bool operator ==(WowGuid first, WowGuid other)
         {
             if (ReferenceEquals(first, other))

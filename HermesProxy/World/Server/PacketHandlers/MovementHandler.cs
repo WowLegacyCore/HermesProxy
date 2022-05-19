@@ -157,6 +157,14 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)]
+        void HandleMoveInitActiveMoverComplete(InitActiveMoverComplete move)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTIVE_MOVER);
+            packet.WriteGuid(GetSession().GameState.CurrentPlayerGuid.To64());
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_MOVE_SPLINE_DONE)]
         void HandleMoveSplineDone(MoveSplineDone movement)
         {
