@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
 
 namespace Framework
 {
@@ -12,7 +13,7 @@ namespace Framework
         public static readonly string ClientSeed = Conf.GetString("ClientSeed", "179D3DC3235629D07113A9B3867F97A7");
         public static readonly ClientVersionBuild ClientBuild = Conf.GetEnum("ClientBuild", ClientVersionBuild.V2_5_2_40892);
         public static readonly ClientVersionBuild ServerBuild = Conf.GetEnum("ServerBuild", ClientVersionBuild.V2_4_3_8606);
-        public static readonly string ServerAddress = Conf.GetString("ServerAddress", "127.0.0.1");
+        public static readonly string ServerAddress = Dns.GetHostAddresses(Conf.GetString("ServerAddress", "127.0.0.1")).GetValue(0).ToString();
         public static readonly int ServerPort = Conf.GetInt("ServerPort", 3724);
         public static readonly string ReportedOS = Conf.GetString("ReportedOS", "OSX");
         public static readonly string ReportedPlatform = Conf.GetString("ReportedPlatform", "x86");
