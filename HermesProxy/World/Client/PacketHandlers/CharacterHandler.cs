@@ -569,5 +569,19 @@ namespace HermesProxy.World.Client
                 inspect.ArenaTeams.Add(GetSession().GameState.GetArenaTeamDataForPlayer(inspect.PlayerGUID, slot));
             SendPacketToClient(inspect);
         }
+
+        [PacketHandler(Opcode.SMSG_CHARACTER_RENAME_RESULT)]
+        void HandleCharacterRenameResult(WorldPacket packet)
+        {
+            CharacterRenameResult rename = new();
+            Enums.Vanilla.ResponseCodes legacyCode = (Enums.Vanilla.ResponseCodes)packet.ReadUInt8();
+            rename.Result = (Enums.Classic.ResponseCodes)Enum.Parse(typeof(Enums.Classic.ResponseCodes), legacyCode.ToString());
+            if (rename.Result == Enums.Classic.ResponseCodes.Success)
+            {
+                rename.Guid = packet.ReadGuid().To128(GetSession().GameState);
+                rename.Name = packet.ReadCString();
+            }
+            SendPacketToClient(rename);
+        }
     }
 }

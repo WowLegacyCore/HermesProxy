@@ -982,4 +982,40 @@ namespace HermesProxy.World.Server.Packets
         public int PersonalGamesPlayed;
         public int PersonalRating;
     }
+
+    public class CharacterRenameRequest : ClientPacket
+    {
+        public CharacterRenameRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Guid = _worldPacket.ReadPackedGuid128();
+            NewName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
+        }
+
+        public string NewName;
+        public WowGuid128 Guid;
+    }
+
+    public class CharacterRenameResult : ServerPacket
+    {
+        public CharacterRenameResult() : base(Opcode.SMSG_CHARACTER_RENAME_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteBit(Guid != null);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
+            _worldPacket.FlushBits();
+
+            if (Guid != null)
+                _worldPacket.WritePackedGuid128(Guid);
+
+            _worldPacket.WriteString(Name);
+        }
+
+        public string Name = "";
+        public Enums.Classic.ResponseCodes Result = 0;
+        public WowGuid128 Guid;
+    }
 }
