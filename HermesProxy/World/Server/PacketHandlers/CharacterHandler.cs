@@ -182,5 +182,14 @@ namespace HermesProxy.World.Server
                 SendPacket(pvp);
             }
         }
+
+        [PacketHandler(Opcode.CMSG_CHARACTER_RENAME_REQUEST)]
+        void HandleCharacterRenameRequest(CharacterRenameRequest rename)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHARACTER_RENAME_REQUEST);
+            packet.WriteGuid(rename.Guid.To64());
+            packet.WriteCString(rename.NewName);
+            SendPacketToServer(packet);
+        }
     }
 }
