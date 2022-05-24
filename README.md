@@ -10,6 +10,12 @@ This project enables play on existing legacy WoW emulation cores using the moder
 - 1.12.1
 - 2.4.3
 
+## Download HermesProxy
+Stable: [Releases](https://github.com/WowLegacyCore/HermesProxy/releases)
+
+Latest: [Build Artifacts](https://github.com/WowLegacyCore/HermesProxy/actions/workflows/Build_Proxy.yml?query=branch%3Amaster)  
+(click at the latest successful build and look at the artifacts at the bottom)
+
 ## Usage Instructions
 
 - Edit the app's config to specify the exact versions of your game client and the remote server, along with the address.
