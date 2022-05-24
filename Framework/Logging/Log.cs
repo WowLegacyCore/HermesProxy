@@ -31,40 +31,36 @@ namespace Framework.Logging
         }; 
 
         static BlockingCollection<(LogType Type, string Message)> logQueue = new();
-
-        public static bool IsLogging;
+        private static Thread? _logOutputThread = null;
+        public static bool IsLogging => _logOutputThread != null && !logQueue.IsCompleted;
 
         /// <summary>
         /// Start the logging Thread and take logs out of the <see cref="BlockingCollection{T}"/>
         /// </summary>
         public static void Start()
         {
-            var logThread = new Thread(() =>
+            if (_logOutputThread == null)
             {
-                IsLogging = true;
-
-                while (IsLogging)
+                _logOutputThread = new Thread(() =>
                 {
-                    Thread.Sleep(1);
+                    foreach (var msg in logQueue.GetConsumingEnumerable())
+                    {
+                        if (msg.Type == LogType.Debug && !Framework.Settings.DebugOutput)
+                            continue;
 
-                    if (!logQueue.TryTake(out var msg))
-                        continue;
+                        Console.Write($"{DateTime.Now:H:mm:ss} |");
 
-                    if (msg.Type == LogType.Debug && !Framework.Settings.DebugOutput)
-                        continue;
+                        Console.ForegroundColor = LogToColorType[msg.Type].Color;
+                        Console.Write($"{LogToColorType[msg.Type].Type}");
+                        Console.ResetColor();
 
-                    Console.Write($"{DateTime.Now:H:mm:ss} |");
+                        Console.WriteLine($"| {msg.Message}");
+                    }
+                });
 
-                    Console.ForegroundColor = LogToColorType[msg.Type].Color;
-                    Console.Write($"{LogToColorType[msg.Type].Type}");
-                    Console.ResetColor();
-
-                    Console.WriteLine($"| {msg.Message}");
-                }
-            });
-            IsLogging = true;
-            logThread.IsBackground = true;
-            logThread.Start();
+                _logOutputThread.IsBackground = true;
+                _logOutputThread.Start();
+            }
         }
 
         public static void Print(LogType type, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
