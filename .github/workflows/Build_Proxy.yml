@@ -1,0 +1,41 @@
+name: Build Proxy
+
+on: ['push']
+
+env:
+  DOTNET_VERSION: '6.0.x'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: ['windows', 'ubuntu']
+    runs-on: ${{ matrix.os }}-latest
+
+    steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish --configuration Release --self-contained true --use-current-runtime
+
+      - name: Copy files
+        run: cp -r ./HermesProxy/bin/*/Release/*/*/publish/ publish
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: publish
+          if-no-files-found: error
