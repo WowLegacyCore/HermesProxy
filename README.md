@@ -1,14 +1,13 @@
-# HermesProxy
+# HermesProxy ![Build](https://github.com/WowLegacyCore/HermesProxy/actions/workflows/Build_Proxy.yml/badge.svg)
 
 This project enables play on existing legacy WoW emulation cores using the modern clients. It serves as a translation layer, converting all network traffic to the appropriate format each side can understand. There are 4 major components to the application. The modern BNetServer to which the client initially logs into. The legacy AuthClient which will in turn login to the remote authentication server (realmd). The modern WorldServer to which the game client will connect once a realm has been selected. And the legacy WorldClient which communicates with the remote world server (mangosd).
 
-### Modern Versions Supported
-- 1.14.0
-- 2.5.2
+## Supported Versions
 
-### Legacy Versions Supported
-- 1.12.1
-- 2.4.3
+| Modern Versions | Legacy Versions |
+|-----------------|-----------------|
+| 1.14.0          | 1.12.1          |
+| 2.5.2           | 2.4.3           |
 
 ## Download HermesProxy
 Stable: [Releases](https://github.com/WowLegacyCore/HermesProxy/releases)
