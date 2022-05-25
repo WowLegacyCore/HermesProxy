@@ -366,5 +366,13 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SELF_RES);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_TOTEM_DESTROYED)]
+        void HandleTotemDestroyed(TotemDestroyed totem)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_TOTEM_DESTROYED);
+            packet.WriteUInt8(totem.slot);
+            SendPacketToServer(packet);
+        }
     }
 }
