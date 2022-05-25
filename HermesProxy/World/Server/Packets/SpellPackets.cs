@@ -1548,7 +1548,7 @@ namespace HermesProxy.World.Server.Packets
         public bool cannotdismiss = false;
     }
 
-        class TotemDestroyed : ClientPacket
+    class TotemDestroyed : ClientPacket
     {
         public TotemDestroyed(WorldPacket packet) : base(packet) { }
 
