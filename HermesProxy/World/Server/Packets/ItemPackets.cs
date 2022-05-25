@@ -654,4 +654,37 @@ namespace HermesProxy.World.Server.Packets
         public uint Slot;
         public WowGuid128 OwnerGuid;
     }
+
+    class EnchantmentLog : ServerPacket
+    {
+        public EnchantmentLog() : base(Opcode.SMSG_ENCHANTMENT_LOG) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(Caster);
+            _worldPacket.WritePackedGuid128(Owner);
+            _worldPacket.WritePackedGuid128(ItemGUID);
+            _worldPacket.WriteInt32(ItemID);
+            _worldPacket.WriteInt32(Enchantment);
+            _worldPacket.WriteInt32(EnchantSlot);
+        }
+        public WowGuid128 Caster;
+        public WowGuid128 Owner;
+        public WowGuid128 ItemGUID;
+        public int ItemID;
+        public int Enchantment;
+        public int EnchantSlot = 1;
+    }
+
+    public class CancelTempEnchantment : ClientPacket
+    {
+        public CancelTempEnchantment(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            EnchantmentSlot = _worldPacket.ReadUInt32();
+        }
+
+        public uint EnchantmentSlot;
+    }
 }

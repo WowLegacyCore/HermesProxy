@@ -186,5 +186,13 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(ammo.ItemId);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_CANCEL_TEMP_ENCHANTMENT)]
+        void HandleCancelTempEnchantment(CancelTempEnchantment cancel)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_TEMP_ENCHANTMENT);
+            packet.WriteUInt32(cancel.EnchantmentSlot);
+            SendPacketToServer(packet);
+        }
     }
 }
