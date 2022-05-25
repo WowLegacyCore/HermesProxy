@@ -1082,10 +1082,10 @@ namespace HermesProxy.World.Client
         void HandleTotemCreated(WorldPacket packet)
         {
             TotemCreated totem = new();
-            totem.slot = packet.ReadUInt8();
+            totem.Slot = packet.ReadUInt8();
             totem.Totem = packet.ReadGuid().To128(GetSession().GameState);
-            totem.duration = packet.ReadUInt32();
-            totem.spellid = packet.ReadUInt32();
+            totem.Duration = packet.ReadUInt32();
+            totem.SpellId = packet.ReadUInt32();
             SendPacketToClient(totem);
         }
 
