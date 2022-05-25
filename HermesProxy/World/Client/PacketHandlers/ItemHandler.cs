@@ -222,8 +222,8 @@ namespace HermesProxy.World.Client
             enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
             enchantment.Owner = enchantment.Caster;
             enchantment.ItemGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            enchantment.ItemID = (Int32)packet.ReadUInt32();
-            enchantment.Enchantment = (Int32)packet.ReadUInt32();
+            enchantment.ItemID = (int)packet.ReadUInt32();
+            enchantment.Enchantment = (int)packet.ReadUInt32();
             SendPacketToClient(enchantment);
         }
     }
