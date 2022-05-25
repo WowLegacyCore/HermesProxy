@@ -47,6 +47,9 @@ namespace HermesProxy.World
 
         public void LogPacket(ref SniffFile sniffFile)
         {
+            if (!Framework.Settings.PacketsLog)
+                return;
+
             if (sniffFile == null)
             {
                 sniffFile = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
@@ -100,6 +103,9 @@ namespace HermesProxy.World
 
         public void LogPacket(ref SniffFile sniffFile)
         {
+            if (!Framework.Settings.PacketsLog)
+                return;
+
             if (sniffFile == null)
             {
                 sniffFile = new SniffFile("modern", (ushort)Framework.Settings.ClientBuild);
