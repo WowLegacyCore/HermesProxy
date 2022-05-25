@@ -246,6 +246,14 @@ namespace HermesProxy
                 return (uint)Enum.Parse(typeof(SpellCastResultClassic), ((SpellCastResultVanilla)result).ToString());
         }
 
+        public static ChatFlags ConvertChatFlags(byte rawOldChatFlags)
+        {
+            ChatFlags result = (ChatFlags) rawOldChatFlags;
+            if (RemovedInVersion(ClientVersionBuild.V2_0_1_6180) && result.HasFlag(ChatFlags.AFK) && result.HasFlag(ChatFlags.DND))
+                return ChatFlags.GM; // In vanilla AFK | DND == GM
+            return result;
+        }
+
         public static QuestGiverStatusModern ConvertQuestGiverStatus(byte status)
         {
             if (AddedInVersion(ClientVersionBuild.V3_0_2_9056))
