@@ -32,6 +32,7 @@ namespace HermesProxy
         public bool IsInWorld;
         public uint? CurrentMapId;
         public uint CurrentTaxiNode;
+        public List<byte> UsableTaxiNodes = new();
         public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
         public uint LastDispellSpellId;

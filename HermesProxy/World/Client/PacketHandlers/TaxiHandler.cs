@@ -36,6 +36,7 @@ namespace HermesProxy.World.Client
                 taxi.CanLandNodes.Add(nodesMask);
                 taxi.CanUseNodes.Add(nodesMask);
             }
+            GetSession().GameState.UsableTaxiNodes = taxi.CanUseNodes; // save for CMSG_ACTIVATE_TAXI_EXPRESS
             SendPacketToClient(taxi);
         }
         [PacketHandler(Opcode.SMSG_NEW_TAXI_PATH)]
