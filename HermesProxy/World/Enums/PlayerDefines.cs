@@ -140,6 +140,7 @@ namespace HermesProxy.World.Enums
         Normal = 0x02,
     };
 
+    [Flags]
     public enum ChatFlags
     {
         None = 0x00,

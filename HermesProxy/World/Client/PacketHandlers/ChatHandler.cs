@@ -200,7 +200,7 @@ namespace HermesProxy.World.Client
 
             uint textLength = packet.ReadUInt32();
             string text = packet.ReadString(textLength);
-            ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
+            ChatFlags chatFlags = LegacyVersion.ConvertChatFlags(packet.ReadUInt8());
 
             string addonPrefix = "";
             if (!ChatPkt.CheckAddonPrefix(GetSession().GameState.AddonPrefixes, ref language, ref text, ref addonPrefix))
@@ -310,7 +310,7 @@ namespace HermesProxy.World.Client
 
             uint textLength = packet.ReadUInt32();
             string text = packet.ReadString(textLength);
-            ChatFlags chatFlags = (ChatFlags)packet.ReadUInt8();
+            ChatFlags chatFlags = LegacyVersion.ConvertChatFlags(packet.ReadUInt8());
 
             if (LegacyVersion.InVersion(ClientVersionBuild.V2_0_1_6180, ClientVersionBuild.V3_0_2_9056) &&
                 packet.GetUniversalOpcode(false) == Opcode.SMSG_GM_MESSAGECHAT)
