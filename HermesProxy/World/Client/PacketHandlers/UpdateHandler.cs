@@ -1597,6 +1597,17 @@ namespace HermesProxy.World.Client
                 if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_MOUNTDISPLAYID])
                 {
                     updateData.UnitData.MountDisplayID = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
+
+                    if (!isCreate && guid == GetSession().GameState.CurrentPlayerGuid &&
+                        LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    {
+                        MoveSetCollisionHeight height = new();
+                        height.MoverGUID = guid;
+                        height.Height = updateData.UnitData.MountDisplayID != 0 ? 3.081099f : 2.438083f;
+                        height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
+                        height.Reason = 1; // Mount
+                        SendPacketToClient(height);
+                    }
                 }
                 int UNIT_FIELD_MINDAMAGE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MINDAMAGE);
                 if (UNIT_FIELD_MINDAMAGE >= 0 && updateMaskArray[UNIT_FIELD_MINDAMAGE])
