@@ -1533,19 +1533,19 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(slot);
+            _worldPacket.WriteUInt8(Slot);
             _worldPacket.WritePackedGuid128(Totem);
-            _worldPacket.WriteUInt32(duration);
-            _worldPacket.WriteUInt32(spellid);
-            _worldPacket.WriteUInt32(timemod);
-            _worldPacket.WriteBool(cannotdismiss);
+            _worldPacket.WriteUInt32(Duration);
+            _worldPacket.WriteUInt32(SpellId);
+            _worldPacket.WriteUInt32(TimeMod);
+            _worldPacket.WriteBool(CannotDismiss);
         }
-        public byte slot;
+        public byte Slot;
         public WowGuid128 Totem;
-        public UInt32 duration;
-        public UInt32 spellid;
-        public UInt32 timemod = 1;
-        public bool cannotdismiss = false;
+        public UInt32 Duration;
+        public UInt32 SpellId;
+        public UInt32 TimeMod = 1;
+        public bool CannotDismiss = false;
     }
 
     class TotemDestroyed : ClientPacket
@@ -1554,9 +1554,9 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Read()
         {
-            slot = _worldPacket.ReadUInt8();
+            Slot = _worldPacket.ReadUInt8();
         }
-        public byte slot;
+        public byte Slot;
     }
 
     public class SetSpellModifier : ServerPacket
