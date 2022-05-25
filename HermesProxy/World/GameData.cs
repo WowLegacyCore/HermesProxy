@@ -30,6 +30,8 @@ namespace HermesProxy.World
         public static HashSet<uint> MountAuras = new HashSet<uint>();
         public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
         public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
+        public static Dictionary<uint, TaxiPath> TaxiPaths = new Dictionary<uint, TaxiPath>();
+        public static int[,] TaxiNodesGraph = new int[250,250];
 
         // From Server
         public static Dictionary<uint, ItemTemplate> ItemTemplates = new Dictionary<uint, ItemTemplate>();
@@ -307,6 +309,8 @@ namespace HermesProxy.World
             LoadMountAuras();
             LoadMeleeSpells();
             LoadAutoRepeatSpells();
+            LoadTaxiPaths();
+            LoadTaxiPathNodesGraph();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
@@ -673,6 +677,156 @@ namespace HermesProxy.World
 
                     uint spellId = UInt32.Parse(fields[0]);
                     AutoRepeatSpells.Add(spellId);
+                }
+            }
+        }
+        public static void LoadTaxiPaths()
+        {
+            var path = Path.Combine("CSV", $"TaxiPath{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    TaxiPath taxiPath = new TaxiPath();
+                    taxiPath.Id = UInt32.Parse(fields[0]);
+                    taxiPath.From = UInt32.Parse(fields[1]);
+                    taxiPath.To = UInt32.Parse(fields[2]);
+                    taxiPath.Cost = Int32.Parse(fields[3]);
+                    TaxiPaths.Add(counter, taxiPath);
+                    counter++;
+                }
+            }
+        }
+        public static void LoadTaxiPathNodesGraph()
+        {
+            // Load TaxiNodes (used in calculating first and last parts of path)
+            Dictionary<uint, TaxiNode> TaxiNodes = new Dictionary<uint, TaxiNode>();
+            var pathNodes = Path.Combine("CSV", $"TaxiNodes{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(pathNodes))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    TaxiNode taxiNode = new TaxiNode();
+                    taxiNode.Id = UInt32.Parse(fields[0]);
+                    taxiNode.mapId = UInt32.Parse(fields[1]);
+                    taxiNode.x = float.Parse(fields[2]);
+                    taxiNode.y = float.Parse(fields[3]);
+                    taxiNode.z = float.Parse(fields[4]);
+                    TaxiNodes.Add(taxiNode.Id, taxiNode);
+                }
+            }
+            // Load TaxiPathNode (used in calculating rest of path)
+            Dictionary<uint, TaxiPathNode> TaxiPathNodes = new Dictionary<uint, TaxiPathNode>();
+            var pathPathNodes = Path.Combine("CSV", $"TaxiPathNode{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(pathPathNodes))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    TaxiPathNode taxiPathNode = new TaxiPathNode();
+                    taxiPathNode.Id = UInt32.Parse(fields[0]);
+                    taxiPathNode.pathId = UInt32.Parse(fields[1]);
+                    taxiPathNode.nodeIndex = UInt32.Parse(fields[2]);
+                    taxiPathNode.mapId = UInt32.Parse(fields[3]);
+                    taxiPathNode.x = float.Parse(fields[4]);
+                    taxiPathNode.y = float.Parse(fields[5]);
+                    taxiPathNode.z = float.Parse(fields[6]);
+                    taxiPathNode.flags = UInt32.Parse(fields[7]);
+                    taxiPathNode.delay = UInt32.Parse(fields[8]);
+                    TaxiPathNodes.Add(taxiPathNode.Id, taxiPathNode);
+                }
+            }
+            // calculate distances between nodes
+            for (uint i = 0; i < TaxiPaths.Count; i++)
+            {
+                if (TaxiPaths.ContainsKey(i))
+                {
+                    float dist = 0.0f;
+                    TaxiPath taxiPath = TaxiPaths[i];
+                    TaxiNode nodeFrom = TaxiNodes[TaxiPaths[i].From];
+                    TaxiNode nodeTo = TaxiNodes[TaxiPaths[i].To];
+
+                    if (nodeFrom.x == 0 && nodeFrom.x == 0 && nodeFrom.z == 0)
+                        continue;
+                    if (nodeTo.x == 0 && nodeTo.x == 0 && nodeTo.z == 0)
+                        continue;
+
+                    // save all node ids of this path
+                    HashSet<uint> pathNodeList = new HashSet<uint>();
+                    foreach (var itr in TaxiPathNodes)
+                    {
+                        TaxiPathNode pNode = itr.Value;
+                        if (pNode.pathId != taxiPath.Id)
+                            continue;
+                        pathNodeList.Add(pNode.Id);
+                    }
+                    // sort ids by node index
+                    IEnumerable<uint> query = pathNodeList.OrderBy(node => TaxiPathNodes[node].nodeIndex);
+                    uint curNode = 0;
+                    foreach (var itr in query)
+                    {
+                        TaxiPathNode pNode = TaxiPathNodes[itr];
+                        // calculate distance from start node
+                        if (pNode.nodeIndex == 0)
+                        {
+                            dist += (float)Math.Sqrt(Math.Pow(nodeFrom.x - pNode.x, 2) + Math.Pow(nodeFrom.y - pNode.y, 2));
+                            continue;
+                        }
+                        // set previous node
+                        if (curNode == 0)
+                        {
+                            curNode = pNode.Id;
+                            continue;
+                        }
+                        // calculate distance to previous node
+                        if (curNode != 0)
+                        {
+                            TaxiPathNode prevNode = TaxiPathNodes[curNode];
+                            curNode = pNode.Id;
+                            if (prevNode.mapId != pNode.mapId)
+                                continue;
+
+                            dist += (float)Math.Sqrt(Math.Pow(prevNode.x - pNode.x, 2) + Math.Pow(prevNode.y - pNode.y, 2));
+                        }
+                    }
+                    // calculate distance to last node
+                    if (curNode != 0) // should not happen
+                    {
+                        TaxiPathNode lastNode = TaxiPathNodes[curNode];
+                        dist += (float)Math.Sqrt(Math.Pow(nodeTo.x - lastNode.x, 2) + Math.Pow(nodeTo.y - lastNode.y, 2));
+                    }
+                    TaxiNodesGraph[TaxiPaths[i].From, TaxiPaths[i].To] = dist > 0 ? (int)dist : 0;
                 }
             }
         }
@@ -1854,6 +2008,29 @@ namespace HermesProxy.World
     {
         public bool IsArena;
         public List<uint> MapIds = new List<uint>();
+    }
+    public class TaxiPath
+    {
+        public uint Id;
+        public uint From;
+        public uint To;
+        public int Cost;
+    }
+    public class TaxiNode
+    {
+        public uint Id;
+        public uint mapId;
+        public float x, y, z;
+    }
+    public class TaxiPathNode
+    {
+        public uint Id;
+        public uint pathId;
+        public uint nodeIndex;
+        public uint mapId;
+        public float x, y, z;
+        public uint flags;
+        public uint delay;
     }
     // Hotfix structures
     public class AreaTrigger

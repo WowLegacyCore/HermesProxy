@@ -23,5 +23,6 @@ namespace Framework
         public static readonly int RealmPort = Conf.GetInt("RealmPort", 8084);
         public static readonly int InstancePort = Conf.GetInt("InstancePort", 8086);
         public static readonly bool DebugOutput = Conf.GetBoolean("DebugOutput", false);
+        public static readonly bool PacketsLog = Conf.GetBoolean("PacketsLog", true);
     }
 }
