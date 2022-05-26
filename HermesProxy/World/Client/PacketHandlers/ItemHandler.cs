@@ -219,10 +219,38 @@ namespace HermesProxy.World.Client
         void HandleEnchantmentLog(WorldPacket packet)
         {
             EnchantmentLog enchantment = new EnchantmentLog();
-            enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
-            enchantment.Owner = enchantment.Caster;
-            enchantment.ItemGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
+                enchantment.Owner = packet.ReadPackedGuid().To128(GetSession().GameState);
+            }
+            else
+            {
+                enchantment.Owner = packet.ReadPackedGuid().To128(GetSession().GameState);
+                enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
+            }
             enchantment.ItemID = (int)packet.ReadUInt32();
+            enchantment.ItemGUID = new WowGuid128();
+            WowGuid128 itemOwner = enchantment.Owner;
+            if (enchantment.Owner.Equals(new WowGuid128()))
+            {
+                itemOwner = enchantment.Caster;
+            }
+            ObjectUpdate updateData = new ObjectUpdate(itemOwner, UpdateTypeModern.Values, GetSession());
+            if (updateData != null)
+            {
+                ActivePlayerData activeData = updateData.ActivePlayerData;
+                if (activeData != null)
+                    for (int i = 0; i < 23; i++)
+                    {
+                        if (activeData.InvSlots[i] != null)
+                            if (activeData.InvSlots[i].GetEntry().Equals(enchantment.ItemID))
+                            {
+                                enchantment.ItemGUID = activeData.InvSlots[i];
+                                break;
+                            }
+                    }
+            }
             enchantment.Enchantment = (int)packet.ReadUInt32();
             SendPacketToClient(enchantment);
         }
