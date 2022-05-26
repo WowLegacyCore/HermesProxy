@@ -231,25 +231,16 @@ namespace HermesProxy.World.Client
             }
             enchantment.ItemID = (int)packet.ReadUInt32();
             enchantment.ItemGUID = new WowGuid128();
-            WowGuid128 itemOwner = enchantment.Owner;
-            if (enchantment.Owner.Equals(new WowGuid128()))
+
+            var session = GetSession().GameState;
+
+            for (int i = 0; i < 23; i++)
             {
-                itemOwner = enchantment.Caster;
-            }
-            ObjectUpdate updateData = new ObjectUpdate(itemOwner, UpdateTypeModern.Values, GetSession());
-            if (updateData != null)
-            {
-                ActivePlayerData activeData = updateData.ActivePlayerData;
-                if (activeData != null)
-                    for (int i = 0; i < 23; i++)
-                    {
-                        if (activeData.InvSlots[i] != null)
-                            if (activeData.InvSlots[i].GetEntry().Equals(enchantment.ItemID))
-                            {
-                                enchantment.ItemGUID = activeData.InvSlots[i];
-                                break;
-                            }
-                    }
+                if (session.GetItemId(session.GetInventorySlotItem(i).To128(session)).Equals((uint)enchantment.ItemID))
+                {
+                    enchantment.ItemGUID = session.GetInventorySlotItem(i).To128(session);
+                    break;
+                }
             }
             enchantment.Enchantment = (int)packet.ReadUInt32();
             SendPacketToClient(enchantment);

@@ -140,6 +140,19 @@ namespace HermesProxy
             uint itemId = updates[OBJECT_FIELD_ENTRY].UInt32Value;
             return GameData.GetItemEffectSlot(itemId, spellId);
         }
+        public uint GetItemId(WowGuid128 guid)
+        {
+            int OBJECT_FIELD_ENTRY = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_ENTRY);
+            if (OBJECT_FIELD_ENTRY < 0)
+                return 0;
+
+            var updates = GetCachedObjectFieldsLegacy(guid);
+            if (updates == null)
+                return 0;
+
+            uint itemId = updates[OBJECT_FIELD_ENTRY].UInt32Value;
+            return itemId;
+        }
         public void SetFlatSpellMod(byte spellMod, byte spellMask, int amount)
         {
             if (FlatSpellMods.ContainsKey(spellMod))
