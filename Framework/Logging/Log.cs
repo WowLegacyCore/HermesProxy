@@ -48,7 +48,7 @@ namespace Framework.Logging
                         if (msg.Type == LogType.Debug && !Framework.Settings.DebugOutput)
                             continue;
 
-                        Console.Write($"{DateTime.Now:H:mm:ss} |");
+                        Console.Write($"{DateTime.Now:HH:mm:ss} |");
 
                         Console.ForegroundColor = LogToColorType[msg.Type].Color;
                         Console.Write($"{LogToColorType[msg.Type].Type}");
