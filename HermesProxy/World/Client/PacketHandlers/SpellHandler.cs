@@ -1078,6 +1078,17 @@ namespace HermesProxy.World.Client
             SendPacketToClient(revive);
         }
 
+        [PacketHandler(Opcode.SMSG_TOTEM_CREATED)]
+        void HandleTotemCreated(WorldPacket packet)
+        {
+            TotemCreated totem = new();
+            totem.Slot = packet.ReadUInt8();
+            totem.Totem = packet.ReadGuid().To128(GetSession().GameState);
+            totem.Duration = packet.ReadUInt32();
+            totem.SpellId = packet.ReadUInt32();
+            SendPacketToClient(totem);
+        }
+
         [PacketHandler(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER)]
         [PacketHandler(Opcode.SMSG_SET_PCT_SPELL_MODIFIER)]
         void HandleSetSpellModifier(WorldPacket packet)
