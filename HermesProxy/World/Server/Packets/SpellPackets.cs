@@ -1555,8 +1555,10 @@ namespace HermesProxy.World.Server.Packets
         public override void Read()
         {
             Slot = _worldPacket.ReadUInt8();
+            Guid = _worldPacket.ReadPackedGuid128();
         }
         public byte Slot;
+        public WowGuid Guid;
     }
 
     public class SetSpellModifier : ServerPacket

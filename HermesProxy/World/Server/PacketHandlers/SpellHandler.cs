@@ -370,6 +370,9 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_TOTEM_DESTROYED)]
         void HandleTotemDestroyed(TotemDestroyed totem)
         {
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                return;
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_TOTEM_DESTROYED);
             packet.WriteUInt8(totem.Slot);
             SendPacketToServer(packet);
