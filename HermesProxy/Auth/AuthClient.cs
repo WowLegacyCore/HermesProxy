@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using HermesProxy.Enums;
 using System.Numerics;
+using System.Threading.Tasks;
 using Framework.Constants;
 using Framework.Cryptography;
 using Framework;
@@ -16,25 +17,23 @@ namespace HermesProxy.Auth
     public class AuthClient
     {
         Socket _clientSocket;
-        bool? _isSuccessful = null;
+        TaskCompletionSource<AuthResult> _response;
         byte[] _passwordHash;
         BigInteger _key;
         byte[] _m2;
         bool _hasRealmList;
         string _username;
-        string _password;
         string _locale;
 
-        public bool ConnectToAuthServer(string username, string password, string locale)
+        public AuthResult ConnectToAuthServer(string username, string password, string locale)
         {
             _username = username;
-            _password = password;
             _locale = locale;
 
-            _isSuccessful = null;
+            _response = new ();
             _hasRealmList = false;
 
-            string authstring = $"{_username.ToUpper()}:{_password}";
+            string authstring = $"{_username.ToUpper()}:{password}";
             _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
 
             try
@@ -48,15 +47,19 @@ namespace HermesProxy.Auth
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Socket Error: {ex.Message}");
-                _isSuccessful = false;
+                _response.SetResult(AuthResult.FAIL_INTERNAL_ERROR);
             }
 
-            while (_isSuccessful == null)
-            { }
+            _response.Task.Wait();
 
-            return (bool)_isSuccessful;
+            return _response.Task.Result;
         }
 
+        private void SetAuthResponse(AuthResult response)
+        {
+            _response.TrySetResult(response);
+        }
+        
         public void Disconnect()
         {
             if (!IsConnected())
@@ -89,7 +92,7 @@ namespace HermesProxy.Auth
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
-                _isSuccessful = false;
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
 
@@ -101,8 +104,7 @@ namespace HermesProxy.Auth
 
                 if (received == 0)
                 {
-                    if (_isSuccessful == null)
-                        _isSuccessful = false;
+                    SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
 
                     Log.Print(LogType.Error, "Socket Closed By Server");
                     return;
@@ -122,7 +124,7 @@ namespace HermesProxy.Auth
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Packet Read Error: {ex.Message}");
-                _isSuccessful = false;
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
 
@@ -135,7 +137,7 @@ namespace HermesProxy.Auth
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Packet Send Error: {ex.Message}");
-                _isSuccessful = false;
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
 
@@ -148,7 +150,7 @@ namespace HermesProxy.Auth
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Packet Write Error: {ex.Message}");
-                _isSuccessful = false;
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
 
@@ -171,7 +173,7 @@ namespace HermesProxy.Auth
                     break;
                 default:
                     Log.Print(LogType.Error, $"No handler for opcode {opcode}!");
-                    _isSuccessful = false;
+                    SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
                     break;
             }
         }
@@ -207,7 +209,7 @@ namespace HermesProxy.Auth
             if (error != AuthResult.SUCCESS)
             {
                 Log.Print(LogType.Error, $"Login failed. Reason: {error}");
-                _isSuccessful = false;
+                SetAuthResponse(error);
                 return;
             }
 
@@ -375,7 +377,7 @@ namespace HermesProxy.Auth
             if (error != AuthResult.SUCCESS)
             {
                 Log.Print(LogType.Error, $"Login failed. Reason: {error}");
-                _isSuccessful = false;
+                SetAuthResponse(error);
                 return;
             }
 
@@ -408,12 +410,12 @@ namespace HermesProxy.Auth
             if (!equal)
             {
                 Log.Print(LogType.Error, "Authentication failed!");
-                _isSuccessful = false;
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
             else
             {
                 Log.Print(LogType.Network, "Authentication succeeded!");
-                _isSuccessful = true;
+                SetAuthResponse(AuthResult.SUCCESS);
             }
         }
 
