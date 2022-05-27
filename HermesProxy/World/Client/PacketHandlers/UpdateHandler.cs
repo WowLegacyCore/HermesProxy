@@ -346,8 +346,6 @@ namespace HermesProxy.World.Client
                 });
         }
 
-        private const bool DebugUpdates = false;
-
         private void PrintString(string txt, params object[] indexes)
         {
 #if DEBUG_UPDATES
