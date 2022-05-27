@@ -42,7 +42,7 @@ namespace HermesProxy.World
         public uint GetOpcode() { return _worldPacket.GetOpcode(); }
         public Opcode GetUniversalOpcode()
         {
-            return Opcodes.GetUniversalOpcode(GetOpcode(), Framework.Settings.ClientBuild);
+            return ModernVersion.GetUniversalOpcode(GetOpcode());
         }
 
         public void LogPacket(ref SniffFile sniffFile)
@@ -67,7 +67,7 @@ namespace HermesProxy.World
         {
             connectionType = ConnectionType.Realm;
 
-            uint opcode = Opcodes.GetOpcodeValueForVersion(universalOpcode, Framework.Settings.ClientBuild);
+            uint opcode = ModernVersion.GetCurrentOpcode(universalOpcode);
             System.Diagnostics.Trace.Assert(opcode != 0);
             _worldPacket = new WorldPacket(opcode);
         }
@@ -76,7 +76,7 @@ namespace HermesProxy.World
         {
             connectionType = type;
 
-            uint opcode = Opcodes.GetOpcodeValueForVersion(universalOpcode, Framework.Settings.ClientBuild);
+            uint opcode = ModernVersion.GetCurrentOpcode(universalOpcode);
             System.Diagnostics.Trace.Assert(opcode != 0);
             _worldPacket = new WorldPacket(opcode);
         }
@@ -93,7 +93,7 @@ namespace HermesProxy.World
         }
         public Opcode GetUniversalOpcode()
         {
-            return Opcodes.GetUniversalOpcode(GetOpcode(), Framework.Settings.ClientBuild);
+            return ModernVersion.GetUniversalOpcode(GetOpcode());
         }
 
         public byte[] GetData()
@@ -143,7 +143,7 @@ namespace HermesProxy.World
 
         public WorldPacket(Opcode opcode)
         {
-            this.opcode = Opcodes.GetOpcodeValueForVersion(opcode, Framework.Settings.ServerBuild);
+            this.opcode = LegacyVersion.GetCurrentOpcode(opcode);
             System.Diagnostics.Trace.Assert(this.opcode != 0);
         }
 
@@ -305,7 +305,10 @@ namespace HermesProxy.World
         public uint GetOpcode() { return opcode; }
         public Opcode GetUniversalOpcode(bool isModern)
         {
-            return Opcodes.GetUniversalOpcode(GetOpcode(), isModern ? Framework.Settings.ClientBuild : Framework.Settings.ServerBuild);
+            if (isModern)
+                return ModernVersion.GetUniversalOpcode(GetOpcode());
+            else
+                return LegacyVersion.GetUniversalOpcode(GetOpcode());
         }
 
         public long GetReceivedTime() { return m_receivedTime; }

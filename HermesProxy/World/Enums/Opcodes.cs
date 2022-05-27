@@ -44,52 +44,41 @@ namespace HermesProxy.World.Enums
             }
             return ClientVersionBuild.Zero;
         }
-        public static uint GetOpcodeValueForVersion(Opcode opcode, ClientVersionBuild version)
+
+        public static Type GetOpcodesEnumForVersion(ClientVersionBuild version)
         {
             switch (GetOpcodesDefiningBuild(version))
             {
                 case ClientVersionBuild.V1_12_1_5875:
-                    return FindOpcodeValueInEnum<V1_12_1_5875.Opcode>(opcode.ToString());
+                    return typeof(V1_12_1_5875.Opcode);
                 case ClientVersionBuild.V2_4_3_8606:
-                    return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode.ToString());
+                    return typeof(V2_4_3_8606.Opcode);
                 case ClientVersionBuild.V3_3_5a_12340:
-                    return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode.ToString());
+                    return typeof(V3_3_5_12340.Opcode);
                 case ClientVersionBuild.V2_5_2_39570:
-                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode.ToString());
+                    return typeof(V2_5_2_39570.Opcode);
             }
-            return 0;
+            return null;
         }
 
-        public static uint GetOpcodeValueForVersion(string opcode, ClientVersionBuild version)
+        public static uint GetOpcodeValueForVersion(Opcode opcode, ClientVersionBuild version)
         {
-            switch (GetOpcodesDefiningBuild(version))
-            {
-                case ClientVersionBuild.V1_12_1_5875:
-                    return FindOpcodeValueInEnum<V1_12_1_5875.Opcode>(opcode);
-                case ClientVersionBuild.V2_4_3_8606:
-                    return FindOpcodeValueInEnum<V2_4_3_8606.Opcode>(opcode);
-                case ClientVersionBuild.V3_3_5a_12340:
-                    return FindOpcodeValueInEnum<V3_3_5_12340.Opcode>(opcode);
-                case ClientVersionBuild.V2_5_2_39570:
-                    return FindOpcodeValueInEnum<V2_5_2_39570.Opcode>(opcode);
-            }
+            return GetOpcodeValueForVersion(opcode.ToString(), version);
+        }
+
+        public static uint GetOpcodeValueForVersion(string opcodeName, ClientVersionBuild version)
+        {
+            object opcode;
+            if (Enum.TryParse(GetOpcodesEnumForVersion(version), opcodeName, out opcode))
+                return (uint)opcode;
+
             return 0;
         }
 
         public static string GetOpcodeNameForVersion(uint opcode, ClientVersionBuild version)
         {
-            switch (GetOpcodesDefiningBuild(version))
-            {
-                case ClientVersionBuild.V1_12_1_5875:
-                    return FindOpcodeNameInEnum<V1_12_1_5875.Opcode>(opcode);
-                case ClientVersionBuild.V2_4_3_8606:
-                    return FindOpcodeNameInEnum<V2_4_3_8606.Opcode>(opcode);
-                case ClientVersionBuild.V3_3_5a_12340:
-                    return FindOpcodeNameInEnum<V3_3_5_12340.Opcode>(opcode);
-                case ClientVersionBuild.V2_5_2_39570:
-                    return FindOpcodeNameInEnum<V2_5_2_39570.Opcode>(opcode);
-            }
-            return "UNKNOWN";
+            Type enumType = GetOpcodesEnumForVersion(version);
+            return Enum.ToObject(enumType, opcode).ToString();
         }
 
         public static Opcode GetUniversalOpcode(uint opcode, ClientVersionBuild version)
@@ -100,11 +89,10 @@ namespace HermesProxy.World.Enums
 
         public static Opcode GetUniversalOpcode(string name)
         {
-            foreach (var item in Enum.GetValues(typeof(Opcode)))
-            {
-                if (Enum.GetName(typeof(Opcode), item) == name)
-                    return (Opcode)item;
-            }
+            object opcode;
+            if (Enum.TryParse(typeof(Opcode), name, out opcode))
+                return (Opcode)opcode;
+
             return Opcode.MSG_NULL_ACTION;
         }
 
@@ -129,7 +117,7 @@ namespace HermesProxy.World.Enums
         }
     }
 
-    public enum Opcode
+    public enum Opcode : uint
     {
         /* Generic opcode enumeration
         * Every opcode _name_ should be here (any version)
@@ -3235,6 +3223,7 @@ namespace HermesProxy.World.Enums
         SMSG_UNKNOWN_8,
         SMSG_UNLEARNED_SPELLS,
         SMSG_UNLOAD_CHILD_MAP,
+        SMSG_UPDATE_AADC_STATUS_RESPONSE,
         SMSG_UPDATE_ACCOUNT_DATA,
         SMSG_UPDATE_ACCOUNT_DATA_COMPLETE,
         SMSG_UPDATE_ACTION_BUTTONS,

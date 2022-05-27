@@ -50,7 +50,7 @@ namespace HermesProxy.World
 
             uint unixtime = (uint)Time.UnixTime;
             _fileWriter.Write(unixtime);
-            _fileWriter.Write(unixtime); // tick count
+            _fileWriter.Write(Environment.TickCount);
 
             if (isFromClient)
             {
