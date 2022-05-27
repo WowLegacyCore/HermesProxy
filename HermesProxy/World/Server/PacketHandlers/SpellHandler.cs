@@ -108,7 +108,7 @@ namespace HermesProxy.World.Server
                 GameData.AutoRepeatSpells.Contains(cast.Cast.SpellID))
             {
                 ClientCastRequest castRequest = new ClientCastRequest();
-                castRequest.Timestamp = Time.UnixTime;
+                castRequest.Timestamp = Environment.TickCount;
                 castRequest.SpellId = cast.Cast.SpellID;
                 castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
                 castRequest.ClientGUID = cast.Cast.CastID;
@@ -134,7 +134,7 @@ namespace HermesProxy.World.Server
             else
             {
                 ClientCastRequest castRequest = new ClientCastRequest();
-                castRequest.Timestamp = Time.UnixTime;
+                castRequest.Timestamp = Environment.TickCount;
                 castRequest.SpellId = cast.Cast.SpellID;
                 castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
                 castRequest.ClientGUID = cast.Cast.CastID;
@@ -148,7 +148,7 @@ namespace HermesProxy.World.Server
                     }
                     else
                     {
-                        if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10 < castRequest.Timestamp)
+                        if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10000 < castRequest.Timestamp)
                         {
                             SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
                             GetSession().GameState.CurrentClientNormalCast = null;
@@ -191,7 +191,7 @@ namespace HermesProxy.World.Server
         void HandlePetCastSpell(PetCastSpell cast)
         {
             ClientCastRequest castRequest = new ClientCastRequest();
-            castRequest.Timestamp = Time.UnixTime;
+            castRequest.Timestamp = Environment.TickCount;
             castRequest.SpellId = cast.Cast.SpellID;
             castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
             castRequest.ClientGUID = cast.Cast.CastID;
@@ -205,7 +205,7 @@ namespace HermesProxy.World.Server
                 }
                 else
                 {
-                    if (GetSession().GameState.CurrentClientPetCast.Timestamp + 10 < castRequest.Timestamp)
+                    if (GetSession().GameState.CurrentClientPetCast.Timestamp + 10000 < castRequest.Timestamp)
                     {
                         SendCastRequestFailed(GetSession().GameState.CurrentClientPetCast, true);
                         GetSession().GameState.CurrentClientPetCast = null;
@@ -238,7 +238,7 @@ namespace HermesProxy.World.Server
         void HandleUseItem(UseItem use)
         {
             ClientCastRequest castRequest = new ClientCastRequest();
-            castRequest.Timestamp = Time.UnixTime;
+            castRequest.Timestamp = Environment.TickCount;
             castRequest.SpellId = use.Cast.SpellID;
             castRequest.SpellXSpellVisualId = use.Cast.SpellXSpellVisualID;
             castRequest.ClientGUID = use.Cast.CastID;
@@ -253,7 +253,7 @@ namespace HermesProxy.World.Server
                 }
                 else
                 {
-                    if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10 < castRequest.Timestamp)
+                    if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10000 < castRequest.Timestamp)
                     {
                         SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
                         GetSession().GameState.CurrentClientNormalCast = null;

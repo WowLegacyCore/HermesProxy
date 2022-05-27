@@ -466,7 +466,7 @@ namespace HermesProxy.World.Client
 
             bool isTaxiFlight = (hasTaxiFlightFlags &&
                                 (GetSession().GameState.IsWaitingForTaxiStart ||
-                                 GetSession().GameState.CurrentPlayerCreateTime == packet.GetReceivedTime()) &&
+                                 Math.Abs(packet.GetReceivedTime() - GetSession().GameState.CurrentPlayerCreateTime) <= 1000) &&
                                  GetSession().GameState.CurrentPlayerGuid == guid);
 
             if (isTaxiFlight)

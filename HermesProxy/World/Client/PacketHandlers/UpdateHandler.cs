@@ -1,4 +1,6 @@
-﻿using Framework.GameMath;
+﻿//#define DEBUG_UPDATES
+
+using Framework.GameMath;
 using Framework.Logging;
 using Framework.Util;
 using HermesProxy.Enums;
@@ -345,16 +347,19 @@ namespace HermesProxy.World.Client
         }
 
         private const bool DebugUpdates = false;
+
         private void PrintString(string txt, params object[] indexes)
         {
-            if (DebugUpdates)
-                Console.WriteLine("{0}{1}", GetIndexString(indexes), txt);
+#if DEBUG_UPDATES
+            Console.WriteLine("{0}{1}", GetIndexString(indexes), txt);
+#endif
         }
 
         private T PrintValue<T>(string name, T obj, params object[] indexes)
         {
-            if (DebugUpdates)
-                Console.WriteLine("{0}{1}: {2}", GetIndexString(indexes), name, obj);
+#if DEBUG_UPDATES
+            Console.WriteLine("{0}{1}: {2}", GetIndexString(indexes), name, obj);
+#endif
             return obj;
         }
 

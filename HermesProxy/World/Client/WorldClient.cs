@@ -185,7 +185,7 @@ namespace HermesProxy.World.Client
                     }
 
                     WorldPacket packet = new WorldPacket(buffer);
-                    packet.SetReceiveTime(Time.UnixTime);
+                    packet.SetReceiveTime(Environment.TickCount);
                     HandlePacket(packet);
                 }
                 else

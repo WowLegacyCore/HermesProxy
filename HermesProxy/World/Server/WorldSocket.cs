@@ -60,8 +60,6 @@ namespace HermesProxy.World.Server
         ConnectToKey _instanceConnectKey;
         RealmId _realmId;
 
-        long _LastPingTime;
-
         ZLib.z_stream _compressionStream;
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         GlobalSessionData _globalSession;
@@ -1021,15 +1019,6 @@ namespace HermesProxy.World.Server
 
         void HandlePing(Ping ping)
         {
-            if (_LastPingTime == 0)
-                _LastPingTime = Time.UnixTime; // for 1st ping
-            else
-            {
-                long now = Time.UnixTime;
-                long diff = now - _LastPingTime;
-                _LastPingTime = now;
-            }
-
             SendPacket(new Pong(ping.Serial));
         }
 
