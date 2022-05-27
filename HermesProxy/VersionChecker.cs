@@ -29,7 +29,56 @@ namespace HermesProxy
             UpdateFieldDictionary = new Dictionary<Type, SortedList<int, UpdateFieldInfo>>();
             UpdateFieldNameDictionary = new Dictionary<Type, Dictionary<string, int>>();
             if (!LoadUFDictionariesInto(UpdateFieldDictionary, UpdateFieldNameDictionary))
-                Log.Print(LogType.Error, "Could not load update fields for current server version.");
+                Log.Print(LogType.Error, "Could not load update fields for current legacy version.");
+            if (!LoadOpcodeDictionaries())
+                Log.Print(LogType.Error, "Could not load opcodes for current legacy version.");
+        }
+
+        private static readonly Dictionary<uint, Opcode> CurrentToUniversalOpcodeDictionary = new();
+        private static readonly Dictionary<Opcode, uint> UniversalToCurrentOpcodeDictionary = new();
+
+        private static bool LoadOpcodeDictionaries()
+        {
+            Type enumType = Opcodes.GetOpcodesEnumForVersion(Build);
+            if (enumType == null)
+                return false;
+
+            foreach (var item in Enum.GetValues(enumType))
+            {
+                string oldOpcodeName = Enum.GetName(enumType, item);
+                Opcode universalOpcode = Opcodes.GetUniversalOpcode(oldOpcodeName);
+                if (universalOpcode == Opcode.MSG_NULL_ACTION &&
+                    oldOpcodeName != "MSG_NULL_ACTION")
+                {
+                    Log.Print(LogType.Error, $"Opcode {oldOpcodeName} is missing from the universal opcode enum!");
+                    continue;
+                }
+
+                CurrentToUniversalOpcodeDictionary.Add((uint)item, universalOpcode);
+                UniversalToCurrentOpcodeDictionary.Add(universalOpcode, (uint)item);
+            }
+
+            if (CurrentToUniversalOpcodeDictionary.Count < 1)
+                return false;
+
+            Log.Print(LogType.Server, $"Loaded {CurrentToUniversalOpcodeDictionary.Count} legacy opcodes.");
+            return true;
+        }
+
+        public static Opcode GetUniversalOpcode(uint opcode)
+        {
+            Opcode universalOpcode;
+            if (CurrentToUniversalOpcodeDictionary.TryGetValue(opcode, out universalOpcode))
+                return universalOpcode;
+            return Opcode.MSG_NULL_ACTION;
+        }
+
+        public static uint GetCurrentOpcode(Opcode universalOpcode)
+        {
+            uint opcode;
+            if (UniversalToCurrentOpcodeDictionary.TryGetValue(universalOpcode, out opcode))
+                return opcode;
+            return 0;
         }
 
         private static readonly Dictionary<Type, SortedList<int, UpdateFieldInfo>> UpdateFieldDictionary;
@@ -284,7 +333,56 @@ namespace HermesProxy
             UpdateFieldDictionary = new Dictionary<Type, SortedList<int, UpdateFieldInfo>>();
             UpdateFieldNameDictionary = new Dictionary<Type, Dictionary<string, int>>();
             if (!LoadUFDictionariesInto(UpdateFieldDictionary, UpdateFieldNameDictionary))
-                Log.Print(LogType.Error, "Could not load update fields for current server version.");
+                Log.Print(LogType.Error, "Could not load update fields for current modern version.");
+            if (!LoadOpcodeDictionaries())
+                Log.Print(LogType.Error, "Could not load opcodes for current modern version.");
+        }
+
+        private static readonly Dictionary<uint, Opcode> CurrentToUniversalOpcodeDictionary = new();
+        private static readonly Dictionary<Opcode, uint> UniversalToCurrentOpcodeDictionary = new();
+
+        private static bool LoadOpcodeDictionaries()
+        {
+            Type enumType = Opcodes.GetOpcodesEnumForVersion(Build);
+            if (enumType == null)
+                return false;
+
+            foreach (var item in Enum.GetValues(enumType))
+            {
+                string oldOpcodeName = Enum.GetName(enumType, item);
+                Opcode universalOpcode = Opcodes.GetUniversalOpcode(oldOpcodeName);
+                if (universalOpcode == Opcode.MSG_NULL_ACTION &&
+                    oldOpcodeName != "MSG_NULL_ACTION")
+                {
+                    Log.Print(LogType.Error, $"Opcode {oldOpcodeName} is missing from the universal opcode enum!");
+                    continue;
+                }
+
+                CurrentToUniversalOpcodeDictionary.Add((uint)item, universalOpcode);
+                UniversalToCurrentOpcodeDictionary.Add(universalOpcode, (uint)item);
+            }
+
+            if (CurrentToUniversalOpcodeDictionary.Count < 1)
+                return false;
+
+            Log.Print(LogType.Server, $"Loaded {CurrentToUniversalOpcodeDictionary.Count} modern opcodes.");
+            return true;
+        }
+
+        public static Opcode GetUniversalOpcode(uint opcode)
+        {
+            Opcode universalOpcode;
+            if (CurrentToUniversalOpcodeDictionary.TryGetValue(opcode, out universalOpcode))
+                return universalOpcode;
+            return Opcode.MSG_NULL_ACTION;
+        }
+
+        public static uint GetCurrentOpcode(Opcode universalOpcode)
+        {
+            uint opcode;
+            if (UniversalToCurrentOpcodeDictionary.TryGetValue(universalOpcode, out opcode))
+                return opcode;
+            return 0;
         }
 
         private static readonly Dictionary<Type, SortedList<int, UpdateFieldInfo>> UpdateFieldDictionary;

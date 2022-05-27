@@ -241,7 +241,7 @@ namespace HermesProxy.World.Client
                 header.Opcode = packet.GetOpcode();
                 header.Write(buffer);
 
-                Log.Print(LogType.Debug, $"Sending opcode {Opcodes.GetOpcodeNameForVersion(header.Opcode, Settings.ServerBuild)} ({header.Opcode}) with size {header.Size}.");
+                Log.Print(LogType.Debug, $"Sending opcode {LegacyVersion.GetUniversalOpcode(header.Opcode)} ({header.Opcode}) with size {header.Size}.");
 
                 byte[] headerArray = buffer.GetData();
                 if (_worldCrypt != null)

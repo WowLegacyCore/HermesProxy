@@ -371,7 +371,7 @@ namespace HermesProxy.World.Server
                 buffer.WriteBytes(compressedData, compressedSize);
 
                 packetSize = (int)(compressedSize + 12);
-                opcode = (ushort)Opcodes.GetOpcodeValueForVersion(Opcode.SMSG_COMPRESSED_PACKET, Framework.Settings.ClientBuild);
+                opcode = (ushort)ModernVersion.GetCurrentOpcode(Opcode.SMSG_COMPRESSED_PACKET);
                 System.Diagnostics.Trace.Assert(opcode != 0);
 
                 data = buffer.GetData();
