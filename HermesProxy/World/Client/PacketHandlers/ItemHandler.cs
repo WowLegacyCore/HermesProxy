@@ -226,12 +226,10 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                enchantment.Owner = packet.ReadPackedGuid().To128(GetSession().GameState);
-                enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
+                enchantment.Owner = packet.ReadGuid().To128(GetSession().GameState);
+                enchantment.Caster = packet.ReadGuid().To128(GetSession().GameState);
             }
             enchantment.ItemID = (int)packet.ReadUInt32();
-            enchantment.ItemGUID = new WowGuid128();
-
             var session = GetSession().GameState;
 
             for (int i = 0; i < 23; i++)
@@ -242,6 +240,9 @@ namespace HermesProxy.World.Client
                     break;
                 }
             }
+            if (enchantment.ItemGUID == null)
+                return;
+
             enchantment.Enchantment = (int)packet.ReadUInt32();
             SendPacketToClient(enchantment);
         }
