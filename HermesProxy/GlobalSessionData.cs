@@ -56,6 +56,7 @@ namespace HermesProxy
         public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
         public WowGuid64 LastLootTargetGuid;
         public List<int> ActionButtons = new();
+        public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationUpdateTime = new();
         public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationLeft = new();
         public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationFull = new();
         public Dictionary<WowGuid128, Dictionary<byte, WowGuid128>> UnitAuraCaster = new();
@@ -303,7 +304,7 @@ namespace HermesProxy
                 return BattleFieldQueueTypes[queueSlot];
             return 0;
         }
-        public void StoreAuraDurationLeft(WowGuid128 guid, byte slot, int duration)
+        public void StoreAuraDurationLeft(WowGuid128 guid, byte slot, int duration, int currentTime)
         {
             if (UnitAuraDurationLeft.ContainsKey(guid))
             {
@@ -317,6 +318,20 @@ namespace HermesProxy
                 Dictionary<byte, int> dict = new Dictionary<byte, int>();
                 dict.Add(slot, duration);
                 UnitAuraDurationLeft.Add(guid, dict);
+            }
+
+            if (UnitAuraDurationUpdateTime.ContainsKey(guid))
+            {
+                if (UnitAuraDurationUpdateTime[guid].ContainsKey(slot))
+                    UnitAuraDurationUpdateTime[guid][slot] = currentTime;
+                else
+                    UnitAuraDurationUpdateTime[guid].Add(slot, currentTime);
+            }
+            else
+            {
+                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                dict.Add(slot, currentTime);
+                UnitAuraDurationUpdateTime.Add(guid, dict);
             }
         }
         public void StoreAuraDurationFull(WowGuid128 guid, byte slot, int duration)
@@ -337,6 +352,10 @@ namespace HermesProxy
         }
         public void ClearAuraDuration(WowGuid128 guid, byte slot)
         {
+            if (UnitAuraDurationUpdateTime.ContainsKey(guid) &&
+                UnitAuraDurationUpdateTime[guid].ContainsKey(slot))
+                UnitAuraDurationUpdateTime[guid].Remove(slot);
+
             if (UnitAuraDurationLeft.ContainsKey(guid) &&
                 UnitAuraDurationLeft[guid].ContainsKey(slot))
                 UnitAuraDurationLeft[guid].Remove(slot);
@@ -358,6 +377,11 @@ namespace HermesProxy
                 full = UnitAuraDurationFull[guid][slot];
             else
                 full = left;
+
+            if (left > 0 &&
+                UnitAuraDurationUpdateTime.ContainsKey(guid) &&
+                UnitAuraDurationUpdateTime[guid].ContainsKey(slot))
+                left = left - (System.Environment.TickCount - UnitAuraDurationUpdateTime[guid][slot]);
         }
         public void StoreAuraCaster(WowGuid128 target, byte slot, WowGuid128 caster)
         {

@@ -1537,14 +1537,15 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WritePackedGuid128(Totem);
             _worldPacket.WriteUInt32(Duration);
             _worldPacket.WriteUInt32(SpellId);
-            _worldPacket.WriteUInt32(TimeMod);
-            _worldPacket.WriteBool(CannotDismiss);
+            _worldPacket.WriteFloat(TimeMod);
+            _worldPacket.WriteBit(CannotDismiss);
+            _worldPacket.FlushBits();
         }
         public byte Slot;
         public WowGuid128 Totem;
-        public UInt32 Duration;
-        public UInt32 SpellId;
-        public UInt32 TimeMod = 1;
+        public uint Duration;
+        public uint SpellId;
+        public float TimeMod = 1;
         public bool CannotDismiss = false;
     }
 

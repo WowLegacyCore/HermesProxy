@@ -1705,6 +1705,22 @@ namespace HermesProxy.World.Client
                 if (UNIT_CREATED_BY_SPELL >= 0 && updateMaskArray[UNIT_CREATED_BY_SPELL])
                 {
                     updateData.UnitData.CreatedBySpell = updates[UNIT_CREATED_BY_SPELL].Int32Value;
+
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180) &&
+                        isCreate && updateData.UnitData.CreatedBy == GetSession().GameState.CurrentPlayerGuid)
+                    {
+                        int totemSlot = GameData.GetTotemSlotForSpell((uint)updateData.UnitData.CreatedBySpell);
+                        if (totemSlot >= 0)
+                        {
+                            TotemCreated totem = new();
+                            totem.Slot = (byte)totemSlot;
+                            totem.Totem = guid;
+                            totem.Duration = 120000;
+                            totem.SpellId = (uint)updateData.UnitData.CreatedBySpell;
+                            totem.CannotDismiss = true;
+                            SendPacketToClient(totem);
+                        }
+                    }
                 }
                 int UNIT_NPC_FLAGS = LegacyVersion.GetUpdateField(UnitField.UNIT_NPC_FLAGS);
                 if (UNIT_NPC_FLAGS >= 0 && updateMaskArray[UNIT_NPC_FLAGS])

@@ -661,15 +661,15 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WritePackedGuid128(Caster);
             _worldPacket.WritePackedGuid128(Owner);
+            _worldPacket.WritePackedGuid128(Caster);
             _worldPacket.WritePackedGuid128(ItemGUID);
             _worldPacket.WriteInt32(ItemID);
             _worldPacket.WriteInt32(Enchantment);
             _worldPacket.WriteInt32(EnchantSlot);
         }
-        public WowGuid128 Caster;
         public WowGuid128 Owner;
+        public WowGuid128 Caster;
         public WowGuid128 ItemGUID;
         public int ItemID;
         public int Enchantment;
