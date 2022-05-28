@@ -221,8 +221,8 @@ namespace HermesProxy.World.Client
             EnchantmentLog enchantment = new EnchantmentLog();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
                 enchantment.Owner = packet.ReadPackedGuid().To128(GetSession().GameState);
+                enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
             }
             else
             {
