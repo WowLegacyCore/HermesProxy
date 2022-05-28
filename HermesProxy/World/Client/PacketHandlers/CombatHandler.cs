@@ -153,5 +153,51 @@ namespace HermesProxy.World.Client
             log.Victim = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(log);
         }
+        [PacketHandler(Opcode.SMSG_THREAT_UPDATE)]
+        void HandleThreatUpdate(WorldPacket packet)
+        {
+            ThreatUpdate update = new();
+            update.UnitGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            update.ThreatListCount = packet.ReadUInt32();
+            for (int i = 0; i < update.ThreatListCount; i++)
+            {
+                var temp = new ThreatInfo();
+                temp.UnitGUID = packet.ReadPackedGuid128().To128(GetSession().GameState);
+                temp.Threat = (int)packet.ReadUInt32();
+                update.ThreatList.Add(temp);
+            }
+            SendPacketToClient(update);
+        }
+        [PacketHandler(Opcode.SMSG_HIGHEST_THREAT_UPDATE)]
+        void HandleHighestThreatUpdate(WorldPacket packet)
+        {
+            HighestThreatUpdate update = new();
+            update.UnitGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            update.HighestThreatGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            update.ThreatListCount = packet.ReadUInt32();
+            for (int i = 0; i < update.ThreatListCount; i++)
+            {
+                var temp = new ThreatInfo();
+                temp.UnitGUID = packet.ReadPackedGuid128().To128(GetSession().GameState);
+                temp.Threat = (int)packet.ReadUInt32();
+                update.ThreatList.Add(temp);
+            }
+            SendPacketToClient(update);
+        }
+        [PacketHandler(Opcode.SMSG_THREAT_CLEAR)]
+        void HandleThreatClear(WorldPacket packet)
+        {
+            ThreatClear clear = new();
+            clear.UnitGUID = packet.ReadPackedGuid128().To128(GetSession().GameState);
+            SendPacketToClient(clear);
+        }
+        [PacketHandler(Opcode.SMSG_THREAT_REMOVE)]
+        void HandleThreatRemove(WorldPacket packet)
+        {
+            ThreatRemove remove = new();
+            remove.UnitGUID = packet.ReadPackedGuid128().To128(GetSession().GameState);
+            remove.AboutGUID = packet.ReadPackedGuid128().To128(GetSession().GameState);
+            SendPacketToClient(remove);
+        }
     }
 }

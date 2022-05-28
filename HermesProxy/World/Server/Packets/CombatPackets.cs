@@ -282,4 +282,71 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 Player;
         public WowGuid128 Victim;
     }
+
+    public struct ThreatInfo
+    {
+        public WowGuid128 UnitGUID;
+        public int Threat;
+    }
+
+    class ThreatUpdate : ServerPacket
+    {
+        public ThreatUpdate() : base(Opcode.SMSG_THREAT_UPDATE) { }
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WriteUInt32(ThreatListCount);
+            foreach (var info in ThreatList)
+            {
+                _worldPacket.WritePackedGuid128(info.UnitGUID);
+                _worldPacket.WriteInt32(info.Threat);
+            }
+        }
+        public WowGuid128 UnitGUID;
+        public uint ThreatListCount;
+        public Array<ThreatInfo> ThreatList;
+    }
+
+    class HighestThreatUpdate : ServerPacket
+    {
+        public HighestThreatUpdate() : base(Opcode.SMSG_HIGHEST_THREAT_UPDATE) { }
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WritePackedGuid128(HighestThreatGUID);
+            _worldPacket.WriteUInt32(ThreatListCount);
+            foreach (var info in ThreatList)
+            {
+                _worldPacket.WritePackedGuid128(info.UnitGUID);
+                _worldPacket.WriteInt32(info.Threat);
+            }
+        }
+        public WowGuid128 UnitGUID;
+        public WowGuid128 HighestThreatGUID;
+        public uint ThreatListCount;
+        public Array<ThreatInfo> ThreatList;
+    }
+
+    class ThreatClear : ServerPacket
+    {
+        public ThreatClear() : base(Opcode.SMSG_THREAT_CLEAR) { }
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+        }
+        public WowGuid128 UnitGUID;
+    }
+
+    class ThreatRemove : ServerPacket
+    {
+        public ThreatRemove() : base(Opcode.SMSG_THREAT_REMOVE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid128(UnitGUID);
+            _worldPacket.WritePackedGuid128(AboutGUID);
+        }
+        public WowGuid128 UnitGUID;
+        public WowGuid128 AboutGUID;
+    }
 }
