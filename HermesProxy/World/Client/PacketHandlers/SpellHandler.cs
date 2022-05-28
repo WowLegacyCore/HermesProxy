@@ -998,7 +998,7 @@ namespace HermesProxy.World.Client
             byte slot = packet.ReadUInt8();
             int duration = packet.ReadInt32();
             WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
-            GetSession().GameState.StoreAuraDurationLeft(guid, slot, duration);
+            GetSession().GameState.StoreAuraDurationLeft(guid, slot, duration, (int)packet.GetReceivedTime());
             if (duration <= 0)
                 return;
 
@@ -1035,7 +1035,7 @@ namespace HermesProxy.World.Client
             int durationLeft = packet.ReadInt32();
 
             GetSession().GameState.StoreAuraDurationFull(guid, slot, durationFull);
-            GetSession().GameState.StoreAuraDurationLeft(guid, slot, durationLeft);
+            GetSession().GameState.StoreAuraDurationLeft(guid, slot, durationLeft, (int)packet.GetReceivedTime());
 
             if (packet.GetUniversalOpcode(false) == Opcode.SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE)
                 GetSession().GameState.StoreAuraCaster(guid, slot, GetSession().GameState.CurrentPlayerGuid);
