@@ -214,5 +214,37 @@ namespace HermesProxy.World.Client
             enchant.OwnerGuid = packet.ReadGuid().To128(GetSession().GameState);
             SendPacketToClient(enchant);
         }
+
+        [PacketHandler(Opcode.SMSG_ENCHANTMENT_LOG)]
+        void HandleEnchantmentLog(WorldPacket packet)
+        {
+            EnchantmentLog enchantment = new EnchantmentLog();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                enchantment.Caster = packet.ReadPackedGuid().To128(GetSession().GameState);
+                enchantment.Owner = packet.ReadPackedGuid().To128(GetSession().GameState);
+            }
+            else
+            {
+                enchantment.Owner = packet.ReadGuid().To128(GetSession().GameState);
+                enchantment.Caster = packet.ReadGuid().To128(GetSession().GameState);
+            }
+            enchantment.ItemID = (int)packet.ReadUInt32();
+            var session = GetSession().GameState;
+
+            for (int i = 0; i < 23; i++)
+            {
+                if (session.GetItemId(session.GetInventorySlotItem(i).To128(session)).Equals((uint)enchantment.ItemID))
+                {
+                    enchantment.ItemGUID = session.GetInventorySlotItem(i).To128(session);
+                    break;
+                }
+            }
+            if (enchantment.ItemGUID == null)
+                return;
+
+            enchantment.Enchantment = (int)packet.ReadUInt32();
+            SendPacketToClient(enchantment);
+        }
     }
 }
