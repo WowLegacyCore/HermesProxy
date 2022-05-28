@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace HermesProxy.Auth
 {
+    // ReSharper disable InconsistentNaming
     public enum AuthCommand : byte
     {
         LOGON_CHALLENGE     = 0x00,
@@ -17,4 +18,5 @@ namespace HermesProxy.Auth
         TRANSFER_RESUME     = 0x33,
         TRANSFER_CANCEL     = 0x34
     }
+    // ReSharper restore InconsistentNaming
 }
