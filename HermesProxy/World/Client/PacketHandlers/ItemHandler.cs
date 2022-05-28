@@ -71,6 +71,8 @@ namespace HermesProxy.World.Client
                             continue;
                         if (logEntry.QuestID != objective.QuestID)
                             continue;
+                        if (logEntry.ObjectiveProgress[objective.StorageIndex] == null)
+                            continue;
 
                         currentCount = (uint)logEntry.ObjectiveProgress[objective.StorageIndex];
                         break;
