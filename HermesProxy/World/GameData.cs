@@ -22,6 +22,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> ItemEnchantVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
+        public static Dictionary<uint, uint> TotemSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
         public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
@@ -182,6 +183,14 @@ namespace HermesProxy.World
             return 0;
         }
 
+        public static int GetTotemSlotForSpell(uint spellId)
+        {
+            uint slot;
+            if (TotemSpells.TryGetValue(spellId, out slot))
+                return (int)slot;
+            return -1;
+        }
+
         public static uint GetRealSpell(uint learnSpellId)
         {
             uint realSpellId;
@@ -301,6 +310,7 @@ namespace HermesProxy.World
             LoadItemEnchantVisuals();
             LoadSpellVisuals();
             LoadLearnSpells();
+            LoadTotemSpells();
             LoadGems();
             LoadUnitDisplayScales();
             LoadTransports();
@@ -475,6 +485,33 @@ namespace HermesProxy.World
                     uint realSpellId = UInt32.Parse(fields[1]);
                     if (!LearnSpells.ContainsKey(learnSpellId))
                         LearnSpells.Add(learnSpellId, realSpellId);
+                }
+            }
+        }
+
+        public static void LoadTotemSpells()
+        {
+            if (LegacyVersion.GetExpansionVersion() > 1)
+                return;
+
+            var path = Path.Combine("CSV", $"TotemSpells.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    uint totemSlot = UInt32.Parse(fields[1]);
+                    TotemSpells.Add(spellId, totemSlot);
                 }
             }
         }
