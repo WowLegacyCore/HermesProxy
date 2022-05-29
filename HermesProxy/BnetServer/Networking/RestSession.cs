@@ -132,6 +132,7 @@ namespace BNetServer.Networking
                 AuthResult.FAIL_INCORRECT_PASSWORD => ("LOGIN", "UNABLE_TO_DECODE", "Invalid password."),
                 AuthResult.FAIL_BANNED             => ("LOGIN", "UNABLE_TO_DECODE", "This account has been closed and is no longer available for use."),
                 AuthResult.FAIL_SUSPENDED          => ("LOGIN", "UNABLE_TO_DECODE", "This account has been temporarily suspended."),
+                AuthResult.FAIL_VERSION_INVALID    => ("LOGIN", "UNABLE_TO_DECODE", "Your version is not supported by this server.\nMost likely HermesProxy is not allowed."),
 
                 AuthResult.FAIL_INTERNAL_ERROR     => ("LOGON", "UNABLE_TO_DECODE", "There was an internal error. Please try again later."),
                 _ => ("LOGON", "UNABLE_TO_DECODE", $"Error: {response}"),
