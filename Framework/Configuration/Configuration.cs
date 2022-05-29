@@ -46,26 +46,11 @@ namespace Framework
                 }
                 ++i;
             }
-            // load different config file
-            if (configFile != null)
-            {
-                string configPath = Path.Combine(Environment.CurrentDirectory, configFile);
-
-                try
-                {
-                    // Get the mapped configuration file
-                    var config = ConfigurationManager.OpenExeConfiguration(configPath);
-
-
-                    settings = ((AppSettingsSection)config.GetSection("appSettings")).Settings;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Could not load config file {0}, reason: {1}", configPath, ex.Message);
-                }
-            }
+            
+            ExeConfigurationFileMap map = new ExeConfigurationFileMap { ExeConfigFilename = "HermesProxy.dll.config" };
+            var config = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
             if (settings == null)
-                settings = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).AppSettings.Settings;
+                settings = config.AppSettings.Settings;
 
             // override config options with options from command line
             foreach (var pair in opts)
