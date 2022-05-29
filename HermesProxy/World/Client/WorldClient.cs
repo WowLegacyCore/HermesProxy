@@ -131,7 +131,7 @@ namespace HermesProxy.World.Client
 
                 if (received == 0)
                 {
-                    Log.Print(LogType.Error, "Socket Closed By Server");
+                    Log.PrintNet(LogType.Error, LogNetDir.S2P, "Socket Closed By Server");
                     if (_isSuccessful == null)
                         _isSuccessful = false;
                     else
@@ -141,7 +141,7 @@ namespace HermesProxy.World.Client
 
                 if (received != LegacyServerPacketHeader.StructSize)
                 {
-                    Log.Print(LogType.Error, $"Received {received} bytes when reading header!");
+                    Log.PrintNet(LogType.Error, LogNetDir.S2P, $"Received {received} bytes when reading header!");
                     if (_isSuccessful == null)
                         _isSuccessful = false;
                     else
@@ -162,7 +162,7 @@ namespace HermesProxy.World.Client
                 {
                     if (packetSize > _clientSocket.ReceiveBufferSize)
                     {
-                        Log.Print(LogType.Error, $"Packet size is greater than max buffer size!");
+                        Log.PrintNet(LogType.Error, LogNetDir.S2P, "Packet size is greater than max buffer size!");
                         return;
                     }
 
@@ -190,7 +190,7 @@ namespace HermesProxy.World.Client
                 }
                 else
                 {
-                    Log.Print(LogType.Error, $"Received an empty packet!");
+                    Log.PrintNet(LogType.Error, LogNetDir.S2P, "Received an empty packet!");
                 }
 
                 if (!IsConnected())
@@ -204,7 +204,7 @@ namespace HermesProxy.World.Client
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Packet Read Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
+                Log.PrintNet(LogType.Error, LogNetDir.S2P, $"Packet Read Error: {ex.Message}{Environment.NewLine}{ex.StackTrace}");
                 if (_isSuccessful == null)
                     _isSuccessful = false;
                 else
@@ -223,7 +223,7 @@ namespace HermesProxy.World.Client
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Packet Send Error: {ex.Message}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Packet Send Error: {ex.Message}");
                 if (_isSuccessful == null)
                     _isSuccessful = false;
             }
@@ -241,7 +241,7 @@ namespace HermesProxy.World.Client
                 header.Opcode = packet.GetOpcode();
                 header.Write(buffer);
 
-                Log.Print(LogType.Debug, $"Sending opcode {LegacyVersion.GetUniversalOpcode(header.Opcode)} ({header.Opcode}) with size {header.Size}.");
+                Log.PrintNet(LogType.Debug, LogNetDir.P2S, $"Sending opcode {LegacyVersion.GetUniversalOpcode(header.Opcode)} ({header.Opcode}) with size {header.Size}.");
 
                 byte[] headerArray = buffer.GetData();
                 if (_worldCrypt != null)
@@ -255,7 +255,7 @@ namespace HermesProxy.World.Client
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Packet Write Error: {ex.Message}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Packet Write Error: {ex.Message}");
                 if (_isSuccessful == null)
                     _isSuccessful = false;
             }
@@ -293,14 +293,14 @@ namespace HermesProxy.World.Client
                 if (GetSession().InstanceSocket == null &&
                    !GetSession().GameState.IsConnectedToInstance)
                 {
-                    Log.Print(LogType.Error, $"Can't send opcode {packet.GetUniversalOpcode()} ({packet.GetOpcode()}) before entering world!");
+                    Log.PrintNet(LogType.Error, LogNetDir.P2C, $"Can't send opcode {packet.GetUniversalOpcode()} ({packet.GetOpcode()}) before entering world!");
                     return;
                 }
 
                 // block these packets until connected to instance
                 while (GetSession().InstanceSocket == null)
                 {
-                    Log.Print(LogType.Network, $"Waiting to send {packet.GetUniversalOpcode()} ({packet.GetOpcode()}).");
+                    Log.PrintNet(LogType.Network, LogNetDir.P2C, $"Waiting to send {packet.GetUniversalOpcode()} ({packet.GetOpcode()}).");
                     System.Threading.Thread.Sleep(200);
                 };
                 GetSession().InstanceSocket.SendPacket(packet);
@@ -356,7 +356,7 @@ namespace HermesProxy.World.Client
         private void HandlePacket(WorldPacket packet)
         {
             Opcode universalOpcode = packet.GetUniversalOpcode(false);
-            Log.Print(LogType.Debug, $"Received opcode {universalOpcode} ({packet.GetOpcode()}).");
+            Log.PrintNet(LogType.Debug, LogNetDir.S2P, $"Received opcode {universalOpcode} ({packet.GetOpcode()}).");
 
             switch (universalOpcode)
             {
@@ -509,14 +509,14 @@ namespace HermesProxy.World.Client
 
                     if (_packetHandlers.ContainsKey(msgAttr.Opcode))
                     {
-                        Log.Print(LogType.Error, $"Tried to override OpcodeHandler of {_packetHandlers[msgAttr.Opcode].ToString()} with {methodInfo.Name} (Opcode {msgAttr.Opcode})");
+                        Log.Print(LogType.Error, $"Tried to override OpcodeHandler of {_packetHandlers[msgAttr.Opcode]} with {methodInfo.Name} (Opcode {msgAttr.Opcode})");
                         continue;
                     }
 
                     var parameters = methodInfo.GetParameters();
                     if (parameters.Length == 0)
                     {
-                        Log.Print(LogType.Error, $"Method: {methodInfo.Name} Has no paramters");
+                        Log.Print(LogType.Error, $"Method: {methodInfo.Name} Has no parameters");
                         continue;
                     }
 
