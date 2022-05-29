@@ -44,8 +44,7 @@ namespace HermesProxy.World.Server
 
         public string GetAccountDataDirectory()
         {
-            string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "AccountData");
+            string path = "AccountData";
             path = Path.Combine(path, _accountName);
             path = Path.Combine(path, _realmName);
 

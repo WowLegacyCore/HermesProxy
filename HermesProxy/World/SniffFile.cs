@@ -11,8 +11,7 @@ namespace HermesProxy.World
     {
         public SniffFile(string fileName, ushort build)
         {
-            string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "PacketsLog");
+            string path = "PacketsLog";
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
