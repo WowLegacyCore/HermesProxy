@@ -18,6 +18,14 @@ namespace Framework.Logging
         Storage
     }
 
+    public enum LogNetDir // Network direction
+    {
+        C2P, // C>P S
+        P2S, // C P>S
+        S2P, // C P<S
+        P2C, // C<P S
+    }
+
     public static class Log
     {
         static Dictionary<LogType, (ConsoleColor Color, string Type)> LogToColorType = new()
@@ -66,6 +74,18 @@ namespace Framework.Logging
         public static void Print(LogType type, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
         {
             logQueue.Add((type, $"{SetCaller(method, path)} | {text}"));
+        }
+
+        public static void PrintNet(LogType type, LogNetDir netDirection, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
+        {
+            string directionText = netDirection switch
+            {
+                LogNetDir.C2P => "C>P S",
+                LogNetDir.P2S => "C P>S",
+                LogNetDir.S2P => "C P<S",
+                LogNetDir.P2C => "C<P S",
+            };
+            logQueue.Add((type, $"{SetCaller(method, path)} | {directionText} | {text}"));
         }
 
         public static void outException(Exception err, [CallerMemberName] string method = "", [CallerFilePath] string path = "")

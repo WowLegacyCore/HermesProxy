@@ -38,7 +38,7 @@ namespace HermesProxy.Auth
 
             try
             {
-                Log.Print(LogType.Network, "Connecting to auth server...");
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, "Connecting to auth server...");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
@@ -46,7 +46,7 @@ namespace HermesProxy.Auth
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Socket Error: {ex.Message}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Socket Error: {ex.Message}");
                 _response.SetResult(AuthResult.FAIL_INTERNAL_ERROR);
             }
 
@@ -91,7 +91,7 @@ namespace HermesProxy.Auth
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Connect Error: {ex.Message}");
                 SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
@@ -106,7 +106,7 @@ namespace HermesProxy.Auth
                 {
                     SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
 
-                    Log.Print(LogType.Error, "Socket Closed By Server");
+                    Log.PrintNet(LogType.Error, LogNetDir.S2P, "Socket Closed By Server");
                     return;
                 }
 
@@ -136,7 +136,7 @@ namespace HermesProxy.Auth
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Packet Send Error: {ex.Message}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Packet Send Error: {ex.Message}");
                 SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
@@ -149,7 +149,7 @@ namespace HermesProxy.Auth
             }
             catch (Exception ex)
             {
-                Log.Print(LogType.Error, $"Packet Write Error: {ex.Message}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Packet Write Error: {ex.Message}");
                 SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
             }
         }
@@ -158,7 +158,7 @@ namespace HermesProxy.Auth
         {
             ByteBuffer packet = new ByteBuffer(buffer);
             AuthCommand opcode = (AuthCommand)packet.ReadUInt8();
-            Log.Print(LogType.Debug, $"Received opcode {opcode} size {size}.");
+            Log.PrintNet(LogType.Debug, LogNetDir.S2P, $"Received opcode {opcode} size {size}.");
 
             switch (opcode)
             {
@@ -172,7 +172,7 @@ namespace HermesProxy.Auth
                     HandleRealmList(packet);
                     break;
                 default:
-                    Log.Print(LogType.Error, $"No handler for opcode {opcode}!");
+                    Log.PrintNet(LogType.Error, LogNetDir.S2P, $"No handler for opcode {opcode}!");
                     SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
                     break;
             }

@@ -244,7 +244,7 @@ namespace HermesProxy.World.Server
 
             Opcode opcode = packet.GetUniversalOpcode(true);
 
-            Log.Print(LogType.Debug, $"Received opcode {opcode.ToString()} ({packet.GetOpcode()}).");
+            Log.PrintNet(LogType.Debug, LogNetDir.C2P, $"Received opcode {opcode.ToString()} ({packet.GetOpcode()}).");
 
             if (opcode != Opcode.CMSG_HOTFIX_REQUEST && !header.IsValidSize())
             {
@@ -334,7 +334,7 @@ namespace HermesProxy.World.Server
         {
             if (!IsOpen())
             {
-                Log.Print(LogType.Error, $"Can't send {packet.GetUniversalOpcode()}, socket is closed!");
+                Log.PrintNet(LogType.Error, LogNetDir.P2C, $"Can't send {packet.GetUniversalOpcode()}, socket is closed!");
                 if (GetSession() != null)
                 {
                     if (GetSession().RealmSocket == this)
@@ -355,7 +355,7 @@ namespace HermesProxy.World.Server
             Opcode universalOpcode = packet.GetUniversalOpcode();
             ushort opcode = (ushort)packet.GetOpcode();
 
-            Log.Print(LogType.Debug, $"Sending opcode {universalOpcode} ({(uint)opcode}).");
+            Log.PrintNet(LogType.Debug, LogNetDir.P2C, $"Sending opcode {universalOpcode} ({(uint)opcode}).");
 
             ByteBuffer buffer = new();
 
@@ -414,7 +414,7 @@ namespace HermesProxy.World.Server
             int z_res = ZLib.deflate(_compressionStream, 2);
             if (z_res != 0)
             {
-                Log.Print(LogType.Error, $"Can't compress packet data (zlib: deflate) Error code: {z_res} msg: {_compressionStream.msg}");
+                Log.PrintNet(LogType.Error, LogNetDir.P2C, $"Can't compress packet data (zlib: deflate) Error code: {z_res} msg: {_compressionStream.msg}");
                 return 0;
             }
 
