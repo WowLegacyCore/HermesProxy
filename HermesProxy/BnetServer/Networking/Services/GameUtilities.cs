@@ -68,7 +68,7 @@ namespace BNetServer.Networking
 
             if (request.AttributeKey == $"Command_RealmListRequest_v1_{GetCommandEndingForVersion()}")
             {
-                Global.RealmMgr.WriteSubRegions(response);
+                GetSession().RealmManager.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;
             }
 
@@ -135,7 +135,7 @@ namespace BNetServer.Networking
                 var lastPlayerChar = _globalSession.GameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
                 if (lastPlayerChar != null)
                 {
-                    var compressed = Global.RealmMgr.GetRealmEntryJSON(lastPlayerChar.RealmId, _globalSession.Build);
+                    var compressed = GetSession().RealmManager.GetRealmEntryJSON(lastPlayerChar.RealmId, _globalSession.Build);
                     if (compressed.Length == 0)
                         return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
@@ -185,7 +185,7 @@ namespace BNetServer.Networking
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
 
-            var compressed = Global.RealmMgr.GetRealmList(_globalSession.Build, subRegionId);
+            var compressed = GetSession().RealmManager.GetRealmList(_globalSession.Build, subRegionId);
             if (compressed.Length == 0)
                 return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
@@ -196,11 +196,11 @@ namespace BNetServer.Networking
             response.Attribute.Add(attribute);
 
             var realmCharacterCounts = new RealmCharacterCountList();
-            foreach (var characterCount in _globalSession.GameAccountInfo.CharacterCounts)
+            foreach (var realm in _globalSession.RealmManager.GetRealms())
             {
                 var countEntry = new RealmCharacterCountEntry();
-                countEntry.WowRealmAddress = (int)characterCount.Key;
-                countEntry.Count = characterCount.Value;
+                countEntry.WowRealmAddress = (int) realm.Id.GetAddress();
+                countEntry.Count = realm.CharacterCount;
                 realmCharacterCounts.Counts.Add(countEntry);
             }
 
@@ -218,7 +218,7 @@ namespace BNetServer.Networking
         {
             Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
-                return Global.RealmMgr.JoinRealm(_globalSession, (uint)realmAddress.UintValue, _globalSession.Build, GetRemoteIpEndPoint().Address, _clientSecret, _globalSession.GameAccountInfo.Name, response);
+                return GetSession().RealmManager.JoinRealm(_globalSession, (uint)realmAddress.UintValue, _globalSession.Build, GetRemoteIpEndPoint().Address, _clientSecret, _globalSession.GameAccountInfo.Name, response);
 
             return BattlenetRpcErrorCode.WowServicesInvalidJoinTicket;
         }
