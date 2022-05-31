@@ -37,7 +37,7 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 party.CanAccept = packet.ReadBool();
 
-            var realm = RealmManager.Instance.GetRealm(GetSession().RealmId);
+            var realm = GetSession().RealmManager.GetRealm(GetSession().RealmId);
             party.InviterRealm = new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName);
 
             party.InviterName = packet.ReadCString();

@@ -30,6 +30,11 @@ namespace BNetServer.Networking
             _clientSecret = new byte[32];
             _responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         }
+        
+        public GlobalSessionData GetSession()
+        {
+            return _globalSession;
+        }
 
         public override void Accept()
         {
@@ -62,12 +67,12 @@ namespace BNetServer.Networking
                     var handler = Global.LoginServiceMgr.GetHandler(header.ServiceHash, header.MethodId);
                     if (handler != null)
                     {
-                        Log.Print(LogType.Debug, $"Service {header.ServiceHash} Method {header.MethodId} Token {header.Token}");
+                        Log.Print(LogType.Debug, $"Service {(OriginalHash) header.ServiceHash}(0x{header.ServiceHash:X8}) Method {header.MethodId} Token {header.Token}");
                         handler.Invoke(this, header.Token, stream);
                     }
                     else
                     {
-                        Log.Print(LogType.Error, $"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {header.ServiceHash}");
+                        Log.Print(LogType.Error, $"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {(OriginalHash) header.ServiceHash}(0x{header.ServiceHash:X8})");
                         SendResponse(header.Token, BattlenetRpcErrorCode.RpcNotImplemented);
                     }
                 }
@@ -196,7 +201,6 @@ namespace BNetServer.Networking
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
 
-        public Dictionary<uint, byte> CharacterCounts;
         public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
 
         public GameAccountInfo(string name)
@@ -213,7 +217,6 @@ namespace BNetServer.Networking
             else
                 DisplayName = Name;
 
-            CharacterCounts = new Dictionary<uint, byte>();
             LastPlayedCharacters = new Dictionary<string, LastPlayedCharacterInfo>();
         }
     }

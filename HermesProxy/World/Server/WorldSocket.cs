@@ -452,7 +452,7 @@ namespace HermesProxy.World.Server
 
         void HandleAuthSessionCallback(AuthSession authSession)
         {
-            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(GetSession().Build);
+            RealmBuildInfo buildInfo = GetSession().RealmManager.GetBuildInfo(GetSession().Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
@@ -537,7 +537,7 @@ namespace HermesProxy.World.Server
 
             _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
             GetSession().WorldClient = new HermesProxy.World.Client.WorldClient();
-            if (!GetSession().WorldClient.ConnectToWorldServer(RealmManager.Instance.GetRealm(_realmId), GetSession()))
+            if (!GetSession().WorldClient.ConnectToWorldServer(GetSession().RealmManager.GetRealm(_realmId), GetSession()))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
                 Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
@@ -707,7 +707,7 @@ namespace HermesProxy.World.Server
                 SendClientCacheVersion(0);
                 SendAvailableHotfixes();
                 SendBnetConnectionState(1);
-                GetSession().AccountDataMgr = new AccountDataManager(GetSession().Username, RealmManager.Instance.GetRealm(_realmId).Name);
+                GetSession().AccountDataMgr = new AccountDataManager(GetSession().Username, GetSession().RealmManager.GetRealm(_realmId).Name);
                 GetSession().RealmSocket = this;
             }
             else
@@ -740,7 +740,7 @@ namespace HermesProxy.World.Server
                 response.SuccessInfo.VirtualRealmAddress = _realmId.GetAddress();
                 response.SuccessInfo.Time = (uint)Time.UnixTime;
 
-                var realm = RealmManager.Instance.GetRealm(_realmId);
+                var realm = GetSession().RealmManager.GetRealm(_realmId);
 
                 // Send current home realm. Also there is no need to send it later in realm queries.
                 response.SuccessInfo.VirtualRealms.Add(new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName));

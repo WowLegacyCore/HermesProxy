@@ -94,7 +94,7 @@ namespace BNetServer.Networking
                 }
             }
 
-            globalSession.AuthClient = new();
+            globalSession.AuthClient = new(globalSession);
             AuthResult response = globalSession.AuthClient.ConnectToAuthServer(login, password, globalSession.Locale);
             if (response != AuthResult.SUCCESS)
             { // Error handling

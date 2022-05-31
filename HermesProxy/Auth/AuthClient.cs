@@ -16,6 +16,7 @@ namespace HermesProxy.Auth
 {
     public class AuthClient
     {
+        GlobalSessionData _globalSession;
         Socket _clientSocket;
         TaskCompletionSource<AuthResult> _response;
         byte[] _passwordHash;
@@ -24,6 +25,16 @@ namespace HermesProxy.Auth
         bool _hasRealmList;
         string _username;
         string _locale;
+
+        public AuthClient(GlobalSessionData globalSession)
+        {
+            _globalSession = globalSession;
+        }
+
+        public GlobalSessionData GetSession()
+        {
+            return _globalSession;
+        }
 
         public AuthResult ConnectToAuthServer(string username, string password, string locale)
         {
@@ -490,7 +501,7 @@ namespace HermesProxy.Auth
                 realmList.Add(realmInfo);
             }
 
-            RealmManager.Instance.UpdateRealms(realmList);
+            GetSession().RealmManager.UpdateRealms(realmList);
             _hasRealmList = true;
         }
     }

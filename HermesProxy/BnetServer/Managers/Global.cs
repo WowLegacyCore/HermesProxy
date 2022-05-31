@@ -44,6 +44,5 @@ public static class Global
             SessionsByKey.Add(connectKey, session);
     }
 
-    public static RealmManager RealmMgr { get { return RealmManager.Instance; } }
     public static LoginServiceManager LoginServiceMgr { get { return LoginServiceManager.Instance; } }
 }
