@@ -33,7 +33,7 @@ jobs:
         run: dotnet publish --configuration Release --self-contained true --use-current-runtime
 
       - name: Copy files
-        run: cp -r ./HermesProxy/bin/*/Release/*/*/publish/ publish
+        run: cp -r ./HermesProxy/bin/Release/publish/ publish
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
