@@ -5,36 +5,18 @@ using HermesProxy.World;
 using HermesProxy.World.Server;
 using System;
 using System.Globalization;
-using System.Reflection;
-
-// This is used to embed the compile date in the executable.
-[AttributeUsage(AttributeTargets.Assembly)]
-internal class BuildDateAttribute : Attribute
-{
-    public BuildDateAttribute(string value)
-    {
-        DateTime = DateTime.ParseExact(value, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None);
-    }
-
-    public DateTime DateTime { get; }
-}
 
 namespace HermesProxy
 {
     class Server
     {
-        private static DateTime GetBuildDate(Assembly assembly)
-        {
-            var attribute = assembly.GetCustomAttribute<BuildDateAttribute>();
-            return attribute != null ? attribute.DateTime : default(DateTime);
-        }
         static void Main()
         {
             //Set Culture
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Log.Print(LogType.Server, "Hello from Hermes Proxy!");
-            Log.Print(LogType.Server, $"Compiled on {GetBuildDate(Assembly.GetExecutingAssembly())}.");
+            Log.Print(LogType.Server, "Starting Hermes Proxy...");
+            Log.Print(LogType.Server, $"Version {GetVersionInformation()}");
             Log.Start();
 
             GameData.LoadEverything();
@@ -108,8 +90,18 @@ namespace HermesProxy
         static void ExitNow()
         {
             Console.WriteLine("Halting process...");
-            System.Threading.Thread.Sleep(10000);
+            System.Threading.Thread.Sleep(10_000);
             Environment.Exit(-1);
+        }
+
+        private static string GetVersionInformation()
+        {
+            string version = $"{GitVersionInformation.CommitDate} {GitVersionInformation.MajorMinorPatch}";
+            if (GitVersionInformation.CommitsSinceVersionSource != "0")
+                version += $"+{GitVersionInformation.CommitsSinceVersionSource}";
+            if (GitVersionInformation.UncommittedChanges != "0")
+                version += " dirty";
+            return version;
         }
     }
 }
