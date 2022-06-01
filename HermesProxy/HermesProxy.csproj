@@ -6,20 +6,18 @@
     <StartupObject>HermesProxy.Server</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
-    <Copyright>Copyright © brotalnia 2022</Copyright>
-    <Authors>brotalnia</Authors>
+    <Copyright>Copyright © WowLegacyCore 2022</Copyright>
+    <Authors>WowLegacyCore</Authors>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <AssemblyAttribute Include="BuildDateAttribute">
-      <_Parameter1>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.15.0" />
     <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+
+    <PackageReference Include="GitVersion.MsBuild" Version="5.6.10*">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
   
   <ItemGroup>
