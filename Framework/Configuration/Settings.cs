@@ -13,7 +13,7 @@ namespace Framework
         public static readonly string ClientSeed = Conf.GetString("ClientSeed", "179D3DC3235629D07113A9B3867F97A7");
         public static readonly ClientVersionBuild ClientBuild = Conf.GetEnum("ClientBuild", ClientVersionBuild.V2_5_2_40892);
         public static readonly ClientVersionBuild ServerBuild = Conf.GetEnum("ServerBuild", ClientVersionBuild.V2_4_3_8606);
-        public static readonly string ServerAddress = Dns.GetHostAddresses(Conf.GetString("ServerAddress", "127.0.0.1")).GetValue(0).ToString();
+        public static readonly string ServerAddress = Dns.GetHostAddresses(Conf.GetString("ServerAddress", "127.0.0.1")).First().ToString();
         public static readonly int ServerPort = Conf.GetInt("ServerPort", 3724);
         public static readonly string ReportedOS = Conf.GetString("ReportedOS", "OSX");
         public static readonly string ReportedPlatform = Conf.GetString("ReportedPlatform", "x86");
@@ -24,5 +24,6 @@ namespace Framework
         public static readonly int InstancePort = Conf.GetInt("InstancePort", 8086);
         public static readonly bool DebugOutput = Conf.GetBoolean("DebugOutput", false);
         public static readonly bool PacketsLog = Conf.GetBoolean("PacketsLog", true);
+        public static readonly bool RememberLastCharacter = Conf.GetBoolean("RememberLastCharacter", true);
     }
 }

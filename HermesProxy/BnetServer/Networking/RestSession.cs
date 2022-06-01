@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HermesProxy.Auth;
 using HermesProxy.Enums;
+using HermesProxy.World.Server;
 
 namespace BNetServer.Networking
 {
@@ -75,8 +76,8 @@ namespace BNetServer.Networking
 
             // Format: "login/$platform/$build/$locale/"
             globalSession.OS = pathElements[1];
-            globalSession.Build =  UInt32.Parse(pathElements[2]);
-            globalSession.Locale =  pathElements[3];
+            globalSession.Build = UInt32.Parse(pathElements[2]);
+            globalSession.Locale = pathElements[3];
 
             // Should never happen. Session.HandleLogon checks version already
             if (Framework.Settings.ClientBuild != (ClientVersionBuild) globalSession.Build)
@@ -89,7 +90,7 @@ namespace BNetServer.Networking
             {
                 switch (field.Id)
                 {
-                    case "account_name": login = field.Value; break;
+                    case "account_name": login = field.Value.Trim().ToUpperInvariant(); break;
                     case "password": password = field.Value; break;
                 }
             }
@@ -101,14 +102,18 @@ namespace BNetServer.Networking
                 return SendAuthError(response);
             }
             else
-            { // Ticket creation
+            {
+                // Request realmlist now, we probably need it later anyways
+                globalSession.AuthClient.RequestRealmListUpdate();
+
+                // Ticket creation
                 LogonResult loginResult = new();
                 byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
                 string loginTicket = TICKET_PREFIX + ticket.ToHexString();
 
                 globalSession.LoginTicket = loginTicket;
                 globalSession.Username = login;
-                globalSession.Password = password;
+                globalSession.AccountMetaDataMgr = new AccountMetaDataManager(login);
                 Global.AddNewSessionByName(login, globalSession);
                 Global.AddNewSessionByTicket(loginTicket, globalSession);
 

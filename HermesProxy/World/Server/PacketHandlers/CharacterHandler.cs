@@ -1,4 +1,7 @@
-﻿using Framework.Constants;
+﻿using System;
+using Framework.Constants;
+using Framework.Logging;
+using HermesProxy.Auth;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -65,6 +68,15 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
         void HandlePlayerLogin(PlayerLogin playerLogin)
         {
+            if (!GetSession().GameState.CachedPlayers.TryGetValue(playerLogin.Guid, out var selectedChar))
+            {
+                Log.Print(LogType.Error, $"Player tried to log in with unknown char id: {playerLogin.Guid}");
+                return;
+            }
+
+            var realmName = GetSession().RealmManager.GetRealm(GetSession().RealmId).Name;
+            GetSession().AccountMetaDataMgr.SaveLastSelectedCharacter(realmName, selectedChar.Name, playerLogin.Guid.Low, Time.UnixTime);
+
             GetSession().GameState.IsFirstEnterWorld = true;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());

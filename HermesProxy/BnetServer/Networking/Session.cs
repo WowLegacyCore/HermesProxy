@@ -201,8 +201,6 @@ namespace BNetServer.Networking
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
 
-        public Dictionary<string, LastPlayedCharacterInfo> LastPlayedCharacters;
-
         public GameAccountInfo(string name)
         {
             Id = 1;
@@ -216,16 +214,6 @@ namespace BNetServer.Networking
                 DisplayName = "WoW" + Name[(hashPos + 1)..];
             else
                 DisplayName = Name;
-
-            LastPlayedCharacters = new Dictionary<string, LastPlayedCharacterInfo>();
         }
-    }
-
-    public class LastPlayedCharacterInfo
-    {
-        public RealmId RealmId;
-        public string CharacterName;
-        public ulong CharacterGUID;
-        public uint LastPlayedTime;
     }
 }

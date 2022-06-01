@@ -54,5 +54,10 @@ namespace Framework.Realm
         {
             return new { Site, Region, Index }.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return $"Realm{{Index={Index},Region={Region},Index={Index}}}";
+        }
     }
 }
