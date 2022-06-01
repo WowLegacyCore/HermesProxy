@@ -74,8 +74,14 @@ namespace HermesProxy.World.Server
                 return;
             }
 
-            var realmName = GetSession().RealmManager.GetRealm(GetSession().RealmId).Name;
-            GetSession().AccountMetaDataMgr.SaveLastSelectedCharacter(realmName, selectedChar.Name, playerLogin.Guid.Low, Time.UnixTime);
+            var realm = GetSession().RealmManager.GetRealm(GetSession().RealmId);
+            if (realm == null)
+            {
+                Log.Print(LogType.Error, $"Player tried to log in to unknown realm id: {GetSession().RealmId}");
+                return;
+            }
+
+            GetSession().AccountMetaDataMgr.SaveLastSelectedCharacter(realm.Name, selectedChar.Name, playerLogin.Guid.Low, Time.UnixTime);
 
             GetSession().GameState.IsFirstEnterWorld = true;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);

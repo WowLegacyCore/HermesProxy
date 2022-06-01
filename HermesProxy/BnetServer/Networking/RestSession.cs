@@ -76,7 +76,7 @@ namespace BNetServer.Networking
 
             // Format: "login/$platform/$build/$locale/"
             globalSession.OS = pathElements[1];
-            globalSession.Build = UInt32.Parse(pathElements[2]);
+            globalSession.Build = uint.Parse(pathElements[2]);
             globalSession.Locale = pathElements[3];
 
             // Should never happen. Session.HandleLogon checks version already

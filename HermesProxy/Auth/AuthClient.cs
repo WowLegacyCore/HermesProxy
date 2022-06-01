@@ -43,7 +43,7 @@ namespace HermesProxy.Auth
             _locale = locale;
 
             _response = new ();
-            _hasRealmlist = new ();
+            _hasRealmlist = new();
 
             string authstring = $"{_username.ToUpper()}:{password}";
             _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));

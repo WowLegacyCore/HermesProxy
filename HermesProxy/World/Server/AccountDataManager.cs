@@ -38,8 +38,7 @@ namespace HermesProxy.World.Server
             if (!Settings.RememberLastCharacter)
                 return null;
 
-            var dir = GetAccountMetaDataDirectory();
-            var path = Path.Combine(dir, LAST_CHARACTER_FILE);
+            var path = Path.Combine(GetAccountMetaDataDirectory(), LAST_CHARACTER_FILE);
             if (!File.Exists(path))
                 return null;
 
