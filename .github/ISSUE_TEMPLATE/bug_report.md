@@ -19,5 +19,5 @@ The server / emulator that you experienced this bug on.
 **Hermes Proxy Version**
 Tell us what version of Hermes Proxy you are using.
 You can find this information at the start of Hermes Proxy:
-![Example Version](https://i.imgur.com/6WlaB1I.png)
+![Example Version](https://i.imgur.com/MRZnQsp.png)
 If you compiled it manually tell us the git hash.
