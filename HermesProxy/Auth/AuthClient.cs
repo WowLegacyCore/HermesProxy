@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -19,10 +20,10 @@ namespace HermesProxy.Auth
         GlobalSessionData _globalSession;
         Socket _clientSocket;
         TaskCompletionSource<AuthResult> _response;
+        TaskCompletionSource _hasRealmlist;
         byte[] _passwordHash;
         BigInteger _key;
-        byte[] _m2;
-        bool _hasRealmList;
+        byte[] _m2; 
         string _username;
         string _locale;
 
@@ -42,7 +43,7 @@ namespace HermesProxy.Auth
             _locale = locale;
 
             _response = new ();
-            _hasRealmList = false;
+            _hasRealmlist = new ();
 
             string authstring = $"{_username.ToUpper()}:{password}";
             _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
@@ -430,15 +431,7 @@ namespace HermesProxy.Auth
             }
         }
 
-        public void RequestRealmListAndWait()
-        {
-            SendRealmListRequest();
-            while (!_hasRealmList && IsConnected())
-            {
-            }
-        }
-
-        private void SendRealmListRequest()
+        public void RequestRealmListUpdate()
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.REALM_LIST);
@@ -484,7 +477,7 @@ namespace HermesProxy.Auth
                 realmInfo.Name = packet.ReadCString();
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
-                realmInfo.Address = Dns.GetHostAddresses(strArr[0]).GetValue(0).ToString();
+                realmInfo.Address = Dns.GetHostAddresses(strArr[0]).First().ToString();
                 realmInfo.Port = UInt16.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();
@@ -502,7 +495,12 @@ namespace HermesProxy.Auth
             }
 
             GetSession().RealmManager.UpdateRealms(realmList);
-            _hasRealmList = true;
+            _hasRealmlist.SetResult();
+        }
+
+        public void WaitForRealmlist()
+        {
+            _hasRealmlist.Task.Wait();
         }
     }
 }

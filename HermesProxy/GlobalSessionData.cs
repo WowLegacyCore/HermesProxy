@@ -641,7 +641,6 @@ namespace HermesProxy
         public BNetServer.Networking.GameAccountInfo GameAccountInfo;
         public RealmManager RealmManager = new();
         public string Username;
-        public string Password;
         public string LoginTicket;
         public byte[] SessionKey;
         public string Locale;
@@ -649,6 +648,7 @@ namespace HermesProxy
         public uint Build;
         public Framework.Realm.RealmId RealmId;
         public GameSessionData GameState = new();
+        public AccountMetaDataManager AccountMetaDataMgr;
         public AccountDataManager AccountDataMgr;
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;

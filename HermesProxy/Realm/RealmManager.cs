@@ -24,17 +24,16 @@ using System.Linq;
 using System.Net;
 using System.Timers;
 using System.Collections.Concurrent;
+using System.Text;
 using Framework.Realm;
 using Framework.Logging;
 using HermesProxy;
+using HermesProxy.Auth;
 
 public class RealmManager
 {
     public RealmManager() {
         LoadBuildInfo();
-
-        // Placeholder required for initial GetSubRegions()
-        AddRealm(1, "Placeholder", "127.0.0.1", 1, RealmType.PVP, RealmFlags.Recommended, 0, 1, 1);
     }
 
     void LoadBuildInfo()
@@ -117,7 +116,7 @@ public class RealmManager
         existingRealms.Remove(realm.Id);
     }
 
-    public void UpdateRealms(List<HermesProxy.Auth.RealmInfo> authRealmList)
+    public void UpdateRealms(List<RealmInfo> authRealmList)
     {
         _realms.Clear();
 
@@ -178,10 +177,9 @@ public class RealmManager
         }
     }
 
-    public byte[] GetRealmEntryJSON(RealmId id, uint build)
+    public byte[] GetCompressdRealmEntryJSON(Realm realm, uint build)
     {
         byte[] compressed = new byte[0];
-        Realm realm = GetRealm(id);
         if (realm != null)
         {
             if (!realm.Flags.HasAnyFlag(RealmFlags.Offline) && realm.Build == build)
