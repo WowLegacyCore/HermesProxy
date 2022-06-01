@@ -44,7 +44,7 @@ namespace BNetServer.Networking
                     response.State = new GameAccountState();
                     response.State.GameLevelInfo = new GameLevelInfo();
                     response.State.GameLevelInfo.Name = gameAccountInfo.DisplayName;
-                    response.State.GameLevelInfo.Program = 0x57_6f_57; // "WoW" Hex
+                    response.State.GameLevelInfo.Program = 0x576f57; // "WoW" in Hex
                 }
 
                 response.Tags = new GameAccountFieldTags();
@@ -66,7 +66,7 @@ namespace BNetServer.Networking
                     response.State.GameStatus.SuspensionExpires = (gameAccountInfo.UnbanDate * 1000000);
                 }
 
-                response.State.GameStatus.Program = 0x57_6f_57; // "WoW" Hex
+                response.State.GameStatus.Program = 0x576f57; // "WoW" in Hex
                 response.Tags.GameStatusTag = 0x98B75F99;
             }
 

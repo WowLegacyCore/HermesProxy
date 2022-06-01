@@ -147,7 +147,7 @@ public class RealmManager
         Log.Print(LogType.Debug,"");
     }
 
-    public Realm GetRealm(RealmId id)
+    public Realm? GetRealm(RealmId id)
     {
         return _realms.LookupByKey(id);
     }
