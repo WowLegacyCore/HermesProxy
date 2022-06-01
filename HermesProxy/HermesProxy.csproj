@@ -7,6 +7,7 @@
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
     <Copyright>Copyright © WowLegacyCore 2022</Copyright>
     <Authors>WowLegacyCore</Authors>
+    <PublishSingleFile>true</PublishSingleFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   
