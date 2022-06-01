@@ -10,27 +10,17 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|Any CPU.ActiveCfg = Release|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|Any CPU.Build.0 = Release|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|x64.ActiveCfg = Debug|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|x64.Build.0 = Debug|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|Any CPU.ActiveCfg = Release|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|Any CPU.Build.0 = Release|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|x64.ActiveCfg = Release|x64
-		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|x64.Build.0 = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|Any CPU.ActiveCfg = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|Any CPU.Build.0 = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|x64.ActiveCfg = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|x64.Build.0 = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|Any CPU.ActiveCfg = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|Any CPU.Build.0 = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|x64.ActiveCfg = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|x64.Build.0 = Release|x64
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

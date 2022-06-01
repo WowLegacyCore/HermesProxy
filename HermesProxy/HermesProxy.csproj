@@ -5,7 +5,6 @@
     <TargetFramework>net5.0</TargetFramework>
     <StartupObject>HermesProxy.Server</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
-    <Platforms>AnyCPU;x64</Platforms>
     <Copyright>Copyright © WowLegacyCore 2022</Copyright>
     <Authors>WowLegacyCore</Authors>
   </PropertyGroup>
