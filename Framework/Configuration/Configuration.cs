@@ -20,11 +20,6 @@ namespace Framework
 
         public static Configuration LoadDefaultConfiguration()
         {
-            return new Configuration(GetDefaultConfiguration());
-        }
-
-        private static KeyValueConfigurationCollection GetDefaultConfiguration()
-        {
             var args = Environment.GetCommandLineArgs();
             var opts = new Dictionary<string, string>();
 
@@ -53,6 +48,9 @@ namespace Framework
 
             try
             {
+                if (!File.Exists(configFile))
+                    throw new FileNotFoundException($"File '{configFile}' was not found.");
+
                 ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap { ExeConfigFilename = configFile };
                 var config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
                 settings = ((AppSettingsSection)config.Sections.Get("appSettings")).Settings;
@@ -70,7 +68,7 @@ namespace Framework
                 settings.Add(pair.Key, pair.Value);
             }
 
-            return settings;
+            return new Configuration(settings);
         }
 
         public string GetString(string key, string defValue)
