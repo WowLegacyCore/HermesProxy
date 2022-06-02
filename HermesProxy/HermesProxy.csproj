@@ -2,25 +2,23 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <StartupObject>HermesProxy.Server</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
     <Copyright>Copyright © WowLegacyCore 2022</Copyright>
     <Authors>WowLegacyCore</Authors>
-    <PublishSingleFile>true</PublishSingleFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.15.0" />
-    <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
 
-    <PackageReference Include="GitVersion.MsBuild" Version="5.6.10*">
+    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>
@@ -39,13 +37,15 @@
   <ItemGroup>
     <Content Include="CSV\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Content Include="CSV\Hotfix\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
-  
+
 </Project>
