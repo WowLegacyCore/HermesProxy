@@ -19,8 +19,7 @@ namespace HermesProxy.World.Server
         private string GetAccountMetaDataDirectory()
         {
             string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "AccountData");
-            path = Path.Combine(path, _accountName);
+            path = Path.Combine(Path.Combine(path, "AccountData"), _accountName);
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
