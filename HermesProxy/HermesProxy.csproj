@@ -31,7 +31,11 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Resource>
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <EmbeddedResource Include="BNetServer.pfx" />
+  </ItemGroup>
+
   <ItemGroup>
     <Content Include="CSV\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
