@@ -26,9 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="BNetServer.pfx">
+    <Resource Include="HermesProxy.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Resource>
   </ItemGroup>
   
   <ItemGroup>

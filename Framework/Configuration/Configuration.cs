@@ -3,30 +3,34 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
 using System.IO;
+using Framework.Logging;
 
 
 namespace Framework
 {
     public class Configuration
-    {
+    { 
+        private const string DEFAULT_CONFIG_FILE = "HermesProxy.config";
         private readonly KeyValueConfigurationCollection _settingsCollection;
-
-        public Configuration()
-        {
-            _settingsCollection = GetConfiguration();
-        }
 
         public Configuration(KeyValueConfigurationCollection configCollection)
         {
             _settingsCollection = configCollection;
         }
 
-        private static KeyValueConfigurationCollection GetConfiguration()
+        public static Configuration LoadDefaultConfiguration()
+        {
+            return new Configuration(GetDefaultConfiguration());
+        }
+
+        private static KeyValueConfigurationCollection GetDefaultConfiguration()
         {
             var args = Environment.GetCommandLineArgs();
             var opts = new Dictionary<string, string>();
-            string configFile = null;
-            KeyValueConfigurationCollection settings = null;
+
+            string configFile = DEFAULT_CONFIG_FILE;
+            KeyValueConfigurationCollection settings;
+
             for (int i = 1; i < args.Length - 1; ++i)
             {
                 string opt = args[i];
@@ -46,26 +50,18 @@ namespace Framework
                 }
                 ++i;
             }
-            // load different config file
-            if (configFile != null)
+
+            try
             {
-                string configPath = Path.Combine(Environment.CurrentDirectory, configFile);
-
-                try
-                {
-                    // Get the mapped configuration file
-                    var config = ConfigurationManager.OpenExeConfiguration(configPath);
-
-
-                    settings = ((AppSettingsSection)config.GetSection("appSettings")).Settings;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Could not load config file {0}, reason: {1}", configPath, ex.Message);
-                }
+                ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap { ExeConfigFilename = configFile };
+                var config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
+                settings = ((AppSettingsSection)config.Sections.Get("appSettings")).Settings;
             }
-            if (settings == null)
-                settings = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None).AppSettings.Settings;
+            catch
+            {
+                Log.Print(LogType.Error, $"Fail to load config file '{configFile}'");
+                throw;
+            }
 
             // override config options with options from command line
             foreach (var pair in opts)
