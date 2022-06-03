@@ -18,8 +18,7 @@ namespace HermesProxy.World.Server
 
         private string GetAccountMetaDataDirectory()
         {
-            string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(Path.Combine(path, "AccountData"), _accountName);
+            string path = Path.GetFullPath(Path.Combine("AccountData", _accountName));
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -101,10 +100,7 @@ namespace HermesProxy.World.Server
 
         public string GetAccountDataDirectory()
         {
-            string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "AccountData");
-            path = Path.Combine(path, _accountName);
-            path = Path.Combine(path, _realmName);
+            string path = Path.GetFullPath(Path.Combine("AccountData", _accountName, _realmName));
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -195,8 +191,7 @@ namespace HermesProxy.World.Server
 
         public byte[] LoadCUFProfiles()
         {
-            string fileName = GetAccountDataDirectory();
-            fileName = Path.Combine(fileName, "cuf.bin");
+            string fileName = Path.Combine(GetAccountDataDirectory(), "cuf.bin");
 
             if (File.Exists(fileName))
             {
@@ -214,8 +209,7 @@ namespace HermesProxy.World.Server
 
         public void SaveCUFProfiles(byte[] data)
         {
-            string fileName = GetAccountDataDirectory();
-            fileName = Path.Combine(fileName, "cuf.bin");
+            string fileName = Path.Combine(GetAccountDataDirectory(), "cuf.bin");
 
             using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
             {
