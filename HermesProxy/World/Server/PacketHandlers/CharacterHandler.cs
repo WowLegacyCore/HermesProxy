@@ -209,5 +209,16 @@ namespace HermesProxy.World.Server
             packet.WriteCString(rename.NewName);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_GENERATE_RANDOM_CHARACTER_NAME)]
+        void HandleGenerateRandomCharacterNameRequest(GenerateRandomCharacterNameRequest randomCharacterName)
+        {
+            GenerateRandomCharacterNameResult result = new();
+
+            // The client can generate the name itself
+            result.Success = false;
+
+            SendPacket(result);
+        }
     }
 }

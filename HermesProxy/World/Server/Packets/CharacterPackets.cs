@@ -1018,4 +1018,34 @@ namespace HermesProxy.World.Server.Packets
         public Enums.Classic.ResponseCodes Result = 0;
         public WowGuid128 Guid;
     }
+
+    public class GenerateRandomCharacterNameRequest : ClientPacket
+    {
+        public GenerateRandomCharacterNameRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Race = _worldPacket.ReadByteEnum<Race>();
+            Sex = _worldPacket.ReadByteEnum<Gender>();
+        }
+
+        public Race Race;
+        public Gender Sex;
+    }
+
+    public class GenerateRandomCharacterNameResult : ServerPacket
+    {
+        public GenerateRandomCharacterNameResult() : base(Opcode.SMSG_GENERATE_RANDOM_CHARACTER_NAME_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBool(Success);
+            
+            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteString(Name);
+        }
+
+        public bool Success;
+        public string Name;
+    }
 }
