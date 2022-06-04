@@ -18,10 +18,7 @@ namespace HermesProxy.World.Server.Packets
             packet.WriteByteEnum(Sex);
             packet.WriteUInt8(Level);
 
-            if (ModernVersion.AddedInVersion(ClientVersionBuild.V9_0_5_37503))
-                packet.WriteUInt64(LastLoginUnixSec);
-            else
-                packet.WriteUInt32((uint) LastLoginUnixSec);
+            packet.WriteUInt64(LastLoginUnixSec);
 
             packet.ResetBitPos();
 
