@@ -26,14 +26,11 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
       - name: Publish
-        run: dotnet publish --configuration Release --self-contained true --use-current-runtime
+        run: dotnet publish --configuration Release --use-current-runtime -p:UsePublishBuildSettings=true
 
       - name: Copy files
-        run: cp -r ./HermesProxy/bin/*/Release/*/*/publish/ publish
+        run: cp -r ./HermesProxy/bin/Release/*/publish/ publish
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v3

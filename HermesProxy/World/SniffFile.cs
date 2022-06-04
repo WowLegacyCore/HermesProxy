@@ -11,15 +11,14 @@ namespace HermesProxy.World
     {
         public SniffFile(string fileName, ushort build)
         {
-            string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            path = Path.Combine(path, "PacketsLog");
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
+            string dir = "PacketsLog";
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
 
             string file = fileName + "_" + build + "_" + Time.UnixTime + ".pkt";
-            path = Path.Combine(path, file);
+            string path = Path.Combine(dir, file);
 
-            _fileWriter = new System.IO.BinaryWriter(File.Open(path, FileMode.Create));
+            _fileWriter = new BinaryWriter(File.Open(path, FileMode.Create));
             _gameVersion = build;
         }
         BinaryWriter _fileWriter;

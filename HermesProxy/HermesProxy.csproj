@@ -2,44 +2,61 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <StartupObject>HermesProxy.Server</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
-    <Platforms>AnyCPU;x64</Platforms>
     <Copyright>Copyright © WowLegacyCore 2022</Copyright>
     <Authors>WowLegacyCore</Authors>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(UsePublishBuildSettings)' == 'true'">
+    <!-- Build/Publish config -->
+    <!-- we HAVE to set some runtime :(   We overwrite this with 'use-current-runtime' inside build process -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.15.0" />
-    <PackageReference Include="Microsoft.Packaging.Tools.Trimming" Version="1.1.0-preview1-26619-01" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
 
-    <PackageReference Include="GitVersion.MsBuild" Version="5.6.10*">
+    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="BNetServer.pfx">
+    <Content Include="HermesProxy.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <EmbeddedResource Include="BNetServer.pfx" />
+  </ItemGroup>
+
   <ItemGroup>
     <Content Include="CSV\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Content Include="CSV\Hotfix\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
-  
+
 </Project>

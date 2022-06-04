@@ -9,15 +9,19 @@ using Google.Protobuf;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using Bgs.Protocol.Club.V1;
 
 namespace BNetServer
 {
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
+        private const string BNET_SERVER_CERT_RESOURCE = "HermesProxy.BNetServer.pfx";
+
         ConcurrentDictionary<(uint ServiceHash, uint MethodId), BnetServiceHandler> serviceHandlers;
         FormInputs formInputs;
         IPEndPoint externalAddress;
@@ -79,9 +83,17 @@ namespace BNetServer
             input.Label = "Log In";
             formInputs.Inputs.Add(input);
 
-            certificate = new X509Certificate2("BNetServer.pfx");
-
             Assembly currentAsm = Assembly.GetExecutingAssembly();
+            using (var stream = currentAsm.GetManifestResourceStream(BNET_SERVER_CERT_RESOURCE))
+            {
+                if (stream == null)
+                    throw new Exception($"Resource not found: '{BNET_SERVER_CERT_RESOURCE}'");
+                var ms = new MemoryStream();
+                stream.CopyTo(ms);
+                byte[] bytes = ms.ToArray();
+                certificate = new X509Certificate2(bytes);
+            }
+
             foreach (var type in currentAsm.GetTypes())
             {
                 foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
