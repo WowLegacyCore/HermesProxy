@@ -13,7 +13,6 @@ namespace HermesProxy.World.Server
 
             foreach (var ownCharacter in GetSession().GameState.OwnCharacters)
             {
-                break;
                 response.CharacterList.Add(new AccountCharacterListEntry
                 {
                     AccountId = ownCharacter.AccountId,
