@@ -106,7 +106,7 @@ namespace HermesProxy.World.Server.Packets
                 foreach (var visualItem in VisualItems)
                     visualItem.Write(data);
 
-                data.WriteInt64(LastPlayedTime);
+                data.WriteUInt64(LastPlayedTime);
                 data.WriteUInt16(SpecID);
                 data.WriteUInt32(Unknown703);
                 data.WriteUInt32(LastLoginVersion);
@@ -163,7 +163,7 @@ namespace HermesProxy.World.Server.Packets
             public bool FirstLogin;
             public byte unkWod61x;
             public bool ExpansionChosen;
-            public long LastPlayedTime;
+            public ulong LastPlayedTime;
             public ushort SpecID;
             public uint Unknown703;
             public uint LastLoginVersion;
