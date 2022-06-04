@@ -98,7 +98,7 @@ namespace HermesProxy
         {
             string version = $"{GitVersionInformation.CommitDate} {GitVersionInformation.MajorMinorPatch}";
             if (GitVersionInformation.CommitsSinceVersionSource != "0")
-                version += $"+{GitVersionInformation.CommitsSinceVersionSource}";
+                version += $"+{GitVersionInformation.CommitsSinceVersionSource}({GitVersionInformation.ShortSha})";
             if (GitVersionInformation.UncommittedChanges != "0")
                 version += " dirty";
             return version;
