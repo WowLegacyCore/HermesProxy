@@ -32,10 +32,13 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
 using static HermesProxy.World.Server.Packets.AuthResponse;
 using System.Net;
+using BNetServer;
+using BNetServer.Services;
+using Google.Protobuf;
 
 namespace HermesProxy.World.Server
 {
-    public partial class WorldSocket : SocketBase
+    public partial class WorldSocket : SocketBase, BnetServices.INetwork
     {
         static readonly string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
         static readonly string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
@@ -64,6 +67,8 @@ namespace HermesProxy.World.Server
         ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         GlobalSessionData _globalSession;
         System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
+
+        private BnetServices.ServiceManager _bnetRpc;
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -276,14 +281,18 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_LOG_DISCONNECT:
                     uint reason = packet.ReadUInt32();
                     Log.Print(LogType.Server, $"Client disconnected with reason {reason}.");
-                    if (_connectType == ConnectionType.Realm &&
-                        GetSession().WorldClient != null)
-                        GetSession().WorldClient.Disconnect();
+
+                    if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
+                    {
+                        // GetSession().WorldClient.Disconnect();
+                    }
+
                     if (GetSession().ModernSniff != null)
                     {
                         GetSession().ModernSniff.CloseFile();
                         GetSession().ModernSniff = null;
                     }
+
                     break;
                 case Opcode.CMSG_ENABLE_NAGLE:
                     SetNoDelay(false);
@@ -446,6 +455,7 @@ namespace HermesProxy.World.Server
         void HandleAuthSession(AuthSession authSession)
         {
             _globalSession = BnetSessionTicketStorage.SessionsByName[authSession.RealmJoinTicket];
+            _bnetRpc = new BnetServices.ServiceManager("WorldSocket", this, _globalSession);
             HandleAuthSessionCallback(authSession);
         }
 
@@ -482,6 +492,10 @@ namespace HermesProxy.World.Server
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
+
+            Log.PrintByteArray(LogType.Debug, "AuthSessionCallback Digest: ", digestKeyHash.Digest);
+            Log.PrintByteArray(LogType.Debug, "AuthSessionCallback LocalChallenge: ", authSession.LocalChallenge);
+            Log.PrintByteArray(LogType.Debug, "AuthSessionCallback serverChallenge: ", _serverChallenge);
 
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
@@ -1107,6 +1121,30 @@ namespace HermesProxy.World.Server
 
             Action<WorldSocket, ClientPacket> methodCaller;
             Type packetType;
+        }
+
+        public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)
+        {
+            var methodInfo = new MethodCall();
+            methodInfo.SetServiceHash((uint)service);
+            methodInfo.SetMethodId(methodId);
+            methodInfo.Token = token;
+            methodInfo.ObjectId = serviceId;
+
+            byte[] bytes = message == null ? Array.Empty<byte>() : message.ToByteArray();
+            BattlenetResponse response = new()
+            {
+                Method = methodInfo,
+                Status = status,
+                Data   = new ByteBuffer(bytes),
+            };
+
+            SendPacket(response);
+        }
+
+        public IPEndPoint GetRemoteIpEndPoint()
+        {
+            return GetRemoteIpAddress();
         }
     }
 

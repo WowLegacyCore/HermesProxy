@@ -45,8 +45,32 @@ namespace HermesProxy.Auth
             _response = new ();
             _hasRealmlist = new();
 
-            string authstring = $"{_username.ToUpper()}:{password}";
+            string authstring = $"{_username}:{password}";
             _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
+
+            try
+            {
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, "Connecting to auth server...");
+                _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                // Connect to the specified host.
+                var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
+                _clientSocket.BeginConnect(endPoint, ConnectCallback, null);
+            }
+            catch (Exception ex)
+            {
+                Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Socket Error: {ex.Message}");
+                _response.SetResult(AuthResult.FAIL_INTERNAL_ERROR);
+            }
+
+            _response.Task.Wait();
+
+            return _response.Task.Result;
+        }
+
+        public AuthResult Reconnect()
+        {
+            _response = new ();
+            _hasRealmlist = new();
 
             try
             {
