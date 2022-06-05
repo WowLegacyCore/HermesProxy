@@ -21,13 +21,14 @@ namespace HermesProxy.World.Client
             charEnum.IsNewPlayer = true;
             charEnum.IsAlliedRacesCreationAllowed = false;
 
+            GetSession().GameState.OwnCharacters.Clear();
+
             byte count = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)
             {
                 EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
                 PlayerCache cache = new PlayerCache();
                 char1.Guid = packet.ReadGuid().To128(GetSession().GameState);
-                GetSession().GameState.OwnCharacters.Add(char1.Guid);
                 char1.Name = cache.Name = packet.ReadCString();
                 char1.RaceId = cache.RaceId = (Race)packet.ReadUInt8();
                 char1.ClassId = cache.ClassId = (Class)packet.ReadUInt8();
@@ -87,7 +88,7 @@ namespace HermesProxy.World.Client
                 char1.Flags4 = 0;
                 char1.ProfessionIds[0] = 0;
                 char1.ProfessionIds[1] = 0;
-                char1.LastPlayedTime = Time.UnixTime;
+                char1.LastPlayedTime = (ulong) Time.UnixTime;
                 char1.SpecID = 0;
                 char1.Unknown703 = 55;
                 char1.LastLoginVersion = 11400;
@@ -96,6 +97,19 @@ namespace HermesProxy.World.Client
                 char1.unkWod61x = 0;
                 char1.ExpansionChosen = true;
                 charEnum.Characters.Add(char1);
+
+                GetSession().GameState.OwnCharacters.Add(new OwnCharacterInfo
+                {
+                    AccountId = GetSession().GameAccountInfo.WoWAccountGuid,
+                    CharacterGuid = char1.Guid,
+                    Realm = GetSession().Realm,
+                    LastLoginUnixSec = char1.LastPlayedTime,
+                    Name = char1.Name,
+                    RaceId = char1.RaceId,
+                    ClassId = char1.ClassId,
+                    SexId = char1.SexId,
+                    Level = char1.ExperienceLevel,
+                });
             }
 
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(1, true, false, false));
