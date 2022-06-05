@@ -196,5 +196,16 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(cancel.EnchantmentSlot);
             SendPacketToServer(packet);
         }
+
+        [PacketHandler(Opcode.CMSG_WRAP_ITEM)]
+        void HandleWrapItem(WrapItem item)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_WRAP_ITEM);
+            packet.WriteUInt8(item.gift_bag);
+            packet.WriteUInt8(item.gift_slot);
+            packet.WriteUInt8(item.item_bag);
+            packet.WriteUInt8(item.item_slot);
+            SendPacketToServer(packet);
+        }
     }
 }
