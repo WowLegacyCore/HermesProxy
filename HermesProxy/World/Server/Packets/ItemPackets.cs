@@ -506,6 +506,8 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
+            if ((sbyte)BagResult >= 29)
+                BagResult+=1;
             _worldPacket.WriteInt8((sbyte)BagResult);
             _worldPacket.WritePackedGuid128(Item[0]);
             _worldPacket.WritePackedGuid128(Item[1]);
