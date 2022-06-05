@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using ThreadingState = System.Threading.ThreadState;
 
@@ -88,6 +89,17 @@ namespace Framework.Logging
             logQueue.Add((type, $"{SetCaller(method, path)} | {directionText} | {text}"));
         }
 
+        public static void PrintByteArray(LogType type, string text, byte[] bytes)
+        {
+            StringBuilder hex = new StringBuilder();
+            foreach (byte b in bytes)
+            {
+                hex.AppendFormat("0x{0:x2}, ", b);
+            }
+
+            Print(type, $"{text} {hex}");
+        }
+
         public static void outException(Exception err, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
         {
             Print(LogType.Error, err.ToString(), method, path);
@@ -103,7 +115,7 @@ namespace Framework.Logging
                 location = temp[temp.Length - 1].Replace(".cs", "");
             }
 
-            return location;
+            return location.PadRight(15, ' ');
         }
 
         private static string NameOfCallingClass()

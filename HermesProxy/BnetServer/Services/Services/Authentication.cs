@@ -9,72 +9,73 @@ using Framework.Logging;
 using Framework.Realm;
 using Google.Protobuf;
 using System;
+using BNetServer.Networking;
 
-namespace BNetServer.Networking
+namespace BNetServer.Services
 {
-    public partial class Session
+    public partial class BnetServices
     {
-        [Service(OriginalHash.AuthenticationService, 1)]
+        [Service(ServiceRequirement.Unauthorized, OriginalHash.AuthenticationService, 1)]
         BattlenetRpcErrorCode HandleLogon(LogonRequest logonRequest, NoData response)
         {
             if (logonRequest.Program != "WoW")
             {
-                Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with game other than WoW (using {logonRequest.Program})!");
+                ServiceLog(LogType.Error, $"Battlenet.LogonRequest: Attempted to log in with game other than WoW (using {logonRequest.Program})!");
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
             if (logonRequest.ApplicationVersion != HermesProxy.ModernVersion.BuildInt)
             {
-                Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with wrong game version (using {logonRequest.ApplicationVersion})!");
+                ServiceLog(LogType.Error, $"Battlenet.LogonRequest: Attempted to log in with wrong game version (using {logonRequest.ApplicationVersion})!");
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
             if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64")
             {
-                Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in from an unsupported platform (using {logonRequest.Platform})!");
+                ServiceLog(LogType.Error, $"Battlenet.LogonRequest: Attempted to log in from an unsupported platform (using {logonRequest.Platform})!");
                 return BattlenetRpcErrorCode.BadPlatform;
             }
 
             if (!LocaleChecker.IsValidLocale(logonRequest.Locale.ToEnum<Locale>()))
             {
-                Log.Print(LogType.Error, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in with unsupported locale (using {logonRequest.Locale})!");
+                ServiceLog(LogType.Error, $"Battlenet.LogonRequest: Attempted to log in with unsupported locale (using {logonRequest.Locale})!");
                 return BattlenetRpcErrorCode.BadLocale;
             }
 
-            var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
+            var endpoint = LoginServiceManager.Instance.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
             ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";            
             externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/{logonRequest.Platform}/{logonRequest.ApplicationVersion}/{logonRequest.Locale}/");
 
-            SendRequest((uint)OriginalHash.ChallengeListener, 3, externalChallenge);
+            SendRequest(OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.AuthenticationService, 7)]
+        [Service(ServiceRequirement.Unauthorized, OriginalHash.AuthenticationService, 7)]
         BattlenetRpcErrorCode HandleVerifyWebCredentials(VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
-            _globalSession = Global.SessionsByTicket[verifyWebCredentialsRequest.WebCredentials.ToStringUtf8()];
-            _globalSession.AccountInfo = new AccountInfo(_globalSession.Username);
+            if (!BnetSessionTicketStorage.SessionsByTicket.TryGetValue(verifyWebCredentialsRequest.WebCredentials.ToStringUtf8(), out var tmpSession))
+                return BattlenetRpcErrorCode.Denied;
 
-            if (_globalSession.AccountInfo.LoginTicketExpiry < Time.UnixTime)
+            tmpSession.AccountInfo = new AccountInfo(tmpSession.Username);
+
+            if (tmpSession.AccountInfo.LoginTicketExpiry < Time.UnixTime)
             {
                 return BattlenetRpcErrorCode.TimedOut;
             }
 
-            string ip_address = GetRemoteIpEndPoint().ToString();
-
             // If the account is banned, reject the logon attempt
-            if (_globalSession.AccountInfo.IsBanned)
+            if (tmpSession.AccountInfo.IsBanned)
             {
-                if (_globalSession.AccountInfo.IsPermanenetlyBanned)
+                if (tmpSession.AccountInfo.IsPermanenetlyBanned)
                 {
-                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Banned account {_globalSession.AccountInfo.Login} tried to login!");
+                    ServiceLog(LogType.Debug, $"Session.HandleVerifyWebCredentials: Banned account {tmpSession.AccountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountBanned;
                 }
                 else
                 {
-                    Log.Print(LogType.Debug, $"{GetClientInfo()} Session.HandleVerifyWebCredentials: Temporarily banned account {_globalSession.AccountInfo.Login} tried to login!");
+                    ServiceLog(LogType.Debug, $"Session.HandleVerifyWebCredentials: Temporarily banned account {tmpSession.AccountInfo.Login} tried to login!");
                     return BattlenetRpcErrorCode.GameAccountSuspended;
                 }
             }
@@ -82,22 +83,22 @@ namespace BNetServer.Networking
             LogonResult logonResult = new();
             logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
-            logonResult.AccountId.Low = _globalSession.AccountInfo.Id;
-            logonResult.AccountId.High = 0x100000000000000;
-            foreach (var pair in _globalSession.AccountInfo.GameAccounts)
+            logonResult.AccountId.Low = tmpSession.AccountInfo.Id;
+            logonResult.AccountId.High = 0x100000000000000; // TODO Use correct GUID generator
+            foreach (var pair in tmpSession.AccountInfo.GameAccounts)
             {
                 EntityId gameAccountId = new();
                 gameAccountId.Low = pair.Value.Id;
-                gameAccountId.High = 0x200000200576F57;
+                gameAccountId.High = 0x200000200576F57; // TODO Use correct GUID generator
                 logonResult.GameAccountId.Add(gameAccountId);
             }
 
-            _globalSession.SessionKey = new byte[64].GenerateRandomKey(64);
-            logonResult.SessionKey = ByteString.CopyFrom(_globalSession.SessionKey);
+            tmpSession.SessionKey = new byte[64].GenerateRandomKey(64);
+            logonResult.SessionKey = ByteString.CopyFrom(tmpSession.SessionKey);
 
-            _authed = true;
+            _globalSession = tmpSession;
 
-            SendRequest((uint)OriginalHash.AuthenticationListener, 5, logonResult);
+            SendRequest(OriginalHash.AuthenticationListener, 5, logonResult);
             return BattlenetRpcErrorCode.Ok;
         }
     }

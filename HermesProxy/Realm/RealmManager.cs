@@ -27,6 +27,8 @@ using System.Collections.Concurrent;
 using System.Text;
 using Framework.Realm;
 using Framework.Logging;
+using Framework.Util;
+using Google.Protobuf;
 using HermesProxy;
 using HermesProxy.Auth;
 
@@ -269,7 +271,7 @@ public class RealmManager
         return Json.Deflate("JSONRealmListUpdates", realmList);
     }
 
-    public BattlenetRpcErrorCode JoinRealm(HermesProxy.GlobalSessionData globalSession, uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
+    public BattlenetRpcErrorCode JoinRealm(GlobalSessionData globalSession, uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
         globalSession.RealmId = new RealmId(realmAddress);
         Realm realm = GetRealm(globalSession.RealmId);
@@ -293,34 +295,12 @@ public class RealmManager
             byte[] serverSecret = new byte[0].GenerateRandomKey(32);
             byte[] keyData = clientSecret.ToArray().Combine(serverSecret);
 
-            /*
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
-            stmt.AddValue(0, keyData);
-            stmt.AddValue(1, clientAddress.ToString());
-            stmt.AddValue(2, (byte)locale);
-            stmt.AddValue(3, os);
-            stmt.AddValue(4, accountName);
-            DB.Login.DirectExecute(stmt);
-            */
             globalSession.SessionKey = keyData;
 
-            Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_RealmJoinTicket";
-            attribute.Value = new Bgs.Protocol.Variant();
-            attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(accountName, System.Text.Encoding.UTF8);
-            response.Attribute.Add(attribute);
+            response.Attribute.AddBlob("Param_RealmJoinTicket", ByteString.CopyFrom(accountName, Encoding.UTF8));
+            response.Attribute.AddBlob("Param_ServerAddresses", ByteString.CopyFrom(compressed));
+            response.Attribute.AddBlob("Param_JoinSecret", ByteString.CopyFrom(serverSecret));
 
-            attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_ServerAddresses";
-            attribute.Value = new Bgs.Protocol.Variant();
-            attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(compressed);
-            response.Attribute.Add(attribute);
-
-            attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_JoinSecret";
-            attribute.Value = new Bgs.Protocol.Variant();
-            attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(serverSecret);
-            response.Attribute.Add(attribute);
             return BattlenetRpcErrorCode.Ok;
         }
 

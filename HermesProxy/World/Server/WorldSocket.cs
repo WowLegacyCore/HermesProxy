@@ -257,8 +257,7 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_PING:
                     Ping ping = new(packet);
                     ping.Read();
-                    if (_connectType == ConnectionType.Realm &&
-                        GetSession().WorldClient != null)
+                    if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
                         GetSession().WorldClient.SendPing(ping.Serial, ping.Latency);
                     HandlePing(ping);
                     break;
@@ -446,7 +445,7 @@ namespace HermesProxy.World.Server
 
         void HandleAuthSession(AuthSession authSession)
         {
-            _globalSession = Global.SessionsByName[authSession.RealmJoinTicket];
+            _globalSession = BnetSessionTicketStorage.SessionsByName[authSession.RealmJoinTicket];
             HandleAuthSessionCallback(authSession);
         }
 
@@ -589,7 +588,7 @@ namespace HermesProxy.World.Server
             ConnectToKey key = new();
             _key = key.Raw = authSession.Key;
 
-            _globalSession = Global.SessionsByKey[_key];
+            _globalSession = BnetSessionTicketStorage.SessionsByKey[_key];
 
             uint accountId = key.AccountId;
             string login = GetSession().AccountInfo.Login;
@@ -629,7 +628,7 @@ namespace HermesProxy.World.Server
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
 
-            Global.AddNewSessionByKey(_instanceConnectKey.Raw, GetSession());
+            BnetSessionTicketStorage.AddNewSessionByKey(_instanceConnectKey.Raw, GetSession());
 
             ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;

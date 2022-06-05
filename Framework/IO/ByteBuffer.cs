@@ -406,6 +406,11 @@ namespace Framework.IO
         {
             WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
         }
+        public void WriteUint32Enum<T>(T x) where T: Enum
+        {
+            WriteUInt32((uint)(object) x);
+        }
+
         #endregion
 
         public bool HasUnfinishedBitPack()
