@@ -694,12 +694,16 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Read()
         {
-            _worldPacket.ReadUInt8(); // Unknown Value. Usually 128
-            gift_bag = _worldPacket.ReadUInt8();
-            gift_slot = _worldPacket.ReadUInt8();
-            item_bag = _worldPacket.ReadUInt8();
-            item_slot = _worldPacket.ReadUInt8();
+            _ = _worldPacket.ReadUInt8(); // Unknown Value. Usually 128
+            GiftBag = _worldPacket.ReadUInt8();
+            GiftSlot = _worldPacket.ReadUInt8();
+            ItemBag = _worldPacket.ReadUInt8();
+            ItemSlot = _worldPacket.ReadUInt8();
         }
-        public byte gift_bag, gift_slot, item_bag, item_slot;
+        
+        public byte GiftBag { get; set; }
+        public byte GiftSlot { get; set; }
+        public byte ItemBag { get; set; }
+        public byte ItemSlot { get; set; }
     }
 }
