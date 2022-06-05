@@ -270,6 +270,91 @@ namespace HermesProxy.World.Enums
         LootCantLootThatNow,
     };
 
+    public enum InventoryResultTBC
+    {
+        Ok = 0,
+        CantEquipLevel,  // You Must Reach Level %D To Use That Item.
+        CantEquipSkill,  // You Aren'T Skilled Enough To Use That Item.
+        WrongSlot,  // That Item Does Not Go In That Slot.
+        BagFull,  // That Bag Is Full.
+        BagInBag,  // Can'T Put Non-Empty Bags In Other Bags.
+        TradeEquippedBag,  // You Can'T Trade Equipped Bags.
+        AmmoOnly,  // Only Ammo Can Go There.
+        ProficiencyNeeded,  // You Do Not Have The Required Proficiency For That Item.
+        NoSlotAvailable,  // No Equipment Slot Is Available For That Item.
+        CantEquipEver, // You Can Never Use That Item.
+        CantEquipEver2, // You Can Never Use That Item.
+        NoSlotAvailable2, // No Equipment Slot Is Available For That Item.
+        Equipped2handed, // Cannot Equip That With A Two-Handed Weapon.
+        TwoHandSkillNotFound, // You Cannot Dual-Wield
+        WrongBagType, // That Item Doesn'T Go In That Container.
+        WrongBagType2, // That Item Doesn'T Go In That Container.
+        ItemMaxCount, // You Can'T Carry Any More Of Those Items.
+        NoSlotAvailable3, // No Equipment Slot Is Available For That Item.
+        CantStack, // This Item Cannot Stack.
+        NotEquippable, // This Item Cannot Be Equipped.
+        CantSwap, // These Items Can'T Be Swapped.
+        SlotEmpty, // That Slot Is Empty.
+        ItemNotFound, // The Item Was Not Found.
+        DropBoundItem, // You Can'T Drop A Soulbound Item.
+        OutOfRange, // Out Of Range.
+        TooFewToSplit, // Tried To Split More Than Number In Stack.
+        SplitFailed, // Couldn'T Split Those Items.
+        SpellFailedReagentsGeneric, // Missing Reagent
+        NotEnoughMoney, // You Don'T Have Enough Money.
+        NotABag, // Not A Bag.
+        DestroyNonemptyBag, // You Can Only Do That With Empty Bags.
+        NotOwner, // You Don'T Own That Item.
+        OnlyOneQuiver, // You Can Only Equip One Quiver.
+        NoBankSlot, // You Must Purchase That Bag Slot First
+        NoBankHere, // You Are Too Far Away From A Bank.
+        ItemLocked, // Item Is Locked.
+        GenericStunned, // You Are Stunned
+        PlayerDead, // You Can'T Do That When You'Re Dead.
+        ClientLockedOut, // You Can'T Do That Right Now.
+        InternalBagError, // Internal Bag Error
+        OnlyOneBolt, // You Can Only Equip One Quiver.
+        OnlyOneAmmo, // You Can Only Equip One Ammo Pouch.
+        CantWrapStackable, // Stackable Items Can'T Be Wrapped.
+        CantWrapEquipped, // Equipped Items Can'T Be Wrapped.
+        CantWrapWrapped, // Wrapped Items Can'T Be Wrapped.
+        CantWrapBound, // Bound Items Can'T Be Wrapped.
+        CantWrapUnique, // Unique Items Can'T Be Wrapped.
+        CantWrapBags, // Bags Can'T Be Wrapped.
+        LootGone, // Already Looted
+        InvFull, // Inventory Is Full.
+        BankFull, // Your Bank Is Full
+        VendorSoldOut, // That Item Is Currently Sold Out.
+        BagFull2, // That Bag Is Full.
+        ItemNotFound2, // The Item Was Not Found.
+        CantStack2, // This Item Cannot Stack.
+        BagFull3, // That Bag Is Full.
+        VendorSoldOut2, // That Item Is Currently Sold Out.
+        ObjectIsBusy, // That Object Is Busy.
+        CantBeDisenchanted, // Item Cannot Be Disenchanted
+        NotInCombat, // You Can'T Do That While In Combat
+        NotWhileDisarmed, // You Can'T Do That While Disarmed
+        BagFull4, // That Bag Is Full.
+        CantEquipRank, // You Don'T Have The Required Rank For That Item
+        CantEquipReputation, // You Don'T Have The Required Reputation For That Item
+        TooManySpecialBags, // You Cannot Equip Another Bag Of That Type
+        LootCantLootThatNow, // You Can'T Loot That Item Now.
+        ItemUniqueEquippable, // You Cannot Equip More Than One Of Those.
+        VendorMissingTurnins, // You Do Not Have The Required Items For That Purchase
+        NotEnoughHonorPoints, // You Don'T Have Enough Honor Points
+        NotEnoughArenaPoints, // You Don'T Have Enough Arena Points
+        ItemMaxCountSocketed, // You Have The Maximum Number Of Those Gems In Your Inventory Or Socketed Into Items.
+        MailBoundItem, // You Can'T Mail Soulbound Items.
+        InternalBagError2, // Internal Bag Error
+        BagFull5, // That Bag Is Full.
+        ItemMaxCountEquippedSocketed, // You Have The Maximum Number Of Those Gems Socketed Into Equipped Items.
+        ItemUniqueEquippableSocketed, // You Cannot Socket More Than One Of Those Gems Into A Single Item.
+        TooMuchGold, // At Gold Limit
+        NotDuringArenaMatch, // You Can'T Do That While In An Arena Match
+        TradeBoundItem, // You Can'T Trade A Soulbound Item.
+        CantEquipRating, // You Don'T Have The Personal, Team, Or Battleground Rating Required To Buy That Item
+    };
+
     public enum InventoryResult
     {
         Ok = 0,
