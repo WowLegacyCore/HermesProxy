@@ -104,6 +104,11 @@ namespace Framework.IO
             return readStream.ReadDouble();
         }
 
+        public T ReadByteEnum<T>() where T: Enum
+        {
+            return (T)(object) ReadUInt8();
+        }
+
         public string ReadCString()
         {
             ResetBitPos();
@@ -406,6 +411,12 @@ namespace Framework.IO
         {
             WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
         }
+
+        public void WriteByteEnum<T>(T x) where T: Enum
+        {
+            WriteUInt8((byte)(object) x);
+        }
+
         public void WriteUint32Enum<T>(T x) where T: Enum
         {
             WriteUInt32((uint)(object) x);

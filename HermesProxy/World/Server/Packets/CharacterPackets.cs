@@ -106,7 +106,7 @@ namespace HermesProxy.World.Server.Packets
                 foreach (var visualItem in VisualItems)
                     visualItem.Write(data);
 
-                data.WriteInt64(LastPlayedTime);
+                data.WriteUInt64(LastPlayedTime);
                 data.WriteUInt16(SpecID);
                 data.WriteUInt32(Unknown703);
                 data.WriteUInt32(LastLoginVersion);
@@ -163,7 +163,7 @@ namespace HermesProxy.World.Server.Packets
             public bool FirstLogin;
             public byte unkWod61x;
             public bool ExpansionChosen;
-            public long LastPlayedTime;
+            public ulong LastPlayedTime;
             public ushort SpecID;
             public uint Unknown703;
             public uint LastLoginVersion;
@@ -1017,5 +1017,35 @@ namespace HermesProxy.World.Server.Packets
         public string Name = "";
         public Enums.Classic.ResponseCodes Result = 0;
         public WowGuid128 Guid;
+    }
+
+    public class GenerateRandomCharacterNameRequest : ClientPacket
+    {
+        public GenerateRandomCharacterNameRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Race = _worldPacket.ReadByteEnum<Race>();
+            Sex = _worldPacket.ReadByteEnum<Gender>();
+        }
+
+        public Race Race;
+        public Gender Sex;
+    }
+
+    public class GenerateRandomCharacterNameResult : ServerPacket
+    {
+        public GenerateRandomCharacterNameResult() : base(Opcode.SMSG_GENERATE_RANDOM_CHARACTER_NAME_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBool(Success);
+            
+            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteString(Name);
+        }
+
+        public bool Success;
+        public string Name;
     }
 }

@@ -687,4 +687,23 @@ namespace HermesProxy.World.Server.Packets
 
         public uint EnchantmentSlot;
     }
+
+    public class WrapItem : ClientPacket
+    {
+        public WrapItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            _ = _worldPacket.ReadUInt8(); // Unknown Value. Usually 128
+            GiftBag = _worldPacket.ReadUInt8();
+            GiftSlot = _worldPacket.ReadUInt8();
+            ItemBag = _worldPacket.ReadUInt8();
+            ItemSlot = _worldPacket.ReadUInt8();
+        }
+        
+        public byte GiftBag { get; set; }
+        public byte GiftSlot { get; set; }
+        public byte ItemBag { get; set; }
+        public byte ItemSlot { get; set; }
+    }
 }

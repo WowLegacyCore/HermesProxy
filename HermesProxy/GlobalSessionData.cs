@@ -5,6 +5,8 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server;
 using System.Collections.Generic;
+using System.Linq;
+using Framework.Realm;
 using ArenaTeamInspectData = HermesProxy.World.Server.Packets.ArenaTeamInspectData;
 
 namespace HermesProxy
@@ -17,6 +19,15 @@ namespace HermesProxy
         public Gender SexId;
         public byte Level;
     }
+
+    public class OwnCharacterInfo : PlayerCache
+    {
+        public WowGuid128 AccountId;
+        public WowGuid128 CharacterGuid;
+        public Realm Realm;
+        public ulong LastLoginUnixSec;
+    }
+
     public class GameSessionData
     {
         public bool HasWsgHordeFlagCarrier;
@@ -68,7 +79,7 @@ namespace HermesProxy
         public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
         public Dictionary<WowGuid128, uint[]> ItemGems = new();
         public Dictionary<uint, Class> CreatureClasses = new();
-        public List<WowGuid128> OwnCharacters = new();
+        public List<OwnCharacterInfo> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
@@ -639,22 +650,27 @@ namespace HermesProxy
     {
         public BNetServer.Networking.AccountInfo AccountInfo;
         public BNetServer.Networking.GameAccountInfo GameAccountInfo;
-        public RealmManager RealmManager = new();
         public string Username;
         public string LoginTicket;
         public byte[] SessionKey;
         public string Locale;
         public string OS;
         public uint Build;
-        public Framework.Realm.RealmId RealmId;
         public GameSessionData GameState = new();
+        
+        public RealmId RealmId;
+        public RealmManager RealmManager = new();
+        public Realm? Realm => RealmManager.GetRealm(RealmId);
+
         public AccountMetaDataManager AccountMetaDataMgr;
         public AccountDataManager AccountDataMgr;
+
         public WorldSocket RealmSocket;
         public WorldSocket InstanceSocket;
         public AuthClient AuthClient;
         public WorldClient WorldClient;
         public SniffFile ModernSniff;
+
         public Dictionary<string, WowGuid128> GuildsByName = new();
         public Dictionary<uint, List<string>> GuildRanks = new();
 
@@ -703,15 +719,15 @@ namespace HermesProxy
 
         public WowGuid128 GetGameAccountGuidForPlayer(WowGuid128 playerGuid)
         {
-            if (GameState.OwnCharacters.Contains(playerGuid))
-                return WowGuid128.Create(HighGuidType703.WowAccount, GameAccountInfo.Id);
+            if (GameState.OwnCharacters.Any(own => own.CharacterGuid == playerGuid))
+                return GameAccountInfo.WoWAccountGuid;
             else
                 return WowGuid128.Create(HighGuidType703.WowAccount, playerGuid.GetCounter());
         }
 
         public WowGuid128 GetBnetAccountGuidForPlayer(WowGuid128 playerGuid)
         {
-            if (GameState.OwnCharacters.Contains(playerGuid))
+            if (GameState.OwnCharacters.Any(own => own.CharacterGuid == playerGuid))
                 return WowGuid128.Create(HighGuidType703.BNetAccount, AccountInfo.Id);
             else
                 return WowGuid128.Create(HighGuidType703.BNetAccount, playerGuid.GetCounter());
