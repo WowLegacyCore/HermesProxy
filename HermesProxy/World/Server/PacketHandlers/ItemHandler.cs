@@ -201,10 +201,10 @@ namespace HermesProxy.World.Server
         void HandleWrapItem(WrapItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_WRAP_ITEM);
-            packet.WriteUInt8(item.gift_bag);
-            packet.WriteUInt8(item.gift_slot);
-            packet.WriteUInt8(item.item_bag);
-            packet.WriteUInt8(item.item_slot);
+            packet.WriteUInt8(item.GiftBag);
+            packet.WriteUInt8(item.GiftSlot);
+            packet.WriteUInt8(item.ItemBag);
+            packet.WriteUInt8(item.ItemSlot);
             SendPacketToServer(packet);
         }
     }
