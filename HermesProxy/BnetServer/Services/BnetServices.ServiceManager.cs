@@ -53,6 +53,14 @@ namespace BNetServer.Services
                 _serviceHolder = new BnetServices(connectionPath, net, initialSession);
             }
 
+            public void SetClientSecret(byte[] key)
+            {
+                for (int i = 0; i < Math.Min(_serviceHolder._clientSecret.Length, key.Length); i++)
+                {
+                    _serviceHolder._clientSecret[i] = key[i];
+                }
+            }
+
             public void Invoke(uint serviceId, OriginalHash serviceHash, uint methodId, uint requestToken, CodedInputStream stream)
             {
                 void SendErrorResponse(BattlenetRpcErrorCode errorCode)

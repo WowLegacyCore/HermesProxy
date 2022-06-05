@@ -48,7 +48,7 @@ namespace BNetServer.Services
                 ServiceLog(LogType.Error, $"Sent ClientRequest with no command.");
                 return BattlenetRpcErrorCode.RpcMalformedRequest;
             }
-            ServiceLog(LogType.Debug, $"Received {command.Name}");
+            ServiceLog(LogType.Debug, $"GameUtilitiesService method: {command.Name}");
 
             if (command.Name == $"Command_RealmListTicketRequest_v1_{GetCommandEndingForVersion()}")
                 return GetRealmListTicket(Params, response);
@@ -101,9 +101,9 @@ namespace BNetServer.Services
             {
                 var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
                 clientInfoOk = true;
-                int i = 0;
-                foreach (byte b in realmListTicketClientInformation.Info.Secret)
-                    _clientSecret[i++] = b;
+
+                for (var i = 0; i < Math.Min(_clientSecret.Length, realmListTicketClientInformation.Info.Secret.Count); i++)
+                    _clientSecret[i] = (byte)realmListTicketClientInformation.Info.Secret[i];
             }
 
             if (!clientInfoOk)

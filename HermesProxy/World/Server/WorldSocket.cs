@@ -284,7 +284,7 @@ namespace HermesProxy.World.Server
 
                     if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
                     {
-                        // GetSession().WorldClient.Disconnect();
+                        GetSession().WorldClient.Disconnect();
                     }
 
                     if (GetSession().ModernSniff != null)
@@ -493,10 +493,6 @@ namespace HermesProxy.World.Server
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
 
-            Log.PrintByteArray(LogType.Debug, "AuthSessionCallback Digest: ", digestKeyHash.Digest);
-            Log.PrintByteArray(LogType.Debug, "AuthSessionCallback LocalChallenge: ", authSession.LocalChallenge);
-            Log.PrintByteArray(LogType.Debug, "AuthSessionCallback serverChallenge: ", _serverChallenge);
-
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
             {
@@ -526,30 +522,12 @@ namespace HermesProxy.World.Server
             // only first 16 bytes of the hmac are used
             Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
-            // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
-            //PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
-            //stmt.AddValue(0, address.Address.ToString());
-            //stmt.AddValue(1, authSession.RealmJoinTicket);
-            //DB.Login.Execute(stmt);
-
-            // This also allows to check for possible "hack" attempts on account
-            //stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_INFO_CONTINUED_SESSION);
-            //stmt.AddValue(0, _sessionKey);
-            //stmt.AddValue(1, account.game.Id);
-            //DB.Login.Execute(stmt);
-
             GetSession().SessionKey = _sessionKey;
 
             Log.Print(LogType.Server, $"WorldSocket:HandleAuthSession: Client '{authSession.RealmJoinTicket}' authenticated successfully from {address}.");
 
-            // Update the last_ip in the database
-            //stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
-            //stmt.AddValue(0, address.Address.ToString());
-            //stmt.AddValue(1, authSession.RealmJoinTicket);
-            //DB.Login.Execute(stmt);
-
             _realmId = new RealmId((byte)authSession.RegionID, (byte)authSession.BattlegroupID, authSession.RealmID);
-            GetSession().WorldClient = new HermesProxy.World.Client.WorldClient();
+            GetSession().WorldClient = new Client.WorldClient();
             if (!GetSession().WorldClient.ConnectToWorldServer(GetSession().RealmManager.GetRealm(_realmId), GetSession()))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
