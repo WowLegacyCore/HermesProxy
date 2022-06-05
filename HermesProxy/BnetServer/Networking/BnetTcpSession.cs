@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using BNetServer.Services;
+using HermesProxy.World;
+using HermesProxy.World.Enums;
 
 namespace BNetServer.Networking
 {
@@ -119,6 +121,7 @@ namespace BNetServer.Networking
     public class GameAccountInfo
     {
         public uint Id;
+        public WowGuid128 WoWAccountGuid => WowGuid128.Create(HighGuidType703.WowAccount, Id);
         public string Name;
         public string DisplayName;
         public uint UnbanDate;
