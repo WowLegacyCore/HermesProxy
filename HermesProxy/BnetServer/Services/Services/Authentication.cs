@@ -27,7 +27,7 @@ namespace BNetServer.Services
             if (logonRequest.ApplicationVersion != HermesProxy.ModernVersion.BuildInt)
             {
                 ServiceLog(LogType.Error, $"Battlenet.LogonRequest: Attempted to log in with wrong game version (using {logonRequest.ApplicationVersion})!");
-                return BattlenetRpcErrorCode.BadProgram;
+                return BattlenetRpcErrorCode.BadVersion;
             }
 
             if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64")
@@ -84,12 +84,12 @@ namespace BNetServer.Services
             logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
             logonResult.AccountId.Low = tmpSession.AccountInfo.Id;
-            logonResult.AccountId.High = 0x100000000000000; // TODO Use correct GUID generator
-            foreach (var pair in tmpSession.AccountInfo.GameAccounts)
+            logonResult.AccountId.High = 0x100000000000000; // Some magic high guid?
+            foreach (var gameAccount in tmpSession.AccountInfo.GameAccounts.Values)
             {
                 EntityId gameAccountId = new();
-                gameAccountId.Low = pair.Value.Id;
-                gameAccountId.High = 0x200000200576F57; // TODO Use correct GUID generator
+                gameAccountId.Low = gameAccount.Id;
+                gameAccountId.High = 0x200000200576F51; // Some magic high guid? When using HighGuid of 703 client disconnects
                 logonResult.GameAccountId.Add(gameAccountId);
             }
 

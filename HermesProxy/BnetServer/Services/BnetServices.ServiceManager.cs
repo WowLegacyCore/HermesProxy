@@ -63,17 +63,22 @@ namespace BNetServer.Services
 
             public void Invoke(uint serviceId, OriginalHash serviceHash, uint methodId, uint requestToken, CodedInputStream stream)
             {
+                void SendRpcMessage(BattlenetRpcErrorCode status, IMessage? message)
+                {
+                    if (_serviceHolder._connectionPath == "WorldSocket")
+                        _serviceHolder._net.SendRpcMessage(serviceId, serviceHash, methodId, requestToken, status, message);
+                    else
+                        _serviceHolder._net.SendRpcMessage(0xFE, serviceHash, methodId, requestToken, status, message);
+                }
+
                 void SendErrorResponse(BattlenetRpcErrorCode errorCode)
                 {
-                    _serviceHolder._net.SendRpcMessage(serviceId, serviceHash, methodId, requestToken, errorCode, null);
+                    SendRpcMessage(errorCode, null);
                 }
 
                 void SendResponse(IMessage response)
                 {
-                    if (_serviceHolder._connectionPath == "WorldSocket")
-                        _serviceHolder._net.SendRpcMessage(serviceId, serviceHash, methodId, requestToken, BattlenetRpcErrorCode.Ok, response);
-                    else
-                        _serviceHolder._net.SendRpcMessage(0xFE, 0, 0, requestToken, BattlenetRpcErrorCode.Ok, response);
+                    SendRpcMessage(BattlenetRpcErrorCode.Ok, response);
                 }
 
                 if (!_serviceHandlers.TryGetValue((serviceHash, methodId), out var handler))

@@ -97,6 +97,7 @@ namespace BNetServer.Networking
     public class AccountInfo
     {   
         public uint Id;
+        public WowGuid128 BnetAccountGuid => WowGuid128.Create(HighGuidType703.BNetAccount, Id);
         public string Login;
         public uint LoginTicketExpiry;
         public bool IsBanned;

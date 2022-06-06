@@ -1046,6 +1046,6 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public bool Success;
-        public string Name;
+        public string Name = "";
     }
 }

@@ -50,7 +50,7 @@ namespace HermesProxy.World.Server
             }
 
             _bnetRpc.Invoke(
-                serviceId: (uint)request.Method.ObjectId,
+                serviceId: 0,
                 (OriginalHash)request.Method.GetServiceHash(),
                 request.Method.GetMethodId(),
                 request.Method.Token,
