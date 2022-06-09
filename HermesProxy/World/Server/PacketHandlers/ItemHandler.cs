@@ -201,10 +201,14 @@ namespace HermesProxy.World.Server
         void HandleWrapItem(WrapItem item)
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_WRAP_ITEM);
-            packet.WriteUInt8(item.GiftBag);
-            packet.WriteUInt8(item.GiftSlot);
-            packet.WriteUInt8(item.ItemBag);
-            packet.WriteUInt8(item.ItemSlot);
+            byte giftBag = item.GiftBag != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.GiftBag) : item.GiftBag;
+            byte giftSlot = item.GiftBag == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.GiftSlot) : item.GiftSlot;
+            byte itemBag = item.ItemBag != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ItemBag) : item.ItemBag;
+            byte itemSlot = item.ItemBag == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(item.ItemSlot) : item.ItemSlot;
+            packet.WriteUInt8(giftBag);
+            packet.WriteUInt8(giftSlot);
+            packet.WriteUInt8(itemBag);
+            packet.WriteUInt8(itemSlot);
             SendPacketToServer(packet);
         }
     }

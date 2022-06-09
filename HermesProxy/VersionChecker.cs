@@ -309,6 +309,8 @@ namespace HermesProxy
         {
             if (RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return (InventoryResult)Enum.Parse(typeof(InventoryResult), ((InventoryResultVanilla)result).ToString());
+            else
+                return (InventoryResult)Enum.Parse(typeof(InventoryResult), ((InventoryResultTBC)result).ToString());
 
             return (InventoryResult)result;
         }
