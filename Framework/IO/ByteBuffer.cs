@@ -417,6 +417,11 @@ namespace Framework.IO
             WriteUInt8((byte)(object) x);
         }
 
+        public void WriteUint32Enum<T>(T x) where T: Enum
+        {
+            WriteUInt32((uint)(object) x);
+        }
+
         #endregion
 
         public bool HasUnfinishedBitPack()

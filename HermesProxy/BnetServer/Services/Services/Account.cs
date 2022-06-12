@@ -5,16 +5,13 @@ using Bgs.Protocol.Account.V1;
 using Framework.Constants;
 using System.Collections.Generic;
 
-namespace BNetServer.Networking
+namespace BNetServer.Services
 {
-    public partial class Session
+    public partial class BnetServices
     {
-        [Service(OriginalHash.AccountService, 30)]
+        [Service(ServiceRequirement.LoggedIn, OriginalHash.AccountService, 30)]
         BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
         {
-            if (!_authed)
-                return BattlenetRpcErrorCode.Denied;
-
             if (request.Options.FieldPrivacyInfo)
             {
                 response.State = new AccountState();
@@ -30,15 +27,12 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.AccountService, 31)]
+        [Service(ServiceRequirement.LoggedIn, OriginalHash.AccountService, 31)]
         BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
         {
-            if (!_authed)
-                return BattlenetRpcErrorCode.Denied;
-
             if (request.Options.FieldGameLevelInfo)
             {
-                var gameAccountInfo = _globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = GetSession().AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State = new GameAccountState();
@@ -58,7 +52,7 @@ namespace BNetServer.Networking
 
                 response.State.GameStatus = new GameStatus();
 
-                var gameAccountInfo = _globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = GetSession().AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;

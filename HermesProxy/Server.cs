@@ -5,6 +5,7 @@ using HermesProxy.World;
 using HermesProxy.World.Server;
 using System;
 using System.Globalization;
+using BNetServer;
 
 namespace HermesProxy
 {
@@ -18,12 +19,12 @@ namespace HermesProxy
             Log.Print(LogType.Server, "Starting Hermes Proxy...");
             Log.Print(LogType.Server, $"Version {GetVersionInformation()}");
             Log.Start();
-
+            
             GameData.LoadEverything();
 
             string bindIp = "0.0.0.0";
 
-            var restSocketServer = new SocketManager<RestSession>();
+            var restSocketServer = new SocketManager<BnetRestApiSession>();
             int restPort = Framework.Settings.RestPort;
             if (restPort < 0 || restPort > 0xFFFF)
             {
@@ -39,9 +40,9 @@ namespace HermesProxy
             }
 
             Log.Print(LogType.Server, "Starting Login service...");
-            Global.LoginServiceMgr.Initialize();
+            LoginServiceManager.Instance.Initialize();
 
-            var sessionSocketServer = new SocketManager<Session>();
+            var sessionSocketServer = new SocketManager<BnetTcpSession>();
             // Start the listening port (acceptor) for auth connections
             int bnPort = Framework.Settings.BNetPort;
             if (bnPort < 0 || bnPort > 0xFFFF)

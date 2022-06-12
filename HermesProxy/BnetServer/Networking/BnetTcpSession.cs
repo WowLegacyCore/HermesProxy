@@ -6,43 +6,30 @@ using Framework.Constants;
 using Framework.IO;
 using Framework.Logging;
 using Framework.Networking;
-using Framework.Realm;
 using Google.Protobuf;
-using HermesProxy;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using BNetServer.Services;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
 
 namespace BNetServer.Networking
 {
-    partial class Session : SSLSocket
+    public class BnetTcpSession : SSLSocket, BnetServices.INetwork
     {
-        GlobalSessionData _globalSession;
+        private readonly BnetServices.ServiceManager _handlerManager;
 
-        byte[] _clientSecret;
-        bool _authed;
-        uint _requestToken;
-
-        Dictionary<uint, Action<CodedInputStream>> _responseCallbacks;
-
-        public Session(Socket socket) : base(socket)
+        public BnetTcpSession(Socket socket) : base(socket)
         {
-            _clientSecret = new byte[32];
-            _responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
-        }
-        
-        public GlobalSessionData GetSession()
-        {
-            return _globalSession;
+            _handlerManager = new BnetServices.ServiceManager("BnetTcp", this, initialSession: null);
         }
 
         public override void Accept()
         {
             string ipAddress = GetRemoteIpEndPoint().ToString();
             Log.Print(LogType.Server, $"Accepting connection from {ipAddress}.");
-            AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
+            AsyncHandshake(BnetServerCertificate.Certificate);
         }
 
         public override bool Update()
@@ -66,76 +53,31 @@ namespace BNetServer.Networking
 
                 if (header.ServiceId != 0xFE && header.ServiceHash != 0)
                 {
-                    var handler = Global.LoginServiceMgr.GetHandler(header.ServiceHash, header.MethodId);
-                    if (handler != null)
-                    {
-                        Log.Print(LogType.Debug, $"Service {(OriginalHash) header.ServiceHash}(0x{header.ServiceHash:X8}) Method {header.MethodId} Token {header.Token}");
-                        handler.Invoke(this, header.Token, stream);
-                    }
-                    else
-                    {
-                        Log.Print(LogType.Error, $"{GetClientInfo()} tried to call not implemented methodId: {header.MethodId} for servicehash: {(OriginalHash) header.ServiceHash}(0x{header.ServiceHash:X8})");
-                        SendResponse(header.Token, BattlenetRpcErrorCode.RpcNotImplemented);
-                    }
-                }
-                else
-                {
-                    var handler = _responseCallbacks.LookupByKey(header.Token);
-                    if (handler != null)
-                    {
-                        handler(stream);
-                        _responseCallbacks.Remove(header.Token);
-                    }
+                    _handlerManager.Invoke(header.ServiceId, (OriginalHash)header.ServiceHash, header.MethodId, header.Token, stream);
                 }
             }
 
             await AsyncRead();
         }
 
-        public async void SendResponse(uint token, IMessage response)
-        {
-            Header header = new();
-            header.Token = token;
-            header.ServiceId = 0xFE;
-            header.Size = (uint)response.CalculateSize();
-
-            ByteBuffer buffer = new();
-            buffer.WriteBytes(GetHeaderSize(header), 2);
-            buffer.WriteBytes(header.ToByteArray());
-            buffer.WriteBytes(response.ToByteArray());
-
-            await AsyncWrite(buffer.GetData());
-        }
-
-        public async void SendResponse(uint token, BattlenetRpcErrorCode status)
+        public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)
         {
             Header header = new();
             header.Token = token;
             header.Status = (uint)status;
-            header.ServiceId = 0xFE;
-
-            ByteBuffer buffer = new();
-            buffer.WriteBytes(GetHeaderSize(header), 2);
-            buffer.WriteBytes(header.ToByteArray());
-
-            await AsyncWrite(buffer.GetData());
-        }
-
-        public async void SendRequest(uint serviceHash, uint methodId, IMessage request)
-        {
-            Header header = new();
-            header.ServiceId = 0;
-            header.ServiceHash = serviceHash;
+            header.ServiceId = serviceId;
+            header.ServiceHash = (uint)service;
             header.MethodId = methodId;
-            header.Size = (uint)request.CalculateSize();
-            header.Token = _requestToken++;
+            if (message != null)
+                header.Size = (uint)message.CalculateSize();
 
             ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
-            buffer.WriteBytes(request.ToByteArray());
+            if (message != null)
+                buffer.WriteBytes(message.ToByteArray());
 
-            await AsyncWrite(buffer.GetData());
+            AsyncWrite(buffer.GetData());
         }
 
         public byte[] GetHeaderSize(Header header)
@@ -150,29 +92,12 @@ namespace BNetServer.Networking
 
             return bytes;
         }
-
-        public string GetClientInfo()
-        {
-            string stream = '[' + GetRemoteIpEndPoint().ToString();
-
-            if (_globalSession != null)
-            {
-                if (_globalSession.AccountInfo != null && !_globalSession.AccountInfo.Login.IsEmpty())
-                    stream += ", Account: " + _globalSession.AccountInfo.Login;
-
-                if (_globalSession.GameAccountInfo != null)
-                    stream += ", Game account: " + _globalSession.GameAccountInfo.Name;
-            }
-
-            stream += ']';
-
-            return stream;
-        }
     }
 
     public class AccountInfo
     {   
         public uint Id;
+        public WowGuid128 BnetAccountGuid => WowGuid128.Create(HighGuidType703.BNetAccount, Id);
         public string Login;
         public uint LoginTicketExpiry;
         public bool IsBanned;

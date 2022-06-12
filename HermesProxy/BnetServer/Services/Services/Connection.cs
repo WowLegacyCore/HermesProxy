@@ -6,11 +6,11 @@ using Bgs.Protocol.Connection.V1;
 using Framework.Constants;
 using System;
 
-namespace BNetServer.Networking
+namespace BNetServer.Services
 {
-    public partial class Session
+    public partial class BnetServices
     {
-        [Service(OriginalHash.ConnectionService, 1)]
+        [Service(ServiceRequirement.Unauthorized, OriginalHash.ConnectionService, 1)]
         BattlenetRpcErrorCode HandleConnect(ConnectRequest request, ConnectResponse response)
         {
             if (request.ClientId != null)
@@ -26,23 +26,24 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.ConnectionService, 5)]
+        [Service(ServiceRequirement.Always, OriginalHash.ConnectionService, 5)]
         BattlenetRpcErrorCode HandleKeepAlive(NoData request)
         {
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.ConnectionService, 7)]
+        [Service(ServiceRequirement.Always, OriginalHash.ConnectionService, 7)]
         BattlenetRpcErrorCode HandleRequestDisconnect(DisconnectRequest request)
         {
-            if (_globalSession != null && _globalSession.AuthClient != null)
-                _globalSession.AuthClient.Disconnect();
+            if (GetSession() != null && GetSession().AuthClient != null)
+                GetSession().AuthClient.Disconnect();
 
             var disconnectNotification = new DisconnectNotification();
             disconnectNotification.ErrorCode = request.ErrorCode;
-            SendRequest((uint)OriginalHash.ConnectionService, 4, disconnectNotification);
+            SendRequest(OriginalHash.ConnectionService, 4, disconnectNotification);
 
             CloseSocket();
+
             return BattlenetRpcErrorCode.Ok;
         }
     }

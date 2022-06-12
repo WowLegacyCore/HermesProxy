@@ -61,4 +61,10 @@ namespace Framework.Constants
         UserManagerService = 0x8EE5694Eu,
         UserManagerListener = 0xB3426BB3u
     }
+
+    public enum GameUtilitiesServiceMethods : uint
+    {
+        GenericClientRequest = 1,
+        GetAllValuesForAttribute = 10,
+    }
 }

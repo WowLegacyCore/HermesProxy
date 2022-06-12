@@ -16,17 +16,17 @@ using HermesProxy.World.Server;
 
 namespace BNetServer.Networking
 {
-    public class RestSession : SSLSocket
+    public class BnetRestApiSession : SSLSocket
     {
         private const string BNET_SERVER_BASE_PATH = "/bnetserver/";
         private const string TICKET_PREFIX = "HP-"; // Hermes Proxy
-        
-        public RestSession(Socket socket) : base(socket) { }
+
+        public BnetRestApiSession(Socket socket) : base(socket) { }
 
         public override void Accept()
         {
             // Setup SSL connection
-            AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
+            AsyncHandshake(BnetServerCertificate.Certificate);
         }
 
         public override async void ReadHandler(byte[] data, int receivedLength)
@@ -55,7 +55,7 @@ namespace BNetServer.Networking
             switch (pathElements[0], httpRequest.Method) 
             {
                 case ("login", "GET"):
-                    SendResponse(HttpCode.Ok, Global.LoginServiceMgr.GetFormInput());
+                    SendResponse(HttpCode.Ok, LoginServiceManager.Instance.GetFormInput());
                     return true;
                 case ("login", "POST"):
                     HandleLoginRequest(pathElements, httpRequest);
@@ -114,8 +114,8 @@ namespace BNetServer.Networking
                 globalSession.LoginTicket = loginTicket;
                 globalSession.Username = login;
                 globalSession.AccountMetaDataMgr = new AccountMetaDataManager(login);
-                Global.AddNewSessionByName(login, globalSession);
-                Global.AddNewSessionByTicket(loginTicket, globalSession);
+                BnetSessionTicketStorage.AddNewSessionByName(login, globalSession);
+                BnetSessionTicketStorage.AddNewSessionByTicket(loginTicket, globalSession);
 
                 loginResult.LoginTicket = loginTicket;
                 loginResult.AuthenticationState = "DONE";
