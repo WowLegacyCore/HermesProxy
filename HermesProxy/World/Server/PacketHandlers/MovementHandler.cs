@@ -88,7 +88,13 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_FORCE_WALK_SPEED_CHANGE_ACK)]
         void HandleMoveForceSpeedChangeAck(MovementSpeedAck speed)
         {
-            WorldPacket packet = new WorldPacket(speed.GetUniversalOpcode());
+            var opcode = speed.GetUniversalOpcode();
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180)
+                && opcode is Opcode.CMSG_MOVE_FORCE_FLIGHT_SPEED_CHANGE_ACK
+                          or Opcode.CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK)
+                return; // This is probably an ack by our swim to fly speed change for vanilla
+
+            WorldPacket packet = new WorldPacket(opcode);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(speed.MoverGUID.To64());
             else
