@@ -93,6 +93,8 @@ namespace HermesProxy.World.Client
                         {
                             if (!GetSession().GameState.ObjectSpawnCount.ContainsKey(oldGuid))
                                 GetSession().GameState.ObjectSpawnCount.Add(oldGuid, 0);
+                            else if (oldGuid.GetHighType() == HighGuidType.GameObject && GetSession().GameState.DespawnedGameObjects.Contains(oldGuid))
+                                    GetSession().GameState.IncrementObjectSpawnCounter(oldGuid);
                         }
 
                         var guid = oldGuid.To128(GetSession().GameState);
