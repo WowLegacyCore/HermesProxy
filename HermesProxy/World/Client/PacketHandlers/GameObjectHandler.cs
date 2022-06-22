@@ -13,9 +13,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GAME_OBJECT_DESPAWN)]
         void HandleGameObjectDespawn(WorldPacket packet)
         {
+            WowGuid64 guid = packet.ReadGuid();
             GameObjectDespawn despawn = new GameObjectDespawn();
-            despawn.ObjectGUID = packet.ReadGuid().To128(GetSession().GameState);
+            despawn.ObjectGUID = guid.To128(GetSession().GameState);
             SendPacketToClient(despawn);
+            GetSession().GameState.DespawnedGameObjects.Add(guid);
         }
 
         [PacketHandler(Opcode.SMSG_GAME_OBJECT_RESET_STATE)]
