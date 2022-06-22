@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.Realm;
 using System;
 using System.Net;
-using System.Net.Sockets;
 
 public class Realm : IEquatable<Realm>
 {
@@ -67,13 +66,14 @@ public class Realm : IEquatable<Realm>
             && other.Name == Name
             && other.Type == Type
             && other.Flags == Flags
+            && other.CharacterCount == CharacterCount
             && other.Timezone == Timezone
             && other.PopulationLevel == PopulationLevel;
     }
 
     public override int GetHashCode()
     {
-        return new { ExternalAddress, Port, Name, Type, Flags, Timezone, PopulationLevel }.GetHashCode();
+        return new { ExternalAddress, Port, Name, Type, Flags, CharacterCount, Timezone, PopulationLevel }.GetHashCode();
     }
 
     public RealmId Id;
@@ -84,6 +84,7 @@ public class Realm : IEquatable<Realm>
     public string NormalizedName;
     public byte Type;
     public RealmFlags Flags;
+    public byte CharacterCount;
     public byte Timezone;
     public float PopulationLevel;
 }

@@ -56,9 +56,6 @@ namespace HermesProxy
                 ExitNow();
             }
 
-            Log.Print(LogType.Server, "Starting Realm manager...");
-            Global.RealmMgr.Initialize();
-
             Log.Print(LogType.Server, "Starting Login service...");
             Global.LoginServiceMgr.Initialize();
 

@@ -641,6 +641,7 @@ namespace HermesProxy
     {
         public BNetServer.Networking.AccountInfo AccountInfo;
         public BNetServer.Networking.GameAccountInfo GameAccountInfo;
+        public RealmManager RealmManager = new();
         public string Username;
         public string Password;
         public string LoginTicket;

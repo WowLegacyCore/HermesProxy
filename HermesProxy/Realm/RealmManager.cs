@@ -28,15 +28,14 @@ using Framework.Realm;
 using Framework.Logging;
 using HermesProxy;
 
-public class RealmManager : Singleton<RealmManager>
+public class RealmManager
 {
-    RealmManager() { }
-
-    public void Initialize()
+    public RealmManager()
     {
         LoadBuildInfo();
 
-        AddRealm(1, "Sandbox", "127.0.0.1", (ushort)Framework.Settings.RealmPort, RealmType.PVP, RealmFlags.Recommended, 1, 1);
+        // Placeholder required for initial GetSubRegions()
+        AddRealm(1, "Placeholder", "127.0.0.1", 1, RealmType.PVP, RealmFlags.Recommended, 0, 1, 1);
     }
 
     void LoadBuildInfo()
@@ -76,7 +75,7 @@ public class RealmManager : Singleton<RealmManager>
         _realms[realm.Id] = realm;
     }
 
-    public void AddRealm(uint id, string name,string externalAddress, ushort port, RealmType type, RealmFlags flags, byte timezone, float populationLevel)
+    public void AddRealm(uint id, string name, string externalAddress, ushort port, RealmType type, RealmFlags flags, byte characterCount, byte timezone, float populationLevel)
     {
         Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
         foreach (var p in _realms)
@@ -95,6 +94,7 @@ public class RealmManager : Singleton<RealmManager>
 
         realm.Type = (byte)realmType;
         realm.Flags = flags;
+        realm.CharacterCount = characterCount;
         realm.Timezone = timezone;
         realm.PopulationLevel = populationLevel;
         realm.Build = (uint)Framework.Settings.ClientBuild;
@@ -110,9 +110,9 @@ public class RealmManager : Singleton<RealmManager>
             _subRegions.Add(subRegion);
 
         if (!existingRealms.ContainsKey(realm.Id))
-            Log.Print(LogType.Server, $"Added realm \"{realm.Name}\" at {realm.ExternalAddress.ToString()}:{realm.Port}");
+            Log.Print(LogType.Server, $"Added realm \"{realm.Name}\" at {realm.ExternalAddress}:{realm.Port}");
         else
-            Log.Print(LogType.Server, $"Updating realm \"{realm.Name}\" at { realm.ExternalAddress.ToString()}:{realm.Port}");
+            Log.Print(LogType.Server, $"Updating realm \"{realm.Name}\" at { realm.ExternalAddress}:{realm.Port}");
 
         existingRealms.Remove(realm.Id);
     }
@@ -126,7 +126,7 @@ public class RealmManager : Singleton<RealmManager>
         {
             foreach (var authRealmEntry in authRealmList)
             {
-                AddRealm(authRealmEntry.ID, authRealmEntry.Name, authRealmEntry.Address, authRealmEntry.Port, authRealmEntry.Type, authRealmEntry.Flags, authRealmEntry.Timezone, authRealmEntry.Population);
+                AddRealm(authRealmEntry.ID, authRealmEntry.Name, authRealmEntry.Address, authRealmEntry.Port, authRealmEntry.Type, authRealmEntry.Flags, authRealmEntry.CharacterCount, authRealmEntry.Timezone, authRealmEntry.Population);
             }
         }
     }
