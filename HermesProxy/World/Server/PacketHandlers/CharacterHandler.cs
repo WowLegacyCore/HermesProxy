@@ -17,6 +17,33 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_GET_ACCOUNT_CHARACTER_LIST)]
+        void HandleGetAccountCharacterList(GetAccountCharacterListRequest request)
+        {
+            GetAccountCharacterListResult response = new();
+            response.Token = request.Token;
+
+            foreach (var ownCharacter in GetSession().GameState.OwnCharacters)
+            {
+                response.CharacterList.Add(new AccountCharacterListEntry
+                {
+                    AccountId = WowGuid128.Create(HighGuidType703.WowAccount, GetSession().GameAccountInfo.Id),
+                    CharacterGuid = ownCharacter.Guid,
+                    RealmVirtualAddress = GetSession().RealmId.GetAddress(),
+                    RealmName = "", // If empty the realm name will not be displayed
+                    LastLoginUnixSec = ownCharacter.LastPlayedTime,
+
+                    Name = ownCharacter.Name,
+                    Race = ownCharacter.RaceId,
+                    Class = ownCharacter.ClassId,
+                    Sex = ownCharacter.SexId,
+                    Level = ownCharacter.ExperienceLevel,
+                });
+            }
+
+            SendPacket(response);
+        }
+
         [PacketHandler(Opcode.CMSG_CREATE_CHARACTER)]
         void HandleCreateCharacter(CreateCharacter charCreate)
         {

@@ -5,6 +5,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server;
 using System.Collections.Generic;
+using System.Linq;
 using ArenaTeamInspectData = HermesProxy.World.Server.Packets.ArenaTeamInspectData;
 
 namespace HermesProxy
@@ -40,6 +41,7 @@ namespace HermesProxy
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
         public World.Server.Packets.PartyUpdate[] CurrentGroups = new World.Server.Packets.PartyUpdate[2];
+        public List<World.Server.Packets.EnumCharactersResult.CharacterInfo> OwnCharacters;
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public uint CurrentGuildCreateTime;
@@ -68,7 +70,6 @@ namespace HermesProxy
         public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
         public Dictionary<WowGuid128, uint[]> ItemGems = new();
         public Dictionary<uint, Class> CreatureClasses = new();
-        public List<WowGuid128> OwnCharacters = new();
         public Dictionary<string, int> ChannelIds = new();
         public Dictionary<uint, uint> ItemBuyCount = new();
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
@@ -702,7 +703,7 @@ namespace HermesProxy
 
         public WowGuid128 GetGameAccountGuidForPlayer(WowGuid128 playerGuid)
         {
-            if (GameState.OwnCharacters.Contains(playerGuid))
+            if (GameState.OwnCharacters.Any(own => own.Guid == playerGuid))
                 return WowGuid128.Create(HighGuidType703.WowAccount, GameAccountInfo.Id);
             else
                 return WowGuid128.Create(HighGuidType703.WowAccount, playerGuid.GetCounter());
@@ -710,7 +711,7 @@ namespace HermesProxy
 
         public WowGuid128 GetBnetAccountGuidForPlayer(WowGuid128 playerGuid)
         {
-            if (GameState.OwnCharacters.Contains(playerGuid))
+            if (GameState.OwnCharacters.Any(own => own.Guid == playerGuid))
                 return WowGuid128.Create(HighGuidType703.BNetAccount, AccountInfo.Id);
             else
                 return WowGuid128.Create(HighGuidType703.BNetAccount, playerGuid.GetCounter());

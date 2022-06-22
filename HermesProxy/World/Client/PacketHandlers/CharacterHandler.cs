@@ -27,7 +27,6 @@ namespace HermesProxy.World.Client
                 EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
                 PlayerCache cache = new PlayerCache();
                 char1.Guid = packet.ReadGuid().To128(GetSession().GameState);
-                GetSession().GameState.OwnCharacters.Add(char1.Guid);
                 char1.Name = cache.Name = packet.ReadCString();
                 char1.RaceId = cache.RaceId = (Race)packet.ReadUInt8();
                 char1.ClassId = cache.ClassId = (Class)packet.ReadUInt8();
@@ -97,6 +96,7 @@ namespace HermesProxy.World.Client
                 char1.ExpansionChosen = true;
                 charEnum.Characters.Add(char1);
             }
+            GetSession().GameState.OwnCharacters = charEnum.Characters;
 
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(1, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(2, true, false, false));
