@@ -310,6 +310,36 @@ namespace HermesProxy.World.Server.Packets
         public List<AccountCharacterListEntry> CharacterList = new();
     }
 
+    public class GenerateRandomCharacterNameRequest : ClientPacket
+    {
+        public GenerateRandomCharacterNameRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Race = (Race)_worldPacket.ReadUInt8();
+            Sex = (Gender)_worldPacket.ReadUInt8();
+        }
+
+        public Race Race;
+        public Gender Sex;
+    }
+
+    public class GenerateRandomCharacterNameResult : ServerPacket
+    {
+        public GenerateRandomCharacterNameResult() : base(Opcode.SMSG_GENERATE_RANDOM_CHARACTER_NAME_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBool(Success);
+
+            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteString(Name);
+        }
+
+        public bool Success;
+        public string Name = "";
+    }
+
     public class ChrCustomizationChoice : IComparable<ChrCustomizationChoice>
     {
         public uint ChrCustomizationOptionID;
