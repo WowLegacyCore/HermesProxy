@@ -1,4 +1,5 @@
-﻿using Framework.Constants;
+﻿using Framework;
+using Framework.Constants;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -106,7 +107,10 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(50);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ServerDelay);
+            }
 
             if (GameData.NextMeleeSpells.Contains(cast.Cast.SpellID) ||
                 GameData.AutoRepeatSpells.Contains(cast.Cast.SpellID))
@@ -196,7 +200,10 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(50);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ServerDelay);
+            }
 
             ClientCastRequest castRequest = new ClientCastRequest();
             castRequest.Timestamp = Environment.TickCount;
@@ -247,7 +254,10 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(50);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ServerDelay);
+            }
 
             ClientCastRequest castRequest = new ClientCastRequest();
             castRequest.Timestamp = Environment.TickCount;
@@ -302,7 +312,10 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(50);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ServerDelay);
+            }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CAST);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -315,7 +328,10 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(50);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ServerDelay);
+            }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CHANNELLING);
             packet.WriteInt32(cast.SpellID);
@@ -363,7 +379,10 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(50);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ServerDelay);
+            }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
             SendPacketToServer(packet);

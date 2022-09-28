@@ -128,7 +128,10 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(70);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ClientDelay);
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
@@ -196,7 +199,10 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(70);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ClientDelay);
+            }
 
             uint spellId = packet.ReadUInt32();
             var status = packet.ReadUInt8();
@@ -232,7 +238,10 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(70);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ClientDelay);
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
@@ -282,7 +291,10 @@ namespace HermesProxy.World.Client
             {
                 // Artificial lag is needed for spell packets,
                 // or spells will bug out and glow if spammed.
-                System.Threading.Thread.Sleep(70);
+                if (Settings.EnableSpellDelay)
+                {
+                    System.Threading.Thread.Sleep(Settings.ClientDelay);
+                }
             }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -442,7 +454,10 @@ namespace HermesProxy.World.Client
             {
                 // Artificial lag is needed for spell packets,
                 // or spells will bug out and glow if spammed.
-                System.Threading.Thread.Sleep(70);
+                if (Settings.EnableSpellDelay)
+                {
+                    System.Threading.Thread.Sleep(Settings.ClientDelay);
+                }
             }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -621,7 +636,10 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            System.Threading.Thread.Sleep(70);
+            if (Settings.EnableSpellDelay)
+            {
+                System.Threading.Thread.Sleep(Settings.ClientDelay);
+            }
 
             if (GetSession().GameState.CurrentClientSpecialCast != null &&
                 GameData.AutoRepeatSpells.Contains(GetSession().GameState.CurrentClientSpecialCast.SpellId))
