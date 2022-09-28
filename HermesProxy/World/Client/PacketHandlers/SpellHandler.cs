@@ -128,7 +128,7 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.EnableSpellDelay)
+            if (Settings.ClientDelay! <= 0)
             {
                 System.Threading.Thread.Sleep(Settings.ClientDelay);
             }
@@ -199,7 +199,7 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.EnableSpellDelay)
+            if (Settings.ClientDelay !<= 0)
             {
                 System.Threading.Thread.Sleep(Settings.ClientDelay);
             }
@@ -238,7 +238,7 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.EnableSpellDelay)
+            if (Settings.ClientDelay !<= 0)
             {
                 System.Threading.Thread.Sleep(Settings.ClientDelay);
             }
@@ -291,7 +291,7 @@ namespace HermesProxy.World.Client
             {
                 // Artificial lag is needed for spell packets,
                 // or spells will bug out and glow if spammed.
-                if (Settings.EnableSpellDelay)
+                if (Settings.ClientDelay !<= 0)
                 {
                     System.Threading.Thread.Sleep(Settings.ClientDelay);
                 }
@@ -454,7 +454,7 @@ namespace HermesProxy.World.Client
             {
                 // Artificial lag is needed for spell packets,
                 // or spells will bug out and glow if spammed.
-                if (Settings.EnableSpellDelay)
+                if (Settings.ClientDelay !<= 0)
                 {
                     System.Threading.Thread.Sleep(Settings.ClientDelay);
                 }
@@ -636,7 +636,7 @@ namespace HermesProxy.World.Client
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.EnableSpellDelay)
+            if (Settings.ClientDelay !<= 0)
             {
                 System.Threading.Thread.Sleep(Settings.ClientDelay);
             }
