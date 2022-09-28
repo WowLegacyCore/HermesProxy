@@ -126,6 +126,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CAST_FAILED)]
         void HandleCastFailed(WorldPacket packet)
         {
+            // Artificial lag is needed for spell packets,
+            // or spells will bug out and glow if spammed.
+            System.Threading.Thread.Sleep(70);
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
 
@@ -190,6 +194,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_CAST_FAILED, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandlePetCastFailed(WorldPacket packet)
         {
+            // Artificial lag is needed for spell packets,
+            // or spells will bug out and glow if spammed.
+            System.Threading.Thread.Sleep(70);
+
             uint spellId = packet.ReadUInt32();
             var status = packet.ReadUInt8();
             if (status != 2)
@@ -222,6 +230,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_CAST_FAILED, ClientVersionBuild.V2_0_1_6180)]
         void HandlePetCastFailedTBC(WorldPacket packet)
         {
+            // Artificial lag is needed for spell packets,
+            // or spells will bug out and glow if spammed.
+            System.Threading.Thread.Sleep(70);
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
 
@@ -265,6 +277,13 @@ namespace HermesProxy.World.Client
                 casterUnit = packet.ReadPackedGuid().To128(GetSession().GameState);
             else
                 casterUnit = packet.ReadGuid().To128(GetSession().GameState);
+
+            if (casterUnit == GetSession().GameState.CurrentPlayerGuid)
+            {
+                // Artificial lag is needed for spell packets,
+                // or spells will bug out and glow if spammed.
+                System.Threading.Thread.Sleep(70);
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // Cast Count
@@ -418,6 +437,13 @@ namespace HermesProxy.World.Client
             
             dbdata.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             dbdata.CasterUnit = packet.ReadPackedGuid().To128(GetSession().GameState);
+
+            if (dbdata.CasterUnit == GetSession().GameState.CurrentPlayerGuid)
+            {
+                // Artificial lag is needed for spell packets,
+                // or spells will bug out and glow if spammed.
+                System.Threading.Thread.Sleep(70);
+            }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt8(); // cast count
@@ -593,6 +619,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CANCEL_AUTO_REPEAT)]
         void HandleCancelAutoRepeat(WorldPacket packet)
         {
+            // Artificial lag is needed for spell packets,
+            // or spells will bug out and glow if spammed.
+            System.Threading.Thread.Sleep(70);
+
             if (GetSession().GameState.CurrentClientSpecialCast != null &&
                 GameData.AutoRepeatSpells.Contains(GetSession().GameState.CurrentClientSpecialCast.SpellId))
             {
