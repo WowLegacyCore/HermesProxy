@@ -107,7 +107,7 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.ServerDelay !<= 0)
+            if (Settings.ServerDelay > 0)
             {
                 System.Threading.Thread.Sleep(Settings.ServerDelay);
             }
@@ -200,7 +200,7 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.ServerDelay !<= 0)
+            if (Settings.ServerDelay > 0)
             {
                 System.Threading.Thread.Sleep(Settings.ServerDelay);
             }
@@ -254,7 +254,7 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.ServerDelay !<= 0)
+            if (Settings.ServerDelay > 0)
             {
                 System.Threading.Thread.Sleep(Settings.ServerDelay);
             }
@@ -312,7 +312,7 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.ServerDelay !<= 0)
+            if (Settings.ServerDelay > 0)
             {
                 System.Threading.Thread.Sleep(Settings.ServerDelay);
             }
@@ -328,7 +328,7 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.ServerDelay !<= 0)
+            if (Settings.ServerDelay > 0)
             {
                 System.Threading.Thread.Sleep(Settings.ServerDelay);
             }
@@ -379,7 +379,7 @@ namespace HermesProxy.World.Server
         {
             // Artificial lag is needed for spell packets,
             // or spells will bug out and glow if spammed.
-            if (Settings.ServerDelay !<= 0)
+            if (Settings.ServerDelay > 0)
             {
                 System.Threading.Thread.Sleep(Settings.ServerDelay);
             }
