@@ -16,6 +16,7 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(Opcode.MSG_AUCTION_HELLO);
             packet.WriteGuid(interact.CreatureGUID.To64());
+            Log.PrintNet(LogType.Network, LogNetDir.C2P, $"MSG_AUCTION_HELLO: {packet.ReadGuid()}");
             SendPacketToServer(packet);
         }
 
