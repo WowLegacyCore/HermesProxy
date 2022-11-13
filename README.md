@@ -19,7 +19,9 @@ There are 4 major components to the application:
 
 - Edit the app's config to specify the exact versions of your game client and the remote server, along with the address.
 - Go into your game folder, in the Classic or Classic Era subdirectory, and edit WTF/Config.wtf to set the portal to 127.0.0.1.
-- Download the static auth seed branch of the [Arctium Launcher](https://github.com/Arctium/WoW-Launcher/tree/static-auth-seed) into the main game folder, and then run it with the `--version=ClassicEra` (or Classic for TBC) argument.
+- Download [Arctium Launcher](https://github.com/Arctium/WoW-Launcher/releases/tag/latest) into the main game folder, and then run it  
+with `--staticseed --version=ClassicEra` for vanilla  
+or `--staticseed --version=Classic` for TBC.
 - Start the proxy app and login through the game with your usual credentials.
 
 ## Acknowledgements
