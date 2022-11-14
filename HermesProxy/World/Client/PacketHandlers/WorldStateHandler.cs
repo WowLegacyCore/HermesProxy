@@ -16,8 +16,8 @@ namespace HermesProxy.World.Client
             InitWorldStates states = new InitWorldStates();
             states.MapID = packet.ReadUInt32();
             GetSession().GameState.CurrentMapId = states.MapID;
-            states.AreaID = packet.ReadUInt32();
-            states.SubareaID = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_1_0_6692) ? packet.ReadUInt32() : states.AreaID;
+            states.ZoneID = packet.ReadUInt32();
+            states.AreaID = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_1_0_6692) ? packet.ReadUInt32() : states.ZoneID;
 
             GetSession().GameState.HasWsgAllyFlagCarrier = false;
             GetSession().GameState.HasWsgHordeFlagCarrier = false;
@@ -47,6 +47,21 @@ namespace HermesProxy.World.Client
             {
                 WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                 SendPacket(packet2);
+            }
+
+            if (GetSession().GameState.CurrentZoneId != states.ZoneID)
+            {
+                string oldZoneName = GameData.GetAreaName(GetSession().GameState.CurrentZoneId);
+                string newZoneName = GameData.GetAreaName(states.ZoneID);
+                GetSession().GameState.CurrentZoneId = states.ZoneID;
+                if (!String.IsNullOrEmpty(oldZoneName) && !String.IsNullOrEmpty(newZoneName))
+                {
+                    foreach (var channel in GameData.GetChatChannelsWithFlags(ChannelFlags.AutoJoin | ChannelFlags.ZoneBased))
+                    {
+                        SendChatLeaveChannel(1, channel.Name + " - " + oldZoneName);
+                        SendChatJoinChannel(1, channel.Name + " - " + newZoneName, "");
+                    }
+                }
             }
         }
 

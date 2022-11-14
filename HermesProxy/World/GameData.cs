@@ -18,6 +18,7 @@ namespace HermesProxy.World
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, ItemDisplayData> ItemDisplayDataStore = new Dictionary<uint, ItemDisplayData>();
         public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
+        public static Dictionary<uint, ChatChannel> ChatChannels = new Dictionary<uint, ChatChannel>();
         public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new Dictionary<uint, Dictionary<uint, byte>>();
         public static Dictionary<uint, uint> ItemEnchantVisuals = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
@@ -26,6 +27,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
         public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
+        public static Dictionary<uint, string> AreaNames = new Dictionary<uint, string>();
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
         public static HashSet<uint> StackableAuras = new HashSet<uint>();
         public static HashSet<uint> MountAuras = new HashSet<uint>();
@@ -233,6 +235,14 @@ namespace HermesProxy.World
             return 0;
         }
 
+        public static string GetAreaName(uint id)
+        {
+            string name;
+            if (AreaNames.TryGetValue(id, out name))
+                return name;
+            return "";
+        }
+
         public static uint GetBattlegroundIdFromMapId(uint mapId)
         {
             foreach (var bg in Battlegrounds)
@@ -249,6 +259,27 @@ namespace HermesProxy.World
             if (Battlegrounds.TryGetValue(bgId, out bg))
                 return bg.MapIds[0];
             return 0;
+        }
+
+        public static uint GetChatChannelIdFromName(string name)
+        {
+            foreach (var channel in ChatChannels)
+            {
+                if (name.Contains(channel.Value.Name))
+                    return channel.Key;
+            }
+            return 0;
+        }
+
+        public static List<ChatChannel> GetChatChannelsWithFlags(ChannelFlags flags)
+        {
+            List<ChatChannel> channels = new List<ChatChannel>();
+            foreach (var channel in ChatChannels)
+            {
+                if ((channel.Value.Flags & flags) == flags)
+                    channels.Add(channel.Value);
+            }
+            return channels;
         }
 
         public static bool IsAllianceRace(Race raceId)
@@ -307,6 +338,7 @@ namespace HermesProxy.World
             LoadBroadcastTexts();
             LoadItemTemplates();
             LoadBattlegrounds();
+            LoadChatChannels();
             LoadItemEnchantVisuals();
             LoadSpellVisuals();
             LoadLearnSpells();
@@ -314,6 +346,7 @@ namespace HermesProxy.World
             LoadGems();
             LoadUnitDisplayScales();
             LoadTransports();
+            LoadAreaNames();
             LoadDispellSpells();
             LoadStackableAuras();
             LoadMountAuras();
@@ -412,6 +445,32 @@ namespace HermesProxy.World
                     }
                     System.Diagnostics.Trace.Assert(bg.MapIds.Count != 0);
                     Battlegrounds.Add(bgId, bg);
+                }
+            }
+        }
+
+        public static void LoadChatChannels()
+        {
+            var path = Path.Combine("CSV", "ChatChannels.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    ChatChannel channel = new ChatChannel();
+                    channel.Id = UInt32.Parse(fields[0]);
+                    channel.Flags = (ChannelFlags)UInt32.Parse(fields[1]);
+                    channel.Name = fields[2];
+                    ChatChannels.Add(channel.Id, channel);
                 }
             }
         }
@@ -590,6 +649,30 @@ namespace HermesProxy.World
                     uint entry = UInt32.Parse(fields[0]);
                     uint period = UInt32.Parse(fields[1]);
                     TransportPeriods.Add(entry, period);
+                }
+            }
+        }
+
+        public static void LoadAreaNames()
+        {
+            var path = Path.Combine("CSV", $"AreaNames.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    string name = fields[1];
+                    AreaNames.Add(id, name);
                 }
             }
         }
@@ -2069,6 +2152,13 @@ namespace HermesProxy.World
         public uint flags;
         public uint delay;
     }
+    public class ChatChannel
+    {
+        public uint Id;
+        public ChannelFlags Flags;
+        public string Name;
+    }
+
     // Hotfix structures
     public class AreaTrigger
     {
