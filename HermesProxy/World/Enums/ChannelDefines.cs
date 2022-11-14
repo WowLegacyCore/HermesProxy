@@ -59,21 +59,16 @@ namespace HermesProxy.World.Enums
     };
 
     [Flags]
-    public enum ChannelFlags
+    public enum ChannelFlags : uint
     {
-        None    = 0x00,
-        Custom  = 0x01,
-        // 0x02
-        Trade   = 0x04,
-        NotLfg  = 0x08,
-        General = 0x10,
-        City    = 0x20,
-        Lfg     = 0x40,
-        Voice   = 0x80
-        // General                  0x18 = 0x10 | 0x08
-        // Trade                    0x3C = 0x20 | 0x10 | 0x08 | 0x04
-        // LocalDefence             0x18 = 0x10 | 0x08
-        // GuildRecruitment         0x38 = 0x20 | 0x10 | 0x08
-        // LookingForGroup          0x50 = 0x40 | 0x10
+        None             = 0x000000,
+        AutoJoin         = 0x000001,              // General, Trade, LocalDefense, LFG
+        ZoneBased        = 0x000002,              // General, Trade, LocalDefense, GuildRecruitment
+        ReadOnly         = 0x000004,              // WorldDefense
+        AllowItemLinks   = 0x000008,              // Trade, LFG
+        OnlyInCities     = 0x000010,              // Trade, GuildRecruitment, LFG
+        LinkedChannel    = 0x000020,              // Trade, GuildRecruitment, LFG
+        ZoneAttackAlerts = 0x010000,              // LocalDefense, WorldDefense
+        GuildRecruitment = 0x020000,              // GuildRecruitment
     }
 }

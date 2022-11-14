@@ -32,11 +32,13 @@ namespace HermesProxy
         public bool IsConnectedToInstance;
         public bool IsInWorld;
         public uint? CurrentMapId;
+        public uint CurrentZoneId;
         public uint CurrentTaxiNode;
         public List<byte> UsableTaxiNodes = new();
         public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
         public uint LastDispellSpellId;
+        public string LeftChannelName = "";
         public bool IsPassingOnLoot;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;

@@ -50,13 +50,16 @@ namespace HermesProxy.World.Client
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                         packet.ReadInt32(); // unk
 
+                    if (channelId == 0)
+                        channelId = (int)GameData.GetChatChannelIdFromName(channelName);
+
                     GetSession().GameState.SetChannelId(channelName, channelId);
 
                     ChannelNotifyJoined joined = new ChannelNotifyJoined();
                     joined.Channel = channelName;
                     joined.ChannelFlags = flags;
                     joined.ChatChannelID = channelId;
-                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, 1, (ulong)channelId);
+                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, (uint)GetSession().GameState.CurrentZoneId, (ulong)channelId);
                     SendPacketToClient(joined);
 
                     break;
@@ -75,7 +78,11 @@ namespace HermesProxy.World.Client
                         left.ChatChannelID = GetSession().GameState.ChannelIds[channelName];
                         left.Suspended = false;
                     }
-                    SendPacketToClient(left);
+
+                    // do not send leave notification for default channels when changing zones
+                    if (String.Equals(GetSession().GameState.LeftChannelName, channelName) ||
+                        GameData.GetChatChannelIdFromName(channelName) == 0)
+                        SendPacketToClient(left);
                     break;
                 }
                 case ChatNotify.PlayerNotFound:
@@ -463,6 +470,29 @@ namespace HermesProxy.World.Client
             message.MessageID = packet.ReadInt32();
             message.StringParam = packet.ReadCString();
             SendPacketToClient(message);
+        }
+
+        public void SendChatJoinChannel(int channelId, string channelName, string password)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_JOIN_CHANNEL);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                packet.WriteInt32(channelId);
+                packet.WriteUInt8(0); // Has Voice
+                packet.WriteUInt8(0); // Joined by zone update
+            }
+            packet.WriteCString(channelName);
+            packet.WriteCString(password);
+            SendPacketToServer(packet);
+        }
+
+        public void SendChatLeaveChannel(int channelId, string channelName)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_LEAVE_CHANNEL);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WriteInt32(channelId);
+            packet.WriteCString(channelName);
+            SendPacketToServer(packet);
         }
     }
 }
