@@ -59,7 +59,7 @@ namespace HermesProxy.Auth
 
             try
             {
-                Log.PrintNet(LogType.Network, LogNetDir.P2S, "Connecting to auth server...");
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
@@ -83,7 +83,7 @@ namespace HermesProxy.Auth
 
             try
             {
-                Log.PrintNet(LogType.Network, LogNetDir.P2S, "Connecting to auth server...");
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Re-Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
