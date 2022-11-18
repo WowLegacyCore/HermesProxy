@@ -30,6 +30,3 @@ Parts of this poject's code are based on [CypherCore](https://github.com/CypherC
 
 ## Download HermesProxy
 Stable Downloads: [Releases](https://github.com/WowLegacyCore/HermesProxy/releases)
-
-Latest Downloads (development, unstable): [Build Artifacts](https://github.com/WowLegacyCore/HermesProxy/actions/workflows/Build_Proxy.yml?query=branch%3Amaster)  
-(click at the latest successful build and look at the artifacts at the bottom)
