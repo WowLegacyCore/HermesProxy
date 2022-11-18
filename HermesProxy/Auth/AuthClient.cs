@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -15,8 +16,16 @@ using Framework.Logging;
 
 namespace HermesProxy.Auth
 {
-    public class AuthClient
+    public partial class AuthClient
     {
+        // For ez debugging: Call this function wherever you want
+        private static readonly Action<ByteBuffer> _debugTraceBreakpointHandler = (b) =>
+        {
+#if DEBUG
+            // Debugger.Log(0, "TraceMe", $"{b}");
+#endif
+        };
+
         GlobalSessionData _globalSession;
         Socket _clientSocket;
         TaskCompletionSource<AuthResult> _response;
@@ -404,6 +413,9 @@ namespace HermesProxy.Auth
             buffer.WriteBytes(crc);
             buffer.WriteUInt8(0);
             buffer.WriteUInt8(0);
+
+            _debugTraceBreakpointHandler(buffer);
+
             SendPacket(buffer);
         }
 
