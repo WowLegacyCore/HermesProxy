@@ -1575,7 +1575,7 @@ namespace HermesProxy.World.Objects.Version.V1_14_0_40237
                     if (activeData.BankBagSlotFlags[i] != null)
                         m_fields.SetUpdateField<uint>(startIndex + i, (uint)activeData.BankBagSlotFlags[i]);
                 }
-                for (int i = 0; i < 875; i++)
+                for (int i = 0; i < activeData.QuestCompleted.Length; i++)
                 {
                     int startIndex = (int)ActivePlayerField.ACTIVE_PLAYER_FIELD_QUEST_COMPLETED;
                     if (activeData.QuestCompleted[i] != null)

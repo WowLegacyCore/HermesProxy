@@ -47,7 +47,7 @@ namespace System
         {
             StringBuilder builder = new StringBuilder();
 
-            for (int i = array.Length - 1; i >= 0; --i)
+            for (int i = 0; i < array.Length; ++i)
                 builder.Append(array[i].ToString("X2"));
 
             return builder.ToString();

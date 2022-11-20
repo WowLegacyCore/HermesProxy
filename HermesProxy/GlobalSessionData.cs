@@ -42,17 +42,20 @@ namespace HermesProxy
         public bool IsConnectedToInstance;
         public bool IsInWorld;
         public uint? CurrentMapId;
+        public uint CurrentZoneId;
         public uint CurrentTaxiNode;
         public List<byte> UsableTaxiNodes = new();
         public uint PendingTransferMapId;
         public uint LastEnteredAreaTrigger;
         public uint LastDispellSpellId;
+        public string LeftChannelName = "";
         public bool IsPassingOnLoot;
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
         public World.Server.Packets.PartyUpdate[] CurrentGroups = new World.Server.Packets.PartyUpdate[2];
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
+        public OwnCharacterInfo CurrentPlayerInfo;
         public uint CurrentGuildCreateTime;
         public uint CurrentGuildNumAccounts;
         public WowGuid128 CurrentInteractedWithNPC;
@@ -92,12 +95,27 @@ namespace HermesProxy
         public Dictionary<uint, uint> DailyQuestsDone = new Dictionary<uint, uint>();
         public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
         public Dictionary<WowGuid64, ushort> ObjectSpawnCount = new Dictionary<WowGuid64, ushort>();
+        public HashSet<WowGuid64> DespawnedGameObjects = new();
         public HashSet<WowGuid128> HunterPetGuids = new HashSet<WowGuid128>();
         public Dictionary<WowGuid128, Array<ArenaTeamInspectData>> PlayerArenaTeams = new Dictionary<WowGuid128, Array<ArenaTeamInspectData>>();
         public HashSet<string> AddonPrefixes = new HashSet<string>();
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
+        public PlayerQuestTracker QuestTracker;
+
+        private GameSessionData()
+        {
+            
+        }
+        
+        public static GameSessionData CreateNewGameSessionData(GlobalSessionData globalSession)
+        {
+            var self = new GameSessionData();
+            self.QuestTracker = new PlayerQuestTracker(globalSession);
+            return self;
+        }
+        
         public uint GetCurrentGroupSize()
         {
             var group = GetCurrentGroup();
@@ -656,7 +674,7 @@ namespace HermesProxy
         public string Locale;
         public string OS;
         public uint Build;
-        public GameSessionData GameState = new();
+        public GameSessionData GameState;
         
         public RealmId RealmId;
         public RealmManager RealmManager = new();
@@ -674,6 +692,11 @@ namespace HermesProxy
         public Dictionary<string, WowGuid128> GuildsByName = new();
         public Dictionary<uint, List<string>> GuildRanks = new();
 
+        public GlobalSessionData()
+        {
+            GameState = GameSessionData.CreateNewGameSessionData(this);
+        }
+        
         public void StoreGuildRankNames(uint guildId, List<string> ranks)
         {
             if (GuildRanks.ContainsKey(guildId))
@@ -761,7 +784,7 @@ namespace HermesProxy
                 InstanceSocket = null;
             }
 
-            GameState = new();
+            GameState = GameSessionData.CreateNewGameSessionData(this);
         }
     }
 }

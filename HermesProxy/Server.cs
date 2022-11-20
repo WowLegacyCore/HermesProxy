@@ -9,7 +9,7 @@ using BNetServer;
 
 namespace HermesProxy
 {
-    class Server
+    partial class Server
     {
         static void Main()
         {
@@ -22,7 +22,7 @@ namespace HermesProxy
             
             GameData.LoadEverything();
 
-            string bindIp = "0.0.0.0";
+            string bindIp = Framework.Settings.ExternalAddress;
 
             var restSocketServer = new SocketManager<BnetRestApiSession>();
             int restPort = Framework.Settings.RestPort;
@@ -95,9 +95,10 @@ namespace HermesProxy
             Environment.Exit(-1);
         }
 
+        private static readonly string? _buildTag;
         private static string GetVersionInformation()
         {
-            string version = $"{GitVersionInformation.CommitDate} {GitVersionInformation.MajorMinorPatch}";
+            string version = $"{GitVersionInformation.CommitDate} {_buildTag}{GitVersionInformation.MajorMinorPatch}";
             if (GitVersionInformation.CommitsSinceVersionSource != "0")
                 version += $"+{GitVersionInformation.CommitsSinceVersionSource}({GitVersionInformation.ShortSha})";
             if (GitVersionInformation.UncommittedChanges != "0")

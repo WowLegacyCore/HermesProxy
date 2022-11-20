@@ -15,26 +15,18 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHAT_JOIN_CHANNEL)]
         void HandleChatJoinChannel(JoinChannel join)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_JOIN_CHANNEL);
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-            {
-                packet.WriteInt32(join.ChatChannelId);
-                packet.WriteUInt8(0); // Has Voice
-                packet.WriteUInt8(0); // Joined by zone update
-            }
-            packet.WriteCString(join.ChannelName);
-            packet.WriteCString(join.Password);
-            SendPacketToServer(packet);
+            if (GetSession().WorldClient != null)
+                GetSession().WorldClient.SendChatJoinChannel(join.ChatChannelId, join.ChannelName, join.Password);
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_LEAVE_CHANNEL)]
         void HandleChatLeaveChannel(LeaveChannel leave)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_LEAVE_CHANNEL);
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                packet.WriteInt32(leave.ZoneChannelID);
-            packet.WriteCString(leave.ChannelName);
-            SendPacketToServer(packet);
+            if (GetSession().WorldClient != null)
+            {
+                GetSession().GameState.LeftChannelName = leave.ChannelName;
+                GetSession().WorldClient.SendChatLeaveChannel(leave.ZoneChannelID, leave.ChannelName);
+            }
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_OWNER)]

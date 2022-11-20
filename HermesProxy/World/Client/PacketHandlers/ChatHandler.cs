@@ -4,6 +4,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using Framework.Logging;
 using static HermesProxy.World.Server.Packets.ChannelListResponse;
 
 namespace HermesProxy.World.Client
@@ -50,13 +51,16 @@ namespace HermesProxy.World.Client
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                         packet.ReadInt32(); // unk
 
+                    if (channelId == 0)
+                        channelId = (int)GameData.GetChatChannelIdFromName(channelName);
+
                     GetSession().GameState.SetChannelId(channelName, channelId);
 
                     ChannelNotifyJoined joined = new ChannelNotifyJoined();
                     joined.Channel = channelName;
                     joined.ChannelFlags = flags;
                     joined.ChatChannelID = channelId;
-                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, 1, (ulong)channelId);
+                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, (uint)GetSession().GameState.CurrentZoneId, (ulong)channelId);
                     SendPacketToClient(joined);
 
                     break;
@@ -75,7 +79,11 @@ namespace HermesProxy.World.Client
                         left.ChatChannelID = GetSession().GameState.ChannelIds[channelName];
                         left.Suspended = false;
                     }
-                    SendPacketToClient(left);
+
+                    // do not send leave notification for default channels when changing zones
+                    if (String.Equals(GetSession().GameState.LeftChannelName, channelName) ||
+                        GameData.GetChatChannelIdFromName(channelName) == 0)
+                        SendPacketToClient(left);
                     break;
                 }
                 case ChatNotify.PlayerNotFound:
@@ -335,6 +343,11 @@ namespace HermesProxy.World.Client
 
         public void SendMessageChatVanilla(ChatMessageTypeVanilla type, uint lang, string msg, string channel, string to)
         {
+            if (HandleHermesInternalChatCommand(msg))
+            {
+                return; // was handled by us
+            }
+            
             WorldPacket packet = new WorldPacket(Opcode.CMSG_MESSAGECHAT);
             packet.WriteUInt32((uint)type);
             packet.WriteUInt32(lang);
@@ -369,8 +382,47 @@ namespace HermesProxy.World.Client
             SendPacket(packet);
         }
 
+        private bool HandleHermesInternalChatCommand(string msg)
+        {
+            // Marks a quest as completed
+            // Useful for /run print(C_QuestLog.IsQuestFlaggedCompleted($questId))
+            // !qcomplete <questId>
+            if (msg.StartsWith("!qcomplete"))
+            {
+                var questIdStr = msg.Remove(0, "!qcomplete".Length);
+                if (!uint.TryParse(questIdStr, out var questId))
+                {
+                    Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
+                    return true;
+                }
+                GetSession().GameState.QuestTracker.MarkQuestAsCompleted(questId);
+                return true;
+            }
+
+            // Marks a quest as uncompleted
+            // !quncomplete <questId>
+            if (msg.StartsWith("!quncomplete"))
+            {
+                var questIdStr = msg.Remove(0, "!quncomplete".Length);
+                if (!uint.TryParse(questIdStr, out var questId))
+                {
+                    Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
+                    return true;
+                }
+                GetSession().GameState.QuestTracker.MarkQuestAsNotCompleted(questId);
+                return true;
+            }
+
+            return false;
+        }
+
         public void SendMessageChatWotLK(ChatMessageTypeWotLK type, uint lang, string msg, string channel, string to)
         {
+            if (HandleHermesInternalChatCommand(msg))
+            {
+                return; // was handled by us
+            }
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_MESSAGECHAT);
             packet.WriteUInt32((uint)type);
             packet.WriteUInt32(lang);
@@ -463,6 +515,29 @@ namespace HermesProxy.World.Client
             message.MessageID = packet.ReadInt32();
             message.StringParam = packet.ReadCString();
             SendPacketToClient(message);
+        }
+
+        public void SendChatJoinChannel(int channelId, string channelName, string password)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_JOIN_CHANNEL);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                packet.WriteInt32(channelId);
+                packet.WriteUInt8(0); // Has Voice
+                packet.WriteUInt8(0); // Joined by zone update
+            }
+            packet.WriteCString(channelName);
+            packet.WriteCString(password);
+            SendPacketToServer(packet);
+        }
+
+        public void SendChatLeaveChannel(int channelId, string channelName)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_LEAVE_CHANNEL);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                packet.WriteInt32(channelId);
+            packet.WriteCString(channelName);
+            SendPacketToServer(packet);
         }
     }
 }

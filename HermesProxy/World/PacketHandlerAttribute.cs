@@ -12,6 +12,11 @@ namespace HermesProxy.World
             Opcode = opcode;
         }
 
+        public PacketHandlerAttribute(uint opcode)
+        {
+            Opcode = (Opcode) opcode;
+        }
+
         /// <summary>
         /// [addedInVersion, +inf[
         /// </summary>

@@ -286,6 +286,7 @@ namespace HermesProxy.World.Client
             QuestGiverQuestComplete quest = new QuestGiverQuestComplete();
             quest.QuestID = packet.ReadUInt32();
 
+            GetSession().GameState.QuestTracker.MarkQuestAsCompleted(quest.QuestID);
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadUInt32(); // mangos sends always 3
 

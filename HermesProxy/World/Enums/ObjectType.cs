@@ -147,6 +147,7 @@ namespace HermesProxy.World.Enums
         Corpse                  = 0xF101,                       // blizz F100
         MOTransport             = 0x1FC0,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
         Group                   = 0x1F50,                       // blizz 1F5x
+        Group2                  = 0x5000,                       // for outdated tbc cores
     }
 
     public enum HighGuidType703
