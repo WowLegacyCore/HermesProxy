@@ -22,7 +22,7 @@ namespace HermesProxy
             
             GameData.LoadEverything();
 
-            string bindIp = "0.0.0.0";
+            string bindIp = Framework.Settings.ExternalAddress;
 
             var restSocketServer = new SocketManager<BnetRestApiSession>();
             int restPort = Framework.Settings.RestPort;
