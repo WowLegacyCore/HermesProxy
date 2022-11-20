@@ -24,6 +24,14 @@ with `--staticseed --version=ClassicEra` for vanilla
 or `--staticseed --version=Classic` for TBC.
 - Start the proxy app and login through the game with your usual credentials.
 
+## Chat commands
+HermesProxy provides some internal chat commands:
+
+| Command                    | Description                                                                  |
+|----------------------------|------------------------------------------------------------------------------|
+| `!qcomplete <questId>`     | Manually marks a quest as already completed (useful for quest helper addons) |
+| `!quncomplete <questId>`   | Unmarks a quest as completed                                                 |
+
 ## Acknowledgements
 
 Parts of this poject's code are based on [CypherCore](https://github.com/CypherCore/CypherCore) and [BotFarm](https://github.com/jackpoz/BotFarm). I would like to extend my sincere thanks to these projects, as the creation of this app might have never happened without them. And I would also like to expressly thank [Modox](https://github.com/mdx7) for all his work on reverse engineering the classic clients and all the help he has personally given me. 

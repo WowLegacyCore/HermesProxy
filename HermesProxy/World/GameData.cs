@@ -35,6 +35,7 @@ namespace HermesProxy.World
         public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
         public static Dictionary<uint, TaxiPath> TaxiPaths = new Dictionary<uint, TaxiPath>();
         public static int[,] TaxiNodesGraph = new int[250,250];
+        public static Dictionary<uint /*questId*/, uint /*questBit*/> QuestBits = new Dictionary<uint, uint>();
 
         // From Server
         public static Dictionary<uint, ItemTemplate> ItemTemplates = new Dictionary<uint, ItemTemplate>();
@@ -110,6 +111,12 @@ namespace HermesProxy.World
             return null;
         }
 
+        public static uint? GetUniqueQuestBit(uint questId)
+        {
+            QuestBits.TryGetValue(questId, out var result);
+            return result;
+        }
+        
         public static void StoreCreatureTemplate(uint entry, CreatureTemplate template)
         {
             if (CreatureTemplates.ContainsKey(entry))
@@ -354,6 +361,7 @@ namespace HermesProxy.World
             LoadAutoRepeatSpells();
             LoadTaxiPaths();
             LoadTaxiPathNodesGraph();
+            LoadQuestBits();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
         }
@@ -950,6 +958,34 @@ namespace HermesProxy.World
                 }
             }
         }
+
+        public static void LoadQuestBits()
+        {
+            if (ModernVersion.GetExpansionVersion() != 1)
+                return; // currently only vanilla support, because I(_BLU) dont have a TBC client
+
+            var path = Path.Combine("CSV", $"QuestV2_{ModernVersion.GetExpansionVersion()}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint questId = UInt32.Parse(fields[0]);
+                    uint uniqueBitFlag = UInt32.Parse(fields[1]);
+                    QuestBits.Add(questId, uniqueBitFlag);
+                }
+            }
+        }
+        
         #endregion
         #region HotFixes
         // Stores

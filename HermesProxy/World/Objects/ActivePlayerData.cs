@@ -141,7 +141,7 @@ namespace HermesProxy.World.Objects
         public uint? OverrideZonePVPType;
         public uint?[] BagSlotFlags { get; } = new uint?[4];
         public uint?[] BankBagSlotFlags { get; } = new uint?[7];
-        public ulong?[] QuestCompleted { get; } = new ulong?[875];
+        public ulong?[] QuestCompleted { get; } = new ulong?[875]; // Field has sizeof 1750 uints => 875 ulongs
         public int? Honor;
         public int? HonorNextLevel;
         public uint? PvPTierMaxFromWins;
