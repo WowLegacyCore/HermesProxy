@@ -113,7 +113,9 @@ namespace HermesProxy.World
 
         public static uint? GetUniqueQuestBit(uint questId)
         {
-            QuestBits.TryGetValue(questId, out var result);
+            if (!QuestBits.TryGetValue(questId, out var result))
+                return null;
+
             return result;
         }
         
@@ -961,9 +963,6 @@ namespace HermesProxy.World
 
         public static void LoadQuestBits()
         {
-            if (ModernVersion.GetExpansionVersion() != 1)
-                return; // currently only vanilla support, because I(_BLU) dont have a TBC client
-
             var path = Path.Combine("CSV", $"QuestV2_{ModernVersion.GetExpansionVersion()}.csv");
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
@@ -980,6 +979,8 @@ namespace HermesProxy.World
                     string[] fields = csvParser.ReadFields();
 
                     uint questId = UInt32.Parse(fields[0]);
+                    if (fields[1].StartsWith("-"))
+                        continue; // Some bits have a negative index, is this an error from WDBX?
                     uint uniqueBitFlag = UInt32.Parse(fields[1]);
                     QuestBits.Add(questId, uniqueBitFlag);
                 }
