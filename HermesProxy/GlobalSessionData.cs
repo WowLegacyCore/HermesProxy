@@ -610,6 +610,54 @@ namespace HermesProxy
             return Class.Warrior;
         }
 
+        public int GetLegacyFieldValueInt32<T>(WowGuid128 guid, T field)
+        {
+            int fieldIndex = LegacyVersion.GetUpdateField(field);
+            if (fieldIndex < 0)
+                return 0;
+
+            var updates = GetCachedObjectFieldsLegacy(guid);
+            if (updates == null)
+                return 0;
+
+            if (!updates.ContainsKey(fieldIndex))
+                return 0;
+
+            return updates[fieldIndex].Int32Value;
+        }
+
+        public uint GetLegacyFieldValueUInt32<T>(WowGuid128 guid, T field)
+        {
+            int fieldIndex = LegacyVersion.GetUpdateField(field);
+            if (fieldIndex < 0)
+                return 0;
+
+            var updates = GetCachedObjectFieldsLegacy(guid);
+            if (updates == null)
+                return 0;
+
+            if (!updates.ContainsKey(fieldIndex))
+                return 0;
+
+            return updates[fieldIndex].UInt32Value;
+        }
+
+        public float GetLegacyFieldValueFloat<T>(WowGuid128 guid, T field)
+        {
+            int fieldIndex = LegacyVersion.GetUpdateField(field);
+            if (fieldIndex < 0)
+                return 0;
+
+            var updates = GetCachedObjectFieldsLegacy(guid);
+            if (updates == null)
+                return 0;
+
+            if (!updates.ContainsKey(fieldIndex))
+                return 0;
+
+            return updates[fieldIndex].FloatValue;
+        }
+
         public Dictionary<int, UpdateField> GetCachedObjectFieldsLegacy(WowGuid128 guid)
         {
             Dictionary<int, UpdateField> dict;
