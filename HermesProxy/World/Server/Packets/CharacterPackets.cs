@@ -571,8 +571,8 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteInt32(Level);
             _worldPacket.WriteInt32(HealthDelta);
 
-            foreach (int power in PowerDelta)
-                _worldPacket.WriteInt32(power);
+            for (int i = 0; i < ModernVersion.GetPowerCountForClientVersion(); i++)
+                _worldPacket.WriteInt32(PowerDelta[i]);
 
             foreach (int stat in StatDelta)
                 _worldPacket.WriteInt32(stat);
@@ -583,7 +583,7 @@ namespace HermesProxy.World.Server.Packets
 
         public int Level = 0;
         public int HealthDelta = 0;
-        public int[] PowerDelta = new int[6];
+        public int[] PowerDelta = new int[7];
         public int[] StatDelta = new int[5];
         public int NumNewTalents;
         public int NumNewPvpTalentSlots;
