@@ -470,7 +470,8 @@ namespace HermesProxy.World.Server.Packets
                 statsData.WriteCString(Stats.CastBarCaption);
                 statsData.WriteCString(Stats.UnkString);
 
-                for (uint i = 0; i < 34; i++)
+                int dataFieldsCount = ModernVersion.AddedInClassicVersion(1, 14, 1, 2, 5, 3) ? 35 : 34;
+                for (int i = 0; i < dataFieldsCount; i++)
                     statsData.WriteInt32(Stats.Data[i]);
 
                 statsData.WriteFloat(Stats.Size);
@@ -500,7 +501,7 @@ namespace HermesProxy.World.Server.Packets
         public string UnkString = "";
         public uint Type;
         public uint DisplayID;
-        public int[] Data = new int[34];
+        public int[] Data = new int[35];
         public float Size = 1;
         public List<uint> QuestItems = new();
         public uint ContentTuningId;

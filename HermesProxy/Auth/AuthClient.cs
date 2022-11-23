@@ -193,13 +193,13 @@ namespace HermesProxy.Auth
         {
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
-            buffer.WriteUInt8((byte)(LegacyVersion.GetExpansionVersion() > 1 ? 8 : 3));
+            buffer.WriteUInt8((byte)(LegacyVersion.ExpansionVersion > 1 ? 8 : 3));
             buffer.WriteUInt16((UInt16)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
             buffer.WriteUInt8(0);
-            buffer.WriteUInt8(LegacyVersion.GetExpansionVersion());
-            buffer.WriteUInt8(LegacyVersion.GetMajorPatchVersion());
-            buffer.WriteUInt8(LegacyVersion.GetMinorPatchVersion());
+            buffer.WriteUInt8(LegacyVersion.ExpansionVersion);
+            buffer.WriteUInt8(LegacyVersion.MajorVersion);
+            buffer.WriteUInt8(LegacyVersion.MinorVersion);
             buffer.WriteUInt16((ushort)Settings.ServerBuild);
             buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedPlatform.Reverse()));
             buffer.WriteUInt8(0);

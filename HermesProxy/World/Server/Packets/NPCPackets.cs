@@ -58,6 +58,8 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteUInt8(options.OptionIcon);
                 _worldPacket.WriteUInt8(options.OptionFlags);
                 _worldPacket.WriteInt32(options.OptionCost);
+                if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+                    _worldPacket.WriteUInt32(options.Language);
 
                 _worldPacket.WriteBits(options.Text.GetByteCount(), 12);
                 _worldPacket.WriteBits(options.Confirm.GetByteCount(), 12);
@@ -92,6 +94,7 @@ namespace HermesProxy.World.Server.Packets
         public byte OptionIcon;
         public byte OptionFlags;
         public int OptionCost;
+        public uint Language;
         public GossipOptionStatus Status;
         public string Text;
         public string Confirm;

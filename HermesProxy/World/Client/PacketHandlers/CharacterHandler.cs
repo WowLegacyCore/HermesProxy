@@ -106,8 +106,8 @@ namespace HermesProxy.World.Client
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(6, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(7, true, false, false));
             charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(8, true, false, false));
-            if (ModernVersion.GetExpansionVersion() >= 2 &&
-                LegacyVersion.GetExpansionVersion() >= 2)
+            if (ModernVersion.ExpansionVersion >= 2 &&
+                LegacyVersion.ExpansionVersion >= 2)
             {
                 charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(10, true, false, false));
                 charEnum.RaceUnlockData.Add(new EnumCharactersResult.RaceUnlock(11, true, false, false));
@@ -238,7 +238,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(tasks);
 
             InitialSetup setup = new();
-            setup.ServerExpansionLevel = (byte)(LegacyVersion.GetExpansionVersion() - 1);
+            setup.ServerExpansionLevel = (byte)(LegacyVersion.ExpansionVersion - 1);
             SendPacketToClient(setup);
 
             LoadCUFProfiles cuf = new();
@@ -483,7 +483,7 @@ namespace HermesProxy.World.Client
             uint standing = packet.ReadUInt32();
             byte rankProgress = packet.ReadUInt8();
 
-            if (ModernVersion.GetExpansionVersion() == 1)
+            if (ModernVersion.ExpansionVersion == 1)
             {
                 InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic();
                 inspect.PlayerGUID = playerGuid;
@@ -527,7 +527,7 @@ namespace HermesProxy.World.Client
             uint yesterdayHonor = packet.ReadUInt32();
             uint lifetimeHonorableKills = packet.ReadUInt32();
 
-            if (ModernVersion.GetExpansionVersion() == 1)
+            if (ModernVersion.ExpansionVersion == 1)
             {
                 InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic();
                 inspect.PlayerGUID = playerGuid;

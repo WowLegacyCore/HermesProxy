@@ -139,8 +139,8 @@ namespace HermesProxy.World.Client
             {
                 TrainerListSpell spell = new();
                 uint spellId = packet.ReadUInt32();
-                if (ModernVersion.GetExpansionVersion() > 1 &&
-                    LegacyVersion.GetExpansionVersion() <= 1)
+                if (ModernVersion.ExpansionVersion > 1 &&
+                    LegacyVersion.ExpansionVersion <= 1)
                 {
                     // in vanilla the server sends learn spell with effect 36
                     // in expansions the server sends the actual spell

@@ -18,9 +18,9 @@ namespace BNetServer.Networking
     {
         string GetCommandEndingForVersion()
         {
-            if (ModernVersion.GetExpansionVersion() == 1)
+            if (ModernVersion.ExpansionVersion == 1)
                 return "c1";
-            if (ModernVersion.GetExpansionVersion() == 2)
+            if (ModernVersion.ExpansionVersion == 2)
                 return "bcc1";
             return "b9";
         }

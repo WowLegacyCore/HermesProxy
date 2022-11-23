@@ -41,6 +41,23 @@ namespace HermesProxy.World.Enums
                 case ClientVersionBuild.V1_14_0_40441:
                 case ClientVersionBuild.V1_14_0_40618:
                     return ClientVersionBuild.V2_5_2_39570;
+                case ClientVersionBuild.V1_14_1_40487:
+                case ClientVersionBuild.V1_14_1_40594:
+                case ClientVersionBuild.V1_14_1_40666:
+                case ClientVersionBuild.V1_14_1_40688:
+                case ClientVersionBuild.V1_14_1_40800:
+                case ClientVersionBuild.V1_14_1_40818:
+                case ClientVersionBuild.V1_14_1_40926:
+                case ClientVersionBuild.V1_14_1_40962:
+                case ClientVersionBuild.V1_14_1_41009:
+                case ClientVersionBuild.V1_14_1_41030:
+                case ClientVersionBuild.V1_14_1_41077:
+                case ClientVersionBuild.V1_14_1_41137:
+                case ClientVersionBuild.V1_14_1_41243:
+                case ClientVersionBuild.V1_14_1_41511:
+                case ClientVersionBuild.V1_14_1_41794:
+                case ClientVersionBuild.V1_14_1_42032:
+                    return ClientVersionBuild.V1_14_1_40688;
             }
             return ClientVersionBuild.Zero;
         }
@@ -57,6 +74,8 @@ namespace HermesProxy.World.Enums
                     return typeof(V3_3_5_12340.Opcode);
                 case ClientVersionBuild.V2_5_2_39570:
                     return typeof(V2_5_2_39570.Opcode);
+                case ClientVersionBuild.V1_14_1_40688:
+                    return typeof(V1_14_1_40688.Opcode);
             }
             return null;
         }
@@ -595,6 +614,7 @@ namespace HermesProxy.World.Enums
         CMSG_GENERATE_RANDOM_CHARACTER_NAME,
         CMSG_GETDEATHBINDZONE,
         CMSG_GET_ACCOUNT_CHARACTER_LIST,
+        CMSG_GET_ACCOUNT_NOTIFICATIONS,
         CMSG_GET_CHALLENGE_MODE_REWARDS,
         CMSG_GET_CHANNEL_MEMBER_COUNT,
         CMSG_GET_GARRISON_INFO,
@@ -749,6 +769,7 @@ namespace HermesProxy.World.Enums
         CMSG_JOIN_RATED_BATTLEGROUND,
         CMSG_KEEP_ALIVE,
         CMSG_KEYBOUND_OVERRIDE,
+        CMSG_LATENCY_REPORT,
         CMSG_LEARN_DANCE_MOVE,
         CMSG_LEARN_PET_SPECIALIZATION_GROUP,
         CMSG_LEARN_PREVIEW_TALENTS,
@@ -846,6 +867,7 @@ namespace HermesProxy.World.Enums
         CMSG_MOUNT_CLEAR_FANFARE,
         CMSG_MOUNT_SET_FAVORITE,
         CMSG_MOUNT_SPECIAL_ANIM,
+        CMSG_MOVE_APPLY_INERTIA_ACK,
         CMSG_MOVE_APPLY_MOVEMENT_FORCE_ACK,
         CMSG_MOVE_CHANGE_TRANSPORT,
         CMSG_MOVE_CHANGE_VEHICLE_SEATS,
@@ -881,6 +903,7 @@ namespace HermesProxy.World.Enums
         CMSG_MOVE_JUMP,
         CMSG_MOVE_KNOCK_BACK_ACK,
         CMSG_MOVE_NOT_ACTIVE_MOVER,
+        CMSG_MOVE_REMOVE_INERTIA_ACK,
         CMSG_MOVE_REMOVE_MOVEMENT_FORCES,
         CMSG_MOVE_REMOVE_MOVEMENT_FORCE_ACK,
         CMSG_MOVE_SEAMLESS_TRANSFER_COMPLETE,
@@ -1550,6 +1573,7 @@ namespace HermesProxy.World.Enums
         SMSG_ACCOUNT_HEIRLOOM_UPDATE,
         SMSG_ACCOUNT_INFO_RESPONSE,
         SMSG_ACCOUNT_MOUNT_UPDATE,
+        SMSG_ACCOUNT_NOTIFICATIONS_RESPONSE,
         SMSG_ACCOUNT_PROFILE,
         SMSG_ACCOUNT_TOY_UPDATE,
         SMSG_ACCOUNT_TRANSMOG_SET_FAVORITES_UPDATE,
@@ -1880,6 +1904,7 @@ namespace HermesProxy.World.Enums
         SMSG_CHROMIE_TIME_OPEN_NPC,
         SMSG_CHROMIE_TIME_SELECT_EXPANSION_SUCCESS,
         SMSG_CHUNKED_PACKET,
+        SMSG_CHAIN_MISSILE_BOUNCE,
         SMSG_CLAIM_RAF_REWARD_RESPONSE,
         SMSG_CLEAR_ALL_SPELL_CHARGES,
         SMSG_CLEAR_BOSS_EMOTES,
@@ -2362,6 +2387,7 @@ namespace HermesProxy.World.Enums
         SMSG_ITEM_UPGRADE_RESULT,
         SMSG_JOINED_BATTLEGROUND_QUEUE,
         SMSG_KICK_REASON,
+        SMSG_LATENCY_REPORT_PING,
         SMSG_LEARNED_DANCE_MOVES,
         SMSG_LEARNED_SPELL,
         SMSG_LEARNED_SPELLS,
@@ -2489,6 +2515,7 @@ namespace HermesProxy.World.Enums
         SMSG_MOUNT_RESULT,
         SMSG_MOVEMENT_ENFORCEMENT_ALERT,
         SMSG_MOVE_ABANDON_TRANSPORT,
+        SMSG_MOVE_APPLY_INERTIA,
         SMSG_MOVE_APPLY_MOVEMENT_FORCE,
         SMSG_MOVE_CHARACTER_CHEAT,
         SMSG_MOVE_CHARACTER_CHEAT_FAILURE,
@@ -2496,13 +2523,16 @@ namespace HermesProxy.World.Enums
         SMSG_MOVE_DISABLE_COLLISION,
         SMSG_MOVE_DISABLE_DOUBLE_JUMP,
         SMSG_MOVE_DISABLE_GRAVITY,
+        SMSG_MOVE_DISABLE_INERTIA,
         SMSG_MOVE_DISABLE_TRANSITION_BETWEEN_SWIM_AND_FLY,
         SMSG_MOVE_ENABLE_COLLISION,
         SMSG_MOVE_ENABLE_DOUBLE_JUMP,
         SMSG_MOVE_ENABLE_GRAVITY,
+        SMSG_MOVE_ENABLE_INERTIA,
         SMSG_MOVE_ENABLE_TRANSITION_BETWEEN_SWIM_AND_FLY,
         SMSG_MOVE_KNOCK_BACK,
         SMSG_MOVE_LEVITATING,
+        SMSG_MOVE_REMOVE_INERTIA,
         SMSG_MOVE_REMOVE_MOVEMENT_FORCE,
         SMSG_MOVE_SET_ACTIVE_MOVER,
         SMSG_MOVE_SET_ANIM_KIT,
@@ -2568,6 +2598,7 @@ namespace HermesProxy.World.Enums
         SMSG_MOVE_UNSET_IGNORE_MOVEMENT_FORCES,
         SMSG_MOVE_UNSET_WALK_IN_AIR,
         SMSG_MOVE_UPDATE,
+        SMSG_MOVE_UPDATE_APPLY_INERTIA,
         SMSG_MOVE_UPDATE_APPLY_MOVEMENT_FORCE,
         SMSG_MOVE_UPDATE_COLLISION_HEIGHT,
         SMSG_MOVE_UPDATE_FLIGHT_BACK_SPEED,
@@ -2575,6 +2606,7 @@ namespace HermesProxy.World.Enums
         SMSG_MOVE_UPDATE_KNOCK_BACK,
         SMSG_MOVE_UPDATE_MOD_MOVEMENT_FORCE_MAGNITUDE,
         SMSG_MOVE_UPDATE_PITCH_RATE,
+        SMSG_MOVE_UPDATE_REMOVE_INERTIA,
         SMSG_MOVE_UPDATE_REMOVE_MOVEMENT_FORCE,
         SMSG_MOVE_UPDATE_RUN_BACK_SPEED,
         SMSG_MOVE_UPDATE_RUN_SPEED,
@@ -2835,6 +2867,7 @@ namespace HermesProxy.World.Enums
         SMSG_RESISTLOG,
         SMSG_RESPEC_WIPE_CONFIRM,
         SMSG_RESPOND_INSPECT_ACHIEVEMENTS,
+        SMSG_RESTART_GLOBAL_COOLDOWN,
         SMSG_RESTRICTED_ACCOUNT_WARNING,
         SMSG_RESUME_CAST,
         SMSG_RESUME_CAST_BAR,

@@ -26,6 +26,10 @@ namespace HermesProxy
         {
             Build = Settings.ServerBuild;
 
+            ExpansionVersion = GetExpansionVersion();
+            MajorVersion = GetMajorPatchVersion();
+            MinorVersion = GetMinorPatchVersion();
+
             UpdateFieldDictionary = new Dictionary<Type, SortedList<int, UpdateFieldInfo>>();
             UpdateFieldNameDictionary = new Dictionary<Type, Dictionary<string, int>>();
             if (!LoadUFDictionariesInto(UpdateFieldDictionary, UpdateFieldNameDictionary))
@@ -215,27 +219,31 @@ namespace HermesProxy
             return null;
         }
 
+        public static byte ExpansionVersion { get; private set; }
+        public static byte MajorVersion { get; private set; }
+        public static byte MinorVersion { get; private set; }
+
         public static ClientVersionBuild Build { get; private set; }
 
         public static int BuildInt => (int)Build;
 
         public static string VersionString => Build.ToString();
 
-        public static byte GetExpansionVersion()
+        private static byte GetExpansionVersion()
         {
             string str = VersionString;
             str = str.Replace("V", "");
             str = str.Substring(0, str.IndexOf("_"));
             return (byte)UInt32.Parse(str);
         }
-        public static byte GetMajorPatchVersion()
+        private static byte GetMajorPatchVersion()
         {
             string str = VersionString;
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
             return (byte)UInt32.Parse(str);
         }
-        public static byte GetMinorPatchVersion()
+        private static byte GetMinorPatchVersion()
         {
             string str = VersionString;
             str = str.Substring(str.IndexOf('_') + 1);
@@ -332,8 +340,13 @@ namespace HermesProxy
         {
             Build = Settings.ClientBuild;
 
+            ExpansionVersion = GetExpansionVersion();
+            MajorVersion = GetMajorPatchVersion();
+            MinorVersion = GetMinorPatchVersion();
+
             UpdateFieldDictionary = new Dictionary<Type, SortedList<int, UpdateFieldInfo>>();
             UpdateFieldNameDictionary = new Dictionary<Type, Dictionary<string, int>>();
+
             if (!LoadUFDictionariesInto(UpdateFieldDictionary, UpdateFieldNameDictionary))
                 Log.Print(LogType.Error, "Could not load update fields for current modern version.");
             if (!LoadOpcodeDictionaries())
@@ -408,6 +421,23 @@ namespace HermesProxy
                 case ClientVersionBuild.V1_14_0_40441:
                 case ClientVersionBuild.V1_14_0_40618:
                     return ClientVersionBuild.V1_14_0_40237;
+                case ClientVersionBuild.V1_14_1_40487:
+                case ClientVersionBuild.V1_14_1_40594:
+                case ClientVersionBuild.V1_14_1_40666:
+                case ClientVersionBuild.V1_14_1_40688:
+                case ClientVersionBuild.V1_14_1_40800:
+                case ClientVersionBuild.V1_14_1_40818:
+                case ClientVersionBuild.V1_14_1_40926:
+                case ClientVersionBuild.V1_14_1_40962:
+                case ClientVersionBuild.V1_14_1_41009:
+                case ClientVersionBuild.V1_14_1_41030:
+                case ClientVersionBuild.V1_14_1_41077:
+                case ClientVersionBuild.V1_14_1_41137:
+                case ClientVersionBuild.V1_14_1_41243:
+                case ClientVersionBuild.V1_14_1_41511:
+                case ClientVersionBuild.V1_14_1_41794:
+                case ClientVersionBuild.V1_14_1_42032:
+                    return ClientVersionBuild.V1_14_1_40688;
                 case ClientVersionBuild.V2_5_2_39570:
                 case ClientVersionBuild.V2_5_2_39618:
                 case ClientVersionBuild.V2_5_2_39926:
@@ -538,33 +568,79 @@ namespace HermesProxy
             return null;
         }
 
+        public static byte ExpansionVersion { get; private set; }
+        public static byte MajorVersion { get; private set; }
+        public static byte MinorVersion { get; private set; }
+
         public static ClientVersionBuild Build { get; private set; }
 
         public static int BuildInt => (int)Build;
 
         public static string VersionString => Build.ToString();
 
-        public static byte GetExpansionVersion()
+        private static byte GetExpansionVersion()
         {
             string str = VersionString;
             str = str.Replace("V", "");
             str = str.Substring(0, str.IndexOf("_"));
             return (byte)UInt32.Parse(str);
         }
-        public static byte GetMajorPatchVersion()
+        private static byte GetMajorPatchVersion()
         {
             string str = VersionString;
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
             return (byte)UInt32.Parse(str);
         }
-        public static byte GetMinorPatchVersion()
+        private static byte GetMinorPatchVersion()
         {
             string str = VersionString;
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
             return (byte)UInt32.Parse(str);
+        }
+
+        public static bool AddedInVersion(byte expansion, byte major, byte minor)
+        {
+            if (ExpansionVersion < expansion)
+                return false;
+
+            if (ExpansionVersion > expansion)
+                return true;
+
+            if (MajorVersion < major)
+                return false;
+
+            if (MajorVersion > major)
+                return true;
+
+            return MinorVersion >= minor;
+        }
+
+        public static bool AddedInVersion(byte retailExpansion, byte retailMajor, byte retailMinor, byte classicEraExpansion, byte classicEraMajor, byte classicEraMinor, byte classicExpansion, byte classicMajor, byte classicMinor)
+        {
+            if (ExpansionVersion == 1)
+                return AddedInVersion(classicEraExpansion, classicEraMajor, classicEraMinor);
+            else if (ExpansionVersion == 2 || ExpansionVersion == 3)
+                return AddedInVersion(classicExpansion, classicMajor, classicMinor);
+
+            return AddedInVersion(retailExpansion, retailMajor, retailMinor);
+        }
+
+        public static bool AddedInClassicVersion(byte classicEraExpansion, byte classicEraMajor, byte classicEraMinor, byte classicExpansion, byte classicMajor, byte classicMinor)
+        {
+            if (ExpansionVersion == 1)
+                return AddedInVersion(classicEraExpansion, classicEraMajor, classicEraMinor);
+            else if (ExpansionVersion == 2 || ExpansionVersion == 3)
+                return AddedInVersion(classicExpansion, classicMajor, classicMinor);
+
+            return false;
+        }
+
+        public static bool IsVersion(byte expansion, byte major, byte minor)
+        {
+            return ExpansionVersion == expansion && MajorVersion == major && MinorVersion == minor;
         }
 
         public static bool InVersion(ClientVersionBuild build1, ClientVersionBuild build2)
@@ -582,10 +658,70 @@ namespace HermesProxy
             return Build < build;
         }
 
+        public static bool IsClassicVersionBuild()
+        {
+            return ExpansionVersion == 1 && MajorVersion >= 13 ||
+                   ExpansionVersion == 2 && MajorVersion >= 5 ||
+                   ExpansionVersion == 3 && MajorVersion >= 4;
+        }
+
         public static int GetAccountDataCount()
         {
-            int count = (GetExpansionVersion() == 1) ? 10 : 8;
-            return count;
+            if (ExpansionVersion == 1 && MajorVersion >= 14)
+            {
+                if (AddedInVersion(1, 14, 1))
+                    return 13;
+                else
+                    return 10;
+            }
+            else if (ExpansionVersion == 2 && MajorVersion >= 5 ||
+                     ExpansionVersion == 3 && MajorVersion >= 4)
+            {
+                if (AddedInVersion(2, 5, 3))
+                    return 13;
+            }
+            else if (!IsClassicVersionBuild())
+            {
+                if (AddedInVersion(9, 2, 0))
+                    return 13;
+                else if (AddedInVersion(9, 1, 5))
+                    return 12;
+            }
+
+            return 8;
+        }
+
+        public static int GetPowerCountForClientVersion()
+        {
+            if (IsClassicVersionBuild())
+            {
+                if (AddedInClassicVersion(1, 14, 1, 2, 5, 3))
+                    return 7;
+
+                return 6;
+            }
+            else
+            {
+                if (RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                    return 5;
+                if (RemovedInVersion(ClientVersionBuild.V4_0_6_13596))
+                    return 7;
+                if (RemovedInVersion(ClientVersionBuild.V6_0_2_19033))
+                    return 5;
+                if (RemovedInVersion(ClientVersionBuild.V9_1_5_40772))
+                    return 6;
+
+                return 7;
+            }
+        }
+
+        public static uint GetGameObjectStateAnimId()
+        {
+            if (IsVersion(1, 14, 0) || IsVersion(2, 5, 2))
+                return 1556;
+            if (IsVersion(1, 14, 1))
+                return 1618;
+            return 0;
         }
 
         public static byte AdjustInventorySlot(byte slot)

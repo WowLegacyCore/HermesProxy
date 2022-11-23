@@ -40,10 +40,10 @@ namespace HermesProxy.World.Objects
         public uint? DisplayPower;
         public uint? OverrideDisplayPowerID;
         public long? Health;
-        public int?[] Power = new int?[6];
+        public int?[] Power = new int?[7];
         public long? MaxHealth;
-        public int?[] MaxPower = new int?[6];
-        public float?[] ModPowerRegen = new float?[6];
+        public int?[] MaxPower = new int?[7];
+        public float?[] ModPowerRegen = new float?[7];
         public int? Level;
         public int? EffectiveLevel;
         public int? ContentTuningID;

@@ -2613,7 +2613,7 @@ namespace HermesProxy.World.Client
                         }
                     }
                 }
-                if (guid == GetSession().GameState.CurrentPlayerGuid && ModernVersion.GetExpansionVersion() > 1)
+                if (guid == GetSession().GameState.CurrentPlayerGuid && ModernVersion.ExpansionVersion > 1)
                 {
                     int PLAYER_FIELD_HONOR_CURRENCY = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_HONOR_CURRENCY);
                     int PLAYER_FIELD_ARENA_CURRENCY = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_ARENA_CURRENCY);

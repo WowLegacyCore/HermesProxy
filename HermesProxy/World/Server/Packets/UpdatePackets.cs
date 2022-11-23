@@ -143,7 +143,7 @@ namespace HermesProxy.World.Server.Packets
                 if (GameObjectData.ParentRotation[3] == null)
                     GameObjectData.ParentRotation[3] = 1;
                 if (GameObjectData.StateAnimID == null)
-                    GameObjectData.StateAnimID = 1556;
+                    GameObjectData.StateAnimID = ModernVersion.GetGameObjectStateAnimId();
                 if (Guid.GetHighType() == HighGuidType.Transport)
                 {
                     uint period = GameData.GetTransportPeriod((uint)ObjectData.EntryID);
@@ -301,6 +301,12 @@ namespace HermesProxy.World.Server.Packets
                     case ClientVersionBuild.V1_14_0_40237:
                     {
                         Objects.Version.V1_14_0_40237.ObjectUpdateBuilder builder = new Objects.Version.V1_14_0_40237.ObjectUpdateBuilder(update, _gameState);
+                        builder.WriteToPacket(data);
+                        break;
+                    }
+                    case ClientVersionBuild.V1_14_1_40688:
+                    {
+                        Objects.Version.V1_14_1_40688.ObjectUpdateBuilder builder = new Objects.Version.V1_14_1_40688.ObjectUpdateBuilder(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
                     }
