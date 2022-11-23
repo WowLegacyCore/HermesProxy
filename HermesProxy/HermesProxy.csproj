@@ -3,11 +3,28 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>HermesProxy</RootNamespace>
     <StartupObject>HermesProxy.Server</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
     <Platforms>AnyCPU;x64</Platforms>
     <Copyright>Copyright © brotalnia 2022</Copyright>
     <Authors>brotalnia</Authors>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <!-- Native AOT settings -->
+    <RootAllApplicationAssemblies>false</RootAllApplicationAssemblies>
+    <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
   </PropertyGroup>
   
   <ItemGroup>
