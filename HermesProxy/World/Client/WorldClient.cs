@@ -262,7 +262,7 @@ namespace HermesProxy.World.Client
             _sendMutex.ReleaseMutex();
         }
 
-        private void SendPacketToClient(ServerPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
+        public void SendPacketToClient(ServerPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)
         {
             Opcode opcode = packet.GetUniversalOpcode();
             if (delayUntilOpcode != Opcode.MSG_NULL_ACTION)

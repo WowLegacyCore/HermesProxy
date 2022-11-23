@@ -140,6 +140,7 @@ namespace HermesProxy.World.Server
                     List<MailAttachment> attachments = new List<MailAttachment>();
                     attachments.Add(item);
                     BuildSendMail(mail, attachments);
+                    System.Threading.Thread.Sleep(500); // prevent triggering antiflood on server
                 }
             }
         }

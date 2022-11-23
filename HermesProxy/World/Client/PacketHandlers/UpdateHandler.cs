@@ -93,6 +93,8 @@ namespace HermesProxy.World.Client
                         {
                             if (!GetSession().GameState.ObjectSpawnCount.ContainsKey(oldGuid))
                                 GetSession().GameState.ObjectSpawnCount.Add(oldGuid, 0);
+                            else if (oldGuid.GetHighType() == HighGuidType.GameObject && GetSession().GameState.DespawnedGameObjects.Contains(oldGuid))
+                                    GetSession().GameState.IncrementObjectSpawnCounter(oldGuid);
                         }
 
                         var guid = oldGuid.To128(GetSession().GameState);
@@ -115,6 +117,15 @@ namespace HermesProxy.World.Client
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject1, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
+
+                        if (updateData.Guid == GetSession().GameState.CurrentPlayerGuid)
+                        {
+                            if (GetSession().GameState.QuestTracker.NeedToLoadBeSentToClient)
+                            {
+                                GetSession().GameState.QuestTracker.WriteAllCompletedIntoArray(updateData.ActivePlayerData.QuestCompleted);
+                                GetSession().GameState.QuestTracker.NeedToLoadBeSentToClient = false;
+                            }
+                        }
 
                         if (guid.IsItem() && updateData.ObjectData.EntryID != null &&
                            !GameData.ItemTemplates.ContainsKey((uint)updateData.ObjectData.EntryID))

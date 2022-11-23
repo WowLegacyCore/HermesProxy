@@ -1,4 +1,5 @@
-﻿using HermesProxy.Enums;
+﻿using Framework.Logging;
+using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
@@ -236,8 +237,16 @@ namespace HermesProxy.World.Client
                 int month = packet.ReadInt32();
                 int year = packet.ReadInt32();
 
-                DateTime date = new DateTime(year, month, day);
-                GetSession().GameState.CurrentGuildCreateTime = (uint)Time.DateTimeToUnixTime(date);
+                DateTime date;
+                try
+                {
+                    date = new DateTime(year, month, day);
+                    GetSession().GameState.CurrentGuildCreateTime = (uint)Time.DateTimeToUnixTime(date);
+                }
+                catch
+                {
+                    Log.Print(LogType.Error, $"Invalid guild create date: {day}-{month}-{year}");
+                }
             }
 
             packet.ReadUInt32(); // Players Count

@@ -315,7 +315,7 @@ namespace HermesProxy.World.Client
             LogoutComplete logout = new LogoutComplete();
             SendPacketToClient(logout);
 
-            GetSession().GameState = new();
+            GetSession().GameState = GameSessionData.CreateNewGameSessionData(GetSession());
             GetSession().InstanceSocket.CloseSocket();
             GetSession().InstanceSocket = null;
         }

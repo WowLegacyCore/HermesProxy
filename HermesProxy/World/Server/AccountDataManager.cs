@@ -13,12 +13,23 @@ namespace HermesProxy.World.Server
     public class AccountMetaDataManager
     {
         private const string LAST_CHARACTER_FILE = "last_character.txt";
+        private const string COMPLETED_QUESTS_FILE = "completed_quests.csv";
 
         private readonly string _accountName;
 
         private string GetAccountMetaDataDirectory()
         {
             string path = Path.GetFullPath(Path.Combine("AccountData", _accountName));
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            return path;
+        }
+
+        private string GetAccountCharacterMetaDataDirectory(string realm, string characterName)
+        {
+            string path = Path.GetFullPath(Path.Combine("AccountData", _accountName, realm, characterName));
 
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -61,6 +72,40 @@ namespace HermesProxy.World.Server
 
             File.WriteAllText(path, $"{realmName},{charName},{charLowerGuid},{lastLoginUnixSec}", Encoding.UTF8);
             Log.Print(LogType.Debug, $"Saved last selected char in '{path}'");
+        }
+
+        public List<uint> GetAllCompletedQuests(string realmName, string charName)
+        {
+            var dir = GetAccountCharacterMetaDataDirectory(realmName, charName);
+            var path = Path.Combine(dir, COMPLETED_QUESTS_FILE);
+
+            if (!File.Exists(path))
+                return new List<uint>();
+
+            List<string> lines = File.ReadAllLines(path).ToList();
+
+            var completedQuestIds = lines.Select(x => uint.Parse(x.Split(',').FirstOrDefault() ?? "0")).ToList();
+            return completedQuestIds;
+        }
+
+        public void MarkQuestAsCompleted(string realmName, string charName, uint questId)
+        {
+            var dir = GetAccountCharacterMetaDataDirectory(realmName, charName);
+            var path = Path.Combine(dir, COMPLETED_QUESTS_FILE);
+
+            var when = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            File.AppendAllLines(path, new[]{$"{questId},{when}"}, Encoding.UTF8);
+        }
+
+        public void MarkQuestAsNotCompleted(string realmName, string charName, uint questId)
+        {
+            var dir = GetAccountCharacterMetaDataDirectory(realmName, charName);
+            var path = Path.Combine(dir, COMPLETED_QUESTS_FILE);
+
+            string needle = questId.ToString();
+            List<string> lines = File.ReadAllLines(path).ToList();
+            lines.RemoveAll(l => l.Split(',').FirstOrDefault()?.Equals(needle) ?? false);
+            File.WriteAllLines(path, lines);
         }
     }
     

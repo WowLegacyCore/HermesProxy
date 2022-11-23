@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Framework.Constants;
 using Framework.Logging;
 using HermesProxy.Auth;
@@ -58,7 +59,11 @@ namespace HermesProxy.World.Server
         void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
             if (GetSession().GameState.CurrentPlayerGuid == null)
+            {
+                // The first queried player is always us
                 GetSession().GameState.CurrentPlayerGuid = queryPlayerName.Player;
+                GetSession().GameState.CurrentPlayerInfo = GetSession().GameState.OwnCharacters.Single(x => x.CharacterGuid == queryPlayerName.Player);
+            }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
             packet.WriteGuid(queryPlayerName.Player.To64());

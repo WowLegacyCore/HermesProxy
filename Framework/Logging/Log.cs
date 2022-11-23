@@ -54,16 +54,7 @@ namespace Framework.Logging
                 {
                     foreach (var msg in logQueue.GetConsumingEnumerable())
                     {
-                        if (msg.Type == LogType.Debug && !Framework.Settings.DebugOutput)
-                            continue;
-
-                        Console.Write($"{DateTime.Now:HH:mm:ss} |");
-
-                        Console.ForegroundColor = LogToColorType[msg.Type].Color;
-                        Console.Write($"{LogToColorType[msg.Type].Type}");
-                        Console.ResetColor();
-
-                        Console.WriteLine($"| {msg.Message}");
+                        PrintInternalDirectly(msg.Type, msg.Message);
                     }
                 });
 
@@ -72,9 +63,35 @@ namespace Framework.Logging
             }
         }
 
+        private static void PrintInternalDirectly(LogType type, string text)
+        {
+            if (type == LogType.Debug && !Framework.Settings.DebugOutput)
+                return;
+
+            Console.Write($"{DateTime.Now:HH:mm:ss} | ");
+
+            Console.ForegroundColor = LogToColorType[type].Color;
+            Console.Write($"{LogToColorType[type].Type}");
+            Console.ResetColor();
+
+            Console.WriteLine($"| {text}");
+        }
+
         public static void Print(LogType type, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
         {
-            logQueue.Add((type, $"{SetCaller(method, path)} | {text}"));
+            string formattedText = $"{FormatCaller(method, path)} | {text}";
+#if DEBUG
+            // Fastpath when using breakpoints we want to see the log results immediately
+            if (Debugger.IsAttached)
+            {
+                lock (logQueue)
+                {
+                    PrintInternalDirectly(type, formattedText);
+                }
+                return;
+            }
+#endif
+            logQueue.Add((type, formattedText));
         }
 
         public static void PrintNet(LogType type, LogNetDir netDirection, object text, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
@@ -86,7 +103,7 @@ namespace Framework.Logging
                 LogNetDir.S2P => "C P<S",
                 LogNetDir.P2C => "C<P S",
             };
-            logQueue.Add((type, $"{SetCaller(method, path)} | {directionText} | {text}"));
+            Print(type, $"{directionText} | {text}", method, path);
         }
 
         public static void PrintByteArray(LogType type, string text, byte[] bytes)
@@ -105,7 +122,7 @@ namespace Framework.Logging
             Print(LogType.Error, err.ToString(), method, path);
         }
 
-        private static string SetCaller(string method, string path)
+        private static string FormatCaller(string method, string path)
         {
             string location = path;
 

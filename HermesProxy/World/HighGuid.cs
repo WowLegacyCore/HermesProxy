@@ -24,6 +24,7 @@ namespace HermesProxy.World
             { HighGuidTypeLegacy.None, HighGuidType.Null },
             { HighGuidTypeLegacy.Player, HighGuidType.Player },
             { HighGuidTypeLegacy.Group, HighGuidType.RaidGroup },
+            { HighGuidTypeLegacy.Group2, HighGuidType.RaidGroup },
             { HighGuidTypeLegacy.MOTransport, HighGuidType.MOTransport }, // ?? unused in wpp
             { HighGuidTypeLegacy.Item, HighGuidType.Item },
             { HighGuidTypeLegacy.DynamicObject, HighGuidType.DynamicObject },
