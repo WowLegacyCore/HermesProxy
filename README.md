@@ -32,7 +32,7 @@ HermesProxy provides some internal chat commands:
 | `!qcomplete <questId>`     | Manually marks a quest as already completed (useful for quest helper addons) |
 | `!quncomplete <questId>`   | Unmarks a quest as completed                                                 |
 
-##v3.2 Not connecting troubleshoot
+## v3.2 You have been disconnected troubleshooting
 
 - If with the most recent version (v3.2) you are getting "You have been disconnected". In the config file change ExternalAddress to 0.0.0.0 from the default 127.0.0.1
 
