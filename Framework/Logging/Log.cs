@@ -67,9 +67,11 @@ namespace Framework.Logging
         {
             if (type == LogType.Debug && !Framework.Settings.DebugOutput)
                 return;
-
+#if DEBUG
+            Console.Write($"{DateTime.Now:HH:mm:ss.ff} | "); // This function is directly called in DEBUG, so our timesstamps can also be a more precise
+#else
             Console.Write($"{DateTime.Now:HH:mm:ss} | ");
-
+#endif
             Console.ForegroundColor = LogToColorType[type].Color;
             Console.Write($"{LogToColorType[type].Type}");
             Console.ResetColor();
