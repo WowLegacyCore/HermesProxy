@@ -4,6 +4,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Globalization;
 using Framework.Logging;
 using static HermesProxy.World.Server.Packets.ChannelListResponse;
 
@@ -382,6 +383,7 @@ namespace HermesProxy.World.Client
             SendPacket(packet);
         }
 
+        // TODO: make all of these available via HTML ingame support menu (as soon as we can influence the page)
         private bool HandleHermesInternalChatCommand(string msg)
         {
             // Marks a quest as completed
@@ -390,7 +392,7 @@ namespace HermesProxy.World.Client
             if (msg.StartsWith("!qcomplete"))
             {
                 var questIdStr = msg.Remove(0, "!qcomplete".Length);
-                if (!uint.TryParse(questIdStr, out var questId))
+                if (!uint.TryParse(questIdStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out var questId))
                 {
                     Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
                     return true;
@@ -404,7 +406,7 @@ namespace HermesProxy.World.Client
             if (msg.StartsWith("!quncomplete"))
             {
                 var questIdStr = msg.Remove(0, "!quncomplete".Length);
-                if (!uint.TryParse(questIdStr, out var questId))
+                if (!uint.TryParse(questIdStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out var questId))
                 {
                     Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
                     return true;

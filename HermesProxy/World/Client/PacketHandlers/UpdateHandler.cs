@@ -2697,6 +2697,26 @@ namespace HermesProxy.World.Client
                         if (updateMaskArray[GAMEOBJECT_ROTATION + i])
                             updateData.CreateData.MoveInfo.Rotation[i] = updates[GAMEOBJECT_ROTATION + i].FloatValue;
                     }
+
+                    // Fix for invalid movement of Deeprun Tram, some carts were going through the wall (in the opposite direction)
+                    // Entry IDs of Trams:
+                    const int tramSouthEastmost = 176080;
+                    const int tramNorthMiddle =   176081;
+                    const int tramSouthMiddle =   176082;
+                    const int tramSouthWestmost = 176083;
+                    const int tramNorthWestmost = 176084;
+                    const int tramNorthEastmost = 176085;
+
+                    if (updateData.ObjectData.EntryID is tramSouthEastmost or tramNorthWestmost or tramNorthEastmost)
+                    {
+                        var rot = updateData.CreateData.MoveInfo.Rotation.AsEulerAngles();
+                        rot.Yaw *= -1; // Rotate the cart content by 180°, so players who stand on the left side of the cart are actually on the left side
+                        updateData.CreateData.MoveInfo.Rotation = rot.AsQuaternion();
+                    }
+                    if (updateData.ObjectData.EntryID is tramNorthMiddle or tramSouthMiddle or tramSouthWestmost or tramNorthEastmost)
+                    {   // Quaternion to rotate the pivot point of the transport movement by 180°
+                        updateData.GameObjectData.ParentRotation = new float?[] { -4.371139E-08f, 0,  1, 0 };
+                    }
                 }
                 int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);
                 if (GAMEOBJECT_STATE >= 0 && updateMaskArray[GAMEOBJECT_STATE])
