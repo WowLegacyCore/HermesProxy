@@ -325,8 +325,8 @@ namespace HermesProxy.World.Client
             SendPacketToClient(spline);
         }
 
-        [PacketHandler(Opcode.SMSG_MOVE_FORCE_ROOT)]
-        [PacketHandler(Opcode.SMSG_MOVE_FORCE_UNROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_ROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_UNROOT)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_WATER_WALK)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_LAND_WALK)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_HOVERING)]
