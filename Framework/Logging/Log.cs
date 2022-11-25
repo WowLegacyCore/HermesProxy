@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -67,9 +68,11 @@ namespace Framework.Logging
         {
             if (type == LogType.Debug && !Framework.Settings.DebugOutput)
                 return;
-
+#if DEBUG
+            Console.Write($"{DateTime.Now:HH:mm:ss.ff} | "); // This function is directly called in DEBUG, so our timesstamps can also be a more precise
+#else
             Console.Write($"{DateTime.Now:HH:mm:ss} | ");
-
+#endif
             Console.ForegroundColor = LogToColorType[type].Color;
             Console.Write($"{LogToColorType[type].Type}");
             Console.ResetColor();
@@ -124,38 +127,8 @@ namespace Framework.Logging
 
         private static string FormatCaller(string method, string path)
         {
-            string location = path;
-
-            if (location.Contains("\\"))
-            {
-                string[] temp = location.Split('\\');
-                location = temp[temp.Length - 1].Replace(".cs", "");
-            }
-
-            return location.PadRight(15, ' ');
-        }
-
-        private static string NameOfCallingClass()
-        {
-            Type declaringType;
-
-            var fullName = string.Empty;
-            var skipFrames = 2;
-
-            do
-            {
-                var method = new StackFrame(skipFrames, false).GetMethod();
-
-                declaringType = method.DeclaringType;
-                if (declaringType == null)
-                    return method.Name;
-
-                skipFrames++;
-                fullName = declaringType.Name;
-            }
-            while (declaringType.Module.Name.Equals("mscorlib.dll", StringComparison.OrdinalIgnoreCase));
-
-            return fullName;
+            var fileName = Path.GetFileNameWithoutExtension(path);
+            return fileName.PadRight(15, ' ');
         }
     }
 }

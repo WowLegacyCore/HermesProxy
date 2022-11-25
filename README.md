@@ -15,6 +15,9 @@ There are 4 major components to the application:
 | 1.14.0          | 1.12.1          |
 | 2.5.2           | 2.4.3           |
 
+## Ingame Settings
+Note: Keep `Optimize Network for Speed` **enabled** (it's under `System` -> `Network`), otherwise you will get kicked every now and then.
+
 ## Usage Instructions
 
 - Edit the app's config to specify the exact versions of your game client and the remote server, along with the address.
