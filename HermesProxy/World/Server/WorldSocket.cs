@@ -338,6 +338,7 @@ namespace HermesProxy.World.Server
             return _clientPacketTable.LookupByKey(opcode);
         }
 
+        // C<P S: Sends data to modern client
         public void SendPacket(ServerPacket packet)
         {
             if (!IsOpen())

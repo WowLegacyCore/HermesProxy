@@ -229,6 +229,7 @@ namespace HermesProxy.World.Client
             }
         }
 
+        // C P>S: Sends data to world server
         private void SendPacket(WorldPacket packet)
         {
             _sendMutex.WaitOne();

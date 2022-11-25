@@ -186,6 +186,7 @@ namespace HermesProxy.Auth
             }
         }
 
+        // C P>R: Sends data to realm server
         private void SendPacket(ByteBuffer packet)
         {
             try
