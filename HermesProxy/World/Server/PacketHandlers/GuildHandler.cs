@@ -1,4 +1,5 @@
-﻿using Framework.Constants;
+﻿using System;
+using Framework.Constants;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -195,6 +196,27 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(emblem.BorderStyle);
             packet.WriteUInt32(emblem.BorderColor);
             packet.WriteUInt32(emblem.BackgroundColor);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_DECLINE_GUILD_INVITES)]
+        void HandleDeclineGuildInvites(SetAutoDeclineGuildInvites packet)
+        {
+            GetSession().GameState.CurrentPlayerStorage.Settings.SetAutoBlockGuildInvites(packet.GuildInvitesShouldGetBlocked);
+
+            // Send update to client
+            ObjectUpdate updateData = new ObjectUpdate(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
+            PlayerFlags flags = GetSession().GameState.CurrentPlayerStorage.Settings.CreateNewFlags();
+            updateData.PlayerData.PlayerFlags = (uint) flags;
+            UpdateObject updatePacket = new UpdateObject(GetSession().GameState);
+            updatePacket.ObjectUpdates.Add(updateData);
+            GetSession().WorldClient.SendPacketToClient(updatePacket);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_AUTO_DECLINE_INVITATION)]
+        void HandleGuildAutoDeclineInvitation(AutoDeclineGuildInvite autoDecline)
+        { // This is called when the client still receives a guild invite after enabling AutoDecline
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DECLINE_INVITATION);
             SendPacketToServer(packet);
         }
     }
