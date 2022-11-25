@@ -139,17 +139,22 @@ namespace HermesProxy.World.Client
                     return;
                 }
 
+                byte[] headerBuffer = (byte[])AR.AsyncState;
+
                 if (received != LegacyServerPacketHeader.StructSize)
                 {
                     Log.Print(LogType.Error, $"Received {received} bytes when reading header!");
-                    if (_isSuccessful == null)
-                        _isSuccessful = false;
-                    else
-                        GetSession().OnDisconnect();
-                    return;
+                    int receivedNow = _clientSocket.Receive(headerBuffer, received, LegacyServerPacketHeader.StructSize - received, SocketFlags.None);
+                    if (receivedNow == 0)
+                    {
+                        Log.Print(LogType.Error, "Socket Closed By Server");
+                        if (_isSuccessful == null)
+                            _isSuccessful = false;
+                        else
+                            GetSession().OnDisconnect();
+                        return;
+                    }
                 }
-
-                byte[] headerBuffer = (byte[])AR.AsyncState;
 
                 if (_worldCrypt != null)
                     _worldCrypt.Decrypt(headerBuffer, LegacyServerPacketHeader.StructSize);
