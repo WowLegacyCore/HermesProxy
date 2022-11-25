@@ -513,6 +513,34 @@ namespace Framework.GameMath
             return new Quaternion(Matrix3.fromEulerAnglesZYX(z, y, x));
         }
 
+        public EulerAngles AsEulerAngles()
+        {
+            var angles = new EulerAngles();
+
+            // roll / x
+            double sinr_cosp = 2 * (W * X + Y * Z);
+            double cosr_cosp = 1 - 2 * (X * X + Y * Y);
+            angles.Roll = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch / y
+            double sinp = 2 * (W * Y - Z * X);
+            if (Math.Abs(sinp) >= 1)
+            {
+                angles.Pitch = (float)Math.CopySign(Math.PI / 2, sinp);
+            }
+            else
+            {
+                angles.Yaw = (float)Math.Asin(sinp);
+            }
+
+            // yaw / z
+            double siny_cosp = 2 * (W * Z + X * Y);
+            double cosy_cosp = 1 - 2 * (Y * Y + Z * Z);
+            angles.Yaw = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+            return angles;
+        }
+
         #region Public Static Complex Special Functions
         /// <summary>
         /// Calculates the logarithm of a given quaternion.
