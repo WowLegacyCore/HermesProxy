@@ -11,6 +11,7 @@ using Google.Protobuf;
 using HermesProxy;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 
 namespace BNetServer.Networking
@@ -56,11 +57,18 @@ namespace BNetServer.Networking
             if (!IsOpen())
                 return;
 
-            var stream = new CodedInputStream(data, 0, receivedLength);
-            while (!stream.IsAtEnd)
+            int readPos = 0;
+            while (readPos < receivedLength)
             {
-                var header = new Header();
-                stream.ReadMessage(header);
+                var headerLength = (ushort)IPAddress.HostToNetworkOrder(BitConverter.ToInt16(data, readPos));
+                readPos += 2;
+
+                Header header = new();
+                header.MergeFrom(data, readPos, headerLength);
+                readPos += headerLength;
+
+                var stream = new CodedInputStream(data, readPos, (int)header.Size);
+                readPos += (int)header.Size;
 
                 if (header.ServiceId != 0xFE && header.ServiceHash != 0)
                 {
