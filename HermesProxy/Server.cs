@@ -19,10 +19,12 @@ namespace HermesProxy
         {
             //Set Culture
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Log.Print(LogType.Server, "Starting Hermes Proxy...");
             Log.Print(LogType.Server, $"Version {GetVersionInformation()}");
             Log.Start();
+
+            Log.DebugLogEnabled = Settings.DebugOutput;
 
             GameData.LoadEverything();
 

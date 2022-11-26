@@ -16,6 +16,6 @@ public static class NetworkUtils
             return result;
         }
 
-        return Dns.GetHostAddresses(Settings.ExternalAddress).First();
+        return Dns.GetHostAddresses(hostOrIpaddress).First();
     }
 }

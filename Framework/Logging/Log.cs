@@ -44,6 +44,8 @@ namespace Framework.Logging
         private static Thread? _logOutputThread = null;
         public static bool IsLogging => _logOutputThread != null && !logQueue.IsCompleted;
 
+        public static bool DebugLogEnabled { get; set; }
+        
         /// <summary>
         /// Start the logging Thread and take logs out of the <see cref="BlockingCollection{T}"/>
         /// </summary>
@@ -66,7 +68,7 @@ namespace Framework.Logging
 
         private static void PrintInternalDirectly(LogType type, string text)
         {
-            if (type == LogType.Debug && !Framework.Settings.DebugOutput)
+            if (type == LogType.Debug && !DebugLogEnabled)
                 return;
 #if DEBUG
             Console.Write($"{DateTime.Now:HH:mm:ss.ff} | "); // This function is directly called in DEBUG, so our timesstamps can also be a more precise
@@ -107,17 +109,6 @@ namespace Framework.Logging
                 LogNetDir.P2C => "C<P S",
             };
             Print(type, $"{directionText} | {text}", method, path);
-        }
-
-        public static void PrintByteArray(LogType type, string text, byte[] bytes)
-        {
-            StringBuilder hex = new StringBuilder();
-            foreach (byte b in bytes)
-            {
-                hex.AppendFormat("0x{0:x2}, ", b);
-            }
-
-            Print(type, $"{text} {hex}");
         }
 
         public static void outException(Exception err, [CallerMemberName] string method = "", [CallerFilePath] string path = "")
