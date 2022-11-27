@@ -1,9 +1,9 @@
 ﻿using Framework;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Threading;
 
 namespace HermesProxy.World.Client
 {
@@ -130,7 +130,7 @@ namespace HermesProxy.World.Client
             // or spells will bug out and glow if spammed.
             if (Settings.ClientSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ClientSpellDelay);
+                Thread.Sleep(Settings.ClientSpellDelay);
             }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -201,7 +201,7 @@ namespace HermesProxy.World.Client
             // or spells will bug out and glow if spammed.
             if (Settings.ClientSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ClientSpellDelay);
+                Thread.Sleep(Settings.ClientSpellDelay);
             }
 
             uint spellId = packet.ReadUInt32();
@@ -240,7 +240,7 @@ namespace HermesProxy.World.Client
             // or spells will bug out and glow if spammed.
             if (Settings.ClientSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ClientSpellDelay);
+                Thread.Sleep(Settings.ClientSpellDelay);
             }
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -293,7 +293,7 @@ namespace HermesProxy.World.Client
                 // or spells will bug out and glow if spammed.
                 if (Settings.ClientSpellDelay > 0)
                 {
-                    System.Threading.Thread.Sleep(Settings.ClientSpellDelay);
+                    Thread.Sleep(Settings.ClientSpellDelay);
                 }
             }
 
@@ -446,7 +446,7 @@ namespace HermesProxy.World.Client
         SpellCastData HandleSpellStartOrGo(WorldPacket packet, bool isSpellGo)
         {
             SpellCastData dbdata = new SpellCastData();
-            
+
             dbdata.CasterGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             dbdata.CasterUnit = packet.ReadPackedGuid().To128(GetSession().GameState);
 
@@ -456,7 +456,7 @@ namespace HermesProxy.World.Client
                 // or spells will bug out and glow if spammed.
                 if (Settings.ClientSpellDelay > 0)
                 {
-                    System.Threading.Thread.Sleep(Settings.ClientSpellDelay);
+                    Thread.Sleep(Settings.ClientSpellDelay);
                 }
             }
 
@@ -503,7 +503,7 @@ namespace HermesProxy.World.Client
                 }
             }
 
-            var targetFlags = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 
+            var targetFlags = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ?
                 (SpellCastTargetFlags)packet.ReadUInt32() : (SpellCastTargetFlags)packet.ReadUInt16();
             dbdata.Target.Flags = targetFlags;
 
@@ -537,7 +537,7 @@ namespace HermesProxy.World.Client
 
                 dbdata.Target.DstLocation.Location = packet.ReadVector3();
             }
-            
+
             if (targetFlags.HasAnyFlag(SpellCastTargetFlags.String))
                 dbdata.Target.Name = packet.ReadCString();
 
@@ -545,7 +545,7 @@ namespace HermesProxy.World.Client
             {
                 if (flags.HasAnyFlag(CastFlag.PredictedPower))
                 {
-                        packet.ReadInt32(); // Rune Cooldown
+                    packet.ReadInt32(); // Rune Cooldown
                 }
 
                 if (flags.HasAnyFlag(CastFlag.RuneInfo))
@@ -638,7 +638,7 @@ namespace HermesProxy.World.Client
             // or spells will bug out and glow if spammed.
             if (Settings.ClientSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ClientSpellDelay);
+                Thread.Sleep(Settings.ClientSpellDelay);
             }
 
             if (GetSession().GameState.CurrentClientSpecialCast != null &&
@@ -822,70 +822,70 @@ namespace HermesProxy.World.Client
                 {
                     case AuraType.PeriodicDamage:
                     case AuraType.PeriodicDamagePercent:
-                    {
-                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
-                        effect.Effect = (uint)aura;
-                        effect.Amount = packet.ReadInt32();
-                        effect.OriginalDamage = effect.Amount;
+                        {
+                            SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                            effect.Effect = (uint)aura;
+                            effect.Amount = packet.ReadInt32();
+                            effect.OriginalDamage = effect.Amount;
 
-                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                            effect.OverHealOrKill = packet.ReadUInt32();
+                            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                                effect.OverHealOrKill = packet.ReadUInt32();
 
-                        uint school = packet.ReadUInt32();
-                        if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                            school = (1u << (byte)school);
+                            uint school = packet.ReadUInt32();
+                            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                                school = (1u << (byte)school);
 
-                        effect.SchoolMaskOrPower = school;
-                        effect.AbsorbedOrAmplitude = packet.ReadUInt32();
-                        effect.Resisted = packet.ReadUInt32();
+                            effect.SchoolMaskOrPower = school;
+                            effect.AbsorbedOrAmplitude = packet.ReadUInt32();
+                            effect.Resisted = packet.ReadUInt32();
 
-                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
-                            effect.Crit = packet.ReadBool();
+                            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
+                                effect.Crit = packet.ReadBool();
 
-                        spell.Effects.Add(effect);
-                        break;
-                    }
+                            spell.Effects.Add(effect);
+                            break;
+                        }
                     case AuraType.PeriodicHeal:
                     case AuraType.ObsModHealth:
-                    {
-                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
-                        effect.Effect = (uint)aura;
-                        effect.Amount = packet.ReadInt32();
-                        effect.OriginalDamage = effect.Amount;
+                        {
+                            SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                            effect.Effect = (uint)aura;
+                            effect.Amount = packet.ReadInt32();
+                            effect.OriginalDamage = effect.Amount;
 
-                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                            effect.OverHealOrKill = packet.ReadUInt32();
+                            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                                effect.OverHealOrKill = packet.ReadUInt32();
 
-                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
-                            // no idea when this was added exactly
-                            effect.AbsorbedOrAmplitude = packet.ReadUInt32();
+                            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
+                                // no idea when this was added exactly
+                                effect.AbsorbedOrAmplitude = packet.ReadUInt32();
 
-                        if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
-                            effect.Crit = packet.ReadBool();
+                            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_2_9901))
+                                effect.Crit = packet.ReadBool();
 
-                        spell.Effects.Add(effect);
-                        break;
-                    }
+                            spell.Effects.Add(effect);
+                            break;
+                        }
                     case AuraType.ObsModPower:
                     case AuraType.PeriodicEnergize:
-                    {
-                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
-                        effect.Effect = (uint)aura;
-                        effect.SchoolMaskOrPower = packet.ReadUInt32();
-                        effect.Amount = packet.ReadInt32();
-                        spell.Effects.Add(effect);
-                        break;
-                    }
+                        {
+                            SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                            effect.Effect = (uint)aura;
+                            effect.SchoolMaskOrPower = packet.ReadUInt32();
+                            effect.Amount = packet.ReadInt32();
+                            spell.Effects.Add(effect);
+                            break;
+                        }
                     case AuraType.PeriodicManaLeech:
-                    {
-                        SpellPeriodicAuraLog.SpellLogEffect effect = new();
-                        effect.Effect = (uint)aura;
-                        effect.SchoolMaskOrPower = packet.ReadUInt32();
-                        effect.Amount = packet.ReadInt32();
-                        packet.ReadFloat(); // Gain multiplier
-                        spell.Effects.Add(effect);
-                        break;
-                    }
+                        {
+                            SpellPeriodicAuraLog.SpellLogEffect effect = new();
+                            effect.Effect = (uint)aura;
+                            effect.SchoolMaskOrPower = packet.ReadUInt32();
+                            effect.Amount = packet.ReadInt32();
+                            packet.ReadFloat(); // Gain multiplier
+                            spell.Effects.Add(effect);
+                            break;
+                        }
                 }
             }
             SendPacketToClient(spell);

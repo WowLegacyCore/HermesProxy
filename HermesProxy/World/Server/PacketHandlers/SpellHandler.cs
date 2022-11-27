@@ -6,6 +6,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Threading;
 
 namespace HermesProxy.World.Server
 {
@@ -109,7 +110,7 @@ namespace HermesProxy.World.Server
             // or spells will bug out and glow if spammed.
             if (Settings.ServerSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ServerSpellDelay);
+                Thread.Sleep(Settings.ServerSpellDelay);
             }
 
             if (GameData.NextMeleeSpells.Contains(cast.Cast.SpellID) ||
@@ -202,7 +203,7 @@ namespace HermesProxy.World.Server
             // or spells will bug out and glow if spammed.
             if (Settings.ServerSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ServerSpellDelay);
+                Thread.Sleep(Settings.ServerSpellDelay);
             }
 
             ClientCastRequest castRequest = new ClientCastRequest();
@@ -256,7 +257,7 @@ namespace HermesProxy.World.Server
             // or spells will bug out and glow if spammed.
             if (Settings.ServerSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ServerSpellDelay);
+                Thread.Sleep(Settings.ServerSpellDelay);
             }
 
             ClientCastRequest castRequest = new ClientCastRequest();
@@ -314,7 +315,7 @@ namespace HermesProxy.World.Server
             // or spells will bug out and glow if spammed.
             if (Settings.ServerSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ServerSpellDelay);
+                Thread.Sleep(Settings.ServerSpellDelay);
             }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CAST);
@@ -330,7 +331,7 @@ namespace HermesProxy.World.Server
             // or spells will bug out and glow if spammed.
             if (Settings.ServerSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ServerSpellDelay);
+                Thread.Sleep(Settings.ServerSpellDelay);
             }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CHANNELLING);
@@ -381,7 +382,7 @@ namespace HermesProxy.World.Server
             // or spells will bug out and glow if spammed.
             if (Settings.ServerSpellDelay > 0)
             {
-                System.Threading.Thread.Sleep(Settings.ServerSpellDelay);
+                Thread.Sleep(Settings.ServerSpellDelay);
             }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
