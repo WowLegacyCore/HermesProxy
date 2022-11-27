@@ -23,6 +23,7 @@ namespace HermesProxy.World.Objects
 
         public uint Flags;
         public uint FlagsExtra;
+        public uint FlagsExtra2;
         public uint MoveTime;
         public float SwimPitch;
         public uint FallTime;
@@ -265,6 +266,14 @@ namespace HermesProxy.World.Objects
         public void ReadMovementInfoModern(WorldPacket data)
         {
             var moveInfo = this;
+
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                moveInfo.Flags = data.ReadUInt32();
+                moveInfo.FlagsExtra = data.ReadUInt32();
+                moveInfo.FlagsExtra2 = data.ReadUInt32();
+            }
+
             moveInfo.MoveTime = data.ReadUInt32();
             moveInfo.Position = data.ReadVector3();
             moveInfo.Orientation = data.ReadFloat();
@@ -283,8 +292,11 @@ namespace HermesProxy.World.Objects
 
             // ResetBitReader
 
-            moveInfo.Flags = data.ReadBits<uint>(30);
-            moveInfo.FlagsExtra = data.ReadBits<uint>(18);
+            if (!ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                moveInfo.Flags = data.ReadBits<uint>(30);
+                moveInfo.FlagsExtra = data.ReadBits<uint>(18);
+            }
 
             bool hasTransport = data.HasBit();
             bool hasFall = data.HasBit();
@@ -292,9 +304,20 @@ namespace HermesProxy.World.Objects
 
             data.ReadBit(); // HeightChangeFailed
             data.ReadBit(); // RemoteTimeValid
+            bool hasInertia = ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3) ? data.HasBit() : false;
 
             if (hasTransport)
                 ReadTransportInfoModern(data);
+
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                if (hasInertia)
+                {
+                    data.ReadPackedGuid128();
+                    data.ReadVector3(); // Force
+                    data.ReadUInt32(); // Lifetime
+                }
+            }
 
             if (hasFall)
             {
@@ -339,6 +362,13 @@ namespace HermesProxy.World.Objects
 
             data.WritePackedGuid128(guid);                                  // MoverGUID
 
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                data.WriteUInt32(Flags);
+                data.WriteUInt32(FlagsExtra);
+                data.WriteUInt32(FlagsExtra2);
+            }
+
             data.WriteUInt32(moveInfo.MoveTime);                            // MoveTime
             data.WriteFloat(moveInfo.Position.X);
             data.WriteFloat(moveInfo.Position.Y);
@@ -354,17 +384,35 @@ namespace HermesProxy.World.Objects
             //for (public uint i = 0; i < RemoveForcesIDs.Count; ++i)
             //    *data << ObjectGuid(RemoveForcesIDs);
 
-            data.WriteBits(moveInfo.Flags, 30);
-            data.WriteBits(moveInfo.FlagsExtra, 18);
+            if (!ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                data.WriteBits(moveInfo.Flags, 30);
+                data.WriteBits(moveInfo.FlagsExtra, 18);
+            }
+                
             data.WriteBit(moveInfo.TransportGuid != null);                 // HasTransport
             data.WriteBit(hasFall);                                        // HasFall
             data.WriteBit(HasSplineData);                                  // HasSpline - marks that the unit uses spline movement
             data.WriteBit(false);                                          // HeightChangeFailed
             data.WriteBit(false);                                          // RemoteTimeValid
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+                data.WriteBit(false);                                      // HasInertia
             data.FlushBits();
 
             if (moveInfo.TransportGuid != null)
                 WriteTransportInfoModern(data);
+
+            /*
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                if (Inertia != null)
+                {
+                    data.WritePackedGuid128(Inertia.Guid);
+                    data.WriteVector3(Inertia.Force);
+                    data.WriteUInt32(Inertia.Lifetime);
+                }
+            }
+            */
 
             if (hasFall)
             {

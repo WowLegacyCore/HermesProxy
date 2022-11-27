@@ -92,8 +92,8 @@ namespace HermesProxy.World.Server
 
             // auction durations were increased in tbc
             // server ignores packet if you send wrong duration
-            if (LegacyVersion.GetExpansionVersion() <= 1 &&
-                ModernVersion.GetExpansionVersion() > 1)
+            if (LegacyVersion.ExpansionVersion <= 1 &&
+                ModernVersion.ExpansionVersion > 1)
             {
                 switch (expireTime)
                 {
@@ -114,8 +114,8 @@ namespace HermesProxy.World.Server
                     }
                 }
             }
-            else if (LegacyVersion.GetExpansionVersion() > 1 &&
-                     ModernVersion.GetExpansionVersion() <= 1)
+            else if (LegacyVersion.ExpansionVersion > 1 &&
+                     ModernVersion.ExpansionVersion <= 1)
             {
                 switch (expireTime)
                 {

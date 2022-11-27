@@ -39,7 +39,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(states);
 
             // These packets don't exist in old versions.
-            if (LegacyVersion.GetExpansionVersion() <= 1 || ModernVersion.GetExpansionVersion() <= 1)
+            if (LegacyVersion.ExpansionVersion <= 1 || ModernVersion.ExpansionVersion <= 1)
                 SendPacketToClient(new SetupCurrency());
             SendPacketToClient(new AllAccountCriteria());
 

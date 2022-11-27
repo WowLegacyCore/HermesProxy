@@ -144,9 +144,13 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Read()
         {
-            Name = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(9));
+            uint nameLength = _worldPacket.ReadBits<uint>(9);
+            if (ModernVersion.AddedInVersion(9, 1, 5, 1, 14, 1, 2, 5, 3))
+                AccountGuid = _worldPacket.ReadPackedGuid128();
+            Name = _worldPacket.ReadString(nameLength);
         }
 
+        WowGuid128 AccountGuid;
         public string Name;
     }
 

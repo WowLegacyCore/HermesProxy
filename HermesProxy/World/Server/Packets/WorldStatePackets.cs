@@ -64,7 +64,7 @@ namespace HermesProxy.World.Server.Packets
 
         public void AddClassicStates()
         {
-            if (ModernVersion.GetExpansionVersion() == 1)
+            if (ModernVersion.ExpansionVersion == 1)
             {
                 AddMissingState(17101, 1);
                 AddMissingState(17222, 1);
