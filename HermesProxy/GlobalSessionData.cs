@@ -56,6 +56,7 @@ namespace HermesProxy
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public OwnCharacterInfo CurrentPlayerInfo;
+        public CurrentPlayerStorage CurrentPlayerStorage;
         public uint CurrentGuildCreateTime;
         public uint CurrentGuildNumAccounts;
         public WowGuid128 CurrentInteractedWithNPC;
@@ -102,17 +103,15 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
 
-        public PlayerQuestTracker QuestTracker;
-
         private GameSessionData()
         {
             
         }
-        
+
         public static GameSessionData CreateNewGameSessionData(GlobalSessionData globalSession)
         {
             var self = new GameSessionData();
-            self.QuestTracker = new PlayerQuestTracker(globalSession);
+            self.CurrentPlayerStorage = new CurrentPlayerStorage(globalSession);
             return self;
         }
         

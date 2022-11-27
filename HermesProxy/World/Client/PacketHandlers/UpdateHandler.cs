@@ -120,10 +120,10 @@ namespace HermesProxy.World.Client
 
                         if (updateData.Guid == GetSession().GameState.CurrentPlayerGuid)
                         {
-                            if (GetSession().GameState.QuestTracker.NeedToLoadBeSentToClient)
+                            if (GetSession().GameState.CurrentPlayerStorage.CompletedQuests.NeedsToBeForceSent)
                             {
-                                GetSession().GameState.QuestTracker.WriteAllCompletedIntoArray(updateData.ActivePlayerData.QuestCompleted);
-                                GetSession().GameState.QuestTracker.NeedToLoadBeSentToClient = false;
+                                GetSession().GameState.CurrentPlayerStorage.CompletedQuests.WriteAllCompletedIntoArray(updateData.ActivePlayerData.QuestCompleted);
+                                GetSession().GameState.CurrentPlayerStorage.CompletedQuests.NeedsToBeForceSent = false;
                             }
                         }
 
@@ -1937,20 +1937,29 @@ namespace HermesProxy.World.Client
                 int PLAYER_FLAGS = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FLAGS);
                 if (PLAYER_FLAGS >= 0 && updateMaskArray[PLAYER_FLAGS])
                 {
-                    PlayerFlagsLegacy playerFlags = (PlayerFlagsLegacy)updates[PLAYER_FLAGS].UInt32Value;
-                    updateData.PlayerData.PlayerFlags = (uint)playerFlags.CastFlags<PlayerFlags>();
+                    PlayerFlagsLegacy legacyFlags = (PlayerFlagsLegacy)updates[PLAYER_FLAGS].UInt32Value;
+                    var flags = legacyFlags.CastFlags<PlayerFlags>();
+                    if (updateData.Guid == GetSession().GameState.CurrentPlayerGuid)
+                        GetSession().GameState.CurrentPlayerStorage.Settings.PatchFlags(ref flags); // Some patches like auto guild inv decline
+                    updateData.PlayerData.PlayerFlags = (uint) flags;
 
                     if (updateData.PlayerData.PlayerFlagsEx == null)
                         updateData.PlayerData.PlayerFlagsEx = 0;
-                    if (playerFlags.HasAnyFlag(PlayerFlagsLegacy.HideHelm))
+                    if (legacyFlags.HasAnyFlag(PlayerFlagsLegacy.HideHelm))
                         updateData.PlayerData.PlayerFlagsEx |= (uint)PlayerFlagsEx.HideHelm;
-                    if (playerFlags.HasAnyFlag(PlayerFlagsLegacy.HideCloak))
+                    if (legacyFlags.HasAnyFlag(PlayerFlagsLegacy.HideCloak))
                         updateData.PlayerData.PlayerFlagsEx |= (uint)PlayerFlagsEx.HideCloak;
 
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056) &&
                         updateData.UnitData.PvpFlags == null)
                         updateData.UnitData.PvpFlags = ReadPvPFlags(updates);
                 }
+                else if (updateData.Guid == GetSession().GameState.CurrentPlayerGuid && GetSession().GameState.CurrentPlayerStorage.Settings.NeedToForcePatchFlags)
+                { // If we did not patch the PlayerFlags the first time, we need to force include the field
+                    PlayerFlags flags = GetSession().GameState.CurrentPlayerStorage.Settings.CreateNewFlags();
+                    updateData.PlayerData.PlayerFlags = (uint) flags;
+                }
+
                 int PLAYER_GUILDID = LegacyVersion.GetUpdateField(PlayerField.PLAYER_GUILDID);
                 if (PLAYER_GUILDID >= 0 && updateMaskArray[PLAYER_GUILDID])
                 {
