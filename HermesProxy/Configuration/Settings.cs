@@ -36,31 +36,31 @@ namespace Framework
                 return false;
             }
             
-            if (IsValidPortNumber(RestPort))
+            if (!IsValidPortNumber(RestPort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({RestPort}) out of allowed range (1-65535)");
                 return false;
             }
 
-            if (IsValidPortNumber(ServerPort))
+            if (!IsValidPortNumber(ServerPort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({BNetPort}) out of allowed range (1-65535)");
                 return false;
             }
 
-            if (IsValidPortNumber(BNetPort))
+            if (!IsValidPortNumber(BNetPort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({BNetPort}) out of allowed range (1-65535)");
                 return false;
             }
 
-            if (IsValidPortNumber(RealmPort))
+            if (!IsValidPortNumber(RealmPort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({RealmPort}) out of allowed range (1-65535)");
                 return false;
             }
 
-            if (IsValidPortNumber(InstancePort))
+            if (!IsValidPortNumber(InstancePort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({InstancePort}) out of allowed range (1-65535)");
                 return false;
