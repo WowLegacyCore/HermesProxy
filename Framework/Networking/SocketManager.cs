@@ -27,6 +27,8 @@ namespace Framework.Networking
         NetworkThread<TSocketType>[] _threads;
         int _threadCount;
 
+        public bool IsListening => Acceptor.IsListening;
+
         public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
             Cypher.Assert(threadCount > 0);

@@ -50,13 +50,9 @@ public class RealmManager
             build.HotfixVersion = hotfixVersion.ToCharArray();
 
         build.Build = (uint)Framework.Settings.ClientBuild;
-        string win64AuthSeedHexStr = Framework.Settings.ClientSeed;
-        if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
-            build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 
-        string mac64AuthSeedHexStr = "";
-        if (!mac64AuthSeedHexStr.IsEmpty() && mac64AuthSeedHexStr.Length == build.Mac64AuthSeed.Length * 2)
-            build.Mac64AuthSeed = mac64AuthSeedHexStr.ToByteArray();
+        build.Win64AuthSeed = Framework.Settings.ClientSeed;
+        build.Mac64AuthSeed = Framework.Settings.ClientSeed;
 
         _builds.Add(build);
     }
