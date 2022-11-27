@@ -63,6 +63,7 @@ namespace HermesProxy.World.Server
                 // The first queried player is always us
                 GetSession().GameState.CurrentPlayerGuid = queryPlayerName.Player;
                 GetSession().GameState.CurrentPlayerInfo = GetSession().GameState.OwnCharacters.Single(x => x.CharacterGuid == queryPlayerName.Player);
+                GetSession().GameState.CurrentPlayerStorage.LoadCurrentPlayer();
             }
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);

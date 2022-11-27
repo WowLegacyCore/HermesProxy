@@ -264,7 +264,6 @@ namespace HermesProxy.World.Server
                     ping.Read();
                     if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
                         GetSession().WorldClient.SendPing(ping.Serial, ping.Latency);
-                    HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
                     AuthSession authSession = new(packet);
@@ -727,7 +726,7 @@ namespace HermesProxy.World.Server
             if (code == BattlenetRpcErrorCode.Ok)
             {
                 response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.ActiveExpansionLevel = (byte)(LegacyVersion.GetExpansionVersion() - 1);
+                response.SuccessInfo.ActiveExpansionLevel = (byte)(LegacyVersion.ExpansionVersion - 1);
                 response.SuccessInfo.AccountExpansionLevel = (byte)0;
                 response.SuccessInfo.VirtualRealmAddress = _realmId.GetAddress();
                 response.SuccessInfo.Time = (uint)Time.UnixTime;
@@ -811,8 +810,8 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(8, 0, 0));
                 availableRaces.Add(race);
 
-                if (ModernVersion.GetExpansionVersion() >= 2 &&
-                    LegacyVersion.GetExpansionVersion() >= 2)
+                if (ModernVersion.ExpansionVersion >= 2 &&
+                    LegacyVersion.ExpansionVersion >= 2)
                 {
                     race = new RaceClassAvailability();
                     race.RaceID = 10;
@@ -966,8 +965,8 @@ namespace HermesProxy.World.Server
         public void SendSeasonInfo()
         {
             SeasonInfo seasonInfo = new();
-            if (LegacyVersion.GetExpansionVersion() > 1 &&
-                ModernVersion.GetExpansionVersion() > 1)
+            if (LegacyVersion.ExpansionVersion > 1 &&
+                ModernVersion.ExpansionVersion > 1)
             {
                 seasonInfo.CurrentSeason = 2;
                 seasonInfo.PreviousSeason = 1;
@@ -1007,11 +1006,6 @@ namespace HermesProxy.World.Server
             ServerTimeOffset response = new();
             response.Time = Time.UnixTime;
             SendPacket(response);
-        }
-
-        void HandlePing(Ping ping)
-        {
-            SendPacket(new Pong(ping.Serial));
         }
 
         public void SendAccountDataTimes()

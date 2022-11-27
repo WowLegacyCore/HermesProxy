@@ -57,7 +57,7 @@ namespace HermesProxy.World.Client
                     instance.DifficultyID = (Difficulty)packet.ReadUInt32();
                 else
                 {
-                    if (ModernVersion.GetExpansionVersion() == 1)
+                    if (ModernVersion.ExpansionVersion == 1)
                         instance.DifficultyID = Difficulty.Raid40;
                     else
                         instance.DifficultyID = Difficulty.Raid25N;
@@ -111,7 +111,7 @@ namespace HermesProxy.World.Client
                 instance.DifficultyID = (Difficulty)packet.ReadUInt32();
             else
             {
-                if (ModernVersion.GetExpansionVersion() == 1)
+                if (ModernVersion.ExpansionVersion == 1)
                     instance.DifficultyID = Difficulty.Raid40;
                 else
                     instance.DifficultyID = Difficulty.Raid25N;

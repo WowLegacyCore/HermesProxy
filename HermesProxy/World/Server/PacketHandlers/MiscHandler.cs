@@ -125,7 +125,7 @@ namespace HermesProxy.World.Server
         void HandleRequestLFGListBlacklist(EmptyClientPacket request)
         {
             LFGListUpdateBlacklist blacklist = new LFGListUpdateBlacklist();
-            if (ModernVersion.GetExpansionVersion() > 1)
+            if (ModernVersion.ExpansionVersion > 1)
             {
                 blacklist.AddBlacklist(796, 3);
                 blacklist.AddBlacklist(797, 3);

@@ -233,7 +233,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE)]
         [PacketHandler(Opcode.SMSG_FORCE_PITCH_RATE_CHANGE)]
         void HandleMoveForceSpeedChange(WorldPacket packet)
-        {
+        { // for own player
             string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("SMSG_FORCE_", "SMSG_MOVE_SET_").Replace("_CHANGE", "");
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
 
@@ -243,10 +243,25 @@ namespace HermesProxy.World.Client
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) &&
                 packet.GetUniversalOpcode(false) == Opcode.SMSG_FORCE_RUN_SPEED_CHANGE)
+            {
                 packet.ReadUInt8(); // unk byte
+            }
 
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
+
+            // Convenience in vanilla to use SwimSpeed as FlySpeed
+            if (universalOpcode is Opcode.SMSG_MOVE_SET_SWIM_SPEED
+                                or Opcode.SMSG_MOVE_SET_SWIM_BACK_SPEED &&
+                LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                var flyOpcode = (Opcode) Enum.Parse(typeof(Opcode), universalOpcode.ToString().Replace("SWIM", "FLIGHT"));
+                MoveSetSpeed flySpeed = new MoveSetSpeed(flyOpcode);
+                flySpeed.MoverGUID = speed.MoverGUID;
+                flySpeed.MoveCounter = speed.MoveCounter;
+                flySpeed.Speed = speed.Speed;
+                SendPacketToClient(flySpeed);
+            }
         }
 
         // for other players
@@ -260,7 +275,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_MOVE_SET_TURN_RATE)]
         [PacketHandler(Opcode.MSG_MOVE_SET_WALK_SPEED)]
         void HandleMoveUpdateSpeed(WorldPacket packet)
-        {
+        { // for other players
             string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("MSG_MOVE_SET", "SMSG_MOVE_UPDATE");
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
 
@@ -268,9 +283,23 @@ namespace HermesProxy.World.Client
             speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
             speed.MoveInfo = new MovementInfo();
             speed.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
-            speed.MoveInfo.Flags = (uint)(((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            var newFlags = ((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>();
+            speed.MoveInfo.Flags = (uint)(newFlags);
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
+
+            // Convenience in vanilla to use SwimSpeed as FlySpeed
+            if (universalOpcode is Opcode.SMSG_MOVE_UPDATE_SWIM_SPEED
+                                or Opcode.SMSG_MOVE_UPDATE_SWIM_BACK_SPEED &&
+                LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+            {
+                var flyOpcode = (Opcode) Enum.Parse(typeof(Opcode), universalOpcode.ToString().Replace("SWIM", "FLIGHT"));
+                MoveUpdateSpeed flySpeed = new MoveUpdateSpeed(flyOpcode);
+                flySpeed.MoverGUID = speed.MoverGUID;
+                flySpeed.MoveInfo = speed.MoveInfo;
+                flySpeed.Speed = speed.Speed;
+                SendPacketToClient(flySpeed);
+            }
         }
 
         [PacketHandler(Opcode.SMSG_MOVE_SPLINE_ROOT)]
@@ -296,8 +325,8 @@ namespace HermesProxy.World.Client
             SendPacketToClient(spline);
         }
 
-        [PacketHandler(Opcode.SMSG_MOVE_FORCE_ROOT)]
-        [PacketHandler(Opcode.SMSG_MOVE_FORCE_UNROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_ROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_UNROOT)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_WATER_WALK)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_LAND_WALK)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_HOVERING)]
@@ -397,7 +426,17 @@ namespace HermesProxy.World.Client
                 hasTrajectory = false;
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagVanilla.Flying);
                 hasTaxiFlightFlags = splineFlags == (SplineFlagVanilla.Runmode | SplineFlagVanilla.Flying);
-                moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+
+                if (splineFlags == SplineFlagVanilla.Runmode) // Default spline flags used by Vanilla and TBC servers
+                {
+                    moveSpline.SplineFlags = SplineFlagModern.Unknown5;
+                    if (((UnitFlagsVanilla)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS) & UnitFlagsVanilla.CanSwim) != 0)
+                        moveSpline.SplineFlags |= SplineFlagModern.CanSwim;
+                    if (type == SplineTypeLegacy.Normal)
+                        moveSpline.SplineFlags |= SplineFlagModern.Steering | SplineFlagModern.Unknown10;
+                }
+                else
+                    moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
             else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
             {
@@ -406,7 +445,17 @@ namespace HermesProxy.World.Client
                 hasTrajectory = false;
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagTBC.Flying);
                 hasTaxiFlightFlags = splineFlags == (SplineFlagTBC.Runmode | SplineFlagTBC.Flying);
-                moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+
+                if (splineFlags == SplineFlagTBC.Runmode) // Default spline flags used by Vanilla and TBC servers
+                {
+                    moveSpline.SplineFlags = SplineFlagModern.Unknown5;
+                    if (((UnitFlags)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS) & UnitFlags.CanSwim) != 0)
+                        moveSpline.SplineFlags |= SplineFlagModern.CanSwim;
+                    if (type == SplineTypeLegacy.Normal)
+                        moveSpline.SplineFlags |= SplineFlagModern.Steering | SplineFlagModern.Unknown10;
+                }
+                else
+                    moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
             else
             {

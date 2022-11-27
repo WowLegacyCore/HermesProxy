@@ -397,7 +397,7 @@ namespace HermesProxy.World.Client
                     Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
                     return true;
                 }
-                GetSession().GameState.QuestTracker.MarkQuestAsCompleted(questId);
+                GetSession().GameState.CurrentPlayerStorage.CompletedQuests.MarkQuestAsCompleted(questId);
                 return true;
             }
 
@@ -411,7 +411,7 @@ namespace HermesProxy.World.Client
                     Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
                     return true;
                 }
-                GetSession().GameState.QuestTracker.MarkQuestAsNotCompleted(questId);
+                GetSession().GameState.CurrentPlayerStorage.CompletedQuests.MarkQuestAsNotCompleted(questId);
                 return true;
             }
 

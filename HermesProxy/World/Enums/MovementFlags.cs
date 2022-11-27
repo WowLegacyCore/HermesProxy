@@ -104,6 +104,7 @@ namespace HermesProxy.World.Enums
         LocalDirty         = 0x80000000
     }
 
+    [Flags]
     public enum MovementFlagModern : uint
     {
         None               = 0x00000000,

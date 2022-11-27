@@ -143,5 +143,15 @@ namespace Framework
             Console.WriteLine("Warning: \"{0}\" is not a valid enum value for key \"{1}\", enum \"{2}\"", s.Value, key, typeof(TEnum).Name);
             return defValue;
         }
+
+        public byte[] GetByteArray(string key, byte[] defValue)
+        {
+            KeyValueConfigurationElement s = _settingsCollection[key];
+            if (string.IsNullOrWhiteSpace(s?.Value))
+            {
+                return defValue;
+            }
+            return s.Value.ParseAsByteArray();
+        }
     }
 }

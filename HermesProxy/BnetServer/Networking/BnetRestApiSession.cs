@@ -29,7 +29,7 @@ namespace BNetServer.Networking
             AsyncHandshake(BnetServerCertificate.Certificate);
         }
 
-        public override async void ReadHandler(byte[] data, int receivedLength)
+        public override async Task ReadHandler(byte[] data, int receivedLength)
         {
             var httpRequest = HttpHelper.ParseRequest(data, receivedLength);
             if (httpRequest == null || !RequestRouter(httpRequest))

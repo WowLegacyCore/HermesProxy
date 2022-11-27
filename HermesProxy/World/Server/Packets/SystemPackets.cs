@@ -21,6 +21,17 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
+    public class GameRuleValuePair
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Rule);
+            data.WriteInt32(Value);
+        }
+        public int Rule;
+        public int Value;
+    }
+
     public class FeatureSystemStatus : ServerPacket
     {
         public FeatureSystemStatus() : base(Opcode.SMSG_FEATURE_SYSTEM_STATUS)
@@ -52,6 +63,21 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
             _worldPacket.WriteUInt32(ClubsPresenceUpdateTimer);
             _worldPacket.WriteUInt32(HiddenUIClubsPresenceUpdateTimer);
+
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                _worldPacket.WriteInt32(ActiveSeason);
+                _worldPacket.WriteInt32(GameRuleValues.Count);
+
+                if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                    _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
+
+                if (ModernVersion.AddedInVersion(9, 2, 7, 1, 14, 4, 3, 4, 0))
+                    _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
+
+                foreach (var rulePair in GameRuleValues)
+                    rulePair.Write(_worldPacket);
+            }
 
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus != null);
@@ -85,8 +111,21 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(IsMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
-            _worldPacket.WriteBit(BattlegroundsEnabled);
-            _worldPacket.WriteBit(RaceClassExpansionLevels != null);
+
+            if (ModernVersion.AddedInVersion(9, 1, 5, 1, 14, 1, 2, 5, 3))
+            {
+                _worldPacket.WriteBit(TextToSpeechFeatureEnabled);
+                _worldPacket.WriteBit(ChatDisabledByDefault);
+                _worldPacket.WriteBit(ChatDisabledByPlayer);
+                _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
+            }
+
+            if (ModernVersion.IsClassicVersionBuild())
+            {
+                _worldPacket.WriteBit(BattlegroundsEnabled);
+                _worldPacket.WriteBit(RaceClassExpansionLevels != null);
+            }
+            
             _worldPacket.FlushBits();
 
             {
@@ -122,11 +161,14 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteInt32(SessionAlert.DisplayTime);
             }
 
-            if (RaceClassExpansionLevels != null)
+            if (ModernVersion.IsClassicVersionBuild())
             {
-                _worldPacket.WriteInt32(RaceClassExpansionLevels.Count);
-                for (var i = 0; i < RaceClassExpansionLevels.Count; ++i)
-                    _worldPacket.WriteUInt8(RaceClassExpansionLevels[i]);
+                if (RaceClassExpansionLevels != null)
+                {
+                    _worldPacket.WriteInt32(RaceClassExpansionLevels.Count);
+                    for (var i = 0; i < RaceClassExpansionLevels.Count; ++i)
+                        _worldPacket.WriteUInt8(RaceClassExpansionLevels[i]);
+                }
             }
 
             _worldPacket.WriteBit(Squelch.IsSquelched);
@@ -156,6 +198,10 @@ namespace HermesProxy.World.Server.Packets
         public uint BpayStoreProductDeliveryDelay;
         public uint ClubsPresenceUpdateTimer;
         public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
+        public int ActiveSeason;
+        public List<GameRuleValuePair> GameRuleValues = new List<GameRuleValuePair>();
+        public short MaxPlayerNameQueriesPerPacket;
+        public short PlayerNameQueryTelemetryInterval;
         public uint KioskSessionMinutes;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
@@ -180,6 +226,10 @@ namespace HermesProxy.World.Server.Packets
         public bool IsMuted;
         public bool ClubFinderEnabled;
         public bool Unknown901CheckoutRelated;
+        public bool TextToSpeechFeatureEnabled;
+        public bool ChatDisabledByDefault;
+        public bool ChatDisabledByPlayer;
+        public bool LFGListCustomRequiresAuthenticator;
         public bool BattlegroundsEnabled;
         public List<byte> RaceClassExpansionLevels;
 
@@ -279,9 +329,26 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteInt32(MinimumExpansionLevel);
             _worldPacket.WriteInt32(MaximumExpansionLevel);
 
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                _worldPacket.WriteInt32(ActiveSeason);
+                _worldPacket.WriteInt32(GameRuleValues.Count);
+
+                if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                    _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
+
+                if (ModernVersion.AddedInVersion(9, 2, 7, 1, 14, 4, 3, 4, 0))
+                    _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
+            }
+
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
 
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+            {
+                foreach (var rulePair in GameRuleValues)
+                    rulePair.Write(_worldPacket);
+            }
         }
 
         public bool BpayStoreAvailable; // NYI
@@ -311,6 +378,10 @@ namespace HermesProxy.World.Server.Packets
         public int ActiveClassTrialBoostType;     // NYI
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
+        public int ActiveSeason;
+        public List<GameRuleValuePair> GameRuleValues = new List<GameRuleValuePair>();
+        public short MaxPlayerNameQueriesPerPacket;
+        public short PlayerNameQueryTelemetryInterval;
         public uint KioskSessionMinutes;
     }
 

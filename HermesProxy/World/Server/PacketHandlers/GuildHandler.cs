@@ -1,4 +1,5 @@
-﻿using Framework.Constants;
+﻿using System;
+using Framework.Constants;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -195,6 +196,269 @@ namespace HermesProxy.World.Server
             packet.WriteUInt32(emblem.BorderStyle);
             packet.WriteUInt32(emblem.BorderColor);
             packet.WriteUInt32(emblem.BackgroundColor);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_DECLINE_GUILD_INVITES)]
+        void HandleDeclineGuildInvites(SetAutoDeclineGuildInvites packet)
+        {
+            GetSession().GameState.CurrentPlayerStorage.Settings.SetAutoBlockGuildInvites(packet.GuildInvitesShouldGetBlocked);
+
+            // Send update to client
+            ObjectUpdate updateData = new ObjectUpdate(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
+            PlayerFlags flags = GetSession().GameState.CurrentPlayerStorage.Settings.CreateNewFlags();
+            updateData.PlayerData.PlayerFlags = (uint) flags;
+            UpdateObject updatePacket = new UpdateObject(GetSession().GameState);
+            updatePacket.ObjectUpdates.Add(updateData);
+            GetSession().WorldClient.SendPacketToClient(updatePacket);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_AUTO_DECLINE_INVITATION)]
+        void HandleGuildAutoDeclineInvitation(AutoDeclineGuildInvite autoDecline)
+        { // This is called when the client still receives a guild invite after enabling AutoDecline
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DECLINE_INVITATION);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_ACTIVATE)]
+        void HandleGuildBankActivate(GuildBankAtivate activate)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_ACTIVATE);
+            packet.WriteGuid(activate.BankGuid.To64());
+            packet.WriteBool(activate.FullUpdate);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_QUERY_TAB)]
+        void HandleGuildBankQueryTab(GuildBankQueryTab query)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_QUERY_TAB);
+            packet.WriteGuid(query.BankGuid.To64());
+            packet.WriteUInt8(query.Tab);
+            packet.WriteBool(query.FullUpdate);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_DEPOSIT_MONEY)]
+        void HandleGuildBankDepositMoney(GuildBankDepositMoney deposit)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_DEPOSIT_MONEY);
+            packet.WriteGuid(deposit.BankGuid.To64());
+            packet.WriteUInt32((uint)deposit.Money);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_TEXT_QUERY)]
+        void HandleGuildBankTextQuery(GuildBankTextQuery query)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_QUERY_GUILD_BANK_TEXT);
+            packet.WriteUInt8((byte)query.Tab);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_UPDATE_TAB)]
+        void HandleGuildBankUpdateTab(GuildBankUpdateTab update)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_UPDATE_TAB);
+            packet.WriteGuid(update.BankGuid.To64());
+            packet.WriteUInt8(update.BankTab);
+            packet.WriteCString(update.Name);
+            packet.WriteCString(update.Icon);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_LOG_QUERY)]
+        void HandleGuildBankLogQuery(GuildBankLogQuery query)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_GUILD_BANK_LOG_QUERY);
+            packet.WriteUInt8((byte)query.Tab);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_SET_TAB_TEXT)]
+        void HandleGuildBankSetTabText(GuildBankSetTabText query)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SET_TAB_TEXT);
+            packet.WriteUInt8((byte)query.Tab);
+            packet.WriteCString(query.TabText);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_BUY_TAB)]
+        void HandleGuildBankBuyTab(GuildBankBuyTab buy)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_BUY_TAB);
+            packet.WriteGuid(buy.BankGuid.To64());
+            packet.WriteUInt8(buy.BankTab);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_GUILD_BANK_WITHDRAW_MONEY)]
+        void HandleGuildBankBuyTab(GuildBankWithdrawMoney withdraw)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_WITHDRAW_MONEY);
+            packet.WriteGuid(withdraw.BankGuid.To64());
+            packet.WriteUInt32((uint)withdraw.Money);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_AUTO_GUILD_BANK_ITEM)]
+        void HandleGuildBankItem(AutoGuildBankItem item)
+        {
+            // moves an item from the player to the bank
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(false); // bank to bank
+            packet.WriteUInt8(item.BankTab);
+            packet.WriteUInt8(item.BankSlot);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(false); // auto store
+            if (item.ContainerSlot != null)
+            {
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot((byte)item.ContainerSlot));
+                packet.WriteUInt8(item.ContainerItemSlot);
+            }
+            else
+            {
+                packet.WriteUInt8(Enums.Classic.InventorySlots.Bag0);
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
+            }
+            packet.WriteBool(false); // to char
+            packet.WriteUInt8(0); // splitted amount
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SPLIT_ITEM_TO_GUILD_BANK)]
+        [PacketHandler(Opcode.CMSG_MERGE_ITEM_WITH_GUILD_BANK_ITEM)]
+        void HandleSplitItemToGuildBank(SplitItemToGuildBank item)
+        {
+            // moves a specific amount of stacks from the player to the bank
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(false); // bank to bank
+            packet.WriteUInt8(item.BankTab);
+            packet.WriteUInt8(item.BankSlot);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(false); // auto store
+            if (item.ContainerSlot != null)
+            {
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot((byte)item.ContainerSlot));
+                packet.WriteUInt8(item.ContainerItemSlot);
+            }
+            else
+            {
+                packet.WriteUInt8(Enums.Classic.InventorySlots.Bag0);
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
+            }
+            packet.WriteBool(false); // to char
+            packet.WriteUInt8((byte)item.StackCount);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_AUTO_STORE_GUILD_BANK_ITEM)]
+        void HandleAutoStoreGuildBankItem(AutoStoreGuildBankItem item)
+        {
+            // moves an item from the bank to the player
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(false); // bank to bank
+            packet.WriteUInt8(item.BankTab);
+            packet.WriteUInt8(item.BankSlot);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(true); // auto store
+            packet.WriteUInt8(0); // auto store count
+            packet.WriteBool(true); // to char
+            packet.WriteUInt8(0); // unknown
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_STORE_GUILD_BANK_ITEM)]
+        void HandleStoreGuildBankItem(AutoGuildBankItem item)
+        {
+            // moves an item from the bank to a specific slot in the player inventory
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(false); // bank to bank
+            packet.WriteUInt8(item.BankTab);
+            packet.WriteUInt8(item.BankSlot);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(false); // auto store
+            if (item.ContainerSlot != null)
+            {
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot((byte)item.ContainerSlot));
+                packet.WriteUInt8(item.ContainerItemSlot);
+            }
+            else
+            {
+                packet.WriteUInt8(Enums.Classic.InventorySlots.Bag0);
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
+            }
+            packet.WriteBool(true); // to char
+            packet.WriteUInt8(0); // splitted amount
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_MERGE_GUILD_BANK_ITEM_WITH_ITEM)]
+        [PacketHandler(Opcode.CMSG_SPLIT_GUILD_BANK_ITEM_TO_INVENTORY)]
+        void HandleMergeGuildBankItemWithItem(SplitItemToGuildBank item)
+        {
+            // moves a specific amount of stacks from the bank to the player
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(false); // bank to bank
+            packet.WriteUInt8(item.BankTab);
+            packet.WriteUInt8(item.BankSlot);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(false); // auto store
+            if (item.ContainerSlot != null)
+            {
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot((byte)item.ContainerSlot));
+                packet.WriteUInt8(item.ContainerItemSlot);
+            }
+            else
+            {
+                packet.WriteUInt8(Enums.Classic.InventorySlots.Bag0);
+                packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
+            }
+            packet.WriteBool(true); // to char
+            packet.WriteUInt8((byte)item.StackCount);
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_MOVE_GUILD_BANK_ITEM)]
+        void HandleMoveGuildBankItem(MoveGuildBankItem item)
+        {
+            // moves an item from the bank to the bank
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(true); // bank to bank
+            packet.WriteUInt8(item.BankTab2);
+            packet.WriteUInt8(item.BankSlot2);
+            packet.WriteUInt32(0); // item id
+            packet.WriteUInt8(item.BankTab1);
+            packet.WriteUInt8(item.BankSlot1);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(false); // auto store
+            packet.WriteUInt8(0); // splitted amount
+            SendPacketToServer(packet);
+        }
+
+        [PacketHandler(Opcode.CMSG_SPLIT_GUILD_BANK_ITEM)]
+        [PacketHandler(Opcode.CMSG_MERGE_GUILD_BANK_ITEM_WITH_GUILD_BANK_ITEM)]
+        void HandleMoveGuildBankItem(SplitGuildBankItem item)
+        {
+            // moves a specific amount of stacks from the bank to the bank
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            packet.WriteGuid(item.BankGuid.To64());
+            packet.WriteBool(true); // bank to bank
+            packet.WriteUInt8(item.BankTab2);
+            packet.WriteUInt8(item.BankSlot2);
+            packet.WriteUInt32(0); // item id
+            packet.WriteUInt8(item.BankTab1);
+            packet.WriteUInt8(item.BankSlot1);
+            packet.WriteUInt32(0); // item id
+            packet.WriteBool(false); // auto store
+            packet.WriteUInt8((byte)item.StackCount);
             SendPacketToServer(packet);
         }
     }

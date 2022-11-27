@@ -811,4 +811,424 @@ namespace HermesProxy.World.Server.Packets
 
         public GuildEmblemError Error;
     }
+
+    public class SetAutoDeclineGuildInvites : ClientPacket
+    {
+        public SetAutoDeclineGuildInvites(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            GuildInvitesShouldGetBlocked = _worldPacket.ReadBool();
+        }
+
+        public bool GuildInvitesShouldGetBlocked;
+    }
+
+    public class AutoDeclineGuildInvite : ClientPacket
+    {
+        public AutoDeclineGuildInvite(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    public class GuildBankAtivate : ClientPacket
+    {
+        public GuildBankAtivate(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            FullUpdate = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 BankGuid;
+        public bool FullUpdate;
+    }
+
+    public class GuildBankItemInfo
+    {
+        public ItemInstance Item = new();
+        public int Slot;
+        public int Count;
+        public int EnchantmentID;
+        public int Charges;
+        public int OnUseEnchantmentID;
+        public uint Flags;
+        public bool Locked;
+        public List<ItemGemData> SocketEnchant = new();
+    }
+
+    public struct GuildBankTabInfo
+    {
+        public int TabIndex;
+        public string Name;
+        public string Icon;
+    }
+
+    public class GuildBankQueryResults : ServerPacket
+    {
+        public GuildBankQueryResults() : base(Opcode.SMSG_GUILD_BANK_QUERY_RESULTS)
+        {
+            ItemInfo = new List<GuildBankItemInfo>();
+            TabInfo = new List<GuildBankTabInfo>();
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt64(Money);
+            _worldPacket.WriteInt32(Tab);
+            _worldPacket.WriteInt32(WithdrawalsRemaining);
+            _worldPacket.WriteInt32(TabInfo.Count);
+            _worldPacket.WriteInt32(ItemInfo.Count);
+            _worldPacket.WriteBit(FullUpdate);
+            _worldPacket.FlushBits();
+
+            foreach (GuildBankTabInfo tab in TabInfo)
+            {
+                _worldPacket.WriteInt32(tab.TabIndex);
+                _worldPacket.WriteBits(tab.Name.GetByteCount(), 7);
+                _worldPacket.WriteBits(tab.Icon.GetByteCount(), 9);
+
+                _worldPacket.WriteString(tab.Name);
+                _worldPacket.WriteString(tab.Icon);
+            }
+
+            foreach (GuildBankItemInfo item in ItemInfo)
+            {
+                _worldPacket.WriteInt32(item.Slot);
+                _worldPacket.WriteInt32(item.Count);
+                _worldPacket.WriteInt32(item.EnchantmentID);
+                _worldPacket.WriteInt32(item.Charges);
+                _worldPacket.WriteInt32(item.OnUseEnchantmentID);
+                _worldPacket.WriteUInt32(item.Flags);
+
+                item.Item.Write(_worldPacket);
+
+                _worldPacket.WriteBits(item.SocketEnchant.Count, 2);
+                _worldPacket.WriteBit(item.Locked);
+                _worldPacket.FlushBits();
+
+                foreach (ItemGemData socketEnchant in item.SocketEnchant)
+                    socketEnchant.Write(_worldPacket);
+            }
+        }
+
+        public List<GuildBankItemInfo> ItemInfo;
+        public List<GuildBankTabInfo> TabInfo;
+        public int WithdrawalsRemaining;
+        public int Tab;
+        public ulong Money;
+        public bool FullUpdate;
+    }
+
+    public class GuildBankQueryTab : ClientPacket
+    {
+        public GuildBankQueryTab(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            Tab = _worldPacket.ReadUInt8();
+
+            FullUpdate = _worldPacket.HasBit();
+        }
+
+        public WowGuid128 BankGuid;
+        public byte Tab;
+        public bool FullUpdate;
+    }
+
+    public class GuildBankDepositMoney : ClientPacket
+    {
+        public GuildBankDepositMoney(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            Money = _worldPacket.ReadUInt64();
+        }
+
+        public WowGuid128 BankGuid;
+        public ulong Money;
+    }
+
+    public class GuildBankTextQuery : ClientPacket
+    {
+        public GuildBankTextQuery(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Tab = _worldPacket.ReadInt32();
+        }
+
+        public int Tab;
+    }
+
+    public class GuildBankTextQueryResult : ServerPacket
+    {
+        public GuildBankTextQueryResult() : base(Opcode.SMSG_GUILD_BANK_TEXT_QUERY_RESULT) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Tab);
+
+            _worldPacket.WriteBits(Text.GetByteCount(), 14);
+            _worldPacket.WriteString(Text);
+        }
+
+        public int Tab;
+        public string Text;
+    }
+
+    public class GuildBankUpdateTab : ClientPacket
+    {
+        public GuildBankUpdateTab(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab = _worldPacket.ReadUInt8();
+
+            _worldPacket.ResetBitPos();
+            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            uint iconLen = _worldPacket.ReadBits<uint>(9);
+
+            Name = _worldPacket.ReadString(nameLen);
+            Icon = _worldPacket.ReadString(iconLen);
+        }
+
+        public WowGuid128 BankGuid;
+        public byte BankTab;
+        public string Name;
+        public string Icon;
+    }
+
+    public class GuildBankLogQuery : ClientPacket
+    {
+        public GuildBankLogQuery(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Tab = _worldPacket.ReadInt32();
+        }
+
+        public int Tab;
+    }
+
+    public class GuildBankLogEntry
+    {
+        public WowGuid128 PlayerGUID;
+        public uint TimeOffset;
+        public sbyte EntryType;
+        public ulong? Money;
+        public int? ItemID;
+        public int? Count;
+        public sbyte? OtherTab;
+    }
+
+    public class GuildBankLogQueryResults : ServerPacket
+    {
+        public GuildBankLogQueryResults() : base(Opcode.SMSG_GUILD_BANK_LOG_QUERY_RESULTS)
+        {
+            Entry = new List<GuildBankLogEntry>();
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Tab);
+            _worldPacket.WriteInt32(Entry.Count);
+            _worldPacket.WriteBit(WeeklyBonusMoney.HasValue);
+            _worldPacket.FlushBits();
+
+            foreach (GuildBankLogEntry logEntry in Entry)
+            {
+                _worldPacket.WritePackedGuid128(logEntry.PlayerGUID);
+                _worldPacket.WriteUInt32(logEntry.TimeOffset);
+                _worldPacket.WriteInt8(logEntry.EntryType);
+
+                _worldPacket.WriteBit(logEntry.Money.HasValue);
+                _worldPacket.WriteBit(logEntry.ItemID.HasValue);
+                _worldPacket.WriteBit(logEntry.Count.HasValue);
+                _worldPacket.WriteBit(logEntry.OtherTab.HasValue);
+                _worldPacket.FlushBits();
+
+                if (logEntry.Money.HasValue)
+                    _worldPacket.WriteUInt64(logEntry.Money.Value);
+
+                if (logEntry.ItemID.HasValue)
+                    _worldPacket.WriteInt32(logEntry.ItemID.Value);
+
+                if (logEntry.Count.HasValue)
+                    _worldPacket.WriteInt32(logEntry.Count.Value);
+
+                if (logEntry.OtherTab.HasValue)
+                    _worldPacket.WriteInt8(logEntry.OtherTab.Value);
+            }
+
+            if (WeeklyBonusMoney.HasValue)
+                _worldPacket.WriteUInt64(WeeklyBonusMoney.Value);
+        }
+
+        public int Tab;
+        public List<GuildBankLogEntry> Entry;
+        public ulong? WeeklyBonusMoney;
+    }
+
+    public class GuildBankSetTabText : ClientPacket
+    {
+        public GuildBankSetTabText(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Tab = _worldPacket.ReadInt32();
+            TabText = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(14));
+        }
+
+        public int Tab;
+        public string TabText;
+    }
+
+    public class GuildBankBuyTab : ClientPacket
+    {
+        public GuildBankBuyTab(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 BankGuid;
+        public byte BankTab;
+    }
+
+    public class GuildBankRemainingWithdrawMoney : ServerPacket
+    {
+        public GuildBankRemainingWithdrawMoney() : base(Opcode.SMSG_GUILD_BANK_REMAINING_WITHDRAW_MONEY) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt64(RemainingWithdrawMoney);
+        }
+
+        public long RemainingWithdrawMoney;
+    }
+
+    public class GuildBankWithdrawMoney : ClientPacket
+    {
+        public GuildBankWithdrawMoney(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            Money = _worldPacket.ReadUInt64();
+        }
+
+        public WowGuid128 BankGuid;
+        public ulong Money;
+    }
+
+    class AutoGuildBankItem : ClientPacket
+    {
+        public AutoGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid BankGuid;
+        public byte BankTab;
+        public byte BankSlot;
+        public byte? ContainerSlot;
+        public byte ContainerItemSlot;
+    }
+
+    class SplitItemToGuildBank : ClientPacket
+    {
+        public SplitItemToGuildBank(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 BankGuid;
+        public byte BankTab;
+        public byte BankSlot;
+        public byte? ContainerSlot;
+        public byte ContainerItemSlot;
+        public uint StackCount;
+    }
+
+    class AutoStoreGuildBankItem : ClientPacket
+    {
+        public AutoStoreGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 BankGuid;
+        public byte BankTab;
+        public byte BankSlot;
+    }
+
+    class MoveGuildBankItem : ClientPacket
+    {
+        public MoveGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab1 = _worldPacket.ReadUInt8();
+            BankSlot1 = _worldPacket.ReadUInt8();
+            BankTab2 = _worldPacket.ReadUInt8();
+            BankSlot2 = _worldPacket.ReadUInt8();
+        }
+
+        public WowGuid128 BankGuid;
+        public byte BankTab1;
+        public byte BankSlot1;
+        public byte BankTab2;
+        public byte BankSlot2;
+    }
+
+    class SplitGuildBankItem : ClientPacket
+    {
+        public SplitGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BankGuid = _worldPacket.ReadPackedGuid128();
+            BankTab1 = _worldPacket.ReadUInt8();
+            BankSlot1 = _worldPacket.ReadUInt8();
+            BankTab2 = _worldPacket.ReadUInt8();
+            BankSlot2 = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+        }
+
+        public WowGuid128 BankGuid;
+        public byte BankTab1;
+        public byte BankSlot1;
+        public byte BankTab2;
+        public byte BankSlot2;
+        public uint StackCount;
+    }
 }
