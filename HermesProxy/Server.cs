@@ -24,6 +24,11 @@ namespace HermesProxy
             Log.Print(LogType.Server, $"Version {GetVersionInformation()}");
             Log.Start();
 
+            if (!Settings.VerifyConfig())
+            {
+                Console.WriteLine("The verification of the config failed");
+                Environment.Exit(1);
+            }
             Log.DebugLogEnabled = Settings.DebugOutput;
 
             GameData.LoadEverything();
