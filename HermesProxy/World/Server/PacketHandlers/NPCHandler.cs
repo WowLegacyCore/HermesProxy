@@ -53,8 +53,8 @@ namespace HermesProxy.World.Server
         {
             WorldPacket packet = new WorldPacket(Opcode.CMSG_TRAINER_BUY_SPELL);
             packet.WriteGuid(buy.TrainerGUID.To64());
-            if (ModernVersion.GetExpansionVersion() > 1 &&
-                LegacyVersion.GetExpansionVersion() <= 1)
+            if (ModernVersion.ExpansionVersion > 1 &&
+                LegacyVersion.ExpansionVersion <= 1)
             {
                 // in vanilla the server sends learn spell with effect 36
                 // in expansions the server sends the actual spell

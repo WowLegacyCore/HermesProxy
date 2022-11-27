@@ -365,5 +365,126 @@ namespace HermesProxy.World.Client
             invite.InviterVirtualRealmAddress = GetSession().RealmId.GetAddress();
             SendPacketToClient(invite);
         }
+
+        [PacketHandler(Opcode.SMSG_GUILD_BANK_QUERY_RESULTS)]
+        void HandleGuildBankQueryResults(WorldPacket packet)
+        {
+            GuildBankQueryResults result = new();
+            result.Money = packet.ReadUInt64();
+            result.Tab = packet.ReadUInt8();
+            result.WithdrawalsRemaining = packet.ReadInt32();
+
+            bool hasTabs = false;
+            if (packet.ReadBool() && result.Tab == 0)
+            {
+                hasTabs = true;
+                var size = packet.ReadUInt8();
+                for (var i = 0; i < size; i++)
+                {
+                    GuildBankTabInfo tabInfo = new GuildBankTabInfo();
+                    tabInfo.TabIndex = i;
+                    tabInfo.Name = packet.ReadCString();
+                    tabInfo.Icon = packet.ReadCString();
+                    result.TabInfo.Add(tabInfo);
+                }
+            }
+
+            var slots = packet.ReadUInt8();
+            for (var i = 0; i < slots; i++)
+            {
+                GuildBankItemInfo itemInfo = new GuildBankItemInfo();
+                itemInfo.Slot = packet.ReadUInt8();
+                int entry = packet.ReadInt32();
+                if (entry > 0)
+                {
+                    itemInfo.Item.ItemID = (uint)entry;
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
+                        itemInfo.Flags = packet.ReadUInt32();
+
+                    itemInfo.Item.RandomPropertiesID = packet.ReadUInt32();
+                    if (itemInfo.Item.RandomPropertiesID != 0)
+                        itemInfo.Item.RandomPropertiesSeed = packet.ReadUInt32();
+
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                        itemInfo.Count = packet.ReadInt32();
+                    else
+                        itemInfo.Count = packet.ReadUInt8();
+
+                    itemInfo.EnchantmentID = packet.ReadInt32();
+                    itemInfo.Charges = packet.ReadUInt8();
+
+                    var enchantments = packet.ReadUInt8();
+                    for (var j = 0; j < enchantments; j++)
+                    {
+                        byte slot = packet.ReadUInt8();
+                        uint enchantId = packet.ReadUInt32();
+                        if (enchantId != 0)
+                        {
+                            uint itemId = GameData.GetGemFromEnchantId(enchantId);
+                            if (itemId != 0)
+                            {
+                                ItemGemData gem = new ItemGemData();
+                                gem.Slot = slot;
+                                gem.Item.ItemID = itemId;
+                                itemInfo.SocketEnchant.Add(gem);
+                            }
+                        }
+                    } 
+                }
+                result.ItemInfo.Add(itemInfo);
+            }
+
+            result.FullUpdate = (hasTabs && slots > 0);
+
+            SendPacketToClient(result);
+        }
+
+        [PacketHandler(Opcode.MSG_QUERY_GUILD_BANK_TEXT)]
+        void HandleQueryGuildBankText(WorldPacket packet)
+        {
+            GuildBankTextQueryResult result = new();
+            result.Tab = packet.ReadUInt8();
+            result.Text = packet.ReadCString();
+            SendPacketToClient(result);
+        }
+
+        [PacketHandler(Opcode.MSG_GUILD_BANK_LOG_QUERY)]
+        void HandleGuildBankLongQuery(WorldPacket packet)
+        {
+            const int maxTabs = 6;
+
+            GuildBankLogQueryResults result = new();
+            result.Tab = packet.ReadUInt8();
+            byte logSize = packet.ReadUInt8();
+            for (byte i = 0; i < logSize; i++)
+            {
+                GuildBankLogEntry logEntry = new GuildBankLogEntry();
+                logEntry.EntryType = packet.ReadInt8();
+                logEntry.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
+                
+                if (result.Tab != maxTabs)
+                {
+                    logEntry.ItemID = packet.ReadInt32();
+                    logEntry.Count = packet.ReadUInt8();
+                    if ((GuildBankEventType)logEntry.EntryType == GuildBankEventType.MoveItem ||
+                        (GuildBankEventType)logEntry.EntryType == GuildBankEventType.MoveItem2)
+                        logEntry.OtherTab = packet.ReadInt8();
+                }
+                else
+                    logEntry.Money = packet.ReadUInt32();
+
+                logEntry.TimeOffset = packet.ReadUInt32();
+                result.Entry.Add(logEntry);
+            }
+            SendPacketToClient(result);
+        }
+
+        [PacketHandler(Opcode.MSG_GUILD_BANK_MONEY_WITHDRAWN)]
+        void HandleGuildBankMoneyWithdrawn(WorldPacket packet)
+        {
+            GuildBankRemainingWithdrawMoney result = new();
+            result.RemainingWithdrawMoney = packet.ReadUInt32();
+            SendPacketToClient(result);
+        }
     }
 }

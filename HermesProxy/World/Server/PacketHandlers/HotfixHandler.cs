@@ -42,6 +42,8 @@ namespace HermesProxy.World.Server
                     reply.Data.WriteUInt16(0); // EmotesId
                     reply.Data.WriteUInt8(0); // Flags
                     reply.Data.WriteUInt32(0); // ChatBubbleDurationMs
+                    if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 1, 2, 5, 3))
+                        reply.Data.WriteUInt32(0); // VoiceOverPriorityID
                     for (int i = 0; i < 2; ++i)
                         reply.Data.WriteUInt32(0); // SoundEntriesID
                     for (int i = 0; i < 3; ++i)

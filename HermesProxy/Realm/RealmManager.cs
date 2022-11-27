@@ -41,9 +41,9 @@ public class RealmManager
     void LoadBuildInfo()
     {
         RealmBuildInfo build = new RealmBuildInfo();
-        build.MajorVersion = ModernVersion.GetExpansionVersion();
-        build.MinorVersion = ModernVersion.GetMajorPatchVersion();
-        build.BugfixVersion = ModernVersion.GetMinorPatchVersion();
+        build.MajorVersion = ModernVersion.ExpansionVersion;
+        build.MinorVersion = ModernVersion.MajorVersion;
+        build.BugfixVersion = ModernVersion.MinorVersion;
 
         string hotfixVersion = "";
         if (!hotfixVersion.IsEmpty() && hotfixVersion.Length < build.HotfixVersion.Length)

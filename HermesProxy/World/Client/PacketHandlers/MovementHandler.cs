@@ -325,8 +325,8 @@ namespace HermesProxy.World.Client
             SendPacketToClient(spline);
         }
 
-        [PacketHandler(Opcode.SMSG_MOVE_FORCE_ROOT)]
-        [PacketHandler(Opcode.SMSG_MOVE_FORCE_UNROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_ROOT)]
+        [PacketHandler(Opcode.SMSG_MOVE_UNROOT)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_WATER_WALK)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_LAND_WALK)]
         [PacketHandler(Opcode.SMSG_MOVE_SET_HOVERING)]
@@ -426,7 +426,17 @@ namespace HermesProxy.World.Client
                 hasTrajectory = false;
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagVanilla.Flying);
                 hasTaxiFlightFlags = splineFlags == (SplineFlagVanilla.Runmode | SplineFlagVanilla.Flying);
-                moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+
+                if (splineFlags == SplineFlagVanilla.Runmode) // Default spline flags used by Vanilla and TBC servers
+                {
+                    moveSpline.SplineFlags = SplineFlagModern.Unknown5;
+                    if (((UnitFlagsVanilla)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS) & UnitFlagsVanilla.CanSwim) != 0)
+                        moveSpline.SplineFlags |= SplineFlagModern.CanSwim;
+                    if (type == SplineTypeLegacy.Normal)
+                        moveSpline.SplineFlags |= SplineFlagModern.Steering | SplineFlagModern.Unknown10;
+                }
+                else
+                    moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
             else if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
             {
@@ -435,7 +445,17 @@ namespace HermesProxy.World.Client
                 hasTrajectory = false;
                 hasCatmullRom = splineFlags.HasAnyFlag(SplineFlagTBC.Flying);
                 hasTaxiFlightFlags = splineFlags == (SplineFlagTBC.Runmode | SplineFlagTBC.Flying);
-                moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
+
+                if (splineFlags == SplineFlagTBC.Runmode) // Default spline flags used by Vanilla and TBC servers
+                {
+                    moveSpline.SplineFlags = SplineFlagModern.Unknown5;
+                    if (((UnitFlags)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS) & UnitFlags.CanSwim) != 0)
+                        moveSpline.SplineFlags |= SplineFlagModern.CanSwim;
+                    if (type == SplineTypeLegacy.Normal)
+                        moveSpline.SplineFlags |= SplineFlagModern.Steering | SplineFlagModern.Unknown10;
+                }
+                else
+                    moveSpline.SplineFlags = splineFlags.CastFlags<SplineFlagModern>();
             }
             else
             {
