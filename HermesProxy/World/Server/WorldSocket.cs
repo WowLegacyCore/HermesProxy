@@ -264,7 +264,6 @@ namespace HermesProxy.World.Server
                     ping.Read();
                     if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
                         GetSession().WorldClient.SendPing(ping.Serial, ping.Latency);
-                    HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
                     AuthSession authSession = new(packet);
@@ -1007,11 +1006,6 @@ namespace HermesProxy.World.Server
             ServerTimeOffset response = new();
             response.Time = Time.UnixTime;
             SendPacket(response);
-        }
-
-        void HandlePing(Ping ping)
-        {
-            SendPacket(new Pong(ping.Serial));
         }
 
         public void SendAccountDataTimes()
