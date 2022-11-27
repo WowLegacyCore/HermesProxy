@@ -26,6 +26,8 @@ namespace Framework
         public static readonly bool DebugOutput = Conf.GetBoolean("DebugOutput", false);
         public static readonly bool PacketsLog = Conf.GetBoolean("PacketsLog", true);
         public static readonly bool RememberLastCharacter = Conf.GetBoolean("RememberLastCharacter", true);
+        public static readonly int ServerDelay = Conf.GetInt("ServerDelay", 0);
+        public static readonly int ClientDelay = Conf.GetInt("ClientDelay", 0);
 
         public static bool VerifyConfig()
         {
