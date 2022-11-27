@@ -367,7 +367,6 @@ namespace HermesProxy.World.Client
                 case Opcode.SMSG_AUTH_RESPONSE:
                     HandleAuthResponse(packet);
                     break;
-                case Opcode.SMSG_PONG:
                 case Opcode.SMSG_ADDON_INFO:
                     break; // don't need to handle
                 default:
