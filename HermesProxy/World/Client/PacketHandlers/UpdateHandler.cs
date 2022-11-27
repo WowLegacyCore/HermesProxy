@@ -783,6 +783,11 @@ namespace HermesProxy.World.Client
                     moveInfo.FlightSpeed = packet.ReadFloat();
                     moveInfo.FlightBackSpeed = packet.ReadFloat();
                 }
+                else
+                { // Convenience in vanilla to use SwimSpeed as FlySpeed
+                    moveInfo.FlightSpeed = moveInfo.SwimSpeed;
+                    moveInfo.FlightBackSpeed = moveInfo.SwimBackSpeed;
+                }
                 moveInfo.TurnRate = packet.ReadFloat();
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     moveInfo.PitchRate = packet.ReadFloat();
