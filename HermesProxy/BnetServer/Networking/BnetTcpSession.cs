@@ -9,7 +9,11 @@ using Framework.Networking;
 using Google.Protobuf;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using BNetServer.Services;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -40,24 +44,51 @@ namespace BNetServer.Networking
             return true;
         }
 
-        public async override void ReadHandler(byte[] data, int receivedLength)
+        private List<byte> _currentBuffer = new List<byte>();
+        
+        public override async Task ReadHandler(byte[] data, int receivedLength)
         {
             if (!IsOpen())
                 return;
+            
+            _currentBuffer.AddRange(data.Take(receivedLength));
 
-            var stream = new CodedInputStream(data, 0, receivedLength);
-            while (!stream.IsAtEnd)
+            await ProcessCurrentBuffer();
+
+            await AsyncRead();
+        }
+
+        private Task ProcessCurrentBuffer()
+        {
+            // TODO: Current hack to ensure that we have enough data. Need to port new DH networking stack in the future
+            while (_currentBuffer.Count > 2)
             {
-                var header = new Header();
-                stream.ReadMessage(header);
+                var headerLengthBuffer = _currentBuffer.Take(2).ToArray();
+                var headerLength = (ushort)IPAddress.HostToNetworkOrder(BitConverter.ToInt16(headerLengthBuffer));
 
+                if (_currentBuffer.Count < 2 + headerLength)
+                    return Task.CompletedTask; // we dont have enough buffer yet
+
+                var headerBuffer = _currentBuffer.Skip(2).Take(headerLength).ToArray();
+                var header = new Header();
+                header.MergeFrom(headerBuffer);
+
+                int payloadLength = (int)header.Size;
+
+                if (_currentBuffer.Count < 2 + headerLength + payloadLength)
+                    return Task.CompletedTask; // we dont have enough buffer yet
+
+                var payloadBuffer = _currentBuffer.Skip(2).Skip(headerLength).Take(payloadLength).ToArray();
+                _currentBuffer.RemoveRange(0, 2 + headerLength + (int)header.Size);
+
+                var stream = new CodedInputStream(payloadBuffer);
                 if (header.ServiceId != 0xFE && header.ServiceHash != 0)
                 {
                     _handlerManager.Invoke(header.ServiceId, (OriginalHash)header.ServiceHash, header.MethodId, header.Token, stream);
                 }
             }
 
-            await AsyncRead();
+            return Task.CompletedTask;
         }
 
         public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)

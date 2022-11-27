@@ -29,6 +29,8 @@ namespace Framework.Networking
         TcpListener _listener;
         volatile bool _closed;
 
+        public bool IsListening => !_closed;
+
         public bool Start(string ip, int port)
         {
             IPAddress bindIP;

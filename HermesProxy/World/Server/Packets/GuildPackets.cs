@@ -811,4 +811,23 @@ namespace HermesProxy.World.Server.Packets
 
         public GuildEmblemError Error;
     }
+
+    public class SetAutoDeclineGuildInvites : ClientPacket
+    {
+        public SetAutoDeclineGuildInvites(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            GuildInvitesShouldGetBlocked = _worldPacket.ReadBool();
+        }
+
+        public bool GuildInvitesShouldGetBlocked;
+    }
+
+    public class AutoDeclineGuildInvite : ClientPacket
+    {
+        public AutoDeclineGuildInvite(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
 }

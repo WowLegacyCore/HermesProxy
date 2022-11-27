@@ -257,5 +257,12 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.CachedPlayers.ContainsKey(invalidate.Guid))
                 GetSession().GameState.CachedPlayers.Remove(invalidate.Guid);
         }
+
+        [PacketHandler(Opcode.SMSG_PONG)]
+        void HandlePingResponse(WorldPacket packet)
+        {
+            uint serial = packet.ReadUInt32();
+            SendPacketToClient(new Pong(serial));
+        }
     }
 }

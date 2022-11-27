@@ -98,7 +98,7 @@ namespace Framework.Networking
             await AsyncRead();
         }
 
-        public abstract void ReadHandler(byte[] data, int receivedLength);
+        public abstract Task ReadHandler(byte[] data, int receivedLength);
 
         public async Task AsyncWrite(byte[] data)
         {

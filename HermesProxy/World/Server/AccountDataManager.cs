@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Framework;
 using Framework.Logging;
@@ -14,6 +15,7 @@ namespace HermesProxy.World.Server
     {
         private const string LAST_CHARACTER_FILE = "last_character.txt";
         private const string COMPLETED_QUESTS_FILE = "completed_quests.csv";
+        private const string SETTINGS_FILE = "settings.json";
 
         private readonly string _accountName;
 
@@ -106,6 +108,34 @@ namespace HermesProxy.World.Server
             List<string> lines = File.ReadAllLines(path).ToList();
             lines.RemoveAll(l => l.Split(',').FirstOrDefault()?.Equals(needle) ?? false);
             File.WriteAllLines(path, lines);
+        }
+
+        public void SaveCharacterSettingsStorage(string realmName, string charName, PlayerSettings.InternalStorage settings)
+        {
+            var dir = GetAccountCharacterMetaDataDirectory(realmName, charName);
+            var path = Path.Combine(dir, SETTINGS_FILE);
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var jsonString = JsonSerializer.Serialize(settings, options);
+            File.WriteAllText(path, jsonString, Encoding.UTF8);
+        }
+
+        public PlayerSettings.InternalStorage LoadCharacterSettingsStorage(string realmName, string charName)
+        {
+            var dir = GetAccountCharacterMetaDataDirectory(realmName, charName);
+            var path = Path.Combine(dir, SETTINGS_FILE);
+
+            if (!File.Exists(path))
+            {
+                var fallback = new PlayerSettings.InternalStorage();
+                SaveCharacterSettingsStorage(realmName, charName, fallback);
+                return fallback; // Default fallback
+            }
+
+            var jsonString = File.ReadAllText(path, Encoding.UTF8);
+            var loadedJson = JsonSerializer.Deserialize<PlayerSettings.InternalStorage>(jsonString);
+
+            return loadedJson;
         }
     }
     

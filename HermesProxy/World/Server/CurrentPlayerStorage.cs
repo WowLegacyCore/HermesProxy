@@ -2,16 +2,97 @@ using System.Collections.Generic;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
 
-namespace HermesProxy.World;
+namespace HermesProxy.World.Server;
 
-public class PlayerQuestTracker
+public class CurrentPlayerStorage
 {
-    private Dictionary<int, ulong> _cachedQuestCompleted = new();
-    public bool NeedToLoadBeSentToClient { get; set; } = true;
+    private readonly GlobalSessionData _globalSession;
+    public CompletedQuestTracker CompletedQuests { get; private set; }
+    public PlayerSettings Settings { get; private set; }
+
+    public CurrentPlayerStorage(GlobalSessionData globalSession)
+    {
+        _globalSession = globalSession;
+    }
+
+    public void LoadCurrentPlayer()
+    {
+        CompletedQuests = new CompletedQuestTracker(_globalSession);
+        Settings = new PlayerSettings(_globalSession);
+        CompletedQuests.Reload();
+        Settings.Reload();
+    }
+}
+
+public class PlayerSettings
+{
+    private InternalStorage _internalStorage;
+    private PlayerFlags _lastCapturedFlags;
+
+    public bool NeedToForcePatchFlags { get; private set; }
+
 
     public GlobalSessionData Session { get; }
 
-    public PlayerQuestTracker(GlobalSessionData globalSession)
+    public PlayerSettings(GlobalSessionData globalSession)
+    {
+        Session = globalSession;
+    }
+
+    public void SetAutoBlockGuildInvites(bool value)
+    {
+        _internalStorage.AutoBlockGuildInvites = value;
+        NeedToForcePatchFlags = true;
+        Save();
+    }
+
+    public void PatchFlags(ref PlayerFlags flags)
+    {
+        _lastCapturedFlags = flags;
+        NeedToForcePatchFlags = false;
+
+        if (_internalStorage.AutoBlockGuildInvites)
+            flags |= PlayerFlags.AutoDeclineGuild;
+        else
+            flags &= ~(PlayerFlags.AutoDeclineGuild);
+    }
+
+    public PlayerFlags CreateNewFlags()
+    {
+        var flags = _lastCapturedFlags;
+        PatchFlags(ref flags);
+        return flags;
+    }
+
+    private void Save()
+    {
+        Session.AccountMetaDataMgr.SaveCharacterSettingsStorage(Session.GameState.CurrentPlayerInfo.Realm.Name, Session.GameState.CurrentPlayerInfo.Name, _internalStorage);
+    }
+    
+    public class InternalStorage
+    {
+        // A JSON encoder / decoder is used to store the settings
+        // Make use of a public { get; set; } Property so that the JSON serializer can change it
+
+        // The player can request a change in the Interface settings
+        // but the actual value has to be reflected in the local CharacterFlags
+        public bool AutoBlockGuildInvites { get; set; }
+    }
+
+    public void Reload()
+    {
+        _internalStorage = Session.AccountMetaDataMgr.LoadCharacterSettingsStorage(Session.GameState.CurrentPlayerInfo.Realm.Name, Session.GameState.CurrentPlayerInfo.Name);
+    }
+}
+
+public class CompletedQuestTracker
+{
+    private Dictionary<int, ulong> _cachedQuestCompleted = new();
+    public bool NeedsToBeForceSent { get; set; } = true;
+
+    public GlobalSessionData Session { get; }
+
+    public CompletedQuestTracker(GlobalSessionData globalSession)
     {
         Session = globalSession;
     }
@@ -64,7 +145,7 @@ public class PlayerQuestTracker
         if (isSet)
             _cachedQuestCompleted[idx] |= ((ulong)1) << bitIdx;
         else
-            _cachedQuestCompleted[idx] ^= ((ulong)1) << bitIdx;
+            _cachedQuestCompleted[idx] &= ~(((ulong)1) << bitIdx);
         
         ObjectUpdate updateData = new ObjectUpdate(Session.GameState.CurrentPlayerGuid, UpdateTypeModern.Values, Session);
         updateData.ActivePlayerData.QuestCompleted[idx] = _cachedQuestCompleted[idx];
@@ -76,7 +157,6 @@ public class PlayerQuestTracker
 
     public void WriteAllCompletedIntoArray(ulong?[] dest)
     {
-        Reload();
         foreach (var kv in _cachedQuestCompleted)
         {
             dest[kv.Key] = kv.Value;
