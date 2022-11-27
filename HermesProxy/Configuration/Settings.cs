@@ -68,6 +68,18 @@ namespace Framework
                 return false;
             }
 
+            if (ServerSpellDelay >= 0)
+            {
+                Log.Print(LogType.Server, "ServerSpellDelay must be larger than or equal to 0");
+                return false;
+            }
+
+            if (ClientSpellDelay >= 0)
+            {
+                Log.Print(LogType.Server, "ClientSpellDelay must be larger than or equal to 0");
+                return false;
+            }
+
             bool IsValidPortNumber(int someNumber)
             {
                 return someNumber > IPEndPoint.MinPort && someNumber < IPEndPoint.MaxPort;
