@@ -50,19 +50,25 @@ namespace HermesProxy.World.Server
             packet.WriteCString(auction.Name);
             packet.WriteUInt8(auction.MinLevel);
             packet.WriteUInt8(auction.MaxLevel);
-            packet.WriteInt32(-1); // auctionSlotID
 
             if (auction.ClassFilters.Count > 0)
             {
-                packet.WriteInt32(auction.ClassFilters[0].ItemClass);
-
                 if (auction.ClassFilters[0].SubClassFilters.Count == 1)
+                {
+                    packet.WriteInt32(ModernToLegacyInventorySlotType(auction.ClassFilters[0].SubClassFilters[0].InvTypeMask));
+                    packet.WriteInt32(auction.ClassFilters[0].ItemClass);
                     packet.WriteInt32(auction.ClassFilters[0].SubClassFilters[0].ItemSubclass);
+                }
                 else
+                {
+                    packet.WriteInt32(-1); // inventorySlotId
+                    packet.WriteInt32(auction.ClassFilters[0].ItemClass);
                     packet.WriteInt32(-1); // auctionSubCategory
+                }
             }
             else
             {
+                packet.WriteInt32(-1); // inventorySlotId
                 packet.WriteInt32(-1); // auctionMainCategory
                 packet.WriteInt32(-1); // auctionSubCategory
             }
@@ -83,6 +89,25 @@ namespace HermesProxy.World.Server
             }
 
             SendPacketToServer(packet);
+        }
+
+        int ModernToLegacyInventorySlotType(uint modernInventoryFlag)
+        {
+            // Modern client can technically search for multiple inventory types at the same time
+            // We just get the first bit and just search for this type
+
+            if (modernInventoryFlag == uint.MaxValue)
+                return -1;
+
+            for (byte i = 0; i < 32; i++)
+            {
+                if ((modernInventoryFlag & (1u << i)) > 0)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         [PacketHandler(Opcode.CMSG_AUCTION_SELL_ITEM)]
