@@ -257,10 +257,10 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_PING:
                     Ping ping = new(packet);
                     ping.Read();
-                    if (_connectType == ConnectionType.Realm &&
-                        GetSession().WorldClient != null)
+                    if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null && GetSession().WorldClient.IsConnected() && GetSession().WorldClient.IsAuthenticated())
                         GetSession().WorldClient.SendPing(ping.Serial, ping.Latency);
-                    HandlePing(ping);
+                    else
+                        HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
                     AuthSession authSession = new(packet);

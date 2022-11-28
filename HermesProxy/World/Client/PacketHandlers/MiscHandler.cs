@@ -10,6 +10,13 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_PONG)]
+        void HandlePingResponse(WorldPacket packet)
+        {
+            uint serial = packet.ReadUInt32();
+            SendPacketToClient(new Pong(serial));
+        }
+
         [PacketHandler(Opcode.SMSG_TUTORIAL_FLAGS)]
         void HandleTutorialFlags(WorldPacket packet)
         {
