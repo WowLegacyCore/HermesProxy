@@ -138,7 +138,10 @@ namespace HermesProxy.World.Client
             else if (loot.Roll == 0 && rollType == 0)
                 loot.RollType = RollType.Need;
             else
-                loot.RollType = RollType.Greed;
+                loot.RollType = (RollType) rollType;
+
+            if (loot.Roll == 128)
+                loot.Roll = 0;
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 loot.Autopassed = packet.ReadBool();
