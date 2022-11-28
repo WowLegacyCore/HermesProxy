@@ -14,6 +14,8 @@ namespace HermesProxy.World.Enums
             switch (version)
             {
                 case ClientVersionBuild.V1_12_1_5875:
+                case ClientVersionBuild.V1_12_2_6005:
+                case ClientVersionBuild.V1_12_3_6141:
                     return ClientVersionBuild.V1_12_1_5875;
                 case ClientVersionBuild.V2_4_3_8606:
                     return ClientVersionBuild.V2_4_3_8606;
