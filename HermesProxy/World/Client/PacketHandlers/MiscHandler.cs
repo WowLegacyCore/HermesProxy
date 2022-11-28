@@ -267,5 +267,13 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.CachedPlayers.ContainsKey(invalidate.Guid))
                 GetSession().GameState.CachedPlayers.Remove(invalidate.Guid);
         }
+
+        [PacketHandler(Opcode.SMSG_ZONE_UNDER_ATTACK)]
+        void HandleZoneUnderAttack(WorldPacket packet)
+        {
+            ZoneUnderAttack zone = new();
+            zone.AreaID = packet.ReadInt32();
+            SendPacketToClient(zone);
+        }
     }
 }
