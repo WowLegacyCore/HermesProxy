@@ -122,16 +122,7 @@ namespace HermesProxy.World.Client
 
             CreateChar createChar = new CreateChar();
             createChar.Guid = new WowGuid128();
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-            {
-                Enums.TBC.ResponseCodes legacyCode = (Enums.TBC.ResponseCodes)result;
-                createChar.Code = (Enums.Classic.ResponseCodes)Enum.Parse(typeof(Enums.Classic.ResponseCodes), legacyCode.ToString());
-            }
-            else
-            {
-                Enums.Vanilla.ResponseCodes legacyCode = (Enums.Vanilla.ResponseCodes)result;
-                createChar.Code = (Enums.Classic.ResponseCodes)Enum.Parse(typeof(Enums.Classic.ResponseCodes), legacyCode.ToString());
-            }
+            createChar.Code = ModernVersion.ConvertResponseCodesValue(result);
             SendPacketToClient(createChar);
         }
 
@@ -141,16 +132,7 @@ namespace HermesProxy.World.Client
             byte result = packet.ReadUInt8();
 
             DeleteChar deleteChar = new DeleteChar();
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-            {
-                Enums.TBC.ResponseCodes legacyCode = (Enums.TBC.ResponseCodes)result;
-                deleteChar.Code = (Enums.Classic.ResponseCodes)Enum.Parse(typeof(Enums.Classic.ResponseCodes), legacyCode.ToString());
-            }
-            else
-            {
-                Enums.Vanilla.ResponseCodes legacyCode = (Enums.Vanilla.ResponseCodes)result;
-                deleteChar.Code = (Enums.Classic.ResponseCodes)Enum.Parse(typeof(Enums.Classic.ResponseCodes), legacyCode.ToString());
-            }
+            deleteChar.Code = ModernVersion.ConvertResponseCodesValue(result);
             SendPacketToClient(deleteChar);
         }
 
@@ -164,7 +146,7 @@ namespace HermesProxy.World.Client
                 var fail = packet.ReadBool();
                 if (fail)
                 {
-                    response.Result = Enums.Classic.ResponseCodes.Failure;
+                    response.Result = (byte)Enums.V2_5_2_39570.ResponseCodes.Failure;
                     SendPacketToClient(response);
                     return;
                 }
@@ -573,10 +555,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CHARACTER_RENAME_RESULT)]
         void HandleCharacterRenameResult(WorldPacket packet)
         {
+            byte result = packet.ReadUInt8();
+
             CharacterRenameResult rename = new();
-            Enums.Vanilla.ResponseCodes legacyCode = (Enums.Vanilla.ResponseCodes)packet.ReadUInt8();
-            rename.Result = (Enums.Classic.ResponseCodes)Enum.Parse(typeof(Enums.Classic.ResponseCodes), legacyCode.ToString());
-            if (rename.Result == Enums.Classic.ResponseCodes.Success)
+            rename.Result = ModernVersion.ConvertResponseCodesValue(result);
+            if (rename.Result == (byte)Enums.V1_12_1_5875.ResponseCodes.Success)
             {
                 rename.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 rename.Name = packet.ReadCString();

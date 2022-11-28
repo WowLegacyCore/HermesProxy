@@ -427,11 +427,11 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Code);
+            _worldPacket.WriteUInt8(Code);
             _worldPacket.WritePackedGuid128(Guid);
         }
 
-        public HermesProxy.World.Enums.Classic.ResponseCodes Code;
+        public byte Code;
         public WowGuid128 Guid;
     }
 
@@ -453,10 +453,10 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Code);
+            _worldPacket.WriteUInt8(Code);
         }
 
-        public HermesProxy.World.Enums.Classic.ResponseCodes Code;
+        public byte Code;
     }
 
     public class LoadingScreenNotify : ClientPacket
@@ -1107,7 +1107,7 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteUInt8(Result);
             _worldPacket.WriteBit(Guid != null);
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.FlushBits();
@@ -1119,7 +1119,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public string Name = "";
-        public Enums.Classic.ResponseCodes Result = 0;
+        public byte Result = 0;
         public WowGuid128 Guid;
     }
 }
