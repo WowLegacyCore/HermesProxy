@@ -26,6 +26,8 @@ namespace Framework
         public static readonly bool DebugOutput = Conf.GetBoolean("DebugOutput", false);
         public static readonly bool PacketsLog = Conf.GetBoolean("PacketsLog", true);
         public static readonly bool RememberLastCharacter = Conf.GetBoolean("RememberLastCharacter", true);
+        public static readonly int ServerSpellDelay = Conf.GetInt("ServerSpellDelay", 0);
+        public static readonly int ClientSpellDelay = Conf.GetInt("ClientSpellDelay", 0);
 
         public static bool VerifyConfig()
         {
@@ -63,6 +65,18 @@ namespace Framework
             if (!IsValidPortNumber(InstancePort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({InstancePort}) out of allowed range (1-65535)");
+                return false;
+            }
+
+            if (ServerSpellDelay >= 0)
+            {
+                Log.Print(LogType.Server, "ServerSpellDelay must be larger than or equal to 0");
+                return false;
+            }
+
+            if (ClientSpellDelay >= 0)
+            {
+                Log.Print(LogType.Server, "ClientSpellDelay must be larger than or equal to 0");
                 return false;
             }
 
