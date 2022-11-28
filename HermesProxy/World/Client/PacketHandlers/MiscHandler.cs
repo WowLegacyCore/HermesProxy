@@ -142,18 +142,21 @@ namespace HermesProxy.World.Client
         void HandleCorpseQuery(WorldPacket packet)
         {
             CorpseLocation corpse = new();
-            corpse.Valid = packet.ReadBool();
-            if (!corpse.Valid)
-                return;
-
-            corpse.MapID = packet.ReadInt32();
-            corpse.Position = packet.ReadVector3();
-            corpse.ActualMapID = packet.ReadInt32();
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
-                packet.ReadInt32(); // Corpse Low GUID
-
             corpse.Player = GetSession().GameState.CurrentPlayerGuid;
             corpse.Transport = WowGuid128.Empty;
+            corpse.Valid = packet.ReadBool();
+            if (corpse.Valid)
+            {
+                corpse.MapID = packet.ReadInt32();
+                corpse.Position = packet.ReadVector3();
+                corpse.ActualMapID = packet.ReadInt32();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
+                    packet.ReadInt32(); // Corpse Low GUID
+            }
+            else
+            {
+                corpse.MapID = corpse.ActualMapID = (int)GetSession().GameState.CurrentMapId;
+            }
             SendPacketToClient(corpse);
         }
 
