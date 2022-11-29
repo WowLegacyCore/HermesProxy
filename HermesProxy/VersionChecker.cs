@@ -68,16 +68,14 @@ namespace HermesProxy
 
         public static Opcode GetUniversalOpcode(uint opcode)
         {
-            Opcode universalOpcode;
-            if (CurrentToUniversalOpcodeDictionary.TryGetValue(opcode, out universalOpcode))
+            if (CurrentToUniversalOpcodeDictionary.TryGetValue(opcode, out Opcode universalOpcode))
                 return universalOpcode;
             return Opcode.MSG_NULL_ACTION;
         }
 
         public static uint GetCurrentOpcode(Opcode universalOpcode)
         {
-            uint opcode;
-            if (UniversalToCurrentOpcodeDictionary.TryGetValue(universalOpcode, out opcode))
+            if (UniversalToCurrentOpcodeDictionary.TryGetValue(universalOpcode, out uint opcode))
                 return opcode;
             return 0;
         }
@@ -167,11 +165,9 @@ namespace HermesProxy
 
         public static int GetUpdateField<T>(T field) // where T: System.Enum // C# 7.3
         {
-            Dictionary<string, int> byNamesDict;
-            if (UpdateFieldNameDictionary.TryGetValue(typeof(T), out byNamesDict))
+            if (UpdateFieldNameDictionary.TryGetValue(typeof(T), out Dictionary<string, int> byNamesDict))
             {
-                int fieldValue;
-                if (byNamesDict.TryGetValue(field.ToString(), out fieldValue))
+                if (byNamesDict.TryGetValue(field.ToString(), out int fieldValue))
                     return fieldValue;
             }
 
@@ -180,8 +176,7 @@ namespace HermesProxy
 
         public static string GetUpdateFieldName<T>(int field) // where T: System.Enum // C# 7.3
         {
-            SortedList<int, UpdateFieldInfo> infoDict;
-            if (UpdateFieldDictionary.TryGetValue(typeof(T), out infoDict))
+            if (UpdateFieldDictionary.TryGetValue(typeof(T), out SortedList<int, UpdateFieldInfo> infoDict))
             {
                 if (infoDict.Count != 0)
                 {
@@ -200,8 +195,7 @@ namespace HermesProxy
 
         public static UpdateFieldInfo GetUpdateFieldInfo<T>(int field) // where T: System.Enum // C# 7.3
         {
-            SortedList<int, UpdateFieldInfo> infoDict;
-            if (UpdateFieldDictionary.TryGetValue(typeof(T), out infoDict))
+            if (UpdateFieldDictionary.TryGetValue(typeof(T), out SortedList<int, UpdateFieldInfo> infoDict))
             {
                 if (infoDict.Count != 0)
                 {
@@ -383,16 +377,14 @@ namespace HermesProxy
 
         public static Opcode GetUniversalOpcode(uint opcode)
         {
-            Opcode universalOpcode;
-            if (CurrentToUniversalOpcodeDictionary.TryGetValue(opcode, out universalOpcode))
+            if (CurrentToUniversalOpcodeDictionary.TryGetValue(opcode, out Opcode universalOpcode))
                 return universalOpcode;
             return Opcode.MSG_NULL_ACTION;
         }
 
         public static uint GetCurrentOpcode(Opcode universalOpcode)
         {
-            uint opcode;
-            if (UniversalToCurrentOpcodeDictionary.TryGetValue(universalOpcode, out opcode))
+            if (UniversalToCurrentOpcodeDictionary.TryGetValue(universalOpcode, out uint opcode))
                 return opcode;
             return 0;
         }
@@ -516,11 +508,9 @@ namespace HermesProxy
 
         public static int GetUpdateField<T>(T field) // where T: System.Enum // C# 7.3
         {
-            Dictionary<string, int> byNamesDict;
-            if (UpdateFieldNameDictionary.TryGetValue(typeof(T), out byNamesDict))
+            if (UpdateFieldNameDictionary.TryGetValue(typeof(T), out Dictionary<string, int> byNamesDict))
             {
-                int fieldValue;
-                if (byNamesDict.TryGetValue(field.ToString(), out fieldValue))
+                if (byNamesDict.TryGetValue(field.ToString(), out int fieldValue))
                     return fieldValue;
             }
 
@@ -529,8 +519,7 @@ namespace HermesProxy
 
         public static string GetUpdateFieldName<T>(int field) // where T: System.Enum // C# 7.3
         {
-            SortedList<int, UpdateFieldInfo> infoDict;
-            if (UpdateFieldDictionary.TryGetValue(typeof(T), out infoDict))
+            if (UpdateFieldDictionary.TryGetValue(typeof(T), out SortedList<int, UpdateFieldInfo> infoDict))
             {
                 if (infoDict.Count != 0)
                 {
@@ -549,8 +538,7 @@ namespace HermesProxy
 
         public static UpdateFieldInfo GetUpdateFieldInfo<T>(int field) // where T: System.Enum // C# 7.3
         {
-            SortedList<int, UpdateFieldInfo> infoDict;
-            if (UpdateFieldDictionary.TryGetValue(typeof(T), out infoDict))
+            if (UpdateFieldDictionary.TryGetValue(typeof(T), out SortedList<int, UpdateFieldInfo> infoDict))
             {
                 if (infoDict.Count != 0)
                 {

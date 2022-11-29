@@ -372,8 +372,7 @@ namespace HermesProxy.World.Server
                 buffer.WriteInt32(packetSize + 2);
                 buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes(opcode), 2), data, (uint)packetSize));
 
-                byte[] compressedData;
-                uint compressedSize = CompressPacket(data, opcode, out compressedData);
+                uint compressedSize = CompressPacket(data, opcode, out byte[] compressedData);
                 buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize));
                 buffer.WriteBytes(compressedData, compressedSize);
 

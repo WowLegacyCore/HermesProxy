@@ -418,8 +418,7 @@ namespace HermesProxy.World.Client
             else
                 inspect.DisplayInfo.GUID = packet.ReadPackedGuid().To128(GetSession().GameState);
 
-            PlayerCache cache;
-            if (!GetSession().GameState.CachedPlayers.TryGetValue(inspect.DisplayInfo.GUID, out cache))
+            if (!GetSession().GameState.CachedPlayers.TryGetValue(inspect.DisplayInfo.GUID, out PlayerCache cache))
                 return;
 
             inspect.DisplayInfo.Name = cache.Name;

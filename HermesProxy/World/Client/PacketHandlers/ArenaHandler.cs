@@ -12,8 +12,7 @@ namespace HermesProxy.World.Client
         void HandleArenaTeamQueryResponse(WorldPacket packet)
         {
             uint teamId = packet.ReadUInt32();
-            ArenaTeamData team;
-            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out team))
+            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out ArenaTeamData team))
             {
                 team = new ArenaTeamData();
                 GetSession().GameState.ArenaTeams.Add(teamId, team);
@@ -32,8 +31,7 @@ namespace HermesProxy.World.Client
         void HandleArenaTeamStats(WorldPacket packet)
         {
             uint teamId = packet.ReadUInt32();
-            ArenaTeamData team;
-            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out team))
+            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out ArenaTeamData team))
             {
                 team = new ArenaTeamData();
                 GetSession().GameState.ArenaTeams.Add(teamId, team);
@@ -88,8 +86,7 @@ namespace HermesProxy.World.Client
                 arena.Members.Add(member);
             }
 
-            ArenaTeamData team;
-            if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out team))
+            if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out ArenaTeamData team))
             {
                 arena.TeamPlayed = team.WeekPlayed;
                 arena.TeamWins = team.WeekWins;

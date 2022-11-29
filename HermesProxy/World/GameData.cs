@@ -51,8 +51,7 @@ namespace HermesProxy.World
 
         public static string GetItemName(uint entry)
         {
-            string data;
-            if (ItemNames.TryGetValue(entry, out data))
+            if (ItemNames.TryGetValue(entry, out string data))
                 return data;
 
             ItemTemplate template = GetItemTemplate(entry);
@@ -72,8 +71,7 @@ namespace HermesProxy.World
 
         public static ItemTemplate GetItemTemplate(uint entry)
         {
-            ItemTemplate data;
-            if (ItemTemplates.TryGetValue(entry, out data))
+            if (ItemTemplates.TryGetValue(entry, out ItemTemplate data))
                 return data;
             return null;
         }
@@ -88,8 +86,7 @@ namespace HermesProxy.World
 
         public static QuestTemplate GetQuestTemplate(uint entry)
         {
-            QuestTemplate data;
-            if (QuestTemplates.TryGetValue(entry, out data))
+            if (QuestTemplates.TryGetValue(entry, out QuestTemplate data))
                 return data;
             return null;
         }
@@ -126,16 +123,14 @@ namespace HermesProxy.World
 
         public static CreatureTemplate GetCreatureTemplate(uint entry)
         {
-            CreatureTemplate data;
-            if (CreatureTemplates.TryGetValue(entry, out data))
+            if (CreatureTemplates.TryGetValue(entry, out CreatureTemplate data))
                 return data;
             return null;
         }
 
         public static ItemDisplayData GetItemDisplayData(uint entry)
         {
-            ItemDisplayData data;
-            if (ItemDisplayDataStore.TryGetValue(entry, out data))
+            if (ItemDisplayDataStore.TryGetValue(entry, out ItemDisplayData data))
                 return data;
             return null;
         }
@@ -177,40 +172,35 @@ namespace HermesProxy.World
 
         public static uint GetItemEnchantVisual(uint enchantId)
         {
-            uint visualId;
-            if (ItemEnchantVisuals.TryGetValue(enchantId, out visualId))
+            if (ItemEnchantVisuals.TryGetValue(enchantId, out uint visualId))
                 return visualId;
             return 0;
         }
 
         public static uint GetSpellVisual(uint spellId)
         {
-            uint visual;
-            if (SpellVisuals.TryGetValue(spellId, out visual))
+            if (SpellVisuals.TryGetValue(spellId, out uint visual))
                 return visual;
             return 0;
         }
 
         public static int GetTotemSlotForSpell(uint spellId)
         {
-            uint slot;
-            if (TotemSpells.TryGetValue(spellId, out slot))
+            if (TotemSpells.TryGetValue(spellId, out uint slot))
                 return (int)slot;
             return -1;
         }
 
         public static uint GetRealSpell(uint learnSpellId)
         {
-            uint realSpellId;
-            if (LearnSpells.TryGetValue(learnSpellId, out realSpellId))
+            if (LearnSpells.TryGetValue(learnSpellId, out uint realSpellId))
                 return realSpellId;
             return learnSpellId;
         }
 
         public static uint GetGemFromEnchantId(uint enchantId)
         {
-            uint itemId;
-            if (Gems.TryGetValue(enchantId, out itemId))
+            if (Gems.TryGetValue(enchantId, out uint itemId))
                 return itemId;
             return 0;
         }
@@ -227,24 +217,21 @@ namespace HermesProxy.World
 
         public static float GetUnitDisplayScale(uint displayId)
         {
-            float scale;
-            if (UnitDisplayScales.TryGetValue(displayId, out scale))
+            if (UnitDisplayScales.TryGetValue(displayId, out float scale))
                 return scale;
             return 1.0f;
         }
 
         public static uint GetTransportPeriod(uint entry)
         {
-            uint period;
-            if (TransportPeriods.TryGetValue(entry, out period))
+            if (TransportPeriods.TryGetValue(entry, out uint period))
                 return period;
             return 0;
         }
 
         public static string GetAreaName(uint id)
         {
-            string name;
-            if (AreaNames.TryGetValue(id, out name))
+            if (AreaNames.TryGetValue(id, out string name))
                 return name;
             return "";
         }
@@ -261,8 +248,7 @@ namespace HermesProxy.World
 
         public static uint GetMapIdFromBattlegroundId(uint bgId)
         {
-            Battleground bg;
-            if (Battlegrounds.TryGetValue(bgId, out bg))
+            if (Battlegrounds.TryGetValue(bgId, out Battleground bg))
                 return bg.MapIds[0];
             return 0;
         }
@@ -305,8 +291,7 @@ namespace HermesProxy.World
 
         public static BroadcastText GetBroadcastText(uint entry)
         {
-            BroadcastText data;
-            if (BroadcastTextStore.TryGetValue(entry, out data))
+            if (BroadcastTextStore.TryGetValue(entry, out BroadcastText data))
                 return data;
             return null;
         }

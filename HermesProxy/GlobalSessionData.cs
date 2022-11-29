@@ -253,8 +253,7 @@ namespace HermesProxy
         }
         public ushort GetObjectSpawnCounter(WowGuid64 guid)
         {
-            ushort count;
-            if (ObjectSpawnCount.TryGetValue(guid, out count))
+            if (ObjectSpawnCount.TryGetValue(guid, out ushort count))
                 return count;
             return 0;
         }
@@ -279,8 +278,7 @@ namespace HermesProxy
         }
         public bool IsAlliancePlayer(WowGuid128 guid)
         {
-            PlayerCache cache;
-            if (CachedPlayers.TryGetValue(guid, out cache))
+            if (CachedPlayers.TryGetValue(guid, out PlayerCache cache))
                 return GameData.IsAllianceRace(cache.RaceId);
             return false;
         }
@@ -662,9 +660,8 @@ namespace HermesProxy
 
         public Dictionary<int, UpdateField> GetCachedObjectFieldsLegacy(WowGuid128 guid)
         {
-            Dictionary<int, UpdateField> dict;
             ObjectCacheMutex.WaitOne();
-            if (ObjectCacheLegacy.TryGetValue(guid, out dict))
+            if (ObjectCacheLegacy.TryGetValue(guid, out Dictionary<int, UpdateField> dict))
             {
                 ObjectCacheMutex.ReleaseMutex();
                 return dict;
@@ -675,9 +672,8 @@ namespace HermesProxy
 
         public UpdateFieldsArray GetCachedObjectFieldsModern(WowGuid128 guid)
         {
-            UpdateFieldsArray array;
             ObjectCacheMutex.WaitOne();
-            if (ObjectCacheModern.TryGetValue(guid, out array))
+            if (ObjectCacheModern.TryGetValue(guid, out UpdateFieldsArray array))
             {
                 ObjectCacheMutex.ReleaseMutex();
                 return array;

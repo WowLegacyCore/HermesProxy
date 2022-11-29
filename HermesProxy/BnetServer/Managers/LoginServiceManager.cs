@@ -30,8 +30,7 @@ namespace BNetServer
             }
 
             string configuredAddress = Framework.Settings.ExternalAddress;
-            IPAddress address;
-            if (!IPAddress.TryParse(configuredAddress, out address))
+            if (!IPAddress.TryParse(configuredAddress, out IPAddress address))
             {
                 Log.Print(LogType.Error, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
                 return;

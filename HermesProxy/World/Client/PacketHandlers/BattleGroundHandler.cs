@@ -311,8 +311,7 @@ namespace HermesProxy.World.Client
                 for (int j = 0; j < statsCount; j++)
                     player.Stats.Add(packet.ReadUInt32());
 
-                PlayerCache cache;
-                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out cache))
+                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out PlayerCache cache))
                 {
                     player.Sex = cache.SexId;
                     player.PlayerRace = cache.RaceId;
@@ -388,8 +387,7 @@ namespace HermesProxy.World.Client
                 for (int j = 0; j < statsCount; j++)
                     player.Stats.Add(packet.ReadUInt32());
 
-                PlayerCache cache;
-                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out cache))
+                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out PlayerCache cache))
                 {
                     player.Sex = cache.SexId;
                     player.PlayerRace = cache.RaceId;

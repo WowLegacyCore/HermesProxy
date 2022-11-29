@@ -333,8 +333,7 @@ namespace HermesProxy.World.Client
 
         public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid128 guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
-            BitArray updateMaskArray = null;
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out BitArray updateMaskArray);
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData);
             GetSession().GameState.ObjectCacheMutex.WaitOne();
             if (!GetSession().GameState.ObjectCacheLegacy.ContainsKey(guid))
@@ -346,9 +345,8 @@ namespace HermesProxy.World.Client
 
         public void ReadValuesUpdateBlock(WorldPacket packet, WowGuid128 guid, ObjectUpdate updateData, AuraUpdate auraUpdate, PowerUpdate powerUpdate, int index)
         {
-            BitArray updateMaskArray = null;
             ObjectType type = GetSession().GameState.GetOriginalObjectType(guid);
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, GetSession().GameState.GetCachedObjectFieldsLegacy(guid), out updateMaskArray);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, GetSession().GameState.GetCachedObjectFieldsLegacy(guid), out BitArray updateMaskArray);
             StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData);
         }
 
@@ -593,8 +591,7 @@ namespace HermesProxy.World.Client
                 List<UpdateField> fieldData = new List<UpdateField>();
                 for (int k = start; k < i; ++k)
                 {
-                    UpdateField updateField;
-                    if (oldValues == null || !oldValues.TryGetValue(k, out updateField))
+                    if (oldValues == null || !oldValues.TryGetValue(k, out UpdateField updateField))
                         updateField = new UpdateField(0);
 
                     fieldData.Add(updateField);
@@ -1932,9 +1929,7 @@ namespace HermesProxy.World.Client
                             };
                             if (aura.AuraData != null)
                             {
-                                int durationLeft;
-                                int durationFull;
-                                GetSession().GameState.GetAuraDuration(guid, i, out durationLeft, out durationFull);
+                                GetSession().GameState.GetAuraDuration(guid, i, out int durationLeft, out int durationFull);
                                 if (durationLeft > 0 && durationFull > 0)
                                 {
                                     aura.AuraData.Flags |= AuraFlagsModern.Duration;
@@ -2154,8 +2149,7 @@ namespace HermesProxy.World.Client
 
                     if (raceId == Race.None || sexId == Gender.None)
                     {
-                        PlayerCache cache;
-                        if (GetSession().GameState.CachedPlayers.TryGetValue(guid.To128(GetSession().GameState), out cache))
+                        if (GetSession().GameState.CachedPlayers.TryGetValue(guid.To128(GetSession().GameState), out PlayerCache cache))
                         {
                             raceId = cache.RaceId;
                             sexId = cache.SexId;

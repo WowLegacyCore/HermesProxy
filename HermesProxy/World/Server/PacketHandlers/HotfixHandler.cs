@@ -197,8 +197,7 @@ namespace HermesProxy.World.Server
             HotfixConnect connect = new HotfixConnect();
             foreach (uint id in request.Hotfixes)
             {
-                HotfixRecord record;
-                if (GameData.Hotfixes.TryGetValue(id, out record))
+                if (GameData.Hotfixes.TryGetValue(id, out HotfixRecord record))
                 {
                     Log.Print(LogType.Debug, $"Hotfix record {record.RecordId} from {record.TableHash}.");
                     connect.Hotfixes.Add(record);
