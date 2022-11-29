@@ -894,16 +894,11 @@ namespace HermesProxy.World.Server.Packets
         {
             if (NewPetGuid == null)
                 NewPetGuid = WowGuid128.Empty;
-            if (NewPetName == null)
-                NewPetName = "";
-            if (DisplayID == null)
-                DisplayID = 0;
-            if (MaxHealth == null)
-                MaxHealth = 0;
-            if (Health == null)
-                Health = 0;
-            if (Auras == null)
-                Auras = new List<PartyMemberAuraStates>();
+            NewPetName ??= "";
+            DisplayID ??= 0;
+            MaxHealth ??= 0;
+            Health ??= 0;
+            Auras ??= new List<PartyMemberAuraStates>();
 
             data.WritePackedGuid128(NewPetGuid);
             data.WriteUInt32(DisplayID.Value);

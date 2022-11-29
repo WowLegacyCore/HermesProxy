@@ -118,8 +118,7 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
-                if (_isSuccessful == null)
-                    _isSuccessful = false;
+                _isSuccessful ??= false;
             }
         }
 
@@ -228,8 +227,7 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Packet Write Error: {ex.Message}");
-                if (_isSuccessful == null)
-                    _isSuccessful = false;
+                _isSuccessful ??= false;
             }
             _sendMutex.ReleaseMutex();
         }
@@ -348,8 +346,7 @@ namespace HermesProxy.World.Client
                     else
                     {
                         Log.Print(LogType.Warn, $"No handler for opcode {universalOpcode} ({packet.GetOpcode()})");
-                        if (_isSuccessful == null)
-                            _isSuccessful = false;
+                        _isSuccessful ??= false;
                     }
                     break;
             }

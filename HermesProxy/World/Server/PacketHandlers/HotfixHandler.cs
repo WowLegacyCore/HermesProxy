@@ -24,15 +24,12 @@ namespace HermesProxy.World.Server
                 if (query.TableHash == DB2Hash.BroadcastText)
                 {
                     BroadcastText bct = GameData.GetBroadcastText(id);
-                    if (bct == null)
-                    {
-                        bct = new BroadcastText
+                    bct ??= new BroadcastText
                         {
                             Entry = id,
                             MaleText = "Clear your cache!",
                             FemaleText = "Clear your cache!"
                         };
-                    }
 
                     reply.Status = HotfixStatus.Valid;
                     reply.Data.WriteCString(bct.MaleText);

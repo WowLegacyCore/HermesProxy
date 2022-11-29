@@ -465,8 +465,7 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.Auras))
             {
-                if (state.Auras == null)
-                    state.Auras = new List<PartyMemberAuraStates>();
+                state.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt32(); // Positive Aura Mask
 
@@ -492,8 +491,7 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.AurasNegative))
             {
-                if (state.Auras == null)
-                    state.Auras = new List<PartyMemberAuraStates>();
+                state.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt16(); // Negative Aura Mask
 
@@ -519,37 +517,32 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetGuid))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
 
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetName))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetName = packet.ReadCString();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetModelId))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.DisplayID = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetCurrentHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.Health = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetMaxHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.MaxHealth = packet.ReadUInt16();
             }
 
@@ -564,10 +557,8 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetAuras))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
-                if (state.Pet.Auras == null)
-                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+                state.Pet ??= new PartyMemberPetStats();
+                state.Pet.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt32(); // Pet Positive Aura Mask
 
@@ -593,10 +584,8 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetAurasNegative))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
-                if (state.Pet.Auras == null)
-                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+                state.Pet ??= new PartyMemberPetStats();
+                state.Pet.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt16(); // Pet Negative Aura Mask
 
@@ -678,8 +667,7 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.Auras))
             {
-                if (state.Auras == null)
-                    state.Auras = new List<PartyMemberAuraStates>();
+                state.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt64();
 
@@ -704,37 +692,32 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetGuid))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
 
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetName))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetName = packet.ReadCString();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetModelId))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.DisplayID = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetCurrentHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.Health = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetMaxHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.MaxHealth = packet.ReadUInt16();
             }
 
@@ -749,10 +732,8 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetAuras))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
-                if (state.Pet.Auras == null)
-                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+                state.Pet ??= new PartyMemberPetStats();
+                state.Pet.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt64();
 
@@ -839,8 +820,7 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.Auras))
             {
-                if (state.Auras == null)
-                    state.Auras = new List<PartyMemberAuraStates>();
+                state.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt32(); // Positive Aura Mask
 
@@ -866,8 +846,7 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.AurasNegative))
             {
-                if (state.Auras == null)
-                    state.Auras = new List<PartyMemberAuraStates>();
+                state.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt16(); // Negative Aura Mask
 
@@ -893,37 +872,32 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetGuid))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
 
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetName))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetName = packet.ReadCString();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetModelId))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.DisplayID = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetCurrentHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.Health = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetMaxHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.MaxHealth = packet.ReadUInt16();
             }
 
@@ -938,10 +912,8 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetAuras))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
-                if (state.Pet.Auras == null)
-                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+                state.Pet ??= new PartyMemberPetStats();
+                state.Pet.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt32(); // Pet Positive Aura Mask
 
@@ -967,10 +939,8 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetAurasNegative))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
-                if (state.Pet.Auras == null)
-                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+                state.Pet ??= new PartyMemberPetStats();
+                state.Pet.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt16(); // Pet Negative Aura Mask
 
@@ -1058,8 +1028,7 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.Auras))
             {
-                if (state.Auras == null)
-                    state.Auras = new List<PartyMemberAuraStates>();
+                state.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt64();
 
@@ -1084,37 +1053,32 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetGuid))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
 
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetName))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.NewPetName = packet.ReadCString();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetModelId))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.DisplayID = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetCurrentHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.Health = packet.ReadUInt16();
             }
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetMaxHealth))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
+                state.Pet ??= new PartyMemberPetStats();
                 state.Pet.MaxHealth = packet.ReadUInt16();
             }
 
@@ -1129,10 +1093,8 @@ namespace HermesProxy.World.Client
 
             if (updateFlags.HasFlag(GroupUpdateFlagTBC.PetAuras))
             {
-                if (state.Pet == null)
-                    state.Pet = new PartyMemberPetStats();
-                if (state.Pet.Auras == null)
-                    state.Pet.Auras = new List<PartyMemberAuraStates>();
+                state.Pet ??= new PartyMemberPetStats();
+                state.Pet.Auras ??= new List<PartyMemberAuraStates>();
 
                 var auraMask = packet.ReadUInt64();
 

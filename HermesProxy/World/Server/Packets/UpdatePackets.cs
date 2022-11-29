@@ -141,21 +141,17 @@ namespace HermesProxy.World.Server.Packets
                     GameObjectData.PercentHealth = 255;
                 if (GameObjectData.ParentRotation[3] == null)
                     GameObjectData.ParentRotation[3] = 1;
-                if (GameObjectData.StateAnimID == null)
-                    GameObjectData.StateAnimID = ModernVersion.GetGameObjectStateAnimId();
+                GameObjectData.StateAnimID ??= ModernVersion.GetGameObjectStateAnimId();
                 if (Guid.GetHighType() == HighGuidType.Transport)
                 {
                     uint period = GameData.GetTransportPeriod((uint)ObjectData.EntryID);
                     if (period != 0)
                     {
-                        if (GameObjectData.Level == null)
-                            GameObjectData.Level = (int)period;
-                        if (ObjectData.DynamicFlags == null)
-                            ObjectData.DynamicFlags = (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * ushort.MaxValue)) << 16);
+                        GameObjectData.Level ??= (int)period;
+                        ObjectData.DynamicFlags ??= (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * ushort.MaxValue)) << 16);
                         GameObjectData.Flags = 1048616;
                     }
-                    else if (ObjectData.DynamicFlags == null)
-                        ObjectData.DynamicFlags = ((CreateData.MoveInfo.TransportPathTimer % ushort.MaxValue) << 16);
+                    else ObjectData.DynamicFlags ??= ((CreateData.MoveInfo.TransportPathTimer % ushort.MaxValue) << 16);
                 }
             }
             if (CorpseData != null)
@@ -175,28 +171,17 @@ namespace HermesProxy.World.Server.Packets
                     if (UnitData.ModPowerRegen[i] == null)
                         UnitData.ModPowerRegen[i] = 1;
                 }
-                if (UnitData.Flags2 == null)
-                    UnitData.Flags2 = 2048;
-                if (UnitData.DisplayScale == null)
-                    UnitData.DisplayScale = 1;
-                if (UnitData.NativeXDisplayScale == null)
-                    UnitData.NativeXDisplayScale = 1;
-                if (UnitData.ModCastHaste == null)
-                    UnitData.ModCastHaste = 1;
-                if (UnitData.ModHaste == null)
-                    UnitData.ModHaste = 1;
-                if (UnitData.ModRangedHaste == null)
-                    UnitData.ModRangedHaste = 1;
-                if (UnitData.ModHasteRegen == null)
-                    UnitData.ModHasteRegen = 1;
-                if (UnitData.ModTimeRate == null)
-                    UnitData.ModTimeRate = 1;
-                if (UnitData.HoverHeight == null)
-                    UnitData.HoverHeight = 1;
-                if (UnitData.ScaleDuration == null)
-                    UnitData.ScaleDuration = 100;
-                if (UnitData.LookAtControllerID == null)
-                    UnitData.LookAtControllerID = -1;
+                UnitData.Flags2 ??= 2048;
+                UnitData.DisplayScale ??= 1;
+                UnitData.NativeXDisplayScale ??= 1;
+                UnitData.ModCastHaste ??= 1;
+                UnitData.ModHaste ??= 1;
+                UnitData.ModRangedHaste ??= 1;
+                UnitData.ModHasteRegen ??= 1;
+                UnitData.ModTimeRate ??= 1;
+                UnitData.HoverHeight ??= 1;
+                UnitData.ScaleDuration ??= 100;
+                UnitData.LookAtControllerID ??= -1;
                 if (UnitData.ChannelObject == null &&
                     Guid == GlobalSession.GameState.CurrentPlayerGuid)
                     UnitData.ChannelObject = WowGuid128.Empty;
@@ -210,10 +195,8 @@ namespace HermesProxy.World.Server.Packets
                     else
                         PlayerData.WowAccount = WowGuid128.Create(HighGuidType703.WowAccount, Guid.GetCounter());
                 }
-                if (PlayerData.VirtualPlayerRealm == null)
-                    PlayerData.VirtualPlayerRealm = GlobalSession.RealmId.GetAddress();
-                if (PlayerData.HonorLevel == null)
-                    PlayerData.HonorLevel = 1;
+                PlayerData.VirtualPlayerRealm ??= GlobalSession.RealmId.GetAddress();
+                PlayerData.HonorLevel ??= 1;
                 if (PlayerData.AvgItemLevel[3] == null)
                     PlayerData.AvgItemLevel[3] = 1;
             }
@@ -230,12 +213,9 @@ namespace HermesProxy.World.Server.Packets
                     if (ActivePlayerData.ModDamageDonePercent[i] == null)
                         ActivePlayerData.ModDamageDonePercent[i] = 1;
                 }
-                if (ActivePlayerData.ModHealingPercent == null)
-                    ActivePlayerData.ModHealingPercent = 1;
-                if (ActivePlayerData.ModHealingDonePercent == null)
-                    ActivePlayerData.ModHealingDonePercent = 1;
-                if (ActivePlayerData.ModPeriodicHealingDonePercent == null)
-                    ActivePlayerData.ModPeriodicHealingDonePercent = 1;
+                ActivePlayerData.ModHealingPercent ??= 1;
+                ActivePlayerData.ModHealingDonePercent ??= 1;
+                ActivePlayerData.ModPeriodicHealingDonePercent ??= 1;
                 for (int i = 0; i < 3; i++)
                 {
                     if (ActivePlayerData.WeaponDmgMultipliers[i] == null)
@@ -243,22 +223,14 @@ namespace HermesProxy.World.Server.Packets
                     if (ActivePlayerData.WeaponAtkSpeedMultipliers[i] == null)
                         ActivePlayerData.WeaponAtkSpeedMultipliers[i] = 1;
                 }
-                if (ActivePlayerData.ModSpellPowerPercent == null)
-                    ActivePlayerData.ModSpellPowerPercent = 1;
-                if (ActivePlayerData.NumBackpackSlots == null)
-                    ActivePlayerData.NumBackpackSlots = 16;
-                if (ActivePlayerData.MultiActionBars == null)
-                    ActivePlayerData.MultiActionBars = 7;
-                if (ActivePlayerData.MaxLevel == null)
-                    ActivePlayerData.MaxLevel = LegacyVersion.GetMaxLevel();
-                if (ActivePlayerData.ModPetHaste == null)
-                    ActivePlayerData.ModPetHaste = 1;
-                if (ActivePlayerData.HonorNextLevel == null)
-                    ActivePlayerData.HonorNextLevel = 5500;
-                if (ActivePlayerData.PvPTierMaxFromWins == null)
-                    ActivePlayerData.PvPTierMaxFromWins = 4294967295;
-                if (ActivePlayerData.PvPLastWeeksTierMaxFromWins == null)
-                    ActivePlayerData.PvPLastWeeksTierMaxFromWins = 4294967295;
+                ActivePlayerData.ModSpellPowerPercent ??= 1;
+                ActivePlayerData.NumBackpackSlots ??= 16;
+                ActivePlayerData.MultiActionBars ??= 7;
+                ActivePlayerData.MaxLevel ??= LegacyVersion.GetMaxLevel();
+                ActivePlayerData.ModPetHaste ??= 1;
+                ActivePlayerData.HonorNextLevel ??= 5500;
+                ActivePlayerData.PvPTierMaxFromWins ??= 4294967295;
+                ActivePlayerData.PvPLastWeeksTierMaxFromWins ??= 4294967295;
             }
         }
     }

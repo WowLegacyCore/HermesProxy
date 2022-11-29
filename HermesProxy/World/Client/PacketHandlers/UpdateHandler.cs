@@ -1032,16 +1032,14 @@ namespace HermesProxy.World.Client
             if ((updateMaskArray != null && updateMaskArray[index]) ||
                 (updateMaskArray == null && updates.ContainsKey(index)))
             {
-                if (questLog == null)
-                    questLog = new QuestLog();
+                questLog ??= new QuestLog();
 
                 questLog.QuestID = updates[index].Int32Value;
             }
             if ((updateMaskArray != null && updateMaskArray[index + stateOffset]) ||
                 (updateMaskArray == null && updates.ContainsKey(index + stateOffset)))
             {
-                if (questLog == null)
-                    questLog = new QuestLog();
+                questLog ??= new QuestLog();
 
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_4_0_8089))
                 {
@@ -1060,8 +1058,7 @@ namespace HermesProxy.World.Client
                ((updateMaskArray != null && updateMaskArray[index + progressOffset]) ||
                (updateMaskArray == null && updates.ContainsKey(index + progressOffset))))
             {
-                if (questLog == null)
-                    questLog = new QuestLog();
+                questLog ??= new QuestLog();
 
                 questLog.ObjectiveProgress[0] = (byte)(updates[index + progressOffset].UInt32Value & 0xFF);
                 questLog.ObjectiveProgress[1] = (byte)((updates[index + progressOffset].UInt32Value >> 8) & 0xFF);
@@ -1071,8 +1068,7 @@ namespace HermesProxy.World.Client
             if ((updateMaskArray != null && updateMaskArray[index + timerOffset]) ||
                 (updateMaskArray == null && updates.ContainsKey(index + timerOffset)))
             {
-                if (questLog == null)
-                    questLog = new QuestLog();
+                questLog ??= new QuestLog();
 
                 questLog.EndTime = updates[index + timerOffset].UInt32Value;
             }
@@ -1243,22 +1239,19 @@ namespace HermesProxy.World.Client
                         int chargesIndex = durationIndex + 1;
                         if (updateMaskArray[idIndex])
                         {
-                            if (enchantment == null)
-                                enchantment = new ItemEnchantment();
+                            enchantment ??= new ItemEnchantment();
 
                             enchantment.ID = updates[idIndex].Int32Value;
                         }
                         if (updateMaskArray[durationIndex])
                         {
-                            if (enchantment == null)
-                                enchantment = new ItemEnchantment();
+                            enchantment ??= new ItemEnchantment();
 
                             enchantment.Duration = updates[durationIndex].UInt32Value;
                         }
                         if (updateMaskArray[chargesIndex])
                         {
-                            if (enchantment == null)
-                                enchantment = new ItemEnchantment();
+                            enchantment ??= new ItemEnchantment();
 
                             enchantment.Charges = (ushort)updates[chargesIndex].UInt32Value;
                         }
@@ -1714,8 +1707,7 @@ namespace HermesProxy.World.Client
 
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                     {
-                        if (updateData.UnitData.Flags2 == null)
-                            updateData.UnitData.Flags2 = (uint)UnitFlags2.RegeneratePower;
+                        updateData.UnitData.Flags2 ??= (uint)UnitFlags2.RegeneratePower;
                         if (flags.HasAnyFlag(UnitDynamicFlagsLegacy.AppearDead))
                             updateData.UnitData.Flags2 |= (uint)UnitFlags2.FeignDeath;
                     }
@@ -1968,8 +1960,7 @@ namespace HermesProxy.World.Client
                         GetSession().GameState.CurrentPlayerStorage.Settings.PatchFlags(ref flags); // Some patches like auto guild inv decline
                     updateData.PlayerData.PlayerFlags = (uint) flags;
 
-                    if (updateData.PlayerData.PlayerFlagsEx == null)
-                        updateData.PlayerData.PlayerFlagsEx = 0;
+                    updateData.PlayerData.PlayerFlagsEx ??= 0;
                     if (legacyFlags.HasAnyFlag(PlayerFlagsLegacy.HideHelm))
                         updateData.PlayerData.PlayerFlagsEx |= (uint)PlayerFlagsEx.HideHelm;
                     if (legacyFlags.HasAnyFlag(PlayerFlagsLegacy.HideCloak))

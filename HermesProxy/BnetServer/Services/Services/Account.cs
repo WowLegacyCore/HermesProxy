@@ -59,8 +59,7 @@ namespace BNetServer.Services
 
             if (request.Options.FieldGameStatus)
             {
-                if (response.State == null)
-                    response.State = new GameAccountState();
+                response.State ??= new GameAccountState();
 
                 response.State.GameStatus = new GameStatus();
 
