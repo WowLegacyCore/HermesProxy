@@ -299,7 +299,7 @@ namespace HermesProxy.World.Server.Packets
             Prefix = addonPrefix;
 
             SenderGUID = sender != null ? sender : WowGuid128.Empty;
-            if (String.IsNullOrEmpty(senderName) && sender != null)
+            if (string.IsNullOrEmpty(senderName) && sender != null)
                 SenderName = globalSession.GameState.GetPlayerName(sender);
             else
                 SenderName = senderName;
@@ -309,7 +309,7 @@ namespace HermesProxy.World.Server.Packets
             PartyGUID = WowGuid128.Empty;
 
             TargetGUID = receiver != null ? receiver : WowGuid128.Empty;
-            if (String.IsNullOrEmpty(receiverName) && receiver != null)
+            if (string.IsNullOrEmpty(receiverName) && receiver != null)
                 TargetName = globalSession.GameState.GetPlayerName(receiver);
             else
                 TargetName = receiverName;

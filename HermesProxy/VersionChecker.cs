@@ -231,14 +231,14 @@ namespace HermesProxy
             string str = VersionString;
             str = str.Replace("V", "");
             str = str.Substring(0, str.IndexOf("_"));
-            return (byte)UInt32.Parse(str);
+            return (byte)uint.Parse(str);
         }
         private static byte GetMajorPatchVersion()
         {
             string str = VersionString;
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
-            return (byte)UInt32.Parse(str);
+            return (byte)uint.Parse(str);
         }
         private static byte GetMinorPatchVersion()
         {
@@ -246,7 +246,7 @@ namespace HermesProxy
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
-            return (byte)UInt32.Parse(str);
+            return (byte)uint.Parse(str);
         }
 
         public static bool InVersion(ClientVersionBuild build1, ClientVersionBuild build2)
@@ -580,14 +580,14 @@ namespace HermesProxy
             string str = VersionString;
             str = str.Replace("V", "");
             str = str.Substring(0, str.IndexOf("_"));
-            return (byte)UInt32.Parse(str);
+            return (byte)uint.Parse(str);
         }
         private static byte GetMajorPatchVersion()
         {
             string str = VersionString;
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
-            return (byte)UInt32.Parse(str);
+            return (byte)uint.Parse(str);
         }
         private static byte GetMinorPatchVersion()
         {
@@ -595,7 +595,7 @@ namespace HermesProxy
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(str.IndexOf('_') + 1);
             str = str.Substring(0, str.IndexOf("_"));
-            return (byte)UInt32.Parse(str);
+            return (byte)uint.Parse(str);
         }
 
         public static bool AddedInVersion(byte expansion, byte major, byte minor)

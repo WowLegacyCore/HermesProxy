@@ -151,7 +151,7 @@ namespace HermesProxy.World.Client
                 packet.ReadFloat(); // Time Left
 
             string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
                 WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
                 query.WriteUInt32(itemId);
@@ -185,7 +185,7 @@ namespace HermesProxy.World.Client
             uint randomPropertyId = packet.ReadUInt32();
 
             string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
                 WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
                 query.WriteUInt32(itemId);

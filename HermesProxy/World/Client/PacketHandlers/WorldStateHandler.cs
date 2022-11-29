@@ -52,7 +52,7 @@ namespace HermesProxy.World.Client
                 string oldZoneName = GameData.GetAreaName(GetSession().GameState.CurrentZoneId);
                 string newZoneName = GameData.GetAreaName(states.ZoneID);
                 GetSession().GameState.CurrentZoneId = states.ZoneID;
-                if (!String.IsNullOrEmpty(oldZoneName) && !String.IsNullOrEmpty(newZoneName))
+                if (!string.IsNullOrEmpty(oldZoneName) && !string.IsNullOrEmpty(newZoneName))
                 {
                     foreach (var channel in GameData.GetChatChannelsWithFlags(ChannelFlags.AutoJoin | ChannelFlags.ZoneBased))
                     {

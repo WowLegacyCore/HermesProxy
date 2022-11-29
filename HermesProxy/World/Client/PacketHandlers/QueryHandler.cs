@@ -444,7 +444,7 @@ namespace HermesProxy.World.Client
 
                 const string placeholderGossip = "Greetings $N";
 
-                if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText) ||
+                if (string.IsNullOrEmpty(maleText) && string.IsNullOrEmpty(femaleText) ||
                     maleText == placeholderGossip && femaleText == placeholderGossip && i != 0)
                     response.BroadcastTextID[i] = 0;
                 else
@@ -708,7 +708,7 @@ namespace HermesProxy.World.Client
                 player.PlayerData.BnetAccountID = GetSession().GetBnetAccountGuidForPlayer(player.PlayerData.GuidActual);
                 player.PlayerData.VirtualRealmAddress = GetSession().RealmId.GetAddress();
 
-                if (!String.IsNullOrEmpty(player.GuildName))
+                if (!string.IsNullOrEmpty(player.GuildName))
                 {
                     player.GuildGUID = GetSession().GetGuildGuid(player.GuildName);
                     player.GuildVirtualRealmAddress = player.PlayerData.VirtualRealmAddress;

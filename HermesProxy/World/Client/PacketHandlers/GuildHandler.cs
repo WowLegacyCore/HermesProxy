@@ -166,7 +166,7 @@ namespace HermesProxy.World.Client
                 case GuildEventType.BankMoneyUpdate:
                 {
                     GuildEventBankMoneyChanged money = new GuildEventBankMoneyChanged();
-                    money.Money = (ulong)Int32.Parse(strings[0], System.Globalization.NumberStyles.HexNumber);
+                    money.Money = (ulong)int.Parse(strings[0], System.Globalization.NumberStyles.HexNumber);
                     SendPacketToClient(money);
                     break;
                 }
@@ -202,7 +202,7 @@ namespace HermesProxy.World.Client
             for (uint i = 0; i < 10; i++)
             {
                 string rankName = packet.ReadCString();
-                if (!String.IsNullOrEmpty(rankName))
+                if (!string.IsNullOrEmpty(rankName))
                 {
                     RankInfo rank = new RankInfo();
                     rank.RankID = i;

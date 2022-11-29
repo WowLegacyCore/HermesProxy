@@ -111,7 +111,7 @@ namespace HermesProxy.World.Client
         {
             WowGuid128 guid = packet.ReadGuid().To128(GetSession().GameState);
             string name = GetSession().GameState.GetPlayerName(guid);
-            if (!String.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(name))
             {
                 ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"{name} has declined your guild invitation.");
                 SendPacketToClient(chat);

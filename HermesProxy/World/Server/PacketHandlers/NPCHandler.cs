@@ -32,7 +32,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.WriteUInt32(gossip.GossipID);
             packet.WriteUInt32(gossip.GossipIndex);
-            if (!String.IsNullOrEmpty(gossip.PromotionCode))
+            if (!string.IsNullOrEmpty(gossip.PromotionCode))
                 packet.WriteCString(gossip.PromotionCode);
             SendPacketToServer(packet);
         }

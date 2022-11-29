@@ -228,7 +228,7 @@ namespace HermesProxy.Auth
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
             buffer.WriteUInt8((byte)(LegacyVersion.ExpansionVersion > 1 ? 8 : 3));
-            buffer.WriteUInt16((UInt16)(_username.Length + 30));
+            buffer.WriteUInt16((ushort)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
             buffer.WriteUInt8(0);
             buffer.WriteUInt8(LegacyVersion.ExpansionVersion);
@@ -514,7 +514,7 @@ namespace HermesProxy.Auth
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
                 realmInfo.Address = Dns.GetHostAddresses(strArr[0]).First().ToString();
-                realmInfo.Port = UInt16.Parse(strArr[1]);
+                realmInfo.Port = ushort.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();
                 realmInfo.Timezone = packet.ReadUInt8();

@@ -151,11 +151,11 @@ namespace HermesProxy.World.Server.Packets
                         if (GameObjectData.Level == null)
                             GameObjectData.Level = (int)period;
                         if (ObjectData.DynamicFlags == null)
-                            ObjectData.DynamicFlags = (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * System.UInt16.MaxValue)) << 16);
+                            ObjectData.DynamicFlags = (((uint)(((float)(CreateData.MoveInfo.TransportPathTimer % period) / (float)period) * ushort.MaxValue)) << 16);
                         GameObjectData.Flags = 1048616;
                     }
                     else if (ObjectData.DynamicFlags == null)
-                        ObjectData.DynamicFlags = ((CreateData.MoveInfo.TransportPathTimer % System.UInt16.MaxValue) << 16);
+                        ObjectData.DynamicFlags = ((CreateData.MoveInfo.TransportPathTimer % ushort.MaxValue) << 16);
                 }
             }
             if (CorpseData != null)

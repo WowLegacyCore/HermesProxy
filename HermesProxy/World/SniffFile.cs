@@ -26,7 +26,7 @@ namespace HermesProxy.World
             _fileWriter.Write('P');
             _fileWriter.Write('K');
             _fileWriter.Write('T');
-            UInt16 sniffVersion = 0x201;
+            ushort sniffVersion = 0x201;
             _fileWriter.Write(sniffVersion);
             _fileWriter.Write(_gameVersion);
 

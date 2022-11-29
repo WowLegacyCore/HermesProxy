@@ -80,7 +80,7 @@ namespace HermesProxy.World.Client
                     }
 
                     // do not send leave notification for default channels when changing zones
-                    if (String.Equals(GetSession().GameState.LeftChannelName, channelName) ||
+                    if (string.Equals(GetSession().GameState.LeftChannelName, channelName) ||
                         GameData.GetChatChannelIdFromName(channelName) == 0)
                         SendPacketToClient(left);
                     break;

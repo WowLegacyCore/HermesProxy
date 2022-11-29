@@ -37,7 +37,7 @@ namespace HermesProxy.World.Server
                 targetFlags |= SpellCastTargetFlags.SourceLocation;
             if (target.DstLocation != null)
                 targetFlags |= SpellCastTargetFlags.DestLocation;
-            if (!String.IsNullOrEmpty(target.Name))
+            if (!string.IsNullOrEmpty(target.Name))
                 targetFlags |= SpellCastTargetFlags.String;
             return targetFlags;
         }
