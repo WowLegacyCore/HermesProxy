@@ -1,4 +1,5 @@
 ﻿using Framework.GameMath;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using System;
@@ -93,6 +94,11 @@ namespace HermesProxy.World.Objects
             copy.TransportPathTimer = this.TransportPathTimer;
             return copy;
         }
+
+        public void SetMovementFlags(MovementFlagModern f) { Flags = (uint)f; }
+        public void AddMovementFlag(MovementFlagModern f) { Flags |= (uint)f; }
+        public void RemoveMovementFlag(MovementFlagModern f) { Flags &= ~(uint)f; }
+        public bool HasMovementFlag(MovementFlagModern f) { return (Flags & (uint)f) != 0; }
 
         public void ReadMovementInfoLegacy(WorldPacket packet, GameSessionData gameState)
         {
@@ -452,6 +458,54 @@ namespace HermesProxy.World.Objects
 
             if (hasVehicleId)
                 data.WriteUInt32(moveInfo.VehicleId);
+        }
+
+        // Must be called only after movement flags are converted to modern enum!
+        public void ValidateMovementInfo()
+        {
+            var RemoveViolatingFlags = new Action<bool, MovementFlagModern>((check, maskToRemove) =>
+            {
+                if (check)
+                {
+                    Log.Print(LogType.Error, $"Violation of MovementFlags found ({check}). MovementFlags: {Flags}, MovementFlags2: {FlagsExtra}. Mask {maskToRemove} will be removed.");
+                    RemoveMovementFlag(maskToRemove);
+                }
+            });
+
+            /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
+                in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD.
+                It will freeze clients that receive this player's movement info.
+            */
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.Root) && HasMovementFlag(MovementFlagModern.MaskMoving), MovementFlagModern.MaskMoving);
+
+            //! Cannot ascend and descend at the same time
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.Ascending) && HasMovementFlag(MovementFlagModern.Descending),
+                MovementFlagModern.Ascending | MovementFlagModern.Descending);
+
+            //! Cannot move left and right at the same time
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.TurnLeft) && HasMovementFlag(MovementFlagModern.TurnRight),
+                MovementFlagModern.TurnLeft | MovementFlagModern.TurnRight);
+
+            //! Cannot strafe left and right at the same time
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.StrafeLeft) && HasMovementFlag(MovementFlagModern.StrafeRight),
+                MovementFlagModern.StrafeLeft | MovementFlagModern.StrafeRight);
+
+            //! Cannot pitch up and down at the same time
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.PitchUp) && HasMovementFlag(MovementFlagModern.PitchDown),
+                MovementFlagModern.PitchUp | MovementFlagModern.PitchDown);
+
+            //! Cannot move forwards and backwards at the same time
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.Forward) && HasMovementFlag(MovementFlagModern.Backward),
+                MovementFlagModern.Forward | MovementFlagModern.Backward);
+
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.DisableGravity | MovementFlagModern.CanFly) && HasMovementFlag(MovementFlagModern.Falling),
+                MovementFlagModern.Falling);
+
+            RemoveViolatingFlags(HasMovementFlag(MovementFlagModern.SplineElevation) && MathFunctions.fuzzyEq(SplineElevation, 0.0f), MovementFlagModern.SplineElevation);
+
+            // Client first checks if spline elevation != 0, then verifies flag presence
+            if (MathFunctions.fuzzyNe(SplineElevation, 0.0f))
+                AddMovementFlag(MovementFlagModern.SplineElevation);
         }
     }
 }

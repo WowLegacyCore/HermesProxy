@@ -966,6 +966,7 @@ namespace HermesProxy.World.Client
             if (updateData != null && moveInfo != null)
             {
                 moveInfo.Flags = (uint)(((MovementFlagWotLK)moveInfo.Flags).CastFlags<MovementFlagModern>());
+                moveInfo.ValidateMovementInfo();
                 updateData.CreateData.MoveInfo = moveInfo;
             }
         }

@@ -53,6 +53,7 @@ namespace HermesProxy.World.Client
             moveUpdate.MoveInfo = new();
             moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             moveUpdate.MoveInfo.Flags = (uint)(((MovementFlagWotLK)moveUpdate.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            moveUpdate.MoveInfo.ValidateMovementInfo();
             SendPacketToClient(moveUpdate);
         }
 
@@ -68,6 +69,7 @@ namespace HermesProxy.World.Client
             knockback.MoveInfo.JumpCosAngle = packet.ReadFloat();
             knockback.MoveInfo.JumpHorizontalSpeed = packet.ReadFloat();
             knockback.MoveInfo.JumpVerticalSpeed = packet.ReadFloat();
+            knockback.MoveInfo.ValidateMovementInfo();
             SendPacketToClient(knockback);
         }
 
@@ -269,6 +271,7 @@ namespace HermesProxy.World.Client
             speed.MoveInfo = new MovementInfo();
             speed.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             speed.MoveInfo.Flags = (uint)(((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            speed.MoveInfo.ValidateMovementInfo();
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
         }
