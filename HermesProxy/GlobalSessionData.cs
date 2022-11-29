@@ -40,6 +40,7 @@ namespace HermesProxy
         public bool IsWaitingForNewWorld;
         public bool IsFirstEnterWorld;
         public bool IsConnectedToInstance;
+        public Queue<ServerPacket> PendingUninstancedPackets = new(); // Here packets are queued while IsConnectedToInstance = false;
         public bool IsInWorld;
         public uint? CurrentMapId;
         public uint CurrentZoneId;
