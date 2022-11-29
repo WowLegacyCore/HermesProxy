@@ -11,8 +11,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INIT_WORLD_STATES)]
         void HandleInitWorldStates(WorldPacket packet)
         {
-            InitWorldStates states = new InitWorldStates();
-            states.MapID = packet.ReadUInt32();
+            InitWorldStates states = new InitWorldStates
+            {
+                MapID = packet.ReadUInt32()
+            };
             GetSession().GameState.CurrentMapId = states.MapID;
             states.ZoneID = packet.ReadUInt32();
             states.AreaID = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_1_0_6692) ? packet.ReadUInt32() : states.ZoneID;
@@ -66,9 +68,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_UPDATE_WORLD_STATE)]
         void HandleUpdateWorldState(WorldPacket packet)
         {
-            UpdateWorldState update = new UpdateWorldState();
-            update.VariableID = packet.ReadUInt32();
-            update.Value = packet.ReadInt32();
+            UpdateWorldState update = new UpdateWorldState
+            {
+                VariableID = packet.ReadUInt32(),
+                Value = packet.ReadInt32()
+            };
             SendPacketToClient(update);
 
             if (update.VariableID == (uint)WorldStates.WsgFlagStateAlliance)

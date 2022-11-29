@@ -160,8 +160,10 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
 
             // Packet does not exist in old clients.
-            SocketGemsSuccess success = new SocketGemsSuccess();
-            success.ItemGuid = gems.ItemGuid;
+            SocketGemsSuccess success = new SocketGemsSuccess
+            {
+                ItemGuid = gems.ItemGuid
+            };
             SendPacket(success);
         }
 

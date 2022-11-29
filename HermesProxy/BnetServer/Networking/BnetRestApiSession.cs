@@ -69,12 +69,13 @@ namespace BNetServer.Networking
             if (loginForm == null)
                 return SendEmptyResponse(HttpCode.InternalServerError);
 
-            HermesProxy.GlobalSessionData globalSession = new();
-
-            // Format: "login/$platform/$build/$locale/"
-            globalSession.OS = pathElements[1];
-            globalSession.Build = uint.Parse(pathElements[2]);
-            globalSession.Locale = pathElements[3];
+            HermesProxy.GlobalSessionData globalSession = new()
+            {
+                // Format: "login/$platform/$build/$locale/"
+                OS = pathElements[1],
+                Build = uint.Parse(pathElements[2]),
+                Locale = pathElements[3]
+            };
 
             // Should never happen. Session.HandleLogon checks version already
             if (Framework.Settings.ClientBuild != (ClientVersionBuild) globalSession.Build)

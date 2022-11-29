@@ -220,13 +220,17 @@ namespace HermesProxy.World.Client
                     SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
                     foreach (var modItr in GetSession().GameState.FlatSpellMods)
                     {
-                        SpellModifierInfo mod = new SpellModifierInfo();
-                        mod.ModIndex = modItr.Key;
+                        SpellModifierInfo mod = new SpellModifierInfo
+                        {
+                            ModIndex = modItr.Key
+                        };
                         foreach (var dataItr in modItr.Value)
                         {
-                            SpellModifierData data = new SpellModifierData();
-                            data.ClassIndex = dataItr.Key;
-                            data.ModifierValue = dataItr.Value;
+                            SpellModifierData data = new SpellModifierData
+                            {
+                                ClassIndex = dataItr.Key,
+                                ModifierValue = dataItr.Value
+                            };
                             mod.ModifierData.Add(data);
                         }
                         spell.Modifiers.Add(mod);
@@ -238,13 +242,17 @@ namespace HermesProxy.World.Client
                     SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
                     foreach (var modItr in GetSession().GameState.PctSpellMods)
                     {
-                        SpellModifierInfo mod = new SpellModifierInfo();
-                        mod.ModIndex = modItr.Key;
+                        SpellModifierInfo mod = new SpellModifierInfo
+                        {
+                            ModIndex = modItr.Key
+                        };
                         foreach (var dataItr in modItr.Value)
                         {
-                            SpellModifierData data = new SpellModifierData();
-                            data.ClassIndex = dataItr.Key;
-                            data.ModifierValue = dataItr.Value;
+                            SpellModifierData data = new SpellModifierData
+                            {
+                                ClassIndex = dataItr.Key,
+                                ModifierValue = dataItr.Value
+                            };
                             mod.ModifierData.Add(data);
                         }
                         spell.Modifiers.Add(mod);
@@ -917,10 +925,12 @@ namespace HermesProxy.World.Client
             {
                 if (flags.HasAnyFlag(UpdateFlag.GOPosition))
                 {
-                    moveInfo = new MovementInfo();
-                    moveInfo.TransportGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
+                    moveInfo = new MovementInfo
+                    {
+                        TransportGuid = packet.ReadPackedGuid().To128(GetSession().GameState),
 
-                    moveInfo.Position = packet.ReadVector3();
+                        Position = packet.ReadVector3()
+                    };
                     moveInfo.TransportOffset.X = packet.ReadFloat();
                     moveInfo.TransportOffset.Y = packet.ReadFloat();
                     moveInfo.TransportOffset.Z = packet.ReadFloat();
@@ -932,9 +942,11 @@ namespace HermesProxy.World.Client
                 }
                 else if (flags.HasAnyFlag(UpdateFlag.StationaryObject))
                 {
-                    moveInfo = new MovementInfo();
-                    moveInfo.Position = packet.ReadVector3();
-                    moveInfo.Orientation = packet.ReadFloat();
+                    moveInfo = new MovementInfo
+                    {
+                        Position = packet.ReadVector3(),
+                        Orientation = packet.ReadFloat()
+                    };
                 }
             }
 
@@ -1085,10 +1097,12 @@ namespace HermesProxy.World.Client
             if (spellId == 0)
                 return null;
 
-            AuraDataInfo data = new AuraDataInfo();
-            data.CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetCounter());
-            data.SpellID = spellId;
-            data.SpellXSpellVisualID = GameData.GetSpellVisual(spellId);
+            AuraDataInfo data = new AuraDataInfo
+            {
+                CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetCounter()),
+                SpellID = spellId,
+                SpellXSpellVisualID = GameData.GetSpellVisual(spellId)
+            };
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
@@ -1503,8 +1517,10 @@ namespace HermesProxy.World.Client
                             uint itemId = GameData.GetItemIdWithDisplayId(itemDisplayId);
                             if (itemId != 0)
                             {
-                                VisibleItem visibleItem = new VisibleItem();
-                                visibleItem.ItemID = (int)itemId;
+                                VisibleItem visibleItem = new VisibleItem
+                                {
+                                    ItemID = (int)itemId
+                                };
                                 updateData.UnitData.VirtualItems[i] = visibleItem;
                             }
                         }
@@ -1517,8 +1533,10 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_VIRTUAL_ITEM_SLOT_ID + i])
                         {
-                            VisibleItem visibleItem = new VisibleItem();
-                            visibleItem.ItemID = updates[UNIT_VIRTUAL_ITEM_SLOT_ID + i].Int32Value;
+                            VisibleItem visibleItem = new VisibleItem
+                            {
+                                ItemID = updates[UNIT_VIRTUAL_ITEM_SLOT_ID + i].Int32Value
+                            };
                             updateData.UnitData.VirtualItems[i] = visibleItem;
                         }
                     }
@@ -1619,11 +1637,13 @@ namespace HermesProxy.World.Client
                     if (!isCreate && guid == GetSession().GameState.CurrentPlayerGuid &&
                         LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                     {
-                        MoveSetCollisionHeight height = new();
-                        height.MoverGUID = guid;
-                        height.Height = updateData.UnitData.MountDisplayID != 0 ? 3.081099f : 2.438083f;
-                        height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
-                        height.Reason = 1; // Mount
+                        MoveSetCollisionHeight height = new()
+                        {
+                            MoverGUID = guid,
+                            Height = updateData.UnitData.MountDisplayID != 0 ? 3.081099f : 2.438083f,
+                            MountDisplayID = (uint)updateData.UnitData.MountDisplayID,
+                            Reason = 1 // Mount
+                        };
                         SendPacketToClient(height);
                     }
                 }
@@ -1706,8 +1726,10 @@ namespace HermesProxy.World.Client
                 int UNIT_CHANNEL_SPELL = LegacyVersion.GetUpdateField(UnitField.UNIT_CHANNEL_SPELL);
                 if (UNIT_CHANNEL_SPELL >= 0 && updateMaskArray[UNIT_CHANNEL_SPELL])
                 {
-                    UnitChannel channel = new UnitChannel();
-                    channel.SpellID = updates[UNIT_CHANNEL_SPELL].Int32Value;
+                    UnitChannel channel = new UnitChannel
+                    {
+                        SpellID = updates[UNIT_CHANNEL_SPELL].Int32Value
+                    };
                     channel.SpellXSpellVisualID = (int)GameData.GetSpellVisual((uint)channel.SpellID);
                     updateData.UnitData.ChannelData = channel;
                 }
@@ -1727,12 +1749,14 @@ namespace HermesProxy.World.Client
                         int totemSlot = GameData.GetTotemSlotForSpell((uint)updateData.UnitData.CreatedBySpell);
                         if (totemSlot >= 0)
                         {
-                            TotemCreated totem = new();
-                            totem.Slot = (byte)totemSlot;
-                            totem.Totem = guid;
-                            totem.Duration = 120000;
-                            totem.SpellId = (uint)updateData.UnitData.CreatedBySpell;
-                            totem.CannotDismiss = true;
+                            TotemCreated totem = new()
+                            {
+                                Slot = (byte)totemSlot,
+                                Totem = guid,
+                                Duration = 120000,
+                                SpellId = (uint)updateData.UnitData.CreatedBySpell,
+                                CannotDismiss = true
+                            };
                             SendPacketToClient(totem);
                         }
                     }
@@ -1901,9 +1925,11 @@ namespace HermesProxy.World.Client
                             updateMaskArray[UNIT_FIELD_AURALEVELS + i / 4] ||
                             updateMaskArray[UNIT_FIELD_AURAAPPLICATIONS + i / 4])
                         {
-                            AuraInfo aura = new AuraInfo();
-                            aura.Slot = i;
-                            aura.AuraData = ReadAuraSlot(i, guid, updates);
+                            AuraInfo aura = new AuraInfo
+                            {
+                                Slot = i,
+                                AuraData = ReadAuraSlot(i, guid, updates)
+                            };
                             if (aura.AuraData != null)
                             {
                                 int durationLeft;
@@ -2021,8 +2047,10 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset])
                         {
-                            updateData.PlayerData.VisibleItems[i] = new VisibleItem();
-                            updateData.PlayerData.VisibleItems[i].ItemID = updates[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset].Int32Value;
+                            updateData.PlayerData.VisibleItems[i] = new VisibleItem
+                            {
+                                ItemID = updates[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset].Int32Value
+                            };
                         }
                     }
                 }
@@ -2590,8 +2618,10 @@ namespace HermesProxy.World.Client
                             }
                             else
                             {
-                                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
-                                response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex((uint)i);
+                                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse
+                                {
+                                    TeamSize = ModernVersion.GetArenaTeamSizeFromIndex((uint)i)
+                                };
                                 SendPacketToClient(response);
                             }
                         }
@@ -2645,16 +2675,20 @@ namespace HermesProxy.World.Client
                         SetupCurrency currencies = new SetupCurrency();
                         if (updates.ContainsKey(PLAYER_FIELD_ARENA_CURRENCY))
                         {
-                            SetupCurrency.Record honor = new SetupCurrency.Record();
-                            honor.Type = (uint)Currency.ArenaPoints;
-                            honor.Quantity = updates[PLAYER_FIELD_ARENA_CURRENCY].UInt32Value;
+                            SetupCurrency.Record honor = new SetupCurrency.Record
+                            {
+                                Type = (uint)Currency.ArenaPoints,
+                                Quantity = updates[PLAYER_FIELD_ARENA_CURRENCY].UInt32Value
+                            };
                             currencies.Data.Add(honor);
                         }
                         if (updates.ContainsKey(PLAYER_FIELD_HONOR_CURRENCY))
                         {
-                            SetupCurrency.Record honor = new SetupCurrency.Record();
-                            honor.Type = (uint)Currency.HonorPoints;
-                            honor.Quantity = updates[PLAYER_FIELD_HONOR_CURRENCY].UInt32Value;
+                            SetupCurrency.Record honor = new SetupCurrency.Record
+                            {
+                                Type = (uint)Currency.HonorPoints,
+                                Quantity = updates[PLAYER_FIELD_HONOR_CURRENCY].UInt32Value
+                            };
                             currencies.Data.Add(honor);
                         }
                         SendPacketToClient(currencies);

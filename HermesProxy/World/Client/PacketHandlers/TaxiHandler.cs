@@ -9,8 +9,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TAXI_NODE_STATUS)]
         void HandleTaxiNodeStatus(WorldPacket packet)
         {
-            TaxiNodeStatusPkt taxi = new();
-            taxi.FlightMaster = packet.ReadGuid().To128(GetSession().GameState);
+            TaxiNodeStatusPkt taxi = new()
+            {
+                FlightMaster = packet.ReadGuid().To128(GetSession().GameState)
+            };
             bool learned = packet.ReadBool();
             taxi.Status = learned ? TaxiNodeStatus.Learned : TaxiNodeStatus.Unlearned;
             SendPacketToClient(taxi);
@@ -22,9 +24,11 @@ namespace HermesProxy.World.Client
             bool hasWindowInfo = packet.ReadUInt32() != 0;
             if (hasWindowInfo)
             {
-                taxi.WindowInfo = new();
-                taxi.WindowInfo.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
-                taxi.WindowInfo.CurrentNode = GetSession().GameState.CurrentTaxiNode = packet.ReadUInt32();
+                taxi.WindowInfo = new()
+                {
+                    UnitGUID = packet.ReadGuid().To128(GetSession().GameState),
+                    CurrentNode = GetSession().GameState.CurrentTaxiNode = packet.ReadUInt32()
+                };
             }
             while (packet.CanRead())
             {
@@ -48,8 +52,10 @@ namespace HermesProxy.World.Client
             // Ok status needs to be sent after the monster move packet.
             if (reply != ActivateTaxiReply.Ok)
             {
-                ActivateTaxiReplyPkt taxi = new();
-                taxi.Reply = reply;
+                ActivateTaxiReplyPkt taxi = new()
+                {
+                    Reply = reply
+                };
                 SendPacketToClient(taxi);
                 GetSession().GameState.IsWaitingForTaxiStart = false;
             }

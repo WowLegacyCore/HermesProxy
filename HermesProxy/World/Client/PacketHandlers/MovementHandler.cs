@@ -48,9 +48,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_MOVE_WATER_WALK)]
         void HandleMovementMessages(WorldPacket packet)
         {
-            MoveUpdate moveUpdate = new MoveUpdate();
-            moveUpdate.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            moveUpdate.MoveInfo = new();
+            MoveUpdate moveUpdate = new MoveUpdate
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                MoveInfo = new()
+            };
             moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             moveUpdate.MoveInfo.Flags = (uint)(((MovementFlagWotLK)moveUpdate.MoveInfo.Flags).CastFlags<MovementFlagModern>());
             SendPacketToClient(moveUpdate);
@@ -59,9 +61,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_MOVE_KNOCK_BACK)]
         void HandleMoveKnockBack(WorldPacket packet)
         {
-            MoveUpdateKnockBack knockback = new MoveUpdateKnockBack();
-            knockback.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            knockback.MoveInfo = new();
+            MoveUpdateKnockBack knockback = new MoveUpdateKnockBack
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                MoveInfo = new()
+            };
             knockback.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             knockback.MoveInfo.Flags = (uint)(((MovementFlagWotLK)knockback.MoveInfo.Flags).CastFlags<MovementFlagModern>());
             knockback.MoveInfo.JumpSinAngle = packet.ReadFloat();
@@ -74,21 +78,25 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MOVE_KNOCK_BACK)]
         void HandleMoveForceKnockBack(WorldPacket packet)
         {
-            MoveKnockBack knockback = new MoveKnockBack();
-            knockback.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            knockback.MoveCounter = packet.ReadUInt32();
-            knockback.Direction = packet.ReadVector2();
-            knockback.HorizontalSpeed = packet.ReadFloat();
-            knockback.VerticalSpeed = packet.ReadFloat();
+            MoveKnockBack knockback = new MoveKnockBack
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                MoveCounter = packet.ReadUInt32(),
+                Direction = packet.ReadVector2(),
+                HorizontalSpeed = packet.ReadFloat(),
+                VerticalSpeed = packet.ReadFloat()
+            };
             SendPacketToClient(knockback);
         }
 
         [PacketHandler(Opcode.SMSG_CONTROL_UPDATE)]
         void HandleControlUpdate(WorldPacket packet)
         {
-            ControlUpdate control = new ControlUpdate();
-            control.Guid = packet.ReadPackedGuid().To128(GetSession().GameState);
-            control.HasControl = packet.ReadBool();
+            ControlUpdate control = new ControlUpdate
+            {
+                Guid = packet.ReadPackedGuid().To128(GetSession().GameState),
+                HasControl = packet.ReadBool()
+            };
             SendPacketToClient(control);
         }
 
@@ -100,16 +108,20 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.IsInTaxiFlight &&
                 GetSession().GameState.CurrentPlayerGuid == guid)
             {
-                ControlUpdate control = new ControlUpdate();
-                control.Guid = guid;
-                control.HasControl = true;
+                ControlUpdate control = new ControlUpdate
+                {
+                    Guid = guid,
+                    HasControl = true
+                };
                 SendPacketToClient(control);
                 GetSession().GameState.IsInTaxiFlight = false;
             }
 
-            MoveTeleport teleport = new MoveTeleport();
-            teleport.MoverGUID = guid;
-            teleport.MoveCounter = packet.ReadUInt32();
+            MoveTeleport teleport = new MoveTeleport
+            {
+                MoverGUID = guid,
+                MoveCounter = packet.ReadUInt32()
+            };
             MovementInfo moveInfo = new();
             moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             teleport.Position = moveInfo.Position;
@@ -117,8 +129,10 @@ namespace HermesProxy.World.Client
             teleport.TransportGUID = moveInfo.TransportGuid;
             if (moveInfo.TransportSeat > 0)
             {
-                teleport.Vehicle = new();
-                teleport.Vehicle.VehicleSeatIndex = moveInfo.TransportSeat;
+                teleport.Vehicle = new()
+                {
+                    VehicleSeatIndex = moveInfo.TransportSeat
+                };
             }
             SendPacketToClient(teleport);
         }
@@ -126,16 +140,20 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TRANSFER_PENDING)]
         void HandleTransferPending(WorldPacket packet)
         {
-            TransferPending transfer = new TransferPending();
-            transfer.MapID = GetSession().GameState.PendingTransferMapId = packet.ReadUInt32();
-            transfer.OldMapPosition = Vector3.Zero;
+            TransferPending transfer = new TransferPending
+            {
+                MapID = GetSession().GameState.PendingTransferMapId = packet.ReadUInt32(),
+                OldMapPosition = Vector3.Zero
+            };
             SendPacketToClient(transfer);
             GetSession().GameState.IsFirstEnterWorld = false;
             GetSession().GameState.IsWaitingForNewWorld = true;
 
-            SuspendToken suspend = new();
-            suspend.SequenceIndex = 3;
-            suspend.Reason = 1;
+            SuspendToken suspend = new()
+            {
+                SequenceIndex = 3,
+                Reason = 1
+            };
             SendPacketToClient(suspend);
         }
 
@@ -180,16 +198,20 @@ namespace HermesProxy.World.Client
                 SendPacketToClient(teleport);
                 if (teleport.MapID > 1)
                 {
-                    UpdateLastInstance instance = new();
-                    instance.MapID = teleport.MapID;
+                    UpdateLastInstance instance = new()
+                    {
+                        MapID = teleport.MapID
+                    };
                     SendPacketToClient(instance);
 
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                         SendPacketToClient(new TimeSyncRequest());
 
-                    ResumeToken resume = new();
-                    resume.SequenceIndex = 3;
-                    resume.Reason = 1;
+                    ResumeToken resume = new()
+                    {
+                        SequenceIndex = 3,
+                        Reason = 1
+                    };
                     SendPacketToClient(resume);
                 }
 
@@ -216,9 +238,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MOVE_SPLINE_SET_WALK_SPEED)]
         void HandleMoveSplineSetSpeed(WorldPacket packet)
         {
-            MoveSplineSetSpeed speed = new MoveSplineSetSpeed(packet.GetUniversalOpcode(false));
-            speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            speed.Speed = packet.ReadFloat();
+            MoveSplineSetSpeed speed = new MoveSplineSetSpeed(packet.GetUniversalOpcode(false))
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                Speed = packet.ReadFloat()
+            };
             SendPacketToClient(speed);
         }
 
@@ -237,9 +261,11 @@ namespace HermesProxy.World.Client
             string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("SMSG_FORCE_", "SMSG_MOVE_SET_").Replace("_CHANGE", "");
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
 
-            MoveSetSpeed speed = new MoveSetSpeed(universalOpcode);
-            speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            speed.MoveCounter = packet.ReadUInt32();
+            MoveSetSpeed speed = new MoveSetSpeed(universalOpcode)
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                MoveCounter = packet.ReadUInt32()
+            };
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) &&
                 packet.GetUniversalOpcode(false) == Opcode.SMSG_FORCE_RUN_SPEED_CHANGE)
@@ -256,10 +282,12 @@ namespace HermesProxy.World.Client
                 LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 var flyOpcode = (Opcode) Enum.Parse(typeof(Opcode), universalOpcode.ToString().Replace("SWIM", "FLIGHT"));
-                MoveSetSpeed flySpeed = new MoveSetSpeed(flyOpcode);
-                flySpeed.MoverGUID = speed.MoverGUID;
-                flySpeed.MoveCounter = speed.MoveCounter;
-                flySpeed.Speed = speed.Speed;
+                MoveSetSpeed flySpeed = new MoveSetSpeed(flyOpcode)
+                {
+                    MoverGUID = speed.MoverGUID,
+                    MoveCounter = speed.MoveCounter,
+                    Speed = speed.Speed
+                };
                 SendPacketToClient(flySpeed);
             }
         }
@@ -279,9 +307,11 @@ namespace HermesProxy.World.Client
             string opcodeName = packet.GetUniversalOpcode(false).ToString().Replace("MSG_MOVE_SET", "SMSG_MOVE_UPDATE");
             Opcode universalOpcode = Opcodes.GetUniversalOpcode(opcodeName);
 
-            MoveUpdateSpeed speed = new MoveUpdateSpeed(universalOpcode);
-            speed.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            speed.MoveInfo = new MovementInfo();
+            MoveUpdateSpeed speed = new MoveUpdateSpeed(universalOpcode)
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                MoveInfo = new MovementInfo()
+            };
             speed.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             var newFlags = ((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>();
             speed.MoveInfo.Flags = (uint)(newFlags);
@@ -294,10 +324,12 @@ namespace HermesProxy.World.Client
                 LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 var flyOpcode = (Opcode) Enum.Parse(typeof(Opcode), universalOpcode.ToString().Replace("SWIM", "FLIGHT"));
-                MoveUpdateSpeed flySpeed = new MoveUpdateSpeed(flyOpcode);
-                flySpeed.MoverGUID = speed.MoverGUID;
-                flySpeed.MoveInfo = speed.MoveInfo;
-                flySpeed.Speed = speed.Speed;
+                MoveUpdateSpeed flySpeed = new MoveUpdateSpeed(flyOpcode)
+                {
+                    MoverGUID = speed.MoverGUID,
+                    MoveInfo = speed.MoveInfo,
+                    Speed = speed.Speed
+                };
                 SendPacketToClient(flySpeed);
             }
         }
@@ -320,8 +352,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MOVE_SPLINE_UNSET_FLYING)]
         void HandleSplineMovementMessages(WorldPacket packet)
         {
-            MoveSplineSetFlag spline = new MoveSplineSetFlag(packet.GetUniversalOpcode(false));
-            spline.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
+            MoveSplineSetFlag spline = new MoveSplineSetFlag(packet.GetUniversalOpcode(false))
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(spline);
         }
 
@@ -341,9 +375,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MOVE_SET_NORMAL_FALL)]
         void HandleMoveForceFlagChange(WorldPacket packet)
         {
-            MoveSetFlag flag = new MoveSetFlag(packet.GetUniversalOpcode(false));
-            flag.MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState);
-            flag.MoveCounter = packet.ReadUInt32();
+            MoveSetFlag flag = new MoveSetFlag(packet.GetUniversalOpcode(false))
+            {
+                MoverGUID = packet.ReadPackedGuid().To128(GetSession().GameState),
+                MoveCounter = packet.ReadUInt32()
+            };
             SendPacketToClient(flag);
         }
 
@@ -523,24 +559,30 @@ namespace HermesProxy.World.Client
                 // Exact sequence of packets from sniff.
                 // Client instantly teleports to destination if anything is left out.
 
-                ServerSideMovement stopSpline = new();
-                stopSpline.StartPosition = moveSpline.StartPosition;
-                stopSpline.SplineId = moveSpline.SplineId - 2;
+                ServerSideMovement stopSpline = new()
+                {
+                    StartPosition = moveSpline.StartPosition,
+                    SplineId = moveSpline.SplineId - 2
+                };
                 MonsterMove moveStop = new MonsterMove(guid, stopSpline);
                 SendPacketToClient(moveStop);
 
-                ControlUpdate update = new();
-                update.Guid = guid;
-                update.HasControl = false;
+                ControlUpdate update = new()
+                {
+                    Guid = guid,
+                    HasControl = false
+                };
                 SendPacketToClient(update);
 
                 stopSpline.SplineId = moveSpline.SplineId - 1;
                 moveStop = new MonsterMove(guid, stopSpline);
                 SendPacketToClient(moveStop);
 
-                update = new();
-                update.Guid = guid;
-                update.HasControl = false;
+                update = new()
+                {
+                    Guid = guid,
+                    HasControl = false
+                };
                 SendPacketToClient(update);
 
                 moveSpline.SplineFlags = SplineFlagModern.Flying |
@@ -562,8 +604,10 @@ namespace HermesProxy.World.Client
             {
                 if (GetSession().GameState.IsWaitingForTaxiStart)
                 {
-                    ActivateTaxiReplyPkt taxi = new();
-                    taxi.Reply = ActivateTaxiReply.Ok;
+                    ActivateTaxiReplyPkt taxi = new()
+                    {
+                        Reply = ActivateTaxiReply.Ok
+                    };
                     SendPacketToClient(taxi);
                     GetSession().GameState.IsWaitingForTaxiStart = false;
                 }

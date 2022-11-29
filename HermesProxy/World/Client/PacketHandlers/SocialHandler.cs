@@ -11,15 +11,19 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FRIEND_LIST)]
         void HandleFriendList(WorldPacket packet)
         {
-            ContactList contacts = new ContactList();
-            contacts.Flags = SocialFlag.Friend;
+            ContactList contacts = new ContactList
+            {
+                Flags = SocialFlag.Friend
+            };
             var count = packet.ReadUInt8();
 
             for (var i = 0; i < count; i++)
             {
-                ContactInfo contact = new ContactInfo();
-                contact.TypeFlags = SocialFlag.Friend;
-                contact.Guid = packet.ReadGuid().To128(GetSession().GameState);
+                ContactInfo contact = new ContactInfo
+                {
+                    TypeFlags = SocialFlag.Friend,
+                    Guid = packet.ReadGuid().To128(GetSession().GameState)
+                };
                 contact.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(contact.Guid);
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
@@ -39,15 +43,19 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_IGNORE_LIST)]
         void HandleIgnoreList(WorldPacket packet)
         {
-            ContactList contacts = new ContactList();
-            contacts.Flags = SocialFlag.Ignored;
+            ContactList contacts = new ContactList
+            {
+                Flags = SocialFlag.Ignored
+            };
             var count = packet.ReadUInt8();
 
             for (var i = 0; i < count; i++)
             {
-                ContactInfo contact = new ContactInfo();
-                contact.TypeFlags = SocialFlag.Ignored;
-                contact.Guid = packet.ReadGuid().To128(GetSession().GameState);
+                ContactInfo contact = new ContactInfo
+                {
+                    TypeFlags = SocialFlag.Ignored,
+                    Guid = packet.ReadGuid().To128(GetSession().GameState)
+                };
                 contact.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(contact.Guid);
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
@@ -60,14 +68,18 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CONTACT_LIST)]
         void HandleContactList(WorldPacket packet)
         {
-            ContactList contacts = new ContactList();
-            contacts.Flags = (SocialFlag)packet.ReadUInt32();
+            ContactList contacts = new ContactList
+            {
+                Flags = (SocialFlag)packet.ReadUInt32()
+            };
             var count = packet.ReadUInt32();
 
             for (var i = 0; i < count; i++)
             {
-                ContactInfo contact = new ContactInfo();
-                contact.Guid = packet.ReadGuid().To128(GetSession().GameState);
+                ContactInfo contact = new ContactInfo
+                {
+                    Guid = packet.ReadGuid().To128(GetSession().GameState)
+                };
                 contact.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(contact.Guid);
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
@@ -92,9 +104,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FRIEND_STATUS)]
         void HandleFriendStatus(WorldPacket packet)
         {
-            FriendStatusPkt friend = new FriendStatusPkt();
-            friend.FriendResult = (FriendsResult)packet.ReadUInt8();
-            friend.Guid = packet.ReadGuid().To128(GetSession().GameState);
+            FriendStatusPkt friend = new FriendStatusPkt
+            {
+                FriendResult = (FriendsResult)packet.ReadUInt8(),
+                Guid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             friend.WowAccountGuid = GetSession().GetGameAccountGuidForPlayer(friend.Guid);
             friend.VirtualRealmAddress = GetSession().RealmId.GetAddress();
             switch (friend.FriendResult)

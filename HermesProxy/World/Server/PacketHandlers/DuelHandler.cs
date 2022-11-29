@@ -9,9 +9,11 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAN_DUEL)]
         void HandleCanDuel(CanDuel request)
         {
-            CanDuelResult result = new CanDuelResult();
-            result.TargetGUID = request.TargetGUID;
-            result.Result = true;
+            CanDuelResult result = new CanDuelResult
+            {
+                TargetGUID = request.TargetGUID,
+                Result = true
+            };
             SendPacket(result);
         }
 

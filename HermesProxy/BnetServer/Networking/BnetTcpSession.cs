@@ -92,12 +92,14 @@ namespace BNetServer.Networking
 
         public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)
         {
-            Header header = new();
-            header.Token = token;
-            header.Status = (uint)status;
-            header.ServiceId = serviceId;
-            header.ServiceHash = (uint)service;
-            header.MethodId = methodId;
+            Header header = new()
+            {
+                Token = token,
+                Status = (uint)status,
+                ServiceId = serviceId,
+                ServiceHash = (uint)service,
+                MethodId = methodId
+            };
             if (message != null)
                 header.Size = (uint)message.CalculateSize();
 

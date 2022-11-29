@@ -206,10 +206,11 @@ namespace HermesProxy.World.Client
             try
             {
                 ByteBuffer buffer = new ByteBuffer();
-                LegacyClientPacketHeader header = new LegacyClientPacketHeader();
-
-                header.Size = (ushort)(packet.GetSize() + sizeof(uint)); // size includes the opcode
-                header.Opcode = packet.GetOpcode();
+                LegacyClientPacketHeader header = new LegacyClientPacketHeader
+                {
+                    Size = (ushort)(packet.GetSize() + sizeof(uint)), // size includes the opcode
+                    Opcode = packet.GetOpcode()
+                };
                 header.Write(buffer);
 
                 Log.PrintNet(LogType.Debug, LogNetDir.P2S, $"Sending opcode {LegacyVersion.GetUniversalOpcode(header.Opcode)} ({header.Opcode}) with size {header.Size}.");

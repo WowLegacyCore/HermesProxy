@@ -102,15 +102,19 @@ namespace HermesProxy.World.Server.Packets
 
             for (int i = 0; i < classFiltersCount; ++i)
             {
-                ClassFilter classFilter = new ClassFilter();
-                classFilter.ItemClass = _worldPacket.ReadInt32();
+                ClassFilter classFilter = new ClassFilter
+                {
+                    ItemClass = _worldPacket.ReadInt32()
+                };
 
                 uint subClassFiltersCount = _worldPacket.ReadBits<uint>(5);
                 for (uint j = 0; j < subClassFiltersCount; ++j)
                 {
-                    SubClassFilter filter = new SubClassFilter();
-                    filter.ItemSubclass = _worldPacket.ReadInt32();
-                    filter.InvTypeMask = _worldPacket.ReadUInt32();
+                    SubClassFilter filter = new SubClassFilter
+                    {
+                        ItemSubclass = _worldPacket.ReadInt32(),
+                        InvTypeMask = _worldPacket.ReadUInt32()
+                    };
                     classFilter.SubClassFilters.Add(filter);
                 }
 
@@ -122,9 +126,11 @@ namespace HermesProxy.World.Server.Packets
             var sorts = new WorldPacket(_worldPacket.GetOpcode(), data);
             for (var i = 0; i < sortCount; ++i)
             {
-                AuctionSort sort = new AuctionSort();
-                sort.Type = sorts.ReadUInt8();
-                sort.Direction = sorts.ReadUInt8();
+                AuctionSort sort = new AuctionSort
+                {
+                    Type = sorts.ReadUInt8(),
+                    Direction = sorts.ReadUInt8()
+                };
                 Sorts.Add(sort);
             }
         }

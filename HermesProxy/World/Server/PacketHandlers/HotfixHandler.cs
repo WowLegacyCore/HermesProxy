@@ -13,21 +13,25 @@ namespace HermesProxy.World.Server
         {
             foreach (uint id in query.Queries)
             {
-                DBReply reply = new();
-                reply.RecordID = id;
-                reply.TableHash = query.TableHash;
-                reply.Status = HotfixStatus.Invalid;
-                reply.Timestamp = (uint)Time.UnixTime;
+                DBReply reply = new()
+                {
+                    RecordID = id,
+                    TableHash = query.TableHash,
+                    Status = HotfixStatus.Invalid,
+                    Timestamp = (uint)Time.UnixTime
+                };
 
                 if (query.TableHash == DB2Hash.BroadcastText)
                 {
                     BroadcastText bct = GameData.GetBroadcastText(id);
                     if (bct == null)
                     {
-                        bct = new BroadcastText();
-                        bct.Entry = id;
-                        bct.MaleText = "Clear your cache!";
-                        bct.FemaleText = "Clear your cache!";
+                        bct = new BroadcastText
+                        {
+                            Entry = id,
+                            MaleText = "Clear your cache!",
+                            FemaleText = "Clear your cache!"
+                        };
                     }
 
                     reply.Status = HotfixStatus.Valid;

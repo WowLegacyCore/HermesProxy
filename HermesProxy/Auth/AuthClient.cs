@@ -495,8 +495,10 @@ namespace HermesProxy.Auth
 
             for (ushort i = 0; i < realmsCount; i++)
             {
-                RealmInfo realmInfo = new RealmInfo();
-                realmInfo.ID = i;
+                RealmInfo realmInfo = new RealmInfo
+                {
+                    ID = i
+                };
 
                 if (Settings.ServerBuild < ClientVersionBuild.V2_0_3_6299)
                 {

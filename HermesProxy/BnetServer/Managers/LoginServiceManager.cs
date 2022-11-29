@@ -49,24 +49,30 @@ namespace BNetServer
             // set up form inputs
             formInputs.Type = "LOGIN_FORM";
 
-            var input = new FormInput();
-            input.Id = "account_name";
-            input.Type = "text";
-            input.Label = "E-mail";
-            input.MaxLength = 320;
+            var input = new FormInput
+            {
+                Id = "account_name",
+                Type = "text",
+                Label = "E-mail",
+                MaxLength = 320
+            };
             formInputs.Inputs.Add(input);
 
-            input = new FormInput();
-            input.Id = "password";
-            input.Type = "password";
-            input.Label = "Password";
-            input.MaxLength = 16;
+            input = new FormInput
+            {
+                Id = "password",
+                Type = "password",
+                Label = "Password",
+                MaxLength = 16
+            };
             formInputs.Inputs.Add(input);
 
-            input = new FormInput();
-            input.Id = "log_in_submit";
-            input.Type = "submit";
-            input.Label = "Log In";
+            input = new FormInput
+            {
+                Id = "log_in_submit",
+                Type = "submit",
+                Label = "Log In"
+            };
             formInputs.Inputs.Add(input);
         }
 

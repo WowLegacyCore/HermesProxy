@@ -11,8 +11,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_AUCTION_HELLO)]
         void HandleAuctionHello(WorldPacket packet)
         {
-            AuctionHelloResponse auction = new AuctionHelloResponse();
-            auction.Guid = packet.ReadGuid().To128(GetSession().GameState);
+            AuctionHelloResponse auction = new AuctionHelloResponse
+            {
+                Guid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             GetSession().GameState.CurrentInteractedWithNPC = auction.Guid;
             auction.AuctionHouseID = packet.ReadUInt32();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
@@ -28,10 +30,14 @@ namespace HermesProxy.World.Client
 
         AuctionItem ReadAuctionItem(WorldPacket packet)
         {
-            AuctionItem item = new AuctionItem();
-            item.AuctionID = packet.ReadUInt32();
-            item.Item = new();
-            item.Item.ItemID = packet.ReadUInt32();
+            AuctionItem item = new AuctionItem
+            {
+                AuctionID = packet.ReadUInt32(),
+                Item = new()
+                {
+                    ItemID = packet.ReadUInt32()
+                }
+            };
 
             byte enchantmentCount;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -43,9 +49,11 @@ namespace HermesProxy.World.Client
 
             for (byte j = 0; j < enchantmentCount; ++j)
             {
-                ItemEnchantData enchant = new ItemEnchantData();
-                enchant.Slot = j;
-                enchant.ID = packet.ReadUInt32();
+                ItemEnchantData enchant = new ItemEnchantData
+                {
+                    Slot = j,
+                    ID = packet.ReadUInt32()
+                };
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 {
                     enchant.Expiration = packet.ReadUInt32();
@@ -115,10 +123,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_AUCTION_COMMAND_RESULT)]
         void HandleAuctionCommandResult(WorldPacket packet)
         {
-            AuctionCommandResult auction = new AuctionCommandResult();
-            auction.AuctionID = packet.ReadUInt32();
-            auction.Command = (AuctionHouseAction)packet.ReadUInt32();
-            auction.ErrorCode = (AuctionHouseError)packet.ReadUInt32();
+            AuctionCommandResult auction = new AuctionCommandResult
+            {
+                AuctionID = packet.ReadUInt32(),
+                Command = (AuctionHouseAction)packet.ReadUInt32(),
+                ErrorCode = (AuctionHouseError)packet.ReadUInt32()
+            };
             switch (auction.ErrorCode)
             {
                 case AuctionHouseError.Ok:

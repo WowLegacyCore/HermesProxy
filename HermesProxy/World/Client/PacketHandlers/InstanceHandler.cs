@@ -10,25 +10,31 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_UPDATE_INSTANCE_OWNERSHIP)]
         void HandleUpdateInstanceOwnership(WorldPacket packet)
         {
-            UpdateInstanceOwnership instance = new UpdateInstanceOwnership();
-            instance.IOwnInstance = packet.ReadUInt32();
+            UpdateInstanceOwnership instance = new UpdateInstanceOwnership
+            {
+                IOwnInstance = packet.ReadUInt32()
+            };
             SendPacketToClient(instance);
         }
 
         [PacketHandler(Opcode.SMSG_INSTANCE_RESET)]
         void HandleInstanceReset(WorldPacket packet)
         {
-            InstanceReset reset = new InstanceReset();
-            reset.MapID = packet.ReadUInt32();
+            InstanceReset reset = new InstanceReset
+            {
+                MapID = packet.ReadUInt32()
+            };
             SendPacketToClient(reset);
         }
 
         [PacketHandler(Opcode.SMSG_INSTANCE_RESET_FAILED)]
         void HandleInstanceResetFailed(WorldPacket packet)
         {
-            InstanceResetFailed reset = new InstanceResetFailed();
-            reset.ResetFailedReason = (ResetFailedReason)packet.ReadUInt32();
-            reset.MapID = packet.ReadUInt32();
+            InstanceResetFailed reset = new InstanceResetFailed
+            {
+                ResetFailedReason = (ResetFailedReason)packet.ReadUInt32(),
+                MapID = packet.ReadUInt32()
+            };
             SendPacketToClient(reset);
         }
 
@@ -47,8 +53,10 @@ namespace HermesProxy.World.Client
             int count = packet.ReadInt32();
             for (var i = 0; i < count; ++i)
             {
-                InstanceLock instance = new InstanceLock();
-                instance.MapID = packet.ReadUInt32();
+                InstanceLock instance = new InstanceLock
+                {
+                    MapID = packet.ReadUInt32()
+                };
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                     instance.DifficultyID = (Difficulty)packet.ReadUInt32();
@@ -83,26 +91,32 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INSTANCE_SAVE_CREATED)]
         void HandleInstanceSaveCreated(WorldPacket packet)
         {
-            InstanceSaveCreated save = new InstanceSaveCreated();
-            save.Gm = packet.ReadUInt32() != 0;
+            InstanceSaveCreated save = new InstanceSaveCreated
+            {
+                Gm = packet.ReadUInt32() != 0
+            };
             SendPacketToClient(save);
         }
 
         [PacketHandler(Opcode.SMSG_RAID_GROUP_ONLY)]
         void HandleRaidGroupOnly(WorldPacket packet)
         {
-            RaidGroupOnly save = new RaidGroupOnly();
-            save.Delay = packet.ReadInt32();
-            save.Reason = (RaidGroupReason)packet.ReadUInt32();
+            RaidGroupOnly save = new RaidGroupOnly
+            {
+                Delay = packet.ReadInt32(),
+                Reason = (RaidGroupReason)packet.ReadUInt32()
+            };
             SendPacketToClient(save);
         }
 
         [PacketHandler(Opcode.SMSG_RAID_INSTANCE_MESSAGE)]
         void HandleRaidInstanceMessage(WorldPacket packet)
         {
-            RaidInstanceMessage instance = new RaidInstanceMessage();
-            instance.Type = (InstanceResetWarningType)packet.ReadUInt32();
-            instance.MapID = packet.ReadUInt32();
+            RaidInstanceMessage instance = new RaidInstanceMessage
+            {
+                Type = (InstanceResetWarningType)packet.ReadUInt32(),
+                MapID = packet.ReadUInt32()
+            };
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 instance.DifficultyID = (Difficulty)packet.ReadUInt32();

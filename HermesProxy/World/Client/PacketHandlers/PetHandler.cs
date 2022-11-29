@@ -23,8 +23,10 @@ namespace HermesProxy.World.Client
                 return;
             }
 
-            PetSpells spells = new();
-            spells.PetGUID = guid.To128(GetSession().GameState);
+            PetSpells spells = new()
+            {
+                PetGUID = guid.To128(GetSession().GameState)
+            };
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                 spells.CreatureFamily = packet.ReadUInt16();
 
@@ -65,17 +67,21 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_ACTION_SOUND)]
         void HandlePetActionSound(WorldPacket packet)
         {
-            PetActionSound sound = new PetActionSound();
-            sound.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
-            sound.Action = packet.ReadUInt32();
+            PetActionSound sound = new PetActionSound
+            {
+                UnitGUID = packet.ReadGuid().To128(GetSession().GameState),
+                Action = packet.ReadUInt32()
+            };
             SendPacketToClient(sound);
         }
 
         [PacketHandler(Opcode.SMSG_PET_BROKEN)]
         void HandlePetBroken(WorldPacket packet)
         {
-            PrintNotification notify = new PrintNotification();
-            notify.NotifyText = "Your pet has run away";
+            PrintNotification notify = new PrintNotification
+            {
+                NotifyText = "Your pet has run away"
+            };
             SendPacketToClient(notify);
         }
 
@@ -93,17 +99,21 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(pets);
 
-            PetStableList stable = new PetStableList();
-            stable.StableMaster = packet.ReadGuid().To128(GetSession().GameState);
+            PetStableList stable = new PetStableList
+            {
+                StableMaster = packet.ReadGuid().To128(GetSession().GameState)
+            };
             byte count = packet.ReadUInt8();
             stable.NumStableSlots = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)
             {
-                PetStableInfo pet = new PetStableInfo();
-                pet.PetNumber = packet.ReadUInt32();
-                pet.CreatureID = packet.ReadUInt32();
-                pet.ExperienceLevel = packet.ReadUInt32();
-                pet.PetName = packet.ReadCString();
+                PetStableInfo pet = new PetStableInfo
+                {
+                    PetNumber = packet.ReadUInt32(),
+                    CreatureID = packet.ReadUInt32(),
+                    ExperienceLevel = packet.ReadUInt32(),
+                    PetName = packet.ReadCString()
+                };
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                     pet.LoyaltyLevel = (byte)packet.ReadUInt32();
                 pet.PetFlags = packet.ReadUInt8();
@@ -130,8 +140,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_STABLE_RESULT)]
         void HandlePetStableResult(WorldPacket packet)
         {
-            PetStableResult stable = new PetStableResult();
-            stable.Result = packet.ReadUInt8();
+            PetStableResult stable = new PetStableResult
+            {
+                Result = packet.ReadUInt8()
+            };
             SendPacketToClient(stable);
         }
     }

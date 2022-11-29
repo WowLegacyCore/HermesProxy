@@ -50,8 +50,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_ROSTER)]
         void HandleArenaTeamRoster(WorldPacket packet)
         {
-            ArenaTeamRosterResponse arena = new ArenaTeamRosterResponse();
-            arena.TeamId = packet.ReadUInt32();
+            ArenaTeamRosterResponse arena = new ArenaTeamRosterResponse
+            {
+                TeamId = packet.ReadUInt32()
+            };
 
             var hiddenRating = false;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_8_9464))
@@ -131,10 +133,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_COMMAND_RESULT)]
         void HandleArenaTeamCommandResult(WorldPacket packet)
         {
-            ArenaTeamCommandResult arena = new ArenaTeamCommandResult();
-            arena.Action = (ArenaTeamCommandType)packet.ReadUInt32();
-            arena.TeamName = packet.ReadCString();
-            arena.PlayerName = packet.ReadCString();
+            ArenaTeamCommandResult arena = new ArenaTeamCommandResult
+            {
+                Action = (ArenaTeamCommandType)packet.ReadUInt32(),
+                TeamName = packet.ReadCString(),
+                PlayerName = packet.ReadCString()
+            };
             var errorType = (ArenaTeamCommandErrorLegacy)packet.ReadUInt32();
             arena.Error = (ArenaTeamCommandErrorModern)Enum.Parse(typeof(ArenaTeamCommandErrorModern), errorType.ToString());
             SendPacketToClient(arena);
@@ -143,9 +147,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_INVITE)]
         void HandleArenaTeamInvite(WorldPacket packet)
         {
-            ArenaTeamInvite arena = new ArenaTeamInvite();
-            arena.PlayerName = packet.ReadCString();
-            arena.TeamName = packet.ReadCString();
+            ArenaTeamInvite arena = new ArenaTeamInvite
+            {
+                PlayerName = packet.ReadCString(),
+                TeamName = packet.ReadCString()
+            };
             arena.PlayerGuid = GetSession().GameState.GetPlayerGuidByName(arena.PlayerName);
             if (arena.PlayerGuid == null)
                 arena.PlayerGuid = WowGuid128.Empty;

@@ -11,8 +11,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TRADE_STATUS)]
         void HandleTradeStatus(WorldPacket packet)
         {
-            TradeStatusPkt trade = new();
-            trade.Status = (TradeStatus)packet.ReadUInt32();
+            TradeStatusPkt trade = new()
+            {
+                Status = (TradeStatus)packet.ReadUInt32()
+            };
             switch (trade.Status)
             {
                 case TradeStatus.Proposed:
@@ -39,8 +41,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TRADE_STATUS_EXTENDED)]
         void HandleTradeStatusExtended(WorldPacket packet)
         {
-            TradeUpdated trade = new();
-            trade.WhichPlayer = packet.ReadUInt8();
+            TradeUpdated trade = new()
+            {
+                WhichPlayer = packet.ReadUInt8()
+            };
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 trade.Id = packet.ReadUInt32();
             trade.ClientStateIndex = packet.ReadUInt32();
@@ -49,9 +53,11 @@ namespace HermesProxy.World.Client
             trade.ProposedEnchantment = packet.ReadInt32();
             while (packet.CanRead())
             {
-                TradeItem item = new TradeItem();
-                item.Unwrapped = new UnwrappedTradeItem();
-                item.Slot = packet.ReadUInt8();
+                TradeItem item = new TradeItem
+                {
+                    Unwrapped = new UnwrappedTradeItem(),
+                    Slot = packet.ReadUInt8()
+                };
                 item.Item.ItemID = packet.ReadUInt32();
                 packet.ReadUInt32(); // Item Display ID
                 item.StackCount = packet.ReadInt32();

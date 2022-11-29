@@ -11,26 +11,32 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SET_PROFICIENCY)]
         void HandleSetProficiency(WorldPacket packet)
         {
-            SetProficiency proficiency = new SetProficiency();
-            proficiency.ProficiencyClass = packet.ReadUInt8();
-            proficiency.ProficiencyMask = packet.ReadUInt32();
+            SetProficiency proficiency = new SetProficiency
+            {
+                ProficiencyClass = packet.ReadUInt8(),
+                ProficiencyMask = packet.ReadUInt32()
+            };
             SendPacketToClient(proficiency);
         }
         [PacketHandler(Opcode.SMSG_BUY_SUCCEEDED)]
         void HandleBuySucceeded(WorldPacket packet)
         {
-            BuySucceeded buy = new BuySucceeded();
-            buy.VendorGUID = packet.ReadGuid().To128(GetSession().GameState);
-            buy.Slot = packet.ReadUInt32();
-            buy.NewQuantity = packet.ReadInt32();
-            buy.QuantityBought = packet.ReadUInt32();
+            BuySucceeded buy = new BuySucceeded
+            {
+                VendorGUID = packet.ReadGuid().To128(GetSession().GameState),
+                Slot = packet.ReadUInt32(),
+                NewQuantity = packet.ReadInt32(),
+                QuantityBought = packet.ReadUInt32()
+            };
             SendPacketToClient(buy);
         }
         [PacketHandler(Opcode.SMSG_ITEM_PUSH_RESULT)]
         void HandleItemPushResult(WorldPacket packet)
         {
-            ItemPushResult item = new ItemPushResult();
-            item.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
+            ItemPushResult item = new ItemPushResult
+            {
+                PlayerGUID = packet.ReadGuid().To128(GetSession().GameState)
+            };
             bool fromNPC = packet.ReadUInt32() == 1;
             item.Created = packet.ReadUInt32() == 1;
             bool showInChat = packet.ReadUInt32() == 1;
@@ -90,32 +96,40 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_OK)]
         void HandleReadItemResultOk(WorldPacket packet)
         {
-            ReadItemResultOK read = new ReadItemResultOK();
-            read.ItemGUID = packet.ReadGuid().To128(GetSession().GameState);
+            ReadItemResultOK read = new ReadItemResultOK
+            {
+                ItemGUID = packet.ReadGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(read);
         }
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_FAILED)]
         void HandleReadItemResultFailed(WorldPacket packet)
         {
-            ReadItemResultFailed read = new ReadItemResultFailed();
-            read.ItemGUID = packet.ReadGuid().To128(GetSession().GameState);
-            read.Subcode = 2;
+            ReadItemResultFailed read = new ReadItemResultFailed
+            {
+                ItemGUID = packet.ReadGuid().To128(GetSession().GameState),
+                Subcode = 2
+            };
             SendPacketToClient(read);
         }
         [PacketHandler(Opcode.SMSG_BUY_FAILED)]
         void HandleBuyFailed(WorldPacket packet)
         {
-            BuyFailed fail = new BuyFailed();
-            fail.VendorGUID = packet.ReadGuid().To128(GetSession().GameState);
-            fail.Slot = packet.ReadUInt32();
-            fail.Reason = (BuyResult)packet.ReadUInt8();
+            BuyFailed fail = new BuyFailed
+            {
+                VendorGUID = packet.ReadGuid().To128(GetSession().GameState),
+                Slot = packet.ReadUInt32(),
+                Reason = (BuyResult)packet.ReadUInt8()
+            };
             SendPacketToClient(fail);
         }
         [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleInventoryChangeFailureVanilla(WorldPacket packet)
         {
-            InventoryChangeFailure failure = new();
-            failure.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt8());
+            InventoryChangeFailure failure = new()
+            {
+                BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt8())
+            };
             if (failure.BagResult == InventoryResult.Ok)
                 return;
 
@@ -143,8 +157,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INVENTORY_CHANGE_FAILURE, ClientVersionBuild.V2_0_1_6180)]
         void HandleInventoryChangeFailure(WorldPacket packet)
         {
-            InventoryChangeFailure failure = new();
-            failure.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt8());
+            InventoryChangeFailure failure = new()
+            {
+                BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt8())
+            };
             if (failure.BagResult == InventoryResult.Ok)
                 return;
 
@@ -182,36 +198,44 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DURABILITY_DAMAGE_DEATH)]
         void HandleDurabilityDamageDeath(WorldPacket packet)
         {
-            DurabilityDamageDeath death = new DurabilityDamageDeath();
-            death.Percent = 10;
+            DurabilityDamageDeath death = new DurabilityDamageDeath
+            {
+                Percent = 10
+            };
             SendPacketToClient(death);
         }
         [PacketHandler(Opcode.SMSG_ITEM_COOLDOWN)]
         void HandleItemCooldown(WorldPacket packet)
         {
-            ItemCooldown item = new ItemCooldown();
-            item.ItemGuid = packet.ReadGuid().To128(GetSession().GameState);
-            item.SpellID = packet.ReadUInt32();
-            item.Cooldown = 30000;
+            ItemCooldown item = new ItemCooldown
+            {
+                ItemGuid = packet.ReadGuid().To128(GetSession().GameState),
+                SpellID = packet.ReadUInt32(),
+                Cooldown = 30000
+            };
             SendPacketToClient(item);
         }
         [PacketHandler(Opcode.SMSG_SELL_RESPONSE)]
         void HandleSellResponse(WorldPacket packet)
         {
-            SellResponse sell = new SellResponse();
-            sell.VendorGUID = packet.ReadGuid().To128(GetSession().GameState);
-            sell.ItemGUID = packet.ReadGuid().To128(GetSession().GameState);
-            sell.Reason = packet.ReadUInt8();
+            SellResponse sell = new SellResponse
+            {
+                VendorGUID = packet.ReadGuid().To128(GetSession().GameState),
+                ItemGUID = packet.ReadGuid().To128(GetSession().GameState),
+                Reason = packet.ReadUInt8()
+            };
             SendPacketToClient(sell);
         }
         [PacketHandler(Opcode.SMSG_ITEM_ENCHANT_TIME_UPDATE)]
         void HandleItemEnchantTimeUpdate(WorldPacket packet)
         {
-            ItemEnchantTimeUpdate enchant = new ItemEnchantTimeUpdate();
-            enchant.ItemGuid = packet.ReadGuid().To128(GetSession().GameState);
-            enchant.Slot = packet.ReadUInt32();
-            enchant.DurationLeft = packet.ReadUInt32();
-            enchant.OwnerGuid = packet.ReadGuid().To128(GetSession().GameState);
+            ItemEnchantTimeUpdate enchant = new ItemEnchantTimeUpdate
+            {
+                ItemGuid = packet.ReadGuid().To128(GetSession().GameState),
+                Slot = packet.ReadUInt32(),
+                DurationLeft = packet.ReadUInt32(),
+                OwnerGuid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(enchant);
         }
 

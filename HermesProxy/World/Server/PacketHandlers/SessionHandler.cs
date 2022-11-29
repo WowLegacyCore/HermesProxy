@@ -13,8 +13,10 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHANGE_REALM_TICKET)]
         void HandleChangeRealmTicket(ChangeRealmTicket request)
         {
-            ChangeRealmTicketResponse response = new();
-            response.Token = request.Token;
+            ChangeRealmTicketResponse response = new()
+            {
+                Token = request.Token
+            };
 
             if (GetSession().AuthClient.Reconnect() != AuthResult.SUCCESS)
             {

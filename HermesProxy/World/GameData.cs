@@ -325,13 +325,15 @@ namespace HermesProxy.World
                 }
             }
 
-            BroadcastText broadcastText = new();
-            broadcastText.Entry = BroadcastTextStore.Keys.Last() + 1;
-            broadcastText.MaleText = maleText;
-            broadcastText.FemaleText = femaleText;
-            broadcastText.Language = language;
-            broadcastText.EmoteDelays = emoteDelays;
-            broadcastText.Emotes = emotes;
+            BroadcastText broadcastText = new()
+            {
+                Entry = BroadcastTextStore.Keys.Last() + 1,
+                MaleText = maleText,
+                FemaleText = femaleText,
+                Language = language,
+                EmoteDelays = emoteDelays,
+                Emotes = emotes
+            };
             BroadcastTextStore.Add(broadcastText.Entry, broadcastText);
             return broadcastText.Entry;
         }
@@ -382,11 +384,13 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    BroadcastText broadcastText = new BroadcastText();
-                    broadcastText.Entry = uint.Parse(fields[0]);
-                    broadcastText.MaleText = fields[1].TrimEnd().Replace("\0", "").Replace("~", "\n");
-                    broadcastText.FemaleText = fields[2].TrimEnd().Replace("\0", "").Replace("~", "\n");
-                    broadcastText.Language = uint.Parse(fields[3]);
+                    BroadcastText broadcastText = new BroadcastText
+                    {
+                        Entry = uint.Parse(fields[0]),
+                        MaleText = fields[1].TrimEnd().Replace("\0", "").Replace("~", "\n"),
+                        FemaleText = fields[2].TrimEnd().Replace("\0", "").Replace("~", "\n"),
+                        Language = uint.Parse(fields[3])
+                    };
                     broadcastText.Emotes[0] = ushort.Parse(fields[4]);
                     broadcastText.Emotes[1] = ushort.Parse(fields[5]);
                     broadcastText.Emotes[2] = ushort.Parse(fields[6]);
@@ -415,10 +419,12 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ItemDisplayData item = new ItemDisplayData();
-                    item.Entry = uint.Parse(fields[0]);
-                    item.DisplayId = uint.Parse(fields[1]);
-                    item.InventoryType = byte.Parse(fields[2]);
+                    ItemDisplayData item = new ItemDisplayData
+                    {
+                        Entry = uint.Parse(fields[0]),
+                        DisplayId = uint.Parse(fields[1]),
+                        InventoryType = byte.Parse(fields[2])
+                    };
                     ItemDisplayDataStore.Add(item.Entry, item);
                 }
             }
@@ -473,10 +479,12 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ChatChannel channel = new ChatChannel();
-                    channel.Id = uint.Parse(fields[0]);
-                    channel.Flags = (ChannelFlags)uint.Parse(fields[1]);
-                    channel.Name = fields[2];
+                    ChatChannel channel = new ChatChannel
+                    {
+                        Id = uint.Parse(fields[0]),
+                        Flags = (ChannelFlags)uint.Parse(fields[1]),
+                        Name = fields[2]
+                    };
                     ChatChannels.Add(channel.Id, channel);
                 }
             }
@@ -826,11 +834,13 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiPath taxiPath = new TaxiPath();
-                    taxiPath.Id = uint.Parse(fields[0]);
-                    taxiPath.From = uint.Parse(fields[1]);
-                    taxiPath.To = uint.Parse(fields[2]);
-                    taxiPath.Cost = int.Parse(fields[3]);
+                    TaxiPath taxiPath = new TaxiPath
+                    {
+                        Id = uint.Parse(fields[0]),
+                        From = uint.Parse(fields[1]),
+                        To = uint.Parse(fields[2]),
+                        Cost = int.Parse(fields[3])
+                    };
                     TaxiPaths.Add(counter, taxiPath);
                     counter++;
                 }
@@ -855,12 +865,14 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiNode taxiNode = new TaxiNode();
-                    taxiNode.Id = uint.Parse(fields[0]);
-                    taxiNode.mapId = uint.Parse(fields[1]);
-                    taxiNode.x = float.Parse(fields[2]);
-                    taxiNode.y = float.Parse(fields[3]);
-                    taxiNode.z = float.Parse(fields[4]);
+                    TaxiNode taxiNode = new TaxiNode
+                    {
+                        Id = uint.Parse(fields[0]),
+                        mapId = uint.Parse(fields[1]),
+                        x = float.Parse(fields[2]),
+                        y = float.Parse(fields[3]),
+                        z = float.Parse(fields[4])
+                    };
                     TaxiNodes.Add(taxiNode.Id, taxiNode);
                 }
             }
@@ -881,16 +893,18 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiPathNode taxiPathNode = new TaxiPathNode();
-                    taxiPathNode.Id = uint.Parse(fields[0]);
-                    taxiPathNode.pathId = uint.Parse(fields[1]);
-                    taxiPathNode.nodeIndex = uint.Parse(fields[2]);
-                    taxiPathNode.mapId = uint.Parse(fields[3]);
-                    taxiPathNode.x = float.Parse(fields[4]);
-                    taxiPathNode.y = float.Parse(fields[5]);
-                    taxiPathNode.z = float.Parse(fields[6]);
-                    taxiPathNode.flags = uint.Parse(fields[7]);
-                    taxiPathNode.delay = uint.Parse(fields[8]);
+                    TaxiPathNode taxiPathNode = new TaxiPathNode
+                    {
+                        Id = uint.Parse(fields[0]),
+                        pathId = uint.Parse(fields[1]),
+                        nodeIndex = uint.Parse(fields[2]),
+                        mapId = uint.Parse(fields[3]),
+                        x = float.Parse(fields[4]),
+                        y = float.Parse(fields[5]),
+                        z = float.Parse(fields[6]),
+                        flags = uint.Parse(fields[7]),
+                        delay = uint.Parse(fields[8])
+                    };
                     TaxiPathNodes.Add(taxiPathNode.Id, taxiPathNode);
                 }
             }
@@ -1042,29 +1056,33 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    AreaTrigger at = new AreaTrigger();
-                    at.Message = fields[0];
-                    at.PositionX = float.Parse(fields[1]);
-                    at.PositionY = float.Parse(fields[2]);
-                    at.PositionZ = float.Parse(fields[3]);
-                    at.Id = uint.Parse(fields[4]);
-                    at.MapId = ushort.Parse(fields[5]);
-                    at.PhaseUseFlags = byte.Parse(fields[6]);
-                    at.PhaseId = ushort.Parse(fields[7]);
-                    at.PhaseGroupId = ushort.Parse(fields[8]);
-                    at.Radius = float.Parse(fields[9]);
-                    at.BoxLength = float.Parse(fields[10]);
-                    at.BoxWidth = float.Parse(fields[11]);
-                    at.BoxHeight = float.Parse(fields[12]);
-                    at.BoxYaw = float.Parse(fields[13]);
-                    at.ShapeType = byte.Parse(fields[14]);
-                    at.ShapeId = ushort.Parse(fields[15]);
-                    at.ActionSetId = ushort.Parse(fields[16]);
-                    at.Flags = byte.Parse(fields[17]);
+                    AreaTrigger at = new AreaTrigger
+                    {
+                        Message = fields[0],
+                        PositionX = float.Parse(fields[1]),
+                        PositionY = float.Parse(fields[2]),
+                        PositionZ = float.Parse(fields[3]),
+                        Id = uint.Parse(fields[4]),
+                        MapId = ushort.Parse(fields[5]),
+                        PhaseUseFlags = byte.Parse(fields[6]),
+                        PhaseId = ushort.Parse(fields[7]),
+                        PhaseGroupId = ushort.Parse(fields[8]),
+                        Radius = float.Parse(fields[9]),
+                        BoxLength = float.Parse(fields[10]),
+                        BoxWidth = float.Parse(fields[11]),
+                        BoxHeight = float.Parse(fields[12]),
+                        BoxYaw = float.Parse(fields[13]),
+                        ShapeType = byte.Parse(fields[14]),
+                        ShapeId = ushort.Parse(fields[15]),
+                        ActionSetId = ushort.Parse(fields[16]),
+                        Flags = byte.Parse(fields[17])
+                    };
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.AreaTrigger;
-                    record.HotfixId = HotfixAreaTriggerBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.AreaTrigger,
+                        HotfixId = HotfixAreaTriggerBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = at.Id;
                     record.Status = HotfixStatus.Valid;
@@ -1124,9 +1142,11 @@ namespace HermesProxy.World
                     ushort flags = ushort.Parse(fields[11]);
                     uint spellBookSpellID = uint.Parse(fields[12]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SkillLine;
-                    record.HotfixId = HotfixSkillLineBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SkillLine,
+                        HotfixId = HotfixSkillLineBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1176,9 +1196,11 @@ namespace HermesProxy.World
                     byte minLevel = byte.Parse(fields[6]);
                     ushort skillTierId = ushort.Parse(fields[7]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SkillRaceClassInfo;
-                    record.HotfixId = HotfixSkillRaceClassInfoBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SkillRaceClassInfo,
+                        HotfixId = HotfixSkillRaceClassInfoBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1232,9 +1254,11 @@ namespace HermesProxy.World
                     uint characterPoints2 = uint.Parse(fields[16]);
 
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SkillLineAbility;
-                    record.HotfixId = HotfixSkillLineAbilityBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SkillLineAbility,
+                        HotfixId = HotfixSkillLineAbilityBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1284,9 +1308,11 @@ namespace HermesProxy.World
                     string description = fields[2];
                     string auraDescription = fields[3];
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.Spell;
-                    record.HotfixId = HotfixSpellBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.Spell,
+                        HotfixId = HotfixSpellBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1320,9 +1346,11 @@ namespace HermesProxy.World
                     uint id = uint.Parse(fields[0]);
                     string name = fields[1];
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellName;
-                    record.HotfixId = HotfixSpellNameBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SpellName,
+                        HotfixId = HotfixSpellNameBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1359,9 +1387,11 @@ namespace HermesProxy.World
                     byte maxPassiveAuraLevel = byte.Parse(fields[5]);
                     uint spellId = uint.Parse(fields[6]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellLevels;
-                    record.HotfixId = HotfixSpellLevelsBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SpellLevels,
+                        HotfixId = HotfixSpellLevelsBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1406,9 +1436,11 @@ namespace HermesProxy.World
                     uint procTypeMask1 = uint.Parse(fields[8]);
                     uint spellId = uint.Parse(fields[9]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellAuraOptions;
-                    record.HotfixId = HotfixSpellAuraOptionsBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SpellAuraOptions,
+                        HotfixId = HotfixSpellAuraOptionsBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1472,9 +1504,11 @@ namespace HermesProxy.World
                     uint attributes14 = uint.Parse(fields[24]);
                     uint spellId = uint.Parse(fields[25]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellMisc;
-                    record.HotfixId = HotfixSpellMiscBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SpellMisc,
+                        HotfixId = HotfixSpellMiscBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1564,9 +1598,11 @@ namespace HermesProxy.World
                     short implicitTarget2 = short.Parse(fields[34]);
                     uint spellId = uint.Parse(fields[35]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellEffect;
-                    record.HotfixId = HotfixSpellEffectBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SpellEffect,
+                        HotfixId = HotfixSpellEffectBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1648,9 +1684,11 @@ namespace HermesProxy.World
                     else
                         SpellVisuals.Add(spellId, id);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellXSpellVisual;
-                    record.HotfixId = HotfixSpellXSpellVisualBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.SpellXSpellVisual,
+                        HotfixId = HotfixSpellXSpellVisualBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1819,10 +1857,12 @@ namespace HermesProxy.World
                     sbyte statValue10 = sbyte.Parse(fields[125]);
                     sbyte requiredLevel = sbyte.Parse(fields[126]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.ItemSparse;
-                    record.HotfixId = HotfixItemSparseBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        Status = HotfixStatus.Valid,
+                        TableHash = DB2Hash.ItemSparse,
+                        HotfixId = HotfixItemSparseBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.HotfixContent.WriteInt64(allowableRace);
@@ -2003,9 +2043,11 @@ namespace HermesProxy.World
                     int textureVariationFileDataId2 = int.Parse(fields[25]);
                     int textureVariationFileDataId3 = int.Parse(fields[26]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.CreatureDisplayInfo;
-                    record.HotfixId = HotfixCreatureDisplayInfoBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.CreatureDisplayInfo,
+                        HotfixId = HotfixCreatureDisplayInfoBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -2076,9 +2118,11 @@ namespace HermesProxy.World
                     byte customDisplayOption2 = byte.Parse(fields[13]);
                     byte customDisplayOption3 = byte.Parse(fields[14]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.CreatureDisplayInfoExtra;
-                    record.HotfixId = HotfixCreatureDisplayInfoExtraBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        TableHash = DB2Hash.CreatureDisplayInfoExtra,
+                        HotfixId = HotfixCreatureDisplayInfoExtraBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -2126,10 +2170,12 @@ namespace HermesProxy.World
                     int chrCustomizationChoiceId = int.Parse(fields[2]);
                     int creatureDisplayInfoExtraId = int.Parse(fields[3]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.CreatureDisplayInfoOption;
-                    record.HotfixId = HotfixCreatureDisplayInfoOptionBegin + counter;
+                    HotfixRecord record = new HotfixRecord
+                    {
+                        Status = HotfixStatus.Valid,
+                        TableHash = DB2Hash.CreatureDisplayInfoOption,
+                        HotfixId = HotfixCreatureDisplayInfoOptionBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.HotfixContent.WriteInt32(chrCustomizationOptionId);

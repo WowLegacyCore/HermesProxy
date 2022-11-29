@@ -9,9 +9,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_REQUESTED)]
         void HandleDuelRequested(WorldPacket packet)
         {
-            DuelRequested duel = new DuelRequested();
-            duel.ArbiterGUID = packet.ReadGuid().To128(GetSession().GameState);
-            duel.RequestedByGUID = packet.ReadGuid().To128(GetSession().GameState);
+            DuelRequested duel = new DuelRequested
+            {
+                ArbiterGUID = packet.ReadGuid().To128(GetSession().GameState),
+                RequestedByGUID = packet.ReadGuid().To128(GetSession().GameState)
+            };
             duel.RequestedByWowAccount = GetSession().GetGameAccountGuidForPlayer(duel.RequestedByGUID);
             SendPacketToClient(duel);
         }
@@ -19,28 +21,34 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_COUNTDOWN)]
         void HandleDuelCountdown(WorldPacket packet)
         {
-            DuelCountdown duel = new DuelCountdown();
-            duel.Countdown = packet.ReadUInt32();
+            DuelCountdown duel = new DuelCountdown
+            {
+                Countdown = packet.ReadUInt32()
+            };
             SendPacketToClient(duel);
         }
 
         [PacketHandler(Opcode.SMSG_DUEL_COMPLETE)]
         void HandleDuelComplete(WorldPacket packet)
         {
-            DuelComplete duel = new DuelComplete();
-            duel.Started = packet.ReadBool();
+            DuelComplete duel = new DuelComplete
+            {
+                Started = packet.ReadBool()
+            };
             SendPacketToClient(duel);
         }
 
         [PacketHandler(Opcode.SMSG_DUEL_WINNER)]
         void HandleDuelWinner(WorldPacket packet)
         {
-            DuelWinner duel = new DuelWinner();
-            duel.Fled = packet.ReadBool();
-            duel.BeatenName = packet.ReadCString();
-            duel.WinnerName = packet.ReadCString();
-            duel.BeatenVirtualRealmAddress = GetSession().RealmId.GetAddress();
-            duel.WinnerVirtualRealmAddress = GetSession().RealmId.GetAddress();
+            DuelWinner duel = new DuelWinner
+            {
+                Fled = packet.ReadBool(),
+                BeatenName = packet.ReadCString(),
+                WinnerName = packet.ReadCString(),
+                BeatenVirtualRealmAddress = GetSession().RealmId.GetAddress(),
+                WinnerVirtualRealmAddress = GetSession().RealmId.GetAddress()
+            };
             SendPacketToClient(duel);
         }
 

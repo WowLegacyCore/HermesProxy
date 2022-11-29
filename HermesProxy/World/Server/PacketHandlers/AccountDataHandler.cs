@@ -8,8 +8,10 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GET_ACCOUNT_CHARACTER_LIST)]
         void HandleGetAccountCharacterList(GetAccountCharacterListRequest request)
         {
-            GetAccountCharacterListResult response = new();
-            response.Token = request.Token;
+            GetAccountCharacterListResult response = new()
+            {
+                Token = request.Token
+            };
 
             foreach (var ownCharacter in GetSession().GameState.OwnCharacters)
             {

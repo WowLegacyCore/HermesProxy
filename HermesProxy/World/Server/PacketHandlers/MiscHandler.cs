@@ -224,12 +224,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_REQUEST_CONQUEST_FORMULA_CONSTANTS)]
         void HandleRequestConquestFormulaConstants(EmptyClientPacket request)
         {
-            ConquestFormulaConstants response = new ConquestFormulaConstants();
-            response.PvpMinCPPerWeek = 1500;
-            response.PvpMaxCPPerWeek = 3000;
-            response.PvpCPBaseCoefficient = 1511.26f;
-            response.PvpCPExpCoefficient = 1639.28f;
-            response.PvpCPNumerator = 0.00412f;
+            ConquestFormulaConstants response = new ConquestFormulaConstants
+            {
+                PvpMinCPPerWeek = 1500,
+                PvpMaxCPPerWeek = 3000,
+                PvpCPBaseCoefficient = 1511.26f,
+                PvpCPExpCoefficient = 1639.28f,
+                PvpCPNumerator = 0.00412f
+            };
             SendPacket(response);
         }
     }

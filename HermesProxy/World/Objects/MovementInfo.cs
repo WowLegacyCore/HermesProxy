@@ -54,39 +54,41 @@ namespace HermesProxy.World.Objects
 
         public MovementInfo CopyFromMe()
         {
-            MovementInfo copy = new MovementInfo();
-            copy.Flags = this.Flags;
-            copy.FlagsExtra = this.FlagsExtra;
-            copy.SwimPitch = this.SwimPitch;
-            copy.FallTime = this.FallTime;
-            copy.JumpHorizontalSpeed = this.JumpHorizontalSpeed;
-            copy.JumpVerticalSpeed = this.JumpVerticalSpeed;
-            copy.JumpCosAngle = this.JumpCosAngle;
-            copy.JumpSinAngle = this.JumpSinAngle;
-            copy.SplineElevation = this.SplineElevation;
-            copy.HasSplineData = this.HasSplineData;
-            copy.Position = this.Position;
-            copy.Orientation = this.Orientation;
-            copy.CorpseOrientation = this.CorpseOrientation;
-            copy.TransportGuid = this.TransportGuid;
-            copy.TransportOffset = this.TransportOffset;
-            copy.TransportTime = this.TransportTime;
-            copy.TransportTime2 = this.TransportTime2;
-            copy.TransportSeat = this.TransportSeat;
-            copy.Rotation = this.Rotation;
-            copy.WalkSpeed = this.WalkSpeed;
-            copy.RunSpeed = this.RunSpeed;
-            copy.RunBackSpeed = this.RunBackSpeed;
-            copy.SwimSpeed = this.SwimSpeed;
-            copy.SwimBackSpeed = this.SwimBackSpeed;
-            copy.FlightSpeed = this.FlightSpeed;
-            copy.FlightBackSpeed = this.FlightBackSpeed;
-            copy.TurnRate = this.TurnRate;
-            copy.PitchRate = this.PitchRate;
-            copy.Hover = this.Hover;
-            copy.VehicleId = this.VehicleId;
-            copy.VehicleOrientation = this.VehicleOrientation;
-            copy.TransportPathTimer = this.TransportPathTimer;
+            MovementInfo copy = new MovementInfo
+            {
+                Flags = this.Flags,
+                FlagsExtra = this.FlagsExtra,
+                SwimPitch = this.SwimPitch,
+                FallTime = this.FallTime,
+                JumpHorizontalSpeed = this.JumpHorizontalSpeed,
+                JumpVerticalSpeed = this.JumpVerticalSpeed,
+                JumpCosAngle = this.JumpCosAngle,
+                JumpSinAngle = this.JumpSinAngle,
+                SplineElevation = this.SplineElevation,
+                HasSplineData = this.HasSplineData,
+                Position = this.Position,
+                Orientation = this.Orientation,
+                CorpseOrientation = this.CorpseOrientation,
+                TransportGuid = this.TransportGuid,
+                TransportOffset = this.TransportOffset,
+                TransportTime = this.TransportTime,
+                TransportTime2 = this.TransportTime2,
+                TransportSeat = this.TransportSeat,
+                Rotation = this.Rotation,
+                WalkSpeed = this.WalkSpeed,
+                RunSpeed = this.RunSpeed,
+                RunBackSpeed = this.RunBackSpeed,
+                SwimSpeed = this.SwimSpeed,
+                SwimBackSpeed = this.SwimBackSpeed,
+                FlightSpeed = this.FlightSpeed,
+                FlightBackSpeed = this.FlightBackSpeed,
+                TurnRate = this.TurnRate,
+                PitchRate = this.PitchRate,
+                Hover = this.Hover,
+                VehicleId = this.VehicleId,
+                VehicleOrientation = this.VehicleOrientation,
+                TransportPathTimer = this.TransportPathTimer
+            };
             return copy;
         }
 

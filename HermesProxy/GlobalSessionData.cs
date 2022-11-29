@@ -110,8 +110,10 @@ namespace HermesProxy
 
         public static GameSessionData CreateNewGameSessionData(GlobalSessionData globalSession)
         {
-            var self = new GameSessionData();
-            self.CurrentPlayerStorage = new CurrentPlayerStorage(globalSession);
+            var self = new GameSessionData
+            {
+                CurrentPlayerStorage = new CurrentPlayerStorage(globalSession)
+            };
             return self;
         }
 

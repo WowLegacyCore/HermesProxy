@@ -43,9 +43,11 @@ namespace BNetServer.Services
 
             var endpoint = LoginServiceManager.Instance.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
-            ChallengeExternalRequest externalChallenge = new();
-            externalChallenge.PayloadType = "web_auth_url";
-            externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/{logonRequest.Platform}/{logonRequest.ApplicationVersion}/{logonRequest.Locale}/");
+            ChallengeExternalRequest externalChallenge = new()
+            {
+                PayloadType = "web_auth_url",
+                Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/{logonRequest.Platform}/{logonRequest.ApplicationVersion}/{logonRequest.Locale}/")
+            };
 
             SendRequest(OriginalHash.ChallengeListener, 3, externalChallenge);
             return BattlenetRpcErrorCode.Ok;
@@ -79,16 +81,22 @@ namespace BNetServer.Services
                 }
             }
 
-            LogonResult logonResult = new();
-            logonResult.ErrorCode = 0;
-            logonResult.AccountId = new EntityId();
-            logonResult.AccountId.Low = tmpSession.AccountInfo.Id;
-            logonResult.AccountId.High = 0x100000000000000; // Some magic high guid?
+            LogonResult logonResult = new()
+            {
+                ErrorCode = 0,
+                AccountId = new EntityId
+                {
+                    Low = tmpSession.AccountInfo.Id,
+                    High = 0x100000000000000 // Some magic high guid?
+                }
+            };
             foreach (var gameAccount in tmpSession.AccountInfo.GameAccounts.Values)
             {
-                EntityId gameAccountId = new();
-                gameAccountId.Low = gameAccount.Id;
-                gameAccountId.High = 0x200000200576F51; // Some magic high guid? When using HighGuid of 703 client disconnects
+                EntityId gameAccountId = new()
+                {
+                    Low = gameAccount.Id,
+                    High = 0x200000200576F51 // Some magic high guid? When using HighGuid of 703 client disconnects
+                };
                 logonResult.GameAccountId.Add(gameAccountId);
             }
 

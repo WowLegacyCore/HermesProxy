@@ -298,8 +298,10 @@ namespace HermesProxy.World.Objects
             if (value is int intValue)
             {
                 uint[] values = new uint[1];
-                UpdateValues union = new();
-                union.SignedValue = intValue;
+                UpdateValues union = new()
+                {
+                    SignedValue = intValue
+                };
                 values[0] = union.UnsignedValue;
                 SetUpdateField((int)index, values, changeType);
             }
@@ -312,8 +314,10 @@ namespace HermesProxy.World.Objects
             else if (value is float floatValue)
             {
                 uint[] values = new uint[1];
-                UpdateValues union = new();
-                union.FloatValue = floatValue;
+                UpdateValues union = new()
+                {
+                    FloatValue = floatValue
+                };
                 values[0] = union.UnsignedValue;
                 SetUpdateField((int)index, values, changeType);
             }

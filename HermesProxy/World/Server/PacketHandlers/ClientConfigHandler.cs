@@ -19,11 +19,13 @@ namespace HermesProxy.World.Server
             if (GetSession().AccountDataMgr.Data[data.DataType] == null)
             {
                 Log.Print(LogType.Error, $"Client requested missing account data {data.DataType}.");
-                GetSession().AccountDataMgr.Data[data.DataType] = new();
-                GetSession().AccountDataMgr.Data[data.DataType].Type = data.DataType;
-                GetSession().AccountDataMgr.Data[data.DataType].Timestamp = Time.UnixTime;
-                GetSession().AccountDataMgr.Data[data.DataType].UncompressedSize = 0;
-                GetSession().AccountDataMgr.Data[data.DataType].CompressedData = new byte[0];
+                GetSession().AccountDataMgr.Data[data.DataType] = new()
+                {
+                    Type = data.DataType,
+                    Timestamp = Time.UnixTime,
+                    UncompressedSize = 0,
+                    CompressedData = new byte[0]
+                };
             }
 
             GetSession().AccountDataMgr.Data[data.DataType].Guid = data.PlayerGuid;

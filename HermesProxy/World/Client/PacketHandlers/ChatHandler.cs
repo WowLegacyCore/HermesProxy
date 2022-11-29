@@ -55,19 +55,23 @@ namespace HermesProxy.World.Client
 
                     GetSession().GameState.SetChannelId(channelName, channelId);
 
-                    ChannelNotifyJoined joined = new ChannelNotifyJoined();
-                    joined.Channel = channelName;
-                    joined.ChannelFlags = flags;
-                    joined.ChatChannelID = channelId;
-                    joined.ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, (uint)GetSession().GameState.CurrentZoneId, (ulong)channelId);
+                    ChannelNotifyJoined joined = new ChannelNotifyJoined
+                    {
+                        Channel = channelName,
+                        ChannelFlags = flags,
+                        ChatChannelID = channelId,
+                        ChannelGUID = WowGuid128.Create(HighGuidType703.ChatChannel, (uint)GetSession().GameState.CurrentMapId, (uint)GetSession().GameState.CurrentZoneId, (ulong)channelId)
+                    };
                     SendPacketToClient(joined);
 
                     break;
                 }
                 case ChatNotify.YouLeft:
                 {
-                    ChannelNotifyLeft left = new ChannelNotifyLeft();
-                    left.Channel = channelName;
+                    ChannelNotifyLeft left = new ChannelNotifyLeft
+                    {
+                        Channel = channelName
+                    };
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     {
                         left.ChatChannelID = packet.ReadInt32();
@@ -144,10 +148,12 @@ namespace HermesProxy.World.Client
             int count = packet.ReadInt32();
             for (int i = 0; i < count; i++)
             {
-                ChannelPlayer member = new ChannelPlayer();
-                member.Guid = packet.ReadGuid().To128(GetSession().GameState);
-                member.VirtualRealmAddress = GetSession().RealmId.GetAddress();
-                member.Flags = packet.ReadUInt8();
+                ChannelPlayer member = new ChannelPlayer
+                {
+                    Guid = packet.ReadGuid().To128(GetSession().GameState),
+                    VirtualRealmAddress = GetSession().RealmId.GetAddress(),
+                    Flags = packet.ReadUInt8()
+                };
                 list.Members.Add(member);
             }
             SendPacketToClient(list);
@@ -461,17 +467,21 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_EMOTE)]
         void HandleEmote(WorldPacket packet)
         {
-            EmoteMessage emote = new EmoteMessage();
-            emote.EmoteID = packet.ReadUInt32();
-            emote.Guid = packet.ReadGuid().To128(GetSession().GameState);
+            EmoteMessage emote = new EmoteMessage
+            {
+                EmoteID = packet.ReadUInt32(),
+                Guid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(emote);
         }
 
         [PacketHandler(Opcode.SMSG_TEXT_EMOTE)]
         void HandleTextEmote(WorldPacket packet)
         {
-            STextEmote emote = new STextEmote();
-            emote.SourceGUID = packet.ReadGuid().To128(GetSession().GameState);
+            STextEmote emote = new STextEmote
+            {
+                SourceGUID = packet.ReadGuid().To128(GetSession().GameState)
+            };
             emote.SourceAccountGUID = GetSession().GetGameAccountGuidForPlayer(emote.SourceGUID);
             emote.EmoteID = packet.ReadInt32();
             emote.SoundIndex = packet.ReadInt32();
@@ -485,24 +495,30 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PRINT_NOTIFICATION)]
         void HandlePrintNotification(WorldPacket packet)
         {
-            PrintNotification notify = new PrintNotification();
-            notify.NotifyText = packet.ReadCString();
+            PrintNotification notify = new PrintNotification
+            {
+                NotifyText = packet.ReadCString()
+            };
             SendPacketToClient(notify);
         }
 
         [PacketHandler(Opcode.SMSG_CHAT_PLAYER_NOTFOUND)]
         void HandleChatPlayerNotFound(WorldPacket packet)
         {
-            ChatPlayerNotfound error = new ChatPlayerNotfound();
-            error.Name = packet.ReadCString();
+            ChatPlayerNotfound error = new ChatPlayerNotfound
+            {
+                Name = packet.ReadCString()
+            };
             SendPacketToClient(error);
         }
 
         [PacketHandler(Opcode.SMSG_DEFENSE_MESSAGE)]
         void HandleDefenseMessage(WorldPacket packet)
         {
-            DefenseMessage message = new DefenseMessage();
-            message.ZoneID = packet.ReadUInt32();
+            DefenseMessage message = new DefenseMessage
+            {
+                ZoneID = packet.ReadUInt32()
+            };
             packet.ReadUInt32(); // message length
             message.MessageText = packet.ReadCString();
             SendPacketToClient(message);
@@ -511,9 +527,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CHAT_SERVER_MESSAGE)]
         void HandleChatServerMessage(WorldPacket packet)
         {
-            ChatServerMessage message = new ChatServerMessage();
-            message.MessageID = packet.ReadInt32();
-            message.StringParam = packet.ReadCString();
+            ChatServerMessage message = new ChatServerMessage
+            {
+                MessageID = packet.ReadInt32(),
+                StringParam = packet.ReadCString()
+            };
             SendPacketToClient(message);
         }
 

@@ -28,8 +28,10 @@ namespace HermesProxy.World.Client
             var itemsCount = packet.ReadUInt8();
             for (var i = 0; i < itemsCount; ++i)
             {
-                LootItemData lootItem = new();
-                lootItem.LootListID = packet.ReadUInt8();
+                LootItemData lootItem = new()
+                {
+                    LootListID = packet.ReadUInt8()
+                };
                 lootItem.Loot.ItemID = packet.ReadUInt32();
                 lootItem.Quantity = packet.ReadUInt32();
                 packet.ReadUInt32(); // DisplayID
@@ -56,18 +58,22 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_REMOVED)]
         void HandleLootRemoved(WorldPacket packet)
         {
-            LootRemoved loot = new();
-            loot.Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState);
-            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
-            loot.LootListID = packet.ReadUInt8();
+            LootRemoved loot = new()
+            {
+                Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState),
+                LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid(),
+                LootListID = packet.ReadUInt8()
+            };
             SendPacketToClient(loot);
         }
 
         [PacketHandler(Opcode.SMSG_LOOT_MONEY_NOTIFY)]
         void HandleLootMoneyNotify(WorldPacket packet)
         {
-            LootMoneyNotify loot = new();
-            loot.Money = packet.ReadUInt32();
+            LootMoneyNotify loot = new()
+            {
+                Money = packet.ReadUInt32()
+            };
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 loot.SoleLooter = packet.ReadBool();
             SendPacketToClient(loot);
@@ -76,8 +82,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_CLEAR_MONEY)]
         void HandleLootCelarMoney(WorldPacket packet)
         {
-            CoinRemoved loot = new();
-            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
+            CoinRemoved loot = new()
+            {
+                LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid()
+            };
             SendPacketToClient(loot);
         }
 
@@ -150,8 +158,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_ROLL_WON)]
         void HandleLootRollWon(WorldPacket packet)
         {
-            LootRollWon loot = new LootRollWon();
-            loot.LootObj = packet.ReadGuid().ToLootGuid();
+            LootRollWon loot = new LootRollWon
+            {
+                LootObj = packet.ReadGuid().ToLootGuid()
+            };
             loot.Item.LootListID = (byte)packet.ReadUInt32();
             loot.Item.Loot.ItemID = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesSeed = packet.ReadUInt32();
@@ -164,17 +174,21 @@ namespace HermesProxy.World.Client
                 loot.MainSpec = 128;
             SendPacketToClient(loot);
 
-            LootRollsComplete complete = new LootRollsComplete();
-            complete.LootObj = loot.LootObj;
-            complete.LootListID = loot.Item.LootListID;
+            LootRollsComplete complete = new LootRollsComplete
+            {
+                LootObj = loot.LootObj,
+                LootListID = loot.Item.LootListID
+            };
             SendPacketToClient(complete);
         }
 
         [PacketHandler(Opcode.SMSG_LOOT_ALL_PASSED)]
         void HandleLootAllPassed(WorldPacket packet)
         {
-            LootAllPassed loot = new LootAllPassed();
-            loot.LootObj = packet.ReadGuid().ToLootGuid();
+            LootAllPassed loot = new LootAllPassed
+            {
+                LootObj = packet.ReadGuid().ToLootGuid()
+            };
             loot.Item.LootListID = (byte)packet.ReadUInt32();
             loot.Item.Loot.ItemID = packet.ReadUInt32();
             loot.Item.Loot.RandomPropertiesSeed = packet.ReadUInt32();
@@ -182,9 +196,11 @@ namespace HermesProxy.World.Client
             loot.Item.Quantity = 1;
             SendPacketToClient(loot);
 
-            LootRollsComplete complete = new LootRollsComplete();
-            complete.LootObj = loot.LootObj;
-            complete.LootListID = loot.Item.LootListID;
+            LootRollsComplete complete = new LootRollsComplete
+            {
+                LootObj = loot.LootObj,
+                LootListID = loot.Item.LootListID
+            };
             SendPacketToClient(complete);
         }
 
@@ -194,14 +210,18 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.LastLootTargetGuid == null)
                 return;
 
-            LootList list = new LootList();
-            list.Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState);
-            list.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
-            list.Master = GetSession().GameState.CurrentPlayerGuid;
+            LootList list = new LootList
+            {
+                Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState),
+                LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid(),
+                Master = GetSession().GameState.CurrentPlayerGuid
+            };
             SendPacketToClient(list);
 
-            MasterLootCandidateList loot = new MasterLootCandidateList();
-            loot.LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid();
+            MasterLootCandidateList loot = new MasterLootCandidateList
+            {
+                LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid()
+            };
             byte count = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)
             {

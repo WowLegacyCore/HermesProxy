@@ -368,9 +368,11 @@ namespace HermesProxy.World.Server.Packets
 
             for (int i = 0; i < Count; ++i)
             {
-                LootRequest lootRequest = new();
-                lootRequest.LootObj = _worldPacket.ReadPackedGuid128();
-                lootRequest.LootListID = _worldPacket.ReadUInt8();
+                LootRequest lootRequest = new()
+                {
+                    LootObj = _worldPacket.ReadPackedGuid128(),
+                    LootListID = _worldPacket.ReadUInt8()
+                };
                 Loot.Add(lootRequest);
             }
         }

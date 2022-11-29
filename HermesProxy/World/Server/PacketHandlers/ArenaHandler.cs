@@ -13,8 +13,10 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180) ||
                 GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex] == 0)
             {
-                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse();
-                response.TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamIndex);
+                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse
+                {
+                    TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamIndex)
+                };
                 SendPacket(response);
             }
             else
@@ -35,17 +37,21 @@ namespace HermesProxy.World.Server
             ArenaTeamData team;
             if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out team))
             {
-                ArenaTeamQueryResponse response = new ArenaTeamQueryResponse();
-                response.TeamId = arena.TeamId;
-                response.Emblem = new ArenaTeamEmblem();
-                response.Emblem.TeamId = arena.TeamId;
-                response.Emblem.TeamSize = team.TeamSize;
-                response.Emblem.BackgroundColor = team.BackgroundColor;
-                response.Emblem.EmblemStyle = team.EmblemStyle;
-                response.Emblem.EmblemColor = team.EmblemColor;
-                response.Emblem.BorderStyle = team.BorderStyle;
-                response.Emblem.BorderColor = team.BorderColor;
-                response.Emblem.TeamName = team.Name;
+                ArenaTeamQueryResponse response = new ArenaTeamQueryResponse
+                {
+                    TeamId = arena.TeamId,
+                    Emblem = new ArenaTeamEmblem
+                    {
+                        TeamId = arena.TeamId,
+                        TeamSize = team.TeamSize,
+                        BackgroundColor = team.BackgroundColor,
+                        EmblemStyle = team.EmblemStyle,
+                        EmblemColor = team.EmblemColor,
+                        BorderStyle = team.BorderStyle,
+                        BorderColor = team.BorderColor,
+                        TeamName = team.Name
+                    }
+                };
                 SendPacket(response);
             }
         }

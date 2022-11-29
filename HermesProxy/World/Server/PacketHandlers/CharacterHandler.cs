@@ -195,8 +195,10 @@ namespace HermesProxy.World.Server
             }
             else
             {
-                InspectPvP pvp = new InspectPvP();
-                pvp.PlayerGUID = inspect.Target;
+                InspectPvP pvp = new InspectPvP
+                {
+                    PlayerGUID = inspect.Target
+                };
                 pvp.ArenaTeams.Add(new ArenaTeamInspectData());
                 pvp.ArenaTeams.Add(new ArenaTeamInspectData());
                 pvp.ArenaTeams.Add(new ArenaTeamInspectData());
@@ -216,10 +218,11 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GENERATE_RANDOM_CHARACTER_NAME)]
         void HandleGenerateRandomCharacterNameRequest(GenerateRandomCharacterNameRequest randomCharacterName)
         {
-            GenerateRandomCharacterNameResult result = new();
-
-            // The client can generate the name itself
-            result.Success = false;
+            GenerateRandomCharacterNameResult result = new()
+            {
+                // The client can generate the name itself
+                Success = false
+            };
 
             SendPacket(result);
         }

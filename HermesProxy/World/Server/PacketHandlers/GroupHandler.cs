@@ -105,10 +105,12 @@ namespace HermesProxy.World.Server
             packet.WriteBool(raid.IsReady);
             SendPacketToServer(packet);
 
-            ReadyCheckResponse ready = new ReadyCheckResponse();
-            ready.Player = GetSession().GameState.CurrentPlayerGuid;
-            ready.IsReady = raid.IsReady;
-            ready.PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000);
+            ReadyCheckResponse ready = new ReadyCheckResponse
+            {
+                Player = GetSession().GameState.CurrentPlayerGuid,
+                IsReady = raid.IsReady,
+                PartyGUID = WowGuid128.Create(HighGuidType703.Party, 1000)
+            };
             SendPacket(ready);
         }
 

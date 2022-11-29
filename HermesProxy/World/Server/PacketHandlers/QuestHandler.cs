@@ -105,9 +105,11 @@ namespace HermesProxy.World.Server
                     WorldPacket packet2 = new WorldPacket(Opcode.CMSG_QUERY_QUEST_INFO);
                     packet2.WriteUInt32(quest.QuestID);
                     SendPacketToServer(packet2);
-                    QuestGiverQuestFailed fail = new QuestGiverQuestFailed();
-                    fail.QuestID = quest.QuestID;
-                    fail.Reason = InventoryResult.ItemNotFound;
+                    QuestGiverQuestFailed fail = new QuestGiverQuestFailed
+                    {
+                        QuestID = quest.QuestID,
+                        Reason = InventoryResult.ItemNotFound
+                    };
                     SendPacket(fail);
                     return;
                 }

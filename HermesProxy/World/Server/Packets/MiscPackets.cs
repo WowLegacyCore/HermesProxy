@@ -685,9 +685,11 @@ namespace HermesProxy.World.Server.Packets
 
         public void AddBlacklist(int activity, int reason)
         {
-            LFGListBlacklistEntry entry = new LFGListBlacklistEntry();
-            entry.ActivityID = activity;
-            entry.Reason = reason;
+            LFGListBlacklistEntry entry = new LFGListBlacklistEntry
+            {
+                ActivityID = activity,
+                Reason = reason
+            };
             Blacklist.Add(entry);
         }
 
