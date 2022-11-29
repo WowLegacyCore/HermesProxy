@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +19,6 @@
 using Framework.Constants;
 using Framework.GameMath;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
@@ -156,12 +155,12 @@ namespace HermesProxy.World.Server.Packets
         {
             public uint Type;
             public uint Quantity;
-            public uint? WeeklyQuantity;       // Currency count obtained this Week.  
+            public uint? WeeklyQuantity;       // Currency count obtained this Week.
             public uint? MaxWeeklyQuantity;    // Weekly Currency cap.
             public uint? TrackedQuantity;
             public int? MaxQuantity;
             public int? Unused901;
-            public byte Flags;                      // 0 = none, 
+            public byte Flags;                      // 0 = none,
         }
     }
 
@@ -366,7 +365,7 @@ namespace HermesProxy.World.Server.Packets
                 task.Write(_worldPacket);
         }
 
-        public List<TaskProgress> Tasks = new List<TaskProgress>();
+        public List<TaskProgress> Tasks = new();
     }
 
     public class TaskProgress
@@ -385,7 +384,7 @@ namespace HermesProxy.World.Server.Packets
         public uint FailureTime;
         public uint Flags;
         public uint Unk;
-        public List<ushort> Progress = new List<ushort>();
+        public List<ushort> Progress = new();
     }
 
     public class InitialSetup : ServerPacket
@@ -686,13 +685,15 @@ namespace HermesProxy.World.Server.Packets
 
         public void AddBlacklist(int activity, int reason)
         {
-            LFGListBlacklistEntry entry = new LFGListBlacklistEntry();
-            entry.ActivityID = activity;
-            entry.Reason = reason;
+            LFGListBlacklistEntry entry = new()
+            {
+                ActivityID = activity,
+                Reason = reason
+            };
             Blacklist.Add(entry);
         }
 
-        public List<LFGListBlacklistEntry> Blacklist = new List<LFGListBlacklistEntry>();
+        public List<LFGListBlacklistEntry> Blacklist = new();
     }
 
     public struct LFGListBlacklistEntry

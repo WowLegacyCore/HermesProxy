@@ -1,8 +1,5 @@
-﻿using Framework.Constants;
-using HermesProxy.Enums;
-using HermesProxy.World;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
 
@@ -22,7 +19,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_AREA_SPIRIT_HEALER_QUEUE)]
         void HandleInteractWithNPC(InteractWithNPC interact)
         {
-            WorldPacket packet = new WorldPacket(interact.GetUniversalOpcode());
+            WorldPacket packet = new(interact.GetUniversalOpcode());
             packet.WriteGuid(interact.CreatureGUID.To64());
             SendPacketToServer(packet);
         }
@@ -30,12 +27,12 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GOSSIP_SELECT_OPTION)]
         void HandleGossipSelectOption(GossipSelectOption gossip)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GOSSIP_SELECT_OPTION);
+            WorldPacket packet = new(Opcode.CMSG_GOSSIP_SELECT_OPTION);
             packet.WriteGuid(gossip.GossipUnit.To64());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.WriteUInt32(gossip.GossipID);
             packet.WriteUInt32(gossip.GossipIndex);
-            if (!String.IsNullOrEmpty(gossip.PromotionCode))
+            if (!string.IsNullOrEmpty(gossip.PromotionCode))
                 packet.WriteCString(gossip.PromotionCode);
             SendPacketToServer(packet);
         }
@@ -43,7 +40,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_BUY_BANK_SLOT)]
         void HandleBuyBankSlot(BuyBankSlot bank)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_BUY_BANK_SLOT);
+            WorldPacket packet = new(Opcode.CMSG_BUY_BANK_SLOT);
             packet.WriteGuid(bank.Guid.To64());
             SendPacketToServer(packet);
         }
@@ -51,7 +48,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_TRAINER_BUY_SPELL)]
         void HandleTrainerBuySpell(TrainerBuySpell buy)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_TRAINER_BUY_SPELL);
+            WorldPacket packet = new(Opcode.CMSG_TRAINER_BUY_SPELL);
             packet.WriteGuid(buy.TrainerGUID.To64());
             if (ModernVersion.ExpansionVersion > 1 &&
                 LegacyVersion.ExpansionVersion <= 1)
@@ -67,7 +64,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CONFIRM_RESPEC_WIPE)]
         void HandleConfirmRespecWipe(ConfirmRespecWipe respec)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_TALENT_WIPE_CONFIRM);
+            WorldPacket packet = new(Opcode.MSG_TALENT_WIPE_CONFIRM);
             packet.WriteGuid(respec.TrainerGUID.To64());
             SendPacketToServer(packet);
         }

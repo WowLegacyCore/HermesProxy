@@ -9,7 +9,6 @@ using Framework.Networking;
 using Google.Protobuf;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -44,13 +43,13 @@ namespace BNetServer.Networking
             return true;
         }
 
-        private List<byte> _currentBuffer = new List<byte>();
-        
+        private readonly List<byte> _currentBuffer = new();
+
         public override async Task ReadHandler(byte[] data, int receivedLength)
         {
             if (!IsOpen())
                 return;
-            
+
             _currentBuffer.AddRange(data.Take(receivedLength));
 
             await ProcessCurrentBuffer();
@@ -93,12 +92,14 @@ namespace BNetServer.Networking
 
         public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)
         {
-            Header header = new();
-            header.Token = token;
-            header.Status = (uint)status;
-            header.ServiceId = serviceId;
-            header.ServiceHash = (uint)service;
-            header.MethodId = methodId;
+            Header header = new()
+            {
+                Token = token,
+                Status = (uint)status,
+                ServiceId = serviceId,
+                ServiceHash = (uint)service,
+                MethodId = methodId
+            };
             if (message != null)
                 header.Size = (uint)message.CalculateSize();
 
@@ -126,7 +127,7 @@ namespace BNetServer.Networking
     }
 
     public class AccountInfo
-    {   
+    {
         public uint Id;
         public WowGuid128 BnetAccountGuid => WowGuid128.Create(HighGuidType703.BNetAccount, Id);
         public string Login;

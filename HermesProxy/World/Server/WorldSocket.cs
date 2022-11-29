@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -49,24 +49,23 @@ namespace HermesProxy.World.Server
         static readonly byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
         static readonly int HeaderSize = 16;
-
-        SocketBuffer _headerBuffer;
-        SocketBuffer _packetBuffer;
+        readonly SocketBuffer _headerBuffer;
+        readonly SocketBuffer _packetBuffer;
 
         ConnectionType _connectType;
         ulong _key;
 
         byte[] _serverChallenge;
-        WorldCrypt _worldCrypt;
+        readonly WorldCrypt _worldCrypt;
         byte[] _sessionKey;
-        byte[] _encryptKey;
+        readonly byte[] _encryptKey;
         ConnectToKey _instanceConnectKey;
         RealmId _realmId;
 
         ZLib.z_stream _compressionStream;
-        ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
+        readonly ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         GlobalSessionData _globalSession;
-        System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
+        readonly System.Threading.Mutex _sendMutex = new();
 
         private BnetServices.ServiceManager _bnetRpc;
 
@@ -373,8 +372,7 @@ namespace HermesProxy.World.Server
                 buffer.WriteInt32(packetSize + 2);
                 buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes(opcode), 2), data, (uint)packetSize));
 
-                byte[] compressedData;
-                uint compressedSize = CompressPacket(data, opcode, out compressedData);
+                uint compressedSize = CompressPacket(data, opcode, out byte[] compressedData);
                 buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize));
                 buffer.WriteBytes(compressedData, compressedSize);
 
@@ -392,8 +390,10 @@ namespace HermesProxy.World.Server
 
             data = buffer.GetData();
 
-            PacketHeader header = new();
-            header.Size = packetSize;
+            PacketHeader header = new()
+            {
+                Size = packetSize
+            };
             _worldCrypt.Encrypt(ref data, ref header.Tag);
 
             ByteBuffer byteBuffer = new();
@@ -444,10 +444,12 @@ namespace HermesProxy.World.Server
 
         void HandleSendAuthSession()
         {
-            AuthChallenge challenge = new();
-            challenge.Challenge = _serverChallenge;
-            challenge.DosChallenge = new byte[32].GenerateRandomKey(32);
-            challenge.DosZeroBits = 1;
+            AuthChallenge challenge = new()
+            {
+                Challenge = _serverChallenge,
+                DosChallenge = new byte[32].GenerateRandomKey(32),
+                DosZeroBits = 1
+            };
 
             SendPacket(challenge);
         }
@@ -614,17 +616,19 @@ namespace HermesProxy.World.Server
         public void SendConnectToInstance(ConnectToSerial serial)
         {
             IPAddress externalIp = IPAddress.Parse(Framework.Settings.ExternalAddress);
-            IPEndPoint instanceAddress = new IPEndPoint(externalIp, Framework.Settings.InstancePort);
-            
+            IPEndPoint instanceAddress = new(externalIp, Framework.Settings.InstancePort);
+
             _instanceConnectKey.AccountId = GetSession().AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
 
             BnetSessionTicketStorage.AddNewSessionByKey(_instanceConnectKey.Raw, GetSession());
 
-            ConnectTo connectTo = new();
-            connectTo.Key = _instanceConnectKey.Raw;
-            connectTo.Serial = serial;
+            ConnectTo connectTo = new()
+            {
+                Key = _instanceConnectKey.Raw,
+                Serial = serial
+            };
             connectTo.Payload.Port = (ushort)Framework.Settings.InstancePort;
             connectTo.Con = (byte)ConnectionType.Instance;
 
@@ -653,7 +657,7 @@ namespace HermesProxy.World.Server
                 _worldPacket.WriteUInt8((byte)Code);
             }
 
-            LoginFailureReason Code;
+            readonly LoginFailureReason Code;
         }
         public void AbortLogin(LoginFailureReason reason)
         {
@@ -711,35 +715,42 @@ namespace HermesProxy.World.Server
 
         public void SendAuthResponseError(BattlenetRpcErrorCode code)
         {
-            AuthResponse response = new();
-            response.SuccessInfo = null;
-            response.WaitInfo = null;
-            response.Result = code;
+            AuthResponse response = new()
+            {
+                SuccessInfo = null,
+                WaitInfo = null,
+                Result = code
+            };
             SendPacket(response);
         }
 
         public void SendAuthResponse(BattlenetRpcErrorCode code, bool queued, uint queuePos = 0)
         {
-            AuthResponse response = new();
-            response.Result = code;
+            AuthResponse response = new()
+            {
+                Result = code
+            };
 
             if (code == BattlenetRpcErrorCode.Ok)
             {
-                response.SuccessInfo = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.ActiveExpansionLevel = (byte)(LegacyVersion.ExpansionVersion - 1);
-                response.SuccessInfo.AccountExpansionLevel = (byte)0;
-                response.SuccessInfo.VirtualRealmAddress = _realmId.GetAddress();
-                response.SuccessInfo.Time = (uint)Time.UnixTime;
+                response.SuccessInfo = new AuthResponse.AuthSuccessInfo
+                {
+                    ActiveExpansionLevel = (byte)(LegacyVersion.ExpansionVersion - 1),
+                    AccountExpansionLevel = (byte)0,
+                    VirtualRealmAddress = _realmId.GetAddress(),
+                    Time = (uint)Time.UnixTime
+                };
 
                 var realm = GetSession().RealmManager.GetRealm(_realmId);
 
                 // Send current home realm. Also there is no need to send it later in realm queries.
                 response.SuccessInfo.VirtualRealms.Add(new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName));
 
-                List<RaceClassAvailability> availableRaces = new List<RaceClassAvailability>();
-                RaceClassAvailability race = new RaceClassAvailability();
-
-                race.RaceID = 1;
+                List<RaceClassAvailability> availableRaces = new();
+                RaceClassAvailability race = new()
+                {
+                    RaceID = 1
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(2, 0, 0));
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
@@ -748,8 +759,10 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(9, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 2;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 2
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(3, 0, 0));
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
@@ -757,8 +770,10 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(9, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 3;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 3
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(2, 0, 0));
                 race.Classes.Add(new ClassAvailability(3, 0, 0));
@@ -766,8 +781,10 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 4;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 4
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(3, 0, 0));
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
@@ -775,8 +792,10 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(11, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 5;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 5
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
                 race.Classes.Add(new ClassAvailability(5, 0, 0));
@@ -784,24 +803,30 @@ namespace HermesProxy.World.Server
                 race.Classes.Add(new ClassAvailability(9, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 6;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 6
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(3, 0, 0));
                 race.Classes.Add(new ClassAvailability(7, 0, 0));
                 race.Classes.Add(new ClassAvailability(11, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 7;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 7
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
                 race.Classes.Add(new ClassAvailability(8, 0, 0));
                 race.Classes.Add(new ClassAvailability(9, 0, 0));
                 availableRaces.Add(race);
 
-                race = new RaceClassAvailability();
-                race.RaceID = 8;
+                race = new RaceClassAvailability
+                {
+                    RaceID = 8
+                };
                 race.Classes.Add(new ClassAvailability(1, 0, 0));
                 race.Classes.Add(new ClassAvailability(4, 0, 0));
                 race.Classes.Add(new ClassAvailability(3, 0, 0));
@@ -813,8 +838,10 @@ namespace HermesProxy.World.Server
                 if (ModernVersion.ExpansionVersion >= 2 &&
                     LegacyVersion.ExpansionVersion >= 2)
                 {
-                    race = new RaceClassAvailability();
-                    race.RaceID = 10;
+                    race = new RaceClassAvailability
+                    {
+                        RaceID = 10
+                    };
                     race.Classes.Add(new ClassAvailability(3, 0, 0));
                     race.Classes.Add(new ClassAvailability(4, 0, 0));
                     race.Classes.Add(new ClassAvailability(5, 0, 0));
@@ -823,8 +850,10 @@ namespace HermesProxy.World.Server
                     race.Classes.Add(new ClassAvailability(2, 0, 0));
                     availableRaces.Add(race);
 
-                    race = new RaceClassAvailability();
-                    race.RaceID = 11;
+                    race = new RaceClassAvailability
+                    {
+                        RaceID = 11
+                    };
                     race.Classes.Add(new ClassAvailability(1, 0, 0));
                     race.Classes.Add(new ClassAvailability(2, 0, 0));
                     race.Classes.Add(new ClassAvailability(3, 0, 0));
@@ -839,8 +868,10 @@ namespace HermesProxy.World.Server
 
             if (queued)
             {
-                response.WaitInfo = new AuthWaitInfo();
-                response.WaitInfo.WaitCount = queuePos;
+                response.WaitInfo = new AuthWaitInfo
+                {
+                    WaitCount = queuePos
+                };
             }
 
             SendPacket(response);
@@ -863,24 +894,28 @@ namespace HermesProxy.World.Server
         public void SendSetTimeZoneInformation()
         {
             // @todo: replace dummy values
-            SetTimeZoneInformation packet = new();
-            packet.ServerTimeTZ = "Europe/Paris";
-            packet.GameTimeTZ = "Europe/Paris";
+            SetTimeZoneInformation packet = new()
+            {
+                ServerTimeTZ = "Europe/Paris",
+                GameTimeTZ = "Europe/Paris"
+            };
 
             SendPacket(packet);//enabled it
         }
 
         public void SendFeatureSystemStatusGlueScreen()
         {
-            FeatureSystemStatusGlueScreen features = new();
-            features.BpayStoreAvailable = false;
-            features.BpayStoreDisabledByParentalControls = false;
-            features.CharUndeleteEnabled = false;
-            features.BpayStoreEnabled = false;
-            features.MaxCharactersPerRealm = 10;
-            features.MinimumExpansionLevel = 5;
-            features.MaximumExpansionLevel = 8;
-            features.Unk14 = true;
+            FeatureSystemStatusGlueScreen features = new()
+            {
+                BpayStoreAvailable = false,
+                BpayStoreDisabledByParentalControls = false,
+                CharUndeleteEnabled = false,
+                BpayStoreEnabled = false,
+                MaxCharactersPerRealm = 10,
+                MinimumExpansionLevel = 5,
+                MaximumExpansionLevel = 8,
+                Unk14 = true
+            };
 
             var europaTicketConfig = new EuropaTicketConfig();
             europaTicketConfig.ThrottleState.MaxTries = 10;
@@ -899,22 +934,24 @@ namespace HermesProxy.World.Server
 
         public void SendFeatureSystemStatus()
         {
-            FeatureSystemStatus features = new();
-            features.ComplaintStatus = 2;
-            features.ScrollOfResurrectionRequestsRemaining = 1;
-            features.ScrollOfResurrectionMaxRequestsPerDay = 1;
-            features.CfgRealmID = 1;
-            features.CfgRealmRecID = 1;
-            features.TwitterPostThrottleLimit = 60;
-            features.TwitterPostThrottleCooldown = 20;
-            features.TokenPollTimeSeconds = 300;
-            features.KioskSessionMinutes = 30;
-            features.BpayStoreProductDeliveryDelay = 180;
-            features.HiddenUIClubsPresenceUpdateTimer = 60000;
-            features.VoiceEnabled = false;
-            features.BrowserEnabled = false;
+            FeatureSystemStatus features = new()
+            {
+                ComplaintStatus = 2,
+                ScrollOfResurrectionRequestsRemaining = 1,
+                ScrollOfResurrectionMaxRequestsPerDay = 1,
+                CfgRealmID = 1,
+                CfgRealmRecID = 1,
+                TwitterPostThrottleLimit = 60,
+                TwitterPostThrottleCooldown = 20,
+                TokenPollTimeSeconds = 300,
+                KioskSessionMinutes = 30,
+                BpayStoreProductDeliveryDelay = 180,
+                HiddenUIClubsPresenceUpdateTimer = 60000,
+                VoiceEnabled = false,
+                BrowserEnabled = false,
 
-            features.EuropaTicketSystemStatus = new EuropaTicketConfig();
+                EuropaTicketSystemStatus = new EuropaTicketConfig()
+            };
             features.EuropaTicketSystemStatus.ThrottleState.MaxTries = 10;
             features.EuropaTicketSystemStatus.ThrottleState.PerMilliseconds = 60000;
             features.EuropaTicketSystemStatus.ThrottleState.TryCount = 1;
@@ -982,29 +1019,37 @@ namespace HermesProxy.World.Server
 
         public void SendClientCacheVersion(uint version)
         {
-            ClientCacheVersion cache = new();
-            cache.CacheVersion = version;
+            ClientCacheVersion cache = new()
+            {
+                CacheVersion = version
+            };
             SendPacket(cache);
         }
 
         public void SendAvailableHotfixes()
         {
-            AvailableHotfixes hotfixes = new AvailableHotfixes();
-            hotfixes.VirtualRealmAddress = GetSession().RealmId.GetAddress();
+            AvailableHotfixes hotfixes = new()
+            {
+                VirtualRealmAddress = GetSession().RealmId.GetAddress()
+            };
             SendPacket(hotfixes);
         }
 
         public void SendBnetConnectionState(byte state)
         {
-            ConnectionStatus bnetConnected = new();
-            bnetConnected.State = state;
+            ConnectionStatus bnetConnected = new()
+            {
+                State = state
+            };
             SendPacket(bnetConnected);
         }
 
         public void SendServerTimeOffset()
         {
-            ServerTimeOffset response = new();
-            response.Time = Time.UnixTime;
+            ServerTimeOffset response = new()
+            {
+                Time = Time.UnixTime
+            };
             SendPacket(response);
         }
 
@@ -1015,9 +1060,11 @@ namespace HermesProxy.World.Server
             WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
             GetSession().AccountDataMgr.LoadAllData(guid);
 
-            AccountDataTimes accountData = new AccountDataTimes();
-            accountData.PlayerGuid = guid;
-            accountData.ServerTime = Time.UnixTime;
+            AccountDataTimes accountData = new()
+            {
+                PlayerGuid = guid,
+                ServerTime = Time.UnixTime
+            };
 
             int count = ModernVersion.GetAccountDataCount();
             accountData.AccountTimes = new long[count];
@@ -1084,16 +1131,16 @@ namespace HermesProxy.World.Server
 
             static Action<WorldSocket, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
             {
-                // create first delegate. It is not fine because its 
+                // create first delegate. It is not fine because its
                 // signature contains unknown types T and P1
                 Action<WorldSocket, P1> d = (Action<WorldSocket, P1>)method.CreateDelegate(typeof(Action<WorldSocket, P1>));
-                // create another delegate having necessary signature. 
+                // create another delegate having necessary signature.
                 // It encapsulates first delegate with a closure
                 return delegate (WorldSocket target, ClientPacket p) { d(target, (P1)p); };
             }
 
-            Action<WorldSocket, ClientPacket> methodCaller;
-            Type packetType;
+            readonly Action<WorldSocket, ClientPacket> methodCaller;
+            readonly Type packetType;
         }
 
         public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)

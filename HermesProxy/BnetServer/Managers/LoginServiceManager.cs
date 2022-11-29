@@ -5,21 +5,17 @@ using Framework.Constants;
 using Framework.Logging;
 using Framework.Web;
 using System;
-using System.IO;
 using System.Net;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 
 namespace BNetServer
 {
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
-        FormInputs formInputs;
+        readonly FormInputs formInputs;
         IPEndPoint externalAddress;
         IPEndPoint localAddress;
-        X509Certificate2 certificate;
 
-        LoginServiceManager() 
+        LoginServiceManager()
         {
             formInputs = new FormInputs();
         }
@@ -34,8 +30,7 @@ namespace BNetServer
             }
 
             string configuredAddress = Framework.Settings.ExternalAddress;
-            IPAddress address;
-            if (!IPAddress.TryParse(configuredAddress, out address))
+            if (!IPAddress.TryParse(configuredAddress, out IPAddress address))
             {
                 Log.Print(LogType.Error, $"Could not resolve LoginREST.ExternalAddress {configuredAddress}");
                 return;
@@ -50,27 +45,33 @@ namespace BNetServer
             }
             localAddress = new IPEndPoint(address, port);
 
-            // set up form inputs 
+            // set up form inputs
             formInputs.Type = "LOGIN_FORM";
 
-            var input = new FormInput();
-            input.Id = "account_name";
-            input.Type = "text";
-            input.Label = "E-mail";
-            input.MaxLength = 320;
+            var input = new FormInput
+            {
+                Id = "account_name",
+                Type = "text",
+                Label = "E-mail",
+                MaxLength = 320
+            };
             formInputs.Inputs.Add(input);
 
-            input = new FormInput();
-            input.Id = "password";
-            input.Type = "password";
-            input.Label = "Password";
-            input.MaxLength = 16;
+            input = new FormInput
+            {
+                Id = "password",
+                Type = "password",
+                Label = "Password",
+                MaxLength = 16
+            };
             formInputs.Inputs.Add(input);
 
-            input = new FormInput();
-            input.Id = "log_in_submit";
-            input.Type = "submit";
-            input.Label = "Log In";
+            input = new FormInput
+            {
+                Id = "log_in_submit",
+                Type = "submit",
+                Label = "Log In"
+            };
             formInputs.Inputs.Add(input);
         }
 

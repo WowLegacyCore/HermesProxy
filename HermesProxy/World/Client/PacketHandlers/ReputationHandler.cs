@@ -1,9 +1,6 @@
-﻿using Framework;
-using HermesProxy.Enums;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
-using System;
 
 namespace HermesProxy.World.Client
 {
@@ -16,7 +13,7 @@ namespace HermesProxy.World.Client
             if (!GetSession().GameState.IsFirstEnterWorld)
                 return;
 
-            InitializeFactions factions = new InitializeFactions();
+            InitializeFactions factions = new();
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i ++)
             {
@@ -45,9 +42,11 @@ namespace HermesProxy.World.Client
             var count = packet.ReadInt32();
             for (var i = 0; i < count; i++)
             {
-                FactionStandingData faction = new();
-                faction.Index = packet.ReadInt32();
-                faction.Standing = packet.ReadInt32();
+                FactionStandingData faction = new()
+                {
+                    Index = packet.ReadInt32(),
+                    Standing = packet.ReadInt32()
+                };
                 standing.Factions.Add(faction);
             }
             SendPacketToClient(standing);
@@ -60,9 +59,11 @@ namespace HermesProxy.World.Client
             var count = packet.ReadInt32();
             for (var i = 0; i < count; i++)
             {
-                ForcedReaction reaction = new();
-                reaction.Faction = packet.ReadInt32();
-                reaction.Reaction = packet.ReadInt32();
+                ForcedReaction reaction = new()
+                {
+                    Faction = packet.ReadInt32(),
+                    Reaction = packet.ReadInt32()
+                };
                 reactions.Reactions.Add(reaction);
             }
             SendPacketToClient(reactions);
@@ -71,8 +72,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SET_FACTION_VISIBLE)]
         void HandleSetFactionVisible(WorldPacket packet)
         {
-            SetFactionVisible faction = new(true);
-            faction.FactionIndex = packet.ReadUInt32();
+            SetFactionVisible faction = new(true)
+            {
+                FactionIndex = packet.ReadUInt32()
+            };
             SendPacketToClient(faction);
         }
     }

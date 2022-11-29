@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.World.Enums
+﻿namespace HermesProxy.World.Enums
 {
     namespace Vanilla
     {
@@ -85,7 +79,7 @@ namespace HermesProxy.World.Enums
             public static int Max = 13;
         }
     }
-    
+
 
     public enum EnchantmentOffset
     {

@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +19,6 @@
 using Framework.Constants;
 using Framework.GameMath;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -825,7 +824,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public uint PhaseShiftFlags;
-        public List<PartyMemberPhase> Phases = new List<PartyMemberPhase>();
+        public List<PartyMemberPhase> Phases = new();
         public WowGuid128 PersonalGUID = WowGuid128.Empty;
 
         public struct PartyMemberPhase
@@ -895,16 +894,11 @@ namespace HermesProxy.World.Server.Packets
         {
             if (NewPetGuid == null)
                 NewPetGuid = WowGuid128.Empty;
-            if (NewPetName == null)
-                NewPetName = "";
-            if (DisplayID == null)
-                DisplayID = 0;
-            if (MaxHealth == null)
-                MaxHealth = 0;
-            if (Health == null)
-                Health = 0;
-            if (Auras == null)
-                Auras = new List<PartyMemberAuraStates>();
+            NewPetName ??= "";
+            DisplayID ??= 0;
+            MaxHealth ??= 0;
+            Health ??= 0;
+            Auras ??= new List<PartyMemberAuraStates>();
 
             data.WritePackedGuid128(NewPetGuid);
             data.WriteUInt32(DisplayID.Value);

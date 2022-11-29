@@ -1,7 +1,4 @@
-﻿using Framework.Constants;
-using Framework.Logging;
-using HermesProxy.Enums;
-using HermesProxy.World;
+﻿using Framework.Logging;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
@@ -16,22 +13,23 @@ namespace HermesProxy.World.Server
         {
             foreach (uint id in query.Queries)
             {
-                DBReply reply = new();
-                reply.RecordID = id;
-                reply.TableHash = query.TableHash;
-                reply.Status = HotfixStatus.Invalid;
-                reply.Timestamp = (uint)Time.UnixTime;
+                DBReply reply = new()
+                {
+                    RecordID = id,
+                    TableHash = query.TableHash,
+                    Status = HotfixStatus.Invalid,
+                    Timestamp = (uint)Time.UnixTime
+                };
 
                 if (query.TableHash == DB2Hash.BroadcastText)
                 {
                     BroadcastText bct = GameData.GetBroadcastText(id);
-                    if (bct == null)
-                    {
-                        bct = new BroadcastText();
-                        bct.Entry = id;
-                        bct.MaleText = "Clear your cache!";
-                        bct.FemaleText = "Clear your cache!";
-                    }
+                    bct ??= new BroadcastText
+                        {
+                            Entry = id,
+                            MaleText = "Clear your cache!",
+                            FemaleText = "Clear your cache!"
+                        };
 
                     reply.Status = HotfixStatus.Valid;
                     reply.Data.WriteCString(bct.MaleText);
@@ -193,11 +191,10 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_HOTFIX_REQUEST)]
         void HandleHotfixRequest(HotfixRequest request)
         {
-            HotfixConnect connect = new HotfixConnect();
+            HotfixConnect connect = new();
             foreach (uint id in request.Hotfixes)
             {
-                HotfixRecord record;
-                if (GameData.Hotfixes.TryGetValue(id, out record))
+                if (GameData.Hotfixes.TryGetValue(id, out HotfixRecord record))
                 {
                     Log.Print(LogType.Debug, $"Hotfix record {record.RecordId} from {record.TableHash}.");
                     connect.Hotfixes.Add(record);

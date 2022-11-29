@@ -1,15 +1,12 @@
 ﻿using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Objects
 {
     public static class ObjectTypeConverter
     {
-        private static readonly Dictionary<ObjectTypeLegacy, ObjectType> ConvDictLegacy = new Dictionary<ObjectTypeLegacy, ObjectType>
+        private static readonly Dictionary<ObjectTypeLegacy, ObjectType> ConvDictLegacy = new()
         {
             { ObjectTypeLegacy.Object,                 ObjectType.Object },
             { ObjectTypeLegacy.Item,                   ObjectType.Item },
@@ -41,7 +38,7 @@ namespace HermesProxy.World.Objects
             throw new ArgumentOutOfRangeException("0x" + type.ToString("X"));
         }
 
-        private static readonly Dictionary<ObjectType801, ObjectType> ConvDict801 = new Dictionary<ObjectType801, ObjectType>
+        private static readonly Dictionary<ObjectType801, ObjectType> ConvDict801 = new()
         {
             { ObjectType801.Object,                 ObjectType.Object },
             { ObjectType801.Item,                   ObjectType.Item },
@@ -76,7 +73,7 @@ namespace HermesProxy.World.Objects
             throw new ArgumentOutOfRangeException("0x" + type.ToString("X"));
         }
 
-        private static readonly Dictionary<ObjectTypeBCC, ObjectType> ConvDictBCC = new Dictionary<ObjectTypeBCC, ObjectType>
+        private static readonly Dictionary<ObjectTypeBCC, ObjectType> ConvDictBCC = new()
         {
             { ObjectTypeBCC.Object,                 ObjectType.Object },
             { ObjectTypeBCC.Item,                   ObjectType.Item },

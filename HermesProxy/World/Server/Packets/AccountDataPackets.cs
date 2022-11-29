@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 
 namespace HermesProxy.World.Server.Packets
@@ -65,7 +63,7 @@ namespace HermesProxy.World.Server.Packets
         {
             _worldPacket.WriteUInt32(Token);
             _worldPacket.WriteUInt32((uint) CharacterList.Count);
-            
+
             _worldPacket.ResetBitPos();
 
             _worldPacket.WriteBit(false); // unknown bit

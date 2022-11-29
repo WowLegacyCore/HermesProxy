@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.World.Enums
+﻿namespace HermesProxy.World.Enums
 {
-     public enum RaidGroupReason
+    public enum RaidGroupReason
     {
         None         = 0,
         Lowlevel     = 1, // "You are too low level to enter this instance."

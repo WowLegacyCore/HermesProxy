@@ -1,8 +1,5 @@
-﻿using Framework.Constants;
-using HermesProxy.Enums;
-using HermesProxy.World;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System.Collections.Generic;
 using static HermesProxy.World.Server.Packets.SendMail;
@@ -15,14 +12,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUERY_NEXT_MAIL_TIME)]
         void HandleMailGetList(EmptyClientPacket mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_QUERY_NEXT_MAIL_TIME);
+            WorldPacket packet = new(Opcode.MSG_QUERY_NEXT_MAIL_TIME);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_MAIL_GET_LIST)]
         void HandleMailGetList(MailGetList mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_GET_LIST);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_GET_LIST);
             packet.WriteGuid(mail.Mailbox.To64());
             SendPacketToServer(packet);
         }
@@ -30,7 +27,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MAIL_CREATE_TEXT_ITEM)]
         void HandleMailCreateTextItem(MailCreateTextItem mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_CREATE_TEXT_ITEM);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_CREATE_TEXT_ITEM);
             packet.WriteGuid(mail.Mailbox.To64());
             packet.WriteUInt32(mail.MailID);
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -41,7 +38,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MAIL_DELETE)]
         void HandleMailDelete(MailDelete mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_DELETE);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_DELETE);
             packet.WriteGuid(GetSession().GameState.CurrentInteractedWithGO.To64());
             packet.WriteUInt32(mail.MailID);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
@@ -52,7 +49,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MAIL_MARK_AS_READ)]
         void HandleMailMarkAsRead(MailMarkAsRead mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_MARK_AS_READ);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_MARK_AS_READ);
             packet.WriteGuid(mail.Mailbox.To64());
             packet.WriteUInt32(mail.MailID);
             SendPacketToServer(packet);
@@ -61,7 +58,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MAIL_RETURN_TO_SENDER)]
         void HandleMailReturnToSender(MailReturnToSender mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_RETURN_TO_SENDER);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_RETURN_TO_SENDER);
             packet.WriteGuid(GetSession().GameState.CurrentInteractedWithGO.To64());
             packet.WriteUInt32(mail.MailID);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
@@ -72,7 +69,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MAIL_TAKE_ITEM)]
         void HandleMailTakeItem(MailTakeItem mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_TAKE_ITEM);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_TAKE_ITEM);
             packet.WriteGuid(mail.Mailbox.To64());
             packet.WriteUInt32(mail.MailID);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
@@ -83,7 +80,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MAIL_TAKE_MONEY)]
         void HandleMailTakeMoney(MailTakeMoney mail)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MAIL_TAKE_MONEY);
+            WorldPacket packet = new(Opcode.CMSG_MAIL_TAKE_MONEY);
             packet.WriteGuid(mail.Mailbox.To64());
             packet.WriteUInt32(mail.MailID);
             SendPacketToServer(packet);
@@ -91,7 +88,7 @@ namespace HermesProxy.World.Server
 
         void BuildSendMail(SendMail mail, List<MailAttachment> attachments)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SEND_MAIL);
+            WorldPacket packet = new(Opcode.CMSG_SEND_MAIL);
             packet.WriteGuid(mail.Mailbox.To64());
             packet.WriteCString(mail.Target);
             packet.WriteCString(mail.Subject);
@@ -137,7 +134,7 @@ namespace HermesProxy.World.Server
                 mail.Cod /= mail.Attachments.Count;
                 foreach (var item in mail.Attachments)
                 {
-                    List<MailAttachment> attachments = new List<MailAttachment>();
+                    List<MailAttachment> attachments = new();
                     attachments.Add(item);
                     BuildSendMail(mail, attachments);
                     System.Threading.Thread.Sleep(500); // prevent triggering antiflood on server

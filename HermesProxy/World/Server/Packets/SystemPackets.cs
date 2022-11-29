@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -125,7 +125,7 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteBit(BattlegroundsEnabled);
                 _worldPacket.WriteBit(RaceClassExpansionLevels != null);
             }
-            
+
             _worldPacket.FlushBits();
 
             {
@@ -199,7 +199,7 @@ namespace HermesProxy.World.Server.Packets
         public uint ClubsPresenceUpdateTimer;
         public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
         public int ActiveSeason;
-        public List<GameRuleValuePair> GameRuleValues = new List<GameRuleValuePair>();
+        public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket;
         public short PlayerNameQueryTelemetryInterval;
         public uint KioskSessionMinutes;
@@ -371,7 +371,7 @@ namespace HermesProxy.World.Server.Packets
         public EuropaTicketConfig EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
-        public long TokenBalanceAmount;     // NYI 
+        public long TokenBalanceAmount;     // NYI
         public int MaxCharactersPerRealm;
         public uint BpayStoreProductDeliveryDelay;     // NYI
         public int ActiveCharacterUpgradeBoostType;     // NYI
@@ -379,7 +379,7 @@ namespace HermesProxy.World.Server.Packets
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
         public int ActiveSeason;
-        public List<GameRuleValuePair> GameRuleValues = new List<GameRuleValuePair>();
+        public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket;
         public short PlayerNameQueryTelemetryInterval;
         public uint KioskSessionMinutes;
@@ -402,7 +402,7 @@ namespace HermesProxy.World.Server.Packets
             }
         }
 
-        public List<string> Text = new List<string>();
+        public List<string> Text = new();
     }
 
     public class SetTimeZoneInformation : ServerPacket

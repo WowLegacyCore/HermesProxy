@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +19,6 @@ using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using Framework.GameMath;
-using HermesProxy.World.Objects;
 using Framework.Constants;
 
 namespace HermesProxy.World.Server.Packets
@@ -133,7 +132,7 @@ namespace HermesProxy.World.Server.Packets
 
                 foreach (string str in MailSenders)
                     data.WriteBits(str.GetByteCount() + 1, 6);
-                
+
                 data.FlushBits();
 
                 foreach (string str in MailSenders)
@@ -927,8 +926,8 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public WowGuid128 PlayerGUID;
-        public List<PvPBracketInspectData> Brackets = new List<PvPBracketInspectData>();
-        public List<ArenaTeamInspectData> ArenaTeams = new List<ArenaTeamInspectData>();
+        public List<PvPBracketInspectData> Brackets = new();
+        public List<ArenaTeamInspectData> ArenaTeams = new();
     }
 
     public class PvPBracketInspectData
@@ -1040,7 +1039,7 @@ namespace HermesProxy.World.Server.Packets
         public override void Write()
         {
             _worldPacket.WriteBool(Success);
-            
+
             _worldPacket.WriteBits(Name.Length, 6);
             _worldPacket.WriteString(Name);
         }

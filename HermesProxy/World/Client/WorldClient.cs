@@ -13,7 +13,6 @@ using Framework.Logging;
 using HermesProxy.World.Enums;
 using System.Reflection;
 using System.Threading.Tasks;
-using HermesProxy.World.Server;
 
 namespace HermesProxy.World.Client
 {
@@ -26,7 +25,7 @@ namespace HermesProxy.World.Client
         LegacyWorldCrypt _worldCrypt;
         Dictionary<Opcode, Action<WorldPacket>> _packetHandlers;
         GlobalSessionData _globalSession;
-        System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
+        readonly System.Threading.Mutex _sendMutex = new();
 
         // packet order is not always the same as new client, sometimes we need to delay packet until another one
         Dictionary<Opcode, List<WorldPacket>> _delayedPacketsToServer;
@@ -119,8 +118,7 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
-                if (_isSuccessful == null)
-                    _isSuccessful = false;
+                _isSuccessful ??= false;
             }
         }
 
@@ -159,7 +157,7 @@ namespace HermesProxy.World.Client
                     if (_worldCrypt != null)
                         _worldCrypt.Decrypt(headerBuffer, LegacyServerPacketHeader.StructSize);
 
-                    LegacyServerPacketHeader header = new LegacyServerPacketHeader();
+                    LegacyServerPacketHeader header = new();
                     header.Read(headerBuffer);
                     ushort packetSize = header.Size;
 
@@ -181,7 +179,7 @@ namespace HermesProxy.World.Client
                             return;
                         }
 
-                        WorldPacket packet = new WorldPacket(buffer);
+                        WorldPacket packet = new(buffer);
                         packet.SetReceiveTime(Environment.TickCount);
                         HandlePacket(packet);
                     }
@@ -206,11 +204,12 @@ namespace HermesProxy.World.Client
             _sendMutex.WaitOne();
             try
             {
-                ByteBuffer buffer = new ByteBuffer();
-                LegacyClientPacketHeader header = new LegacyClientPacketHeader();
-
-                header.Size = (ushort)(packet.GetSize() + sizeof(uint)); // size includes the opcode
-                header.Opcode = packet.GetOpcode();
+                ByteBuffer buffer = new();
+                LegacyClientPacketHeader header = new()
+                {
+                    Size = (ushort)(packet.GetSize() + sizeof(uint)), // size includes the opcode
+                    Opcode = packet.GetOpcode()
+                };
                 header.Write(buffer);
 
                 Log.PrintNet(LogType.Debug, LogNetDir.P2S, $"Sending opcode {LegacyVersion.GetUniversalOpcode(header.Opcode)} ({header.Opcode}) with size {header.Size}.");
@@ -228,8 +227,7 @@ namespace HermesProxy.World.Client
             catch (Exception ex)
             {
                 Log.PrintNet(LogType.Error, LogNetDir.P2S, $"Packet Write Error: {ex.Message}");
-                if (_isSuccessful == null)
-                    _isSuccessful = false;
+                _isSuccessful ??= false;
             }
             _sendMutex.ReleaseMutex();
         }
@@ -243,7 +241,7 @@ namespace HermesProxy.World.Client
                     _delayedPacketsToClient[delayUntilOpcode].Add(packet);
                 else
                 {
-                    List<ServerPacket> packets = new List<ServerPacket>();
+                    List<ServerPacket> packets = new();
                     packets.Add(packet);
                     _delayedPacketsToClient.Add(delayUntilOpcode, packets);
                 }
@@ -310,7 +308,7 @@ namespace HermesProxy.World.Client
                     _delayedPacketsToServer[delayUntilOpcode].Add(packet);
                 else
                 {
-                    List<WorldPacket> packets = new List<WorldPacket>();
+                    List<WorldPacket> packets = new();
                     packets.Add(packet);
                     _delayedPacketsToServer.Add(delayUntilOpcode, packets);
                 }
@@ -370,8 +368,7 @@ namespace HermesProxy.World.Client
                     else
                     {
                         Log.Print(LogType.Warn, $"No handler for opcode {universalOpcode} ({packet.GetOpcode()})");
-                        if (_isSuccessful == null)
-                            _isSuccessful = false;
+                        _isSuccessful ??= false;
                     }
                     break;
             }
@@ -415,7 +412,7 @@ namespace HermesProxy.World.Client
                 GetSession().AuthClient.GetSessionKey()
             );
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_AUTH_SESSION);
+            WorldPacket packet = new(Opcode.CMSG_AUTH_SESSION);
             packet.WriteUInt32((uint)Settings.ServerBuild);
             packet.WriteUInt32(_realm.Id.Index);
             packet.WriteBytes(_username.ToUpper().ToCString());
@@ -480,7 +477,7 @@ namespace HermesProxy.World.Client
             if (!IsConnected() || _isSuccessful == false)
                 return;
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_PING);
+            WorldPacket packet = new(Opcode.CMSG_PING);
             packet.WriteUInt32(ping);
             packet.WriteUInt32(latency);
             SendPacket(packet);

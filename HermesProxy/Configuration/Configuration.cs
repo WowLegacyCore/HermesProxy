@@ -9,7 +9,7 @@ using Framework.Logging;
 namespace Framework
 {
     public class Configuration
-    { 
+    {
         private const string DEFAULT_CONFIG_FILE = "HermesProxy.config";
         private readonly KeyValueConfigurationCollection _settingsCollection;
 
@@ -51,7 +51,7 @@ namespace Framework
                 if (!File.Exists(configFile))
                     throw new FileNotFoundException($"File '{configFile}' was not found.");
 
-                ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap { ExeConfigFilename = configFile };
+                ExeConfigurationFileMap fileMap = new() { ExeConfigFilename = configFile };
                 var config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
                 settings = ((AppSettingsSection)config.Sections.Get("appSettings")).Settings;
             }
@@ -98,8 +98,7 @@ namespace Framework
             if (s?.Value == null)
                 return defValue;
 
-            bool aux;
-            if (bool.TryParse(s.Value, out aux))
+            if (bool.TryParse(s.Value, out bool aux))
                 return aux;
 
             Console.WriteLine("Warning: \"{0}\" is not a valid boolean value for key \"{1}\"", s.Value, key);
@@ -112,8 +111,7 @@ namespace Framework
             if (string.IsNullOrEmpty(s?.Value))
                 return defValue;
 
-            int aux;
-            if (int.TryParse(s.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out aux))
+            if (int.TryParse(s.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int aux))
                 return aux;
 
             Console.WriteLine("Warning: \"{0}\" is not a valid integer value for key \"{1}\"", s.Value, key);
@@ -126,8 +124,7 @@ namespace Framework
             if (string.IsNullOrEmpty(s?.Value))
                 return defValue;
 
-            int value;
-            if (!int.TryParse(s.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out value))
+            if (!int.TryParse(s.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
             {
                 Console.WriteLine("Warning: \"{0}\" is not a valid integer value for key \"{1}\"", s.Value, key);
                 return defValue;
@@ -136,8 +133,7 @@ namespace Framework
             if (Enum.IsDefined(typeof(TEnum), value))
                 return (TEnum)(object)value;
 
-            TEnum enumValue;
-            if (Enum.TryParse(value.ToString(), out enumValue))
+            if (Enum.TryParse(value.ToString(), out TEnum enumValue))
                 return enumValue;
 
             Console.WriteLine("Warning: \"{0}\" is not a valid enum value for key \"{1}\", enum \"{2}\"", s.Value, key, typeof(TEnum).Name);

@@ -1,9 +1,5 @@
 ﻿using Framework.Cryptography;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Client
 {
@@ -78,7 +74,7 @@ namespace HermesProxy.World.Client
         public void Initialize(byte[] sessionKey)
         {
             byte[] recvSeed = new byte[16] { 0x38, 0xA7, 0x83, 0x15, 0xF8, 0x92, 0x25, 0x30, 0x71, 0x98, 0x67, 0xB1, 0x8C, 0x4, 0xE2, 0xAA };
-            HmacHash recvHash = new HmacHash(recvSeed);
+            HmacHash recvHash = new(recvSeed);
             recvHash.Finish(sessionKey, sessionKey.Count());
             m_key = recvHash.Digest.ToArray();
 

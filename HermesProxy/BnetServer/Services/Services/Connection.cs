@@ -16,9 +16,11 @@ namespace BNetServer.Services
             if (request.ClientId != null)
                 response.ClientId.MergeFrom(request.ClientId);
 
-            response.ServerId = new ProcessId();
-            response.ServerId.Label = (uint)Environment.ProcessId;
-            response.ServerId.Epoch = (uint)Time.UnixTime;
+            response.ServerId = new ProcessId
+            {
+                Label = (uint)Environment.ProcessId,
+                Epoch = (uint)Time.UnixTime
+            };
             response.ServerTime = (ulong)Time.UnixTimeMilliseconds;
 
             response.UseBindlessRpc = request.UseBindlessRpc;
@@ -38,8 +40,10 @@ namespace BNetServer.Services
             if (GetSession() != null && GetSession().AuthClient != null)
                 GetSession().AuthClient.Disconnect();
 
-            var disconnectNotification = new DisconnectNotification();
-            disconnectNotification.ErrorCode = request.ErrorCode;
+            var disconnectNotification = new DisconnectNotification
+            {
+                ErrorCode = request.ErrorCode
+            };
             SendRequest(OriginalHash.ConnectionService, 4, disconnectNotification);
 
             CloseSocket();

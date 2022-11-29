@@ -1,12 +1,7 @@
 ﻿using Framework.GameMath;
-using Framework.IO;
 using HermesProxy.World.Enums.V1_14_0_40237;
 using HermesProxy.World.Server.Packets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Objects.Version.V1_14_0_40237
 {
@@ -660,7 +655,7 @@ namespace HermesProxy.World.Objects.Version.V1_14_0_40237
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.ProgressCurveId);
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.ParabolicCurveId);
                 }
-                
+
                 if (moveSpline.splineflags.HasFlag(SplineFlag.Parabolic))
                 {
                     data.WriteFloat(moveSpline.vertical_acceleration);
@@ -1152,7 +1147,7 @@ namespace HermesProxy.World.Objects.Version.V1_14_0_40237
                         if (playerData.QuestLog[i].EndTime != null)
                             m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 2 + 12, (uint)playerData.QuestLog[i].EndTime);
                         if (playerData.QuestLog[i].AcceptTime != null)
-                            m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 3 + 12, (uint)playerData.QuestLog[i].AcceptTime); 
+                            m_fields.SetUpdateField<uint>(startIndex + i * sizePerEntry + 3 + 12, (uint)playerData.QuestLog[i].AcceptTime);
                     }
                 }
                 for (int i = 0; i < 19; i++)

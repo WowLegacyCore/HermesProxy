@@ -3,11 +3,7 @@ using Framework.IO;
 using Framework.Logging;
 using HermesProxy.World.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Objects
 {
@@ -262,10 +258,11 @@ namespace HermesProxy.World.Objects
             m_updateMask = new UpdateMask(size);
             m_fieldBuffer = new();
         }
-        uint ValuesCount;
-        UpdateTypeModern m_updateType;
-        UpdateMask m_updateMask;
-        ByteBuffer m_fieldBuffer;
+
+        readonly uint ValuesCount;
+        readonly UpdateTypeModern m_updateType;
+        readonly UpdateMask m_updateMask;
+        readonly ByteBuffer m_fieldBuffer;
 
         public void WriteToPacket(ByteBuffer buffer)
         {
@@ -284,7 +281,7 @@ namespace HermesProxy.World.Objects
             {
                 arrayMask.ValueCount = values.Length;
                 arrayMask.SetCount(values.Length);
-            } 
+            }
 
             for (var v = 0; v < values.Length; ++v)
             {
@@ -301,8 +298,10 @@ namespace HermesProxy.World.Objects
             if (value is int intValue)
             {
                 uint[] values = new uint[1];
-                UpdateValues union = new();
-                union.SignedValue = intValue;
+                UpdateValues union = new()
+                {
+                    SignedValue = intValue
+                };
                 values[0] = union.UnsignedValue;
                 SetUpdateField((int)index, values, changeType);
             }
@@ -315,8 +314,10 @@ namespace HermesProxy.World.Objects
             else if (value is float floatValue)
             {
                 uint[] values = new uint[1];
-                UpdateValues union = new();
-                union.FloatValue = floatValue;
+                UpdateValues union = new()
+                {
+                    FloatValue = floatValue
+                };
                 values[0] = union.UnsignedValue;
                 SetUpdateField((int)index, values, changeType);
             }

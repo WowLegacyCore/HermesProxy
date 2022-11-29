@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.World.Enums.V2_4_3_8606
+﻿namespace HermesProxy.World.Enums.V2_4_3_8606
 {
     // ReSharper disable InconsistentNaming
     // 2.4.3

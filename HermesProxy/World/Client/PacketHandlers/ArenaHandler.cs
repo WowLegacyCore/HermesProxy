@@ -1,9 +1,7 @@
 ﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
-using System.Collections.Generic;
 
 namespace HermesProxy.World.Client
 {
@@ -14,8 +12,7 @@ namespace HermesProxy.World.Client
         void HandleArenaTeamQueryResponse(WorldPacket packet)
         {
             uint teamId = packet.ReadUInt32();
-            ArenaTeamData team;
-            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out team))
+            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out ArenaTeamData team))
             {
                 team = new ArenaTeamData();
                 GetSession().GameState.ArenaTeams.Add(teamId, team);
@@ -34,8 +31,7 @@ namespace HermesProxy.World.Client
         void HandleArenaTeamStats(WorldPacket packet)
         {
             uint teamId = packet.ReadUInt32();
-            ArenaTeamData team;
-            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out team))
+            if (!GetSession().GameState.ArenaTeams.TryGetValue(teamId, out ArenaTeamData team))
             {
                 team = new ArenaTeamData();
                 GetSession().GameState.ArenaTeams.Add(teamId, team);
@@ -52,8 +48,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_ROSTER)]
         void HandleArenaTeamRoster(WorldPacket packet)
         {
-            ArenaTeamRosterResponse arena = new ArenaTeamRosterResponse();
-            arena.TeamId = packet.ReadUInt32();
+            ArenaTeamRosterResponse arena = new()
+            {
+                TeamId = packet.ReadUInt32()
+            };
 
             var hiddenRating = false;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_8_9464))
@@ -64,8 +62,8 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < count; i++)
             {
-                ArenaTeamMember member = new ArenaTeamMember();
-                PlayerCache cache = new PlayerCache();
+                ArenaTeamMember member = new();
+                PlayerCache cache = new();
                 member.MemberGUID = packet.ReadGuid().To128(GetSession().GameState);
                 member.Online = packet.ReadBool();
                 member.Name = cache.Name = packet.ReadCString();
@@ -88,8 +86,7 @@ namespace HermesProxy.World.Client
                 arena.Members.Add(member);
             }
 
-            ArenaTeamData team;
-            if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out team))
+            if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out ArenaTeamData team))
             {
                 arena.TeamPlayed = team.WeekPlayed;
                 arena.TeamWins = team.WeekWins;
@@ -105,7 +102,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_EVENT)]
         void HandleArenaTeamEvent(WorldPacket packet)
         {
-            ArenaTeamEvent arena = new ArenaTeamEvent();
+            ArenaTeamEvent arena = new();
             var eventType = (ArenaTeamEventLegacy)packet.ReadUInt8();
             arena.Event = (ArenaTeamEventModern)Enum.Parse(typeof(ArenaTeamEventModern), eventType.ToString());
             byte count = packet.ReadUInt8();
@@ -133,10 +130,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_COMMAND_RESULT)]
         void HandleArenaTeamCommandResult(WorldPacket packet)
         {
-            ArenaTeamCommandResult arena = new ArenaTeamCommandResult();
-            arena.Action = (ArenaTeamCommandType)packet.ReadUInt32();
-            arena.TeamName = packet.ReadCString();
-            arena.PlayerName = packet.ReadCString();
+            ArenaTeamCommandResult arena = new()
+            {
+                Action = (ArenaTeamCommandType)packet.ReadUInt32(),
+                TeamName = packet.ReadCString(),
+                PlayerName = packet.ReadCString()
+            };
             var errorType = (ArenaTeamCommandErrorLegacy)packet.ReadUInt32();
             arena.Error = (ArenaTeamCommandErrorModern)Enum.Parse(typeof(ArenaTeamCommandErrorModern), errorType.ToString());
             SendPacketToClient(arena);
@@ -145,9 +144,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_INVITE)]
         void HandleArenaTeamInvite(WorldPacket packet)
         {
-            ArenaTeamInvite arena = new ArenaTeamInvite();
-            arena.PlayerName = packet.ReadCString();
-            arena.TeamName = packet.ReadCString();
+            ArenaTeamInvite arena = new()
+            {
+                PlayerName = packet.ReadCString(),
+                TeamName = packet.ReadCString()
+            };
             arena.PlayerGuid = GetSession().GameState.GetPlayerGuidByName(arena.PlayerName);
             if (arena.PlayerGuid == null)
                 arena.PlayerGuid = WowGuid128.Empty;

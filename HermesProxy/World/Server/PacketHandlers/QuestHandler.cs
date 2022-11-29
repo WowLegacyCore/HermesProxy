@@ -1,6 +1,4 @@
-﻿using Framework.Constants;
-using Framework.Logging;
-using HermesProxy.World;
+﻿using Framework.Logging;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
@@ -15,7 +13,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_QUERY_QUEST)]
         void HandleQuestGiverQueryQuest(QuestGiverQueryQuest quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_QUERY_QUEST);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_QUERY_QUEST);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);
             if (LegacyVersion.AddedInVersion(HermesProxy.Enums.ClientVersionBuild.V2_0_1_6180))
@@ -25,7 +23,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_ACCEPT_QUEST)]
         void HandleQuestGiverAcceptQuest(QuestGiverAcceptQuest quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_ACCEPT_QUEST);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_ACCEPT_QUEST);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);
             if (LegacyVersion.AddedInVersion(HermesProxy.Enums.ClientVersionBuild.V3_1_2_9901))
@@ -35,14 +33,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_LOG_REMOVE_QUEST)]
         void HandleQuestLogRemoveQuest(QuestLogRemoveQuest quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_LOG_REMOVE_QUEST);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_LOG_REMOVE_QUEST);
             packet.WriteUInt8(quest.Slot);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY)]
         void HandleQuestGiverStatusQuery(QuestGiverStatusQuery query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY);
             packet.WriteGuid(query.QuestGiverGUID.To64());
             SendPacketToServer(packet);
         }
@@ -51,7 +49,7 @@ namespace HermesProxy.World.Server
         {
             if (LegacyVersion.AddedInVersion(HermesProxy.Enums.ClientVersionBuild.V2_0_1_6180))
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_STATUS_MULTIPLE_QUERY);
+                WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_STATUS_MULTIPLE_QUERY);
                 SendPacketToServer(packet);
             }
             else
@@ -60,11 +58,11 @@ namespace HermesProxy.World.Server
                 if (UNIT_NPC_FLAGS < 0)
                     return;
 
-                List<WowGuid128> npcGuids = new List<WowGuid128>();
+                List<WowGuid128> npcGuids = new();
                 GetSession().GameState.ObjectCacheMutex.WaitOne();
                 foreach (var obj in GetSession().GameState.ObjectCacheModern)
                 {
-                    if (obj.Key.GetObjectType() == ObjectType.Unit && 
+                    if (obj.Key.GetObjectType() == ObjectType.Unit &&
                         obj.Value.GetUpdateField<uint>(UNIT_NPC_FLAGS).HasAnyFlag(NPCFlags.QuestGiver))
                         npcGuids.Add(obj.Key);
                 }
@@ -72,7 +70,7 @@ namespace HermesProxy.World.Server
 
                 foreach (var guid in npcGuids)
                 {
-                    WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY);
+                    WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_STATUS_QUERY);
                     packet.WriteGuid(guid.To64());
                     SendPacketToServer(packet);
                 }
@@ -81,14 +79,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_HELLO)]
         void HandleQuestGiverHello(QuestGiverHello hello)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_HELLO);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_HELLO);
             packet.WriteGuid(hello.QuestGiverGUID.To64());
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_REQUEST_REWARD)]
         void HandleQuestGiverRequestReward(QuestGiverRequestReward quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_REQUEST_REWARD);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_REQUEST_REWARD);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);
             SendPacketToServer(packet);
@@ -104,12 +102,14 @@ namespace HermesProxy.World.Server
                 if (questTemplate == null)
                 {
                     Log.Print(LogType.Error, "Unable to select quest reward because quest template is missing. Try again.");
-                    WorldPacket packet2 = new WorldPacket(Opcode.CMSG_QUERY_QUEST_INFO);
+                    WorldPacket packet2 = new(Opcode.CMSG_QUERY_QUEST_INFO);
                     packet2.WriteUInt32(quest.QuestID);
                     SendPacketToServer(packet2);
-                    QuestGiverQuestFailed fail = new QuestGiverQuestFailed();
-                    fail.QuestID = quest.QuestID;
-                    fail.Reason = InventoryResult.ItemNotFound;
+                    QuestGiverQuestFailed fail = new()
+                    {
+                        QuestID = quest.QuestID,
+                        Reason = InventoryResult.ItemNotFound
+                    };
                     SendPacket(fail);
                     return;
                 }
@@ -123,8 +123,8 @@ namespace HermesProxy.World.Server
                     }
                 }
             }
-            
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD);
+
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);
             packet.WriteInt32(choiceIndex);
@@ -133,7 +133,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_GIVER_COMPLETE_QUEST)]
         void HandleQuestGiverCompleteQuest(QuestGiverCompleteQuest quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_COMPLETE_QUEST);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_GIVER_COMPLETE_QUEST);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);
             SendPacketToServer(packet);
@@ -141,21 +141,21 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUEST_CONFIRM_ACCEPT)]
         void HandleQuestConfirmAcceptResponse(QuestConfirmAcceptResponse quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_CONFIRM_ACCEPT);
+            WorldPacket packet = new(Opcode.CMSG_QUEST_CONFIRM_ACCEPT);
             packet.WriteUInt32(quest.QuestID);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_PUSH_QUEST_TO_PARTY)]
         void HandlePushQuestToParty(PushQuestToParty quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_PUSH_QUEST_TO_PARTY);
+            WorldPacket packet = new(Opcode.CMSG_PUSH_QUEST_TO_PARTY);
             packet.WriteUInt32(quest.QuestID);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_QUEST_PUSH_RESULT)]
         void HandleQuestPushResult(QuestPushResultResponse quest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_QUEST_PUSH_RESULT);
+            WorldPacket packet = new(Opcode.MSG_QUEST_PUSH_RESULT);
             packet.WriteGuid(quest.SenderGUID.To64());
             packet.WriteUInt8((byte)quest.Result);
             SendPacketToServer(packet);

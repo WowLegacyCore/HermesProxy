@@ -1,9 +1,6 @@
-﻿using Framework;
-using HermesProxy.Enums;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
-using System;
 
 namespace HermesProxy.World.Client
 {
@@ -20,7 +17,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MOTD)]
         void HandleMotd(WorldPacket packet)
         {
-            MOTD motd = new MOTD();
+            MOTD motd = new();
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i++)
                 motd.Text.Add(packet.ReadCString());

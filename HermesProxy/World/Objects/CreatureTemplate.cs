@@ -1,9 +1,5 @@
 ﻿using Framework.Collections;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HermesProxy.World.Enums;
 
 namespace HermesProxy.World.Objects

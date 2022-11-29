@@ -4,8 +4,6 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using System.Threading;
-using BNetServer.Networking;
 using Framework.Constants;
 using Framework.Logging;
 using Google.Protobuf;
@@ -16,7 +14,7 @@ namespace BNetServer.Services
     public partial class BnetServices
     {
         private static uint _serverInvokedRequestToken = 0;
-        private Dictionary<uint /*requestId*/, Action<CodedInputStream> /*callbackHandler*/> _callbackHandlers = new();
+        private readonly Dictionary<uint /*requestId*/, Action<CodedInputStream> /*callbackHandler*/> _callbackHandlers = new();
 
         private GlobalSessionData _globalSession;
         private readonly byte[] _clientSecret = new byte[32];
@@ -58,10 +56,10 @@ namespace BNetServer.Services
 
         private void ServiceLog(LogType type, string message)
         {
-            StringBuilder prefix = new StringBuilder();
+            StringBuilder prefix = new();
             prefix.Append($"[{_connectionPath}]");
             prefix.Append($"[{GetRemoteIpEndPoint()}");
-            
+
             if (GetSession() != null)
             {
                 if (GetSession().AccountInfo != null && !GetSession().AccountInfo.Login.IsEmpty())
@@ -70,7 +68,7 @@ namespace BNetServer.Services
                 if (GetSession().GameAccountInfo != null)
                     prefix.Append(", Game account: " + GetSession().GameAccountInfo.Name);
             }
-            
+
             prefix.Append(']');
 
             Log.Print(type, $"{prefix} {message}");

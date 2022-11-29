@@ -14,14 +14,20 @@ namespace BNetServer.Services
         {
             if (request.Options.FieldPrivacyInfo)
             {
-                response.State = new AccountState();
-                response.State.PrivacyInfo = new PrivacyInfo();
-                response.State.PrivacyInfo.IsUsingRid = false;
-                response.State.PrivacyInfo.IsVisibleForViewFriends = false;
-                response.State.PrivacyInfo.IsHiddenFromFriendFinder = true;
+                response.State = new AccountState
+                {
+                    PrivacyInfo = new PrivacyInfo
+                    {
+                        IsUsingRid = false,
+                        IsVisibleForViewFriends = false,
+                        IsHiddenFromFriendFinder = true
+                    }
+                };
 
-                response.Tags = new AccountFieldTags();
-                response.Tags.PrivacyInfoTag = 0xD7CA834D;
+                response.Tags = new AccountFieldTags
+                {
+                    PrivacyInfoTag = 0xD7CA834D
+                };
             }
 
             return BattlenetRpcErrorCode.Ok;
@@ -35,20 +41,25 @@ namespace BNetServer.Services
                 var gameAccountInfo = GetSession().AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
-                    response.State = new GameAccountState();
-                    response.State.GameLevelInfo = new GameLevelInfo();
-                    response.State.GameLevelInfo.Name = gameAccountInfo.DisplayName;
-                    response.State.GameLevelInfo.Program = 0x576f57; // "WoW" in Hex
+                    response.State = new GameAccountState
+                    {
+                        GameLevelInfo = new GameLevelInfo
+                        {
+                            Name = gameAccountInfo.DisplayName,
+                            Program = 0x576f57 // "WoW" in Hex
+                        }
+                    };
                 }
 
-                response.Tags = new GameAccountFieldTags();
-                response.Tags.GameLevelInfoTag = 0x5C46D483;
+                response.Tags = new GameAccountFieldTags
+                {
+                    GameLevelInfoTag = 0x5C46D483
+                };
             }
 
             if (request.Options.FieldGameStatus)
             {
-                if (response.State == null)
-                    response.State = new GameAccountState();
+                response.State ??= new GameAccountState();
 
                 response.State.GameStatus = new GameStatus();
 

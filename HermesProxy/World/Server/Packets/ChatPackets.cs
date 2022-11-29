@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,9 +17,7 @@
 
 
 using Framework.Constants;
-using Framework.GameMath;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -301,7 +299,7 @@ namespace HermesProxy.World.Server.Packets
             Prefix = addonPrefix;
 
             SenderGUID = sender != null ? sender : WowGuid128.Empty;
-            if (String.IsNullOrEmpty(senderName) && sender != null)
+            if (string.IsNullOrEmpty(senderName) && sender != null)
                 SenderName = globalSession.GameState.GetPlayerName(sender);
             else
                 SenderName = senderName;
@@ -311,7 +309,7 @@ namespace HermesProxy.World.Server.Packets
             PartyGUID = WowGuid128.Empty;
 
             TargetGUID = receiver != null ? receiver : WowGuid128.Empty;
-            if (String.IsNullOrEmpty(receiverName) && receiver != null)
+            if (string.IsNullOrEmpty(receiverName) && receiver != null)
                 TargetName = globalSession.GameState.GetPlayerName(receiver);
             else
                 TargetName = receiverName;
@@ -532,6 +530,6 @@ namespace HermesProxy.World.Server.Packets
                 Prefixes.Add(_worldPacket.ReadString(_worldPacket.ReadBits<uint>(5)));
         }
 
-        public List<string> Prefixes = new List<string>();
+        public List<string> Prefixes = new();
     }
 }

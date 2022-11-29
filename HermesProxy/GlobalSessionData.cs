@@ -68,8 +68,8 @@ namespace HermesProxy
         public ClientCastRequest CurrentClientNormalCast;  // regular spell casts
         public ClientCastRequest CurrentClientSpecialCast; // next melee or auto repeat spells
         public ClientCastRequest CurrentClientPetCast;
-        public List<ClientCastRequest> PendingClientCasts = new List<ClientCastRequest>();
-        public List<ClientCastRequest> PendingClientPetCasts = new List<ClientCastRequest>();
+        public List<ClientCastRequest> PendingClientCasts = new();
+        public List<ClientCastRequest> PendingClientPetCasts = new();
         public WowGuid64 LastLootTargetGuid;
         public List<int> ActionButtons = new();
         public Dictionary<WowGuid128, Dictionary<byte, int>> UnitAuraDurationUpdateTime = new();
@@ -78,7 +78,7 @@ namespace HermesProxy
         public Dictionary<WowGuid128, Dictionary<byte, WowGuid128>> UnitAuraCaster = new();
         public Dictionary<WowGuid128, PlayerCache> CachedPlayers = new();
         public Dictionary<WowGuid128, uint> PlayerGuildIds = new();
-        public System.Threading.Mutex ObjectCacheMutex = new System.Threading.Mutex();
+        public System.Threading.Mutex ObjectCacheMutex = new();
         public Dictionary<WowGuid128, Dictionary<int, UpdateField>> ObjectCacheLegacy = new();
         public Dictionary<WowGuid128, UpdateFieldsArray> ObjectCacheModern = new();
         public Dictionary<WowGuid128, ObjectType> OriginalObjectTypes = new();
@@ -90,32 +90,34 @@ namespace HermesProxy
         public Dictionary<uint, uint> RealSpellToLearnSpell = new();
         public Dictionary<uint, ArenaTeamData> ArenaTeams = new();
         public World.Server.Packets.MailListResult PendingMailListPacket;
-        public HashSet<uint> RequestedItemTextIds = new HashSet<uint>();
-        public Dictionary<uint, string> ItemTexts = new Dictionary<uint, string>();
-        public Dictionary<uint, uint> BattleFieldQueueTypes = new Dictionary<uint, uint>();
-        public Dictionary<uint, long> BattleFieldQueueTimes = new Dictionary<uint, long>();
-        public Dictionary<uint, uint> DailyQuestsDone = new Dictionary<uint, uint>();
-        public HashSet<WowGuid128> FlagCarrierGuids = new HashSet<WowGuid128>();
-        public Dictionary<WowGuid64, ushort> ObjectSpawnCount = new Dictionary<WowGuid64, ushort>();
+        public HashSet<uint> RequestedItemTextIds = new();
+        public Dictionary<uint, string> ItemTexts = new();
+        public Dictionary<uint, uint> BattleFieldQueueTypes = new();
+        public Dictionary<uint, long> BattleFieldQueueTimes = new();
+        public Dictionary<uint, uint> DailyQuestsDone = new();
+        public HashSet<WowGuid128> FlagCarrierGuids = new();
+        public Dictionary<WowGuid64, ushort> ObjectSpawnCount = new();
         public HashSet<WowGuid64> DespawnedGameObjects = new();
-        public HashSet<WowGuid128> HunterPetGuids = new HashSet<WowGuid128>();
-        public Dictionary<WowGuid128, Array<ArenaTeamInspectData>> PlayerArenaTeams = new Dictionary<WowGuid128, Array<ArenaTeamInspectData>>();
-        public HashSet<string> AddonPrefixes = new HashSet<string>();
-        public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
-        public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
+        public HashSet<WowGuid128> HunterPetGuids = new();
+        public Dictionary<WowGuid128, Array<ArenaTeamInspectData>> PlayerArenaTeams = new();
+        public HashSet<string> AddonPrefixes = new();
+        public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new();
+        public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new();
 
         private GameSessionData()
         {
-            
+
         }
 
         public static GameSessionData CreateNewGameSessionData(GlobalSessionData globalSession)
         {
-            var self = new GameSessionData();
-            self.CurrentPlayerStorage = new CurrentPlayerStorage(globalSession);
+            var self = new GameSessionData
+            {
+                CurrentPlayerStorage = new CurrentPlayerStorage(globalSession)
+            };
             return self;
         }
-        
+
         public uint GetCurrentGroupSize()
         {
             var group = GetCurrentGroup();
@@ -199,7 +201,7 @@ namespace HermesProxy
             }
             else
             {
-                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                Dictionary<byte, int> dict = new();
                 dict.Add(spellMask, amount);
                 FlatSpellMods.Add(spellMod, dict);
             }
@@ -220,7 +222,7 @@ namespace HermesProxy
             }
             else
             {
-                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                Dictionary<byte, int> dict = new();
                 dict.Add(spellMask, amount);
                 PctSpellMods.Add(spellMod, dict);
             }
@@ -252,8 +254,7 @@ namespace HermesProxy
         }
         public ushort GetObjectSpawnCounter(WowGuid64 guid)
         {
-            ushort count;
-            if (ObjectSpawnCount.TryGetValue(guid, out count))
+            if (ObjectSpawnCount.TryGetValue(guid, out ushort count))
                 return count;
             return 0;
         }
@@ -278,8 +279,7 @@ namespace HermesProxy
         }
         public bool IsAlliancePlayer(WowGuid128 guid)
         {
-            PlayerCache cache;
-            if (CachedPlayers.TryGetValue(guid, out cache))
+            if (CachedPlayers.TryGetValue(guid, out PlayerCache cache))
                 return GameData.IsAllianceRace(cache.RaceId);
             return false;
         }
@@ -344,7 +344,7 @@ namespace HermesProxy
             }
             else
             {
-                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                Dictionary<byte, int> dict = new();
                 dict.Add(slot, duration);
                 UnitAuraDurationLeft.Add(guid, dict);
             }
@@ -358,7 +358,7 @@ namespace HermesProxy
             }
             else
             {
-                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                Dictionary<byte, int> dict = new();
                 dict.Add(slot, currentTime);
                 UnitAuraDurationUpdateTime.Add(guid, dict);
             }
@@ -374,7 +374,7 @@ namespace HermesProxy
             }
             else
             {
-                Dictionary<byte, int> dict = new Dictionary<byte, int>();
+                Dictionary<byte, int> dict = new();
                 dict.Add(slot, duration);
                 UnitAuraDurationFull.Add(guid, dict);
             }
@@ -423,7 +423,7 @@ namespace HermesProxy
             }
             else
             {
-                Dictionary<byte, WowGuid128> dict = new Dictionary<byte, WowGuid128>();
+                Dictionary<byte, WowGuid128> dict = new();
                 dict.Add(slot, caster);
                 UnitAuraCaster.Add(target, dict);
             }
@@ -487,7 +487,7 @@ namespace HermesProxy
                 {
                     ObjectCacheMutex.ReleaseMutex();
                     return itr.Key;
-                }  
+                }
             }
             ObjectCacheMutex.ReleaseMutex();
             return null;
@@ -661,9 +661,8 @@ namespace HermesProxy
 
         public Dictionary<int, UpdateField> GetCachedObjectFieldsLegacy(WowGuid128 guid)
         {
-            Dictionary<int, UpdateField> dict;
             ObjectCacheMutex.WaitOne();
-            if (ObjectCacheLegacy.TryGetValue(guid, out dict))
+            if (ObjectCacheLegacy.TryGetValue(guid, out Dictionary<int, UpdateField> dict))
             {
                 ObjectCacheMutex.ReleaseMutex();
                 return dict;
@@ -674,9 +673,8 @@ namespace HermesProxy
 
         public UpdateFieldsArray GetCachedObjectFieldsModern(WowGuid128 guid)
         {
-            UpdateFieldsArray array;
             ObjectCacheMutex.WaitOne();
-            if (ObjectCacheModern.TryGetValue(guid, out array))
+            if (ObjectCacheModern.TryGetValue(guid, out UpdateFieldsArray array))
             {
                 ObjectCacheMutex.ReleaseMutex();
                 return array;
@@ -723,7 +721,7 @@ namespace HermesProxy
         public string OS;
         public uint Build;
         public GameSessionData GameState;
-        
+
         public RealmId RealmId;
         public RealmManager RealmManager = new();
         public Realm? Realm => RealmManager.GetRealm(RealmId);
@@ -744,7 +742,7 @@ namespace HermesProxy
         {
             GameState = GameSessionData.CreateNewGameSessionData(this);
         }
-        
+
         public void StoreGuildRankNames(uint guildId, List<string> ranks)
         {
             if (GuildRanks.ContainsKey(guildId))

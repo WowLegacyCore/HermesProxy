@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework;
 using Framework.Logging;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -15,33 +12,33 @@ namespace HermesProxy.World
     public static class GameData
     {
         // From CSV
-        public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
-        public static Dictionary<uint, ItemDisplayData> ItemDisplayDataStore = new Dictionary<uint, ItemDisplayData>();
-        public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
-        public static Dictionary<uint, ChatChannel> ChatChannels = new Dictionary<uint, ChatChannel>();
-        public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new Dictionary<uint, Dictionary<uint, byte>>();
-        public static Dictionary<uint, uint> ItemEnchantVisuals = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> TotemSpells = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
-        public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
-        public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
-        public static Dictionary<uint, string> AreaNames = new Dictionary<uint, string>();
-        public static HashSet<uint> DispellSpells = new HashSet<uint>();
-        public static HashSet<uint> StackableAuras = new HashSet<uint>();
-        public static HashSet<uint> MountAuras = new HashSet<uint>();
-        public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
-        public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
-        public static Dictionary<uint, TaxiPath> TaxiPaths = new Dictionary<uint, TaxiPath>();
+        public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new();
+        public static Dictionary<uint, ItemDisplayData> ItemDisplayDataStore = new();
+        public static Dictionary<uint, Battleground> Battlegrounds = new();
+        public static Dictionary<uint, ChatChannel> ChatChannels = new();
+        public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new();
+        public static Dictionary<uint, uint> ItemEnchantVisuals = new();
+        public static Dictionary<uint, uint> SpellVisuals = new();
+        public static Dictionary<uint, uint> LearnSpells = new();
+        public static Dictionary<uint, uint> TotemSpells = new();
+        public static Dictionary<uint, uint> Gems = new();
+        public static Dictionary<uint, float> UnitDisplayScales = new();
+        public static Dictionary<uint, uint> TransportPeriods = new();
+        public static Dictionary<uint, string> AreaNames = new();
+        public static HashSet<uint> DispellSpells = new();
+        public static HashSet<uint> StackableAuras = new();
+        public static HashSet<uint> MountAuras = new();
+        public static HashSet<uint> NextMeleeSpells = new();
+        public static HashSet<uint> AutoRepeatSpells = new();
+        public static Dictionary<uint, TaxiPath> TaxiPaths = new();
         public static int[,] TaxiNodesGraph = new int[250,250];
-        public static Dictionary<uint /*questId*/, uint /*questBit*/> QuestBits = new Dictionary<uint, uint>();
+        public static Dictionary<uint /*questId*/, uint /*questBit*/> QuestBits = new();
 
         // From Server
-        public static Dictionary<uint, ItemTemplate> ItemTemplates = new Dictionary<uint, ItemTemplate>();
-        public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
-        public static Dictionary<uint, QuestTemplate> QuestTemplates = new Dictionary<uint, QuestTemplate>();
-        public static Dictionary<uint, string> ItemNames = new Dictionary<uint, string>();
+        public static Dictionary<uint, ItemTemplate> ItemTemplates = new();
+        public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new();
+        public static Dictionary<uint, QuestTemplate> QuestTemplates = new();
+        public static Dictionary<uint, string> ItemNames = new();
 
         #region GettersAndSetters
         public static void StoreItemName(uint entry, string name)
@@ -54,8 +51,7 @@ namespace HermesProxy.World
 
         public static string GetItemName(uint entry)
         {
-            string data;
-            if (ItemNames.TryGetValue(entry, out data))
+            if (ItemNames.TryGetValue(entry, out string data))
                 return data;
 
             ItemTemplate template = GetItemTemplate(entry);
@@ -75,8 +71,7 @@ namespace HermesProxy.World
 
         public static ItemTemplate GetItemTemplate(uint entry)
         {
-            ItemTemplate data;
-            if (ItemTemplates.TryGetValue(entry, out data))
+            if (ItemTemplates.TryGetValue(entry, out ItemTemplate data))
                 return data;
             return null;
         }
@@ -91,8 +86,7 @@ namespace HermesProxy.World
 
         public static QuestTemplate GetQuestTemplate(uint entry)
         {
-            QuestTemplate data;
-            if (QuestTemplates.TryGetValue(entry, out data))
+            if (QuestTemplates.TryGetValue(entry, out QuestTemplate data))
                 return data;
             return null;
         }
@@ -118,7 +112,7 @@ namespace HermesProxy.World
 
             return result;
         }
-        
+
         public static void StoreCreatureTemplate(uint entry, CreatureTemplate template)
         {
             if (CreatureTemplates.ContainsKey(entry))
@@ -129,16 +123,14 @@ namespace HermesProxy.World
 
         public static CreatureTemplate GetCreatureTemplate(uint entry)
         {
-            CreatureTemplate data;
-            if (CreatureTemplates.TryGetValue(entry, out data))
+            if (CreatureTemplates.TryGetValue(entry, out CreatureTemplate data))
                 return data;
             return null;
         }
 
         public static ItemDisplayData GetItemDisplayData(uint entry)
         {
-            ItemDisplayData data;
-            if (ItemDisplayDataStore.TryGetValue(entry, out data))
+            if (ItemDisplayDataStore.TryGetValue(entry, out ItemDisplayData data))
                 return data;
             return null;
         }
@@ -164,7 +156,7 @@ namespace HermesProxy.World
             }
             else
             {
-                Dictionary<uint, byte> dict = new Dictionary<uint, byte>();
+                Dictionary<uint, byte> dict = new();
                 dict.Add(spellId, slot);
                 ItemEffects.Add(itemId, dict);
             }
@@ -180,40 +172,35 @@ namespace HermesProxy.World
 
         public static uint GetItemEnchantVisual(uint enchantId)
         {
-            uint visualId;
-            if (ItemEnchantVisuals.TryGetValue(enchantId, out visualId))
+            if (ItemEnchantVisuals.TryGetValue(enchantId, out uint visualId))
                 return visualId;
             return 0;
         }
 
         public static uint GetSpellVisual(uint spellId)
         {
-            uint visual;
-            if (SpellVisuals.TryGetValue(spellId, out visual))
+            if (SpellVisuals.TryGetValue(spellId, out uint visual))
                 return visual;
             return 0;
         }
 
         public static int GetTotemSlotForSpell(uint spellId)
         {
-            uint slot;
-            if (TotemSpells.TryGetValue(spellId, out slot))
+            if (TotemSpells.TryGetValue(spellId, out uint slot))
                 return (int)slot;
             return -1;
         }
 
         public static uint GetRealSpell(uint learnSpellId)
         {
-            uint realSpellId;
-            if (LearnSpells.TryGetValue(learnSpellId, out realSpellId))
+            if (LearnSpells.TryGetValue(learnSpellId, out uint realSpellId))
                 return realSpellId;
             return learnSpellId;
         }
 
         public static uint GetGemFromEnchantId(uint enchantId)
         {
-            uint itemId;
-            if (Gems.TryGetValue(enchantId, out itemId))
+            if (Gems.TryGetValue(enchantId, out uint itemId))
                 return itemId;
             return 0;
         }
@@ -230,24 +217,21 @@ namespace HermesProxy.World
 
         public static float GetUnitDisplayScale(uint displayId)
         {
-            float scale;
-            if (UnitDisplayScales.TryGetValue(displayId, out scale))
+            if (UnitDisplayScales.TryGetValue(displayId, out float scale))
                 return scale;
             return 1.0f;
         }
 
         public static uint GetTransportPeriod(uint entry)
         {
-            uint period;
-            if (TransportPeriods.TryGetValue(entry, out period))
+            if (TransportPeriods.TryGetValue(entry, out uint period))
                 return period;
             return 0;
         }
 
         public static string GetAreaName(uint id)
         {
-            string name;
-            if (AreaNames.TryGetValue(id, out name))
+            if (AreaNames.TryGetValue(id, out string name))
                 return name;
             return "";
         }
@@ -264,8 +248,7 @@ namespace HermesProxy.World
 
         public static uint GetMapIdFromBattlegroundId(uint bgId)
         {
-            Battleground bg;
-            if (Battlegrounds.TryGetValue(bgId, out bg))
+            if (Battlegrounds.TryGetValue(bgId, out Battleground bg))
                 return bg.MapIds[0];
             return 0;
         }
@@ -282,7 +265,7 @@ namespace HermesProxy.World
 
         public static List<ChatChannel> GetChatChannelsWithFlags(ChannelFlags flags)
         {
-            List<ChatChannel> channels = new List<ChatChannel>();
+            List<ChatChannel> channels = new();
             foreach (var channel in ChatChannels)
             {
                 if ((channel.Value.Flags & flags) == flags)
@@ -308,8 +291,7 @@ namespace HermesProxy.World
 
         public static BroadcastText GetBroadcastText(uint entry)
         {
-            BroadcastText data;
-            if (BroadcastTextStore.TryGetValue(entry, out data))
+            if (BroadcastTextStore.TryGetValue(entry, out BroadcastText data))
                 return data;
             return null;
         }
@@ -318,8 +300,8 @@ namespace HermesProxy.World
         {
             foreach (var itr in BroadcastTextStore)
             {
-                if (((!String.IsNullOrEmpty(maleText) && itr.Value.MaleText == maleText) ||
-                     (!String.IsNullOrEmpty(femaleText) && itr.Value.FemaleText == femaleText)) &&
+                if (((!string.IsNullOrEmpty(maleText) && itr.Value.MaleText == maleText) ||
+                     (!string.IsNullOrEmpty(femaleText) && itr.Value.FemaleText == femaleText)) &&
                     itr.Value.Language == language &&
                     Enumerable.SequenceEqual(itr.Value.EmoteDelays, emoteDelays) &&
                     Enumerable.SequenceEqual(itr.Value.Emotes, emotes))
@@ -328,13 +310,15 @@ namespace HermesProxy.World
                 }
             }
 
-            BroadcastText broadcastText = new();
-            broadcastText.Entry = BroadcastTextStore.Keys.Last() + 1;
-            broadcastText.MaleText = maleText;
-            broadcastText.FemaleText = femaleText;
-            broadcastText.Language = language;
-            broadcastText.EmoteDelays = emoteDelays;
-            broadcastText.Emotes = emotes;
+            BroadcastText broadcastText = new()
+            {
+                Entry = BroadcastTextStore.Keys.Last() + 1,
+                MaleText = maleText,
+                FemaleText = femaleText,
+                Language = language,
+                EmoteDelays = emoteDelays,
+                Emotes = emotes
+            };
             BroadcastTextStore.Add(broadcastText.Entry, broadcastText);
             return broadcastText.Entry;
         }
@@ -371,7 +355,7 @@ namespace HermesProxy.World
         public static void LoadBroadcastTexts()
         {
             var path = Path.Combine("CSV", $"BroadcastTexts{LegacyVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -385,17 +369,19 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    BroadcastText broadcastText = new BroadcastText();
-                    broadcastText.Entry = UInt32.Parse(fields[0]);
-                    broadcastText.MaleText = fields[1].TrimEnd().Replace("\0", "").Replace("~", "\n");
-                    broadcastText.FemaleText = fields[2].TrimEnd().Replace("\0", "").Replace("~", "\n");
-                    broadcastText.Language = UInt32.Parse(fields[3]);
-                    broadcastText.Emotes[0] = UInt16.Parse(fields[4]);
-                    broadcastText.Emotes[1] = UInt16.Parse(fields[5]);
-                    broadcastText.Emotes[2] = UInt16.Parse(fields[6]);
-                    broadcastText.EmoteDelays[0] = UInt16.Parse(fields[7]);
-                    broadcastText.EmoteDelays[1] = UInt16.Parse(fields[8]);
-                    broadcastText.EmoteDelays[2] = UInt16.Parse(fields[9]);
+                    BroadcastText broadcastText = new()
+                    {
+                        Entry = uint.Parse(fields[0]),
+                        MaleText = fields[1].TrimEnd().Replace("\0", "").Replace("~", "\n"),
+                        FemaleText = fields[2].TrimEnd().Replace("\0", "").Replace("~", "\n"),
+                        Language = uint.Parse(fields[3])
+                    };
+                    broadcastText.Emotes[0] = ushort.Parse(fields[4]);
+                    broadcastText.Emotes[1] = ushort.Parse(fields[5]);
+                    broadcastText.Emotes[2] = ushort.Parse(fields[6]);
+                    broadcastText.EmoteDelays[0] = ushort.Parse(fields[7]);
+                    broadcastText.EmoteDelays[1] = ushort.Parse(fields[8]);
+                    broadcastText.EmoteDelays[2] = ushort.Parse(fields[9]);
                     BroadcastTextStore.Add(broadcastText.Entry, broadcastText);
                 }
             }
@@ -404,7 +390,7 @@ namespace HermesProxy.World
         public static void LoadItemTemplates()
         {
             var path = Path.Combine("CSV", $"Items{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -418,10 +404,12 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ItemDisplayData item = new ItemDisplayData();
-                    item.Entry = UInt32.Parse(fields[0]);
-                    item.DisplayId = UInt32.Parse(fields[1]);
-                    item.InventoryType = Byte.Parse(fields[2]);
+                    ItemDisplayData item = new()
+                    {
+                        Entry = uint.Parse(fields[0]),
+                        DisplayId = uint.Parse(fields[1]),
+                        InventoryType = byte.Parse(fields[2])
+                    };
                     ItemDisplayDataStore.Add(item.Entry, item);
                 }
             }
@@ -430,7 +418,7 @@ namespace HermesProxy.World
         public static void LoadBattlegrounds()
         {
             var path = Path.Combine("CSV", "Battlegrounds.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -444,12 +432,12 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    Battleground bg = new Battleground();
-                    uint bgId = UInt32.Parse(fields[0]);
-                    bg.IsArena = Byte.Parse(fields[1]) != 0;
+                    Battleground bg = new();
+                    uint bgId = uint.Parse(fields[0]);
+                    bg.IsArena = byte.Parse(fields[1]) != 0;
                     for (int i = 0; i < 6; i++)
                     {
-                        uint mapId = UInt32.Parse(fields[2 + i]);
+                        uint mapId = uint.Parse(fields[2 + i]);
                         if (mapId != 0)
                             bg.MapIds.Add(mapId);
                     }
@@ -462,7 +450,7 @@ namespace HermesProxy.World
         public static void LoadChatChannels()
         {
             var path = Path.Combine("CSV", "ChatChannels.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -476,10 +464,12 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ChatChannel channel = new ChatChannel();
-                    channel.Id = UInt32.Parse(fields[0]);
-                    channel.Flags = (ChannelFlags)UInt32.Parse(fields[1]);
-                    channel.Name = fields[2];
+                    ChatChannel channel = new()
+                    {
+                        Id = uint.Parse(fields[0]),
+                        Flags = (ChannelFlags)uint.Parse(fields[1]),
+                        Name = fields[2]
+                    };
                     ChatChannels.Add(channel.Id, channel);
                 }
             }
@@ -488,7 +478,7 @@ namespace HermesProxy.World
         public static void LoadItemEnchantVisuals()
         {
             var path = Path.Combine("CSV", $"ItemEnchantVisuals{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -502,8 +492,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint enchantId = UInt32.Parse(fields[0]);
-                    uint visualId = UInt32.Parse(fields[1]);
+                    uint enchantId = uint.Parse(fields[0]);
+                    uint visualId = uint.Parse(fields[1]);
                     ItemEnchantVisuals.Add(enchantId, visualId);
                 }
             }
@@ -512,7 +502,7 @@ namespace HermesProxy.World
         public static void LoadSpellVisuals()
         {
             var path = Path.Combine("CSV", $"SpellVisuals{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -526,8 +516,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
-                    uint visualId = UInt32.Parse(fields[1]);
+                    uint spellId = uint.Parse(fields[0]);
+                    uint visualId = uint.Parse(fields[1]);
                     SpellVisuals.Add(spellId, visualId);
                 }
             }
@@ -536,7 +526,7 @@ namespace HermesProxy.World
         public static void LoadLearnSpells()
         {
             var path = Path.Combine("CSV", "LearnSpells.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -550,8 +540,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint learnSpellId = UInt32.Parse(fields[0]);
-                    uint realSpellId = UInt32.Parse(fields[1]);
+                    uint learnSpellId = uint.Parse(fields[0]);
+                    uint realSpellId = uint.Parse(fields[1]);
                     if (!LearnSpells.ContainsKey(learnSpellId))
                         LearnSpells.Add(learnSpellId, realSpellId);
                 }
@@ -564,7 +554,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"TotemSpells.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -578,8 +568,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
-                    uint totemSlot = UInt32.Parse(fields[1]);
+                    uint spellId = uint.Parse(fields[0]);
+                    uint totemSlot = uint.Parse(fields[1]);
                     TotemSpells.Add(spellId, totemSlot);
                 }
             }
@@ -591,7 +581,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"Gems{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -605,8 +595,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint enchantId = UInt32.Parse(fields[0]);
-                    uint itemId = UInt32.Parse(fields[1]);
+                    uint enchantId = uint.Parse(fields[0]);
+                    uint itemId = uint.Parse(fields[1]);
                     Gems.Add(enchantId, itemId);
                 }
             }
@@ -618,7 +608,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", "UnitDisplayScales.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -632,8 +622,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint displayId = UInt32.Parse(fields[0]);
-                    float scale = Single.Parse(fields[1]);
+                    uint displayId = uint.Parse(fields[0]);
+                    float scale = float.Parse(fields[1]);
                     UnitDisplayScales.Add(displayId, scale);
                 }
             }
@@ -642,7 +632,7 @@ namespace HermesProxy.World
         public static void LoadTransports()
         {
             var path = Path.Combine("CSV", $"Transports{LegacyVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -656,8 +646,8 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint entry = UInt32.Parse(fields[0]);
-                    uint period = UInt32.Parse(fields[1]);
+                    uint entry = uint.Parse(fields[0]);
+                    uint period = uint.Parse(fields[1]);
                     TransportPeriods.Add(entry, period);
                 }
             }
@@ -666,7 +656,7 @@ namespace HermesProxy.World
         public static void LoadAreaNames()
         {
             var path = Path.Combine("CSV", $"AreaNames.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -680,7 +670,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
+                    uint id = uint.Parse(fields[0]);
                     string name = fields[1];
                     AreaNames.Add(id, name);
                 }
@@ -693,7 +683,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", "DispellSpells.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -707,7 +697,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
+                    uint spellId = uint.Parse(fields[0]);
                     DispellSpells.Add(spellId);
                 }
             }
@@ -719,7 +709,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"StackableAuras{LegacyVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -733,7 +723,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
+                    uint spellId = uint.Parse(fields[0]);
                     StackableAuras.Add(spellId);
                 }
             }
@@ -745,7 +735,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"MountAuras.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -759,7 +749,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
+                    uint spellId = uint.Parse(fields[0]);
                     MountAuras.Add(spellId);
                 }
             }
@@ -768,7 +758,7 @@ namespace HermesProxy.World
         public static void LoadMeleeSpells()
         {
             var path = Path.Combine("CSV", $"MeleeSpells{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -782,7 +772,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
+                    uint spellId = uint.Parse(fields[0]);
                     NextMeleeSpells.Add(spellId);
                 }
             }
@@ -791,7 +781,7 @@ namespace HermesProxy.World
         public static void LoadAutoRepeatSpells()
         {
             var path = Path.Combine("CSV", $"AutoRepeatSpells{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -805,7 +795,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint spellId = UInt32.Parse(fields[0]);
+                    uint spellId = uint.Parse(fields[0]);
                     AutoRepeatSpells.Add(spellId);
                 }
             }
@@ -813,7 +803,7 @@ namespace HermesProxy.World
         public static void LoadTaxiPaths()
         {
             var path = Path.Combine("CSV", $"TaxiPath{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -829,11 +819,13 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiPath taxiPath = new TaxiPath();
-                    taxiPath.Id = UInt32.Parse(fields[0]);
-                    taxiPath.From = UInt32.Parse(fields[1]);
-                    taxiPath.To = UInt32.Parse(fields[2]);
-                    taxiPath.Cost = Int32.Parse(fields[3]);
+                    TaxiPath taxiPath = new()
+                    {
+                        Id = uint.Parse(fields[0]),
+                        From = uint.Parse(fields[1]),
+                        To = uint.Parse(fields[2]),
+                        Cost = int.Parse(fields[3])
+                    };
                     TaxiPaths.Add(counter, taxiPath);
                     counter++;
                 }
@@ -842,9 +834,9 @@ namespace HermesProxy.World
         public static void LoadTaxiPathNodesGraph()
         {
             // Load TaxiNodes (used in calculating first and last parts of path)
-            Dictionary<uint, TaxiNode> TaxiNodes = new Dictionary<uint, TaxiNode>();
+            Dictionary<uint, TaxiNode> TaxiNodes = new();
             var pathNodes = Path.Combine("CSV", $"TaxiNodes{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(pathNodes))
+            using (TextFieldParser csvParser = new(pathNodes))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -858,19 +850,21 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiNode taxiNode = new TaxiNode();
-                    taxiNode.Id = UInt32.Parse(fields[0]);
-                    taxiNode.mapId = UInt32.Parse(fields[1]);
-                    taxiNode.x = float.Parse(fields[2]);
-                    taxiNode.y = float.Parse(fields[3]);
-                    taxiNode.z = float.Parse(fields[4]);
+                    TaxiNode taxiNode = new()
+                    {
+                        Id = uint.Parse(fields[0]),
+                        mapId = uint.Parse(fields[1]),
+                        x = float.Parse(fields[2]),
+                        y = float.Parse(fields[3]),
+                        z = float.Parse(fields[4])
+                    };
                     TaxiNodes.Add(taxiNode.Id, taxiNode);
                 }
             }
             // Load TaxiPathNode (used in calculating rest of path)
-            Dictionary<uint, TaxiPathNode> TaxiPathNodes = new Dictionary<uint, TaxiPathNode>();
+            Dictionary<uint, TaxiPathNode> TaxiPathNodes = new();
             var pathPathNodes = Path.Combine("CSV", $"TaxiPathNode{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(pathPathNodes))
+            using (TextFieldParser csvParser = new(pathPathNodes))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -884,16 +878,18 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiPathNode taxiPathNode = new TaxiPathNode();
-                    taxiPathNode.Id = UInt32.Parse(fields[0]);
-                    taxiPathNode.pathId = UInt32.Parse(fields[1]);
-                    taxiPathNode.nodeIndex = UInt32.Parse(fields[2]);
-                    taxiPathNode.mapId = UInt32.Parse(fields[3]);
-                    taxiPathNode.x = float.Parse(fields[4]);
-                    taxiPathNode.y = float.Parse(fields[5]);
-                    taxiPathNode.z = float.Parse(fields[6]);
-                    taxiPathNode.flags = UInt32.Parse(fields[7]);
-                    taxiPathNode.delay = UInt32.Parse(fields[8]);
+                    TaxiPathNode taxiPathNode = new()
+                    {
+                        Id = uint.Parse(fields[0]),
+                        pathId = uint.Parse(fields[1]),
+                        nodeIndex = uint.Parse(fields[2]),
+                        mapId = uint.Parse(fields[3]),
+                        x = float.Parse(fields[4]),
+                        y = float.Parse(fields[5]),
+                        z = float.Parse(fields[6]),
+                        flags = uint.Parse(fields[7]),
+                        delay = uint.Parse(fields[8])
+                    };
                     TaxiPathNodes.Add(taxiPathNode.Id, taxiPathNode);
                 }
             }
@@ -913,7 +909,7 @@ namespace HermesProxy.World
                         continue;
 
                     // save all node ids of this path
-                    HashSet<uint> pathNodeList = new HashSet<uint>();
+                    HashSet<uint> pathNodeList = new();
                     foreach (var itr in TaxiPathNodes)
                     {
                         TaxiPathNode pNode = itr.Value;
@@ -964,7 +960,7 @@ namespace HermesProxy.World
         public static void LoadQuestBits()
         {
             var path = Path.Combine("CSV", $"QuestV2_{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -978,15 +974,15 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint questId = UInt32.Parse(fields[0]);
+                    uint questId = uint.Parse(fields[0]);
                     if (fields[1].StartsWith("-"))
                         continue; // Some bits have a negative index, is this an error from WDBX?
-                    uint uniqueBitFlag = UInt32.Parse(fields[1]);
+                    uint uniqueBitFlag = uint.Parse(fields[1]);
                     QuestBits.Add(questId, uniqueBitFlag);
                 }
             }
         }
-        
+
         #endregion
         #region HotFixes
         // Stores
@@ -1005,7 +1001,7 @@ namespace HermesProxy.World
         public const uint HotfixCreatureDisplayInfoBegin = 220000;
         public const uint HotfixCreatureDisplayInfoExtraBegin = 230000;
         public const uint HotfixCreatureDisplayInfoOptionBegin = 240000;
-        public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
+        public static Dictionary<uint, HotfixRecord> Hotfixes = new();
         public static void LoadHotfixes()
         {
             LoadAreaTriggerHotfixes();
@@ -1024,11 +1020,11 @@ namespace HermesProxy.World
             LoadCreatureDisplayInfoExtraHotfixes();
             LoadCreatureDisplayInfoOptionHotfixes();
         }
-        
+
         public static void LoadAreaTriggerHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"AreaTrigger{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1045,29 +1041,33 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    AreaTrigger at = new AreaTrigger();
-                    at.Message = fields[0];
-                    at.PositionX = float.Parse(fields[1]);
-                    at.PositionY = float.Parse(fields[2]);
-                    at.PositionZ = float.Parse(fields[3]);
-                    at.Id = UInt32.Parse(fields[4]);
-                    at.MapId = UInt16.Parse(fields[5]);
-                    at.PhaseUseFlags = Byte.Parse(fields[6]);
-                    at.PhaseId = UInt16.Parse(fields[7]);
-                    at.PhaseGroupId = UInt16.Parse(fields[8]);
-                    at.Radius = float.Parse(fields[9]);
-                    at.BoxLength = float.Parse(fields[10]);
-                    at.BoxWidth = float.Parse(fields[11]);
-                    at.BoxHeight = float.Parse(fields[12]);
-                    at.BoxYaw = float.Parse(fields[13]);
-                    at.ShapeType = Byte.Parse(fields[14]);
-                    at.ShapeId = UInt16.Parse(fields[15]);
-                    at.ActionSetId = UInt16.Parse(fields[16]);
-                    at.Flags = Byte.Parse(fields[17]);
+                    AreaTrigger at = new()
+                    {
+                        Message = fields[0],
+                        PositionX = float.Parse(fields[1]),
+                        PositionY = float.Parse(fields[2]),
+                        PositionZ = float.Parse(fields[3]),
+                        Id = uint.Parse(fields[4]),
+                        MapId = ushort.Parse(fields[5]),
+                        PhaseUseFlags = byte.Parse(fields[6]),
+                        PhaseId = ushort.Parse(fields[7]),
+                        PhaseGroupId = ushort.Parse(fields[8]),
+                        Radius = float.Parse(fields[9]),
+                        BoxLength = float.Parse(fields[10]),
+                        BoxWidth = float.Parse(fields[11]),
+                        BoxHeight = float.Parse(fields[12]),
+                        BoxYaw = float.Parse(fields[13]),
+                        ShapeType = byte.Parse(fields[14]),
+                        ShapeId = ushort.Parse(fields[15]),
+                        ActionSetId = ushort.Parse(fields[16]),
+                        Flags = byte.Parse(fields[17])
+                    };
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.AreaTrigger;
-                    record.HotfixId = HotfixAreaTriggerBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.AreaTrigger,
+                        HotfixId = HotfixAreaTriggerBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = at.Id;
                     record.Status = HotfixStatus.Valid;
@@ -1096,7 +1096,7 @@ namespace HermesProxy.World
         public static void LoadSkillLineHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SkillLine{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1118,18 +1118,20 @@ namespace HermesProxy.World
                     string description = fields[2];
                     string hordeDisplayName = fields[3];
                     string neutralDisplayName = fields[4];
-                    uint id = UInt32.Parse(fields[5]);
-                    byte categoryID = Byte.Parse(fields[6]);
-                    uint spellIconFileID = UInt32.Parse(fields[7]);
-                    byte canLink = Byte.Parse(fields[8]);
-                    uint parentSkillLineID = UInt32.Parse(fields[9]);
-                    uint parentTierIndex = UInt32.Parse(fields[10]);
-                    ushort flags = UInt16.Parse(fields[11]);
-                    uint spellBookSpellID = UInt32.Parse(fields[12]);
-                    
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SkillLine;
-                    record.HotfixId = HotfixSkillLineBegin + counter;
+                    uint id = uint.Parse(fields[5]);
+                    byte categoryID = byte.Parse(fields[6]);
+                    uint spellIconFileID = uint.Parse(fields[7]);
+                    byte canLink = byte.Parse(fields[8]);
+                    uint parentSkillLineID = uint.Parse(fields[9]);
+                    uint parentTierIndex = uint.Parse(fields[10]);
+                    ushort flags = ushort.Parse(fields[11]);
+                    uint spellBookSpellID = uint.Parse(fields[12]);
+
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SkillLine,
+                        HotfixId = HotfixSkillLineBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1153,7 +1155,7 @@ namespace HermesProxy.World
         public static void LoadSkillRaceClassInfoHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SkillRaceClassInfo{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1170,18 +1172,20 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    ulong raceMask = UInt64.Parse(fields[1]);
-                    ushort skillId = UInt16.Parse(fields[2]);
-                    uint classMask = UInt32.Parse(fields[3]);
-                    ushort flags = UInt16.Parse(fields[4]);
-                    byte availability = Byte.Parse(fields[5]);
-                    byte minLevel = Byte.Parse(fields[6]);
-                    ushort skillTierId = UInt16.Parse(fields[7]);
+                    uint id = uint.Parse(fields[0]);
+                    ulong raceMask = ulong.Parse(fields[1]);
+                    ushort skillId = ushort.Parse(fields[2]);
+                    uint classMask = uint.Parse(fields[3]);
+                    ushort flags = ushort.Parse(fields[4]);
+                    byte availability = byte.Parse(fields[5]);
+                    byte minLevel = byte.Parse(fields[6]);
+                    ushort skillTierId = ushort.Parse(fields[7]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SkillRaceClassInfo;
-                    record.HotfixId = HotfixSkillRaceClassInfoBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SkillRaceClassInfo,
+                        HotfixId = HotfixSkillRaceClassInfoBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1199,7 +1203,7 @@ namespace HermesProxy.World
         public static void LoadSkillLineAbilityHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SkillLineAbility{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1216,28 +1220,30 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ulong raceMask = UInt64.Parse(fields[0]);
-                    uint id = UInt32.Parse(fields[1]);
-                    ushort skillId = UInt16.Parse(fields[2]);
-                    uint spellId = UInt32.Parse(fields[3]);
-                    ushort minSkillLineRank = UInt16.Parse(fields[4]);
-                    uint classMask = UInt32.Parse(fields[5]);
-                    uint supercedesSpellId = UInt32.Parse(fields[6]);
-                    byte acquireMethod = Byte.Parse(fields[7]);
-                    ushort trivialSkillLineRankHigh = UInt16.Parse(fields[8]);
-                    ushort trivialSkillLineRankLow = UInt16.Parse(fields[9]);
-                    byte flags = Byte.Parse(fields[10]);
-                    byte numSkillUps = Byte.Parse(fields[11]);
-                    ushort uniqueBit = UInt16.Parse(fields[12]);
-                    ushort tradeSkillCategoryId = UInt16.Parse(fields[13]);
-                    ushort skillUpSkillLineId = UInt16.Parse(fields[14]);
-                    uint characterPoints1 = UInt32.Parse(fields[15]);
-                    uint characterPoints2 = UInt32.Parse(fields[16]);
+                    ulong raceMask = ulong.Parse(fields[0]);
+                    uint id = uint.Parse(fields[1]);
+                    ushort skillId = ushort.Parse(fields[2]);
+                    uint spellId = uint.Parse(fields[3]);
+                    ushort minSkillLineRank = ushort.Parse(fields[4]);
+                    uint classMask = uint.Parse(fields[5]);
+                    uint supercedesSpellId = uint.Parse(fields[6]);
+                    byte acquireMethod = byte.Parse(fields[7]);
+                    ushort trivialSkillLineRankHigh = ushort.Parse(fields[8]);
+                    ushort trivialSkillLineRankLow = ushort.Parse(fields[9]);
+                    byte flags = byte.Parse(fields[10]);
+                    byte numSkillUps = byte.Parse(fields[11]);
+                    ushort uniqueBit = ushort.Parse(fields[12]);
+                    ushort tradeSkillCategoryId = ushort.Parse(fields[13]);
+                    ushort skillUpSkillLineId = ushort.Parse(fields[14]);
+                    uint characterPoints1 = uint.Parse(fields[15]);
+                    uint characterPoints2 = uint.Parse(fields[16]);
 
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SkillLineAbility;
-                    record.HotfixId = HotfixSkillLineAbilityBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SkillLineAbility,
+                        HotfixId = HotfixSkillLineAbilityBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1265,7 +1271,7 @@ namespace HermesProxy.World
         public static void LoadSpellHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"Spell{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1282,14 +1288,16 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
+                    uint id = uint.Parse(fields[0]);
                     string nameSubText = fields[1];
                     string description = fields[2];
                     string auraDescription = fields[3];
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.Spell;
-                    record.HotfixId = HotfixSpellBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.Spell,
+                        HotfixId = HotfixSpellBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1303,7 +1311,7 @@ namespace HermesProxy.World
         public static void LoadSpellNameHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellName{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1320,12 +1328,14 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
+                    uint id = uint.Parse(fields[0]);
                     string name = fields[1];
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellName;
-                    record.HotfixId = HotfixSpellNameBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SpellName,
+                        HotfixId = HotfixSpellNameBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1337,7 +1347,7 @@ namespace HermesProxy.World
         public static void LoadSpellLevelsHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellLevels{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1354,17 +1364,19 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    byte difficultyId = Byte.Parse(fields[1]);
-                    ushort baseLevel = UInt16.Parse(fields[2]);
-                    ushort maxLevel = UInt16.Parse(fields[3]);
-                    ushort spellLevel = UInt16.Parse(fields[4]);
-                    byte maxPassiveAuraLevel = Byte.Parse(fields[5]);
-                    uint spellId = UInt32.Parse(fields[6]);
+                    uint id = uint.Parse(fields[0]);
+                    byte difficultyId = byte.Parse(fields[1]);
+                    ushort baseLevel = ushort.Parse(fields[2]);
+                    ushort maxLevel = ushort.Parse(fields[3]);
+                    ushort spellLevel = ushort.Parse(fields[4]);
+                    byte maxPassiveAuraLevel = byte.Parse(fields[5]);
+                    uint spellId = uint.Parse(fields[6]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellLevels;
-                    record.HotfixId = HotfixSpellLevelsBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SpellLevels,
+                        HotfixId = HotfixSpellLevelsBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1381,7 +1393,7 @@ namespace HermesProxy.World
         public static void LoadSpellAuraOptionsHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellAuraOptions{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1398,20 +1410,22 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    byte difficultyId = Byte.Parse(fields[1]);
-                    uint cumulatievAura = UInt32.Parse(fields[2]);
-                    uint procCategoryRecovery = UInt32.Parse(fields[3]);
-                    byte procChance = Byte.Parse(fields[4]);
-                    uint procCharges = UInt32.Parse(fields[5]);
-                    ushort spellProcsPerMinuteId = UInt16.Parse(fields[6]);
-                    uint procTypeMask0 = UInt32.Parse(fields[7]);
-                    uint procTypeMask1 = UInt32.Parse(fields[8]);
-                    uint spellId = UInt32.Parse(fields[9]);
+                    uint id = uint.Parse(fields[0]);
+                    byte difficultyId = byte.Parse(fields[1]);
+                    uint cumulatievAura = uint.Parse(fields[2]);
+                    uint procCategoryRecovery = uint.Parse(fields[3]);
+                    byte procChance = byte.Parse(fields[4]);
+                    uint procCharges = uint.Parse(fields[5]);
+                    ushort spellProcsPerMinuteId = ushort.Parse(fields[6]);
+                    uint procTypeMask0 = uint.Parse(fields[7]);
+                    uint procTypeMask1 = uint.Parse(fields[8]);
+                    uint spellId = uint.Parse(fields[9]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellAuraOptions;
-                    record.HotfixId = HotfixSpellAuraOptionsBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SpellAuraOptions,
+                        HotfixId = HotfixSpellAuraOptionsBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1431,7 +1445,7 @@ namespace HermesProxy.World
         public static void LoadSpellMiscHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellMisc{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1448,36 +1462,38 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    byte difficultyId = Byte.Parse(fields[1]);
-                    ushort castingTimeIndex = UInt16.Parse(fields[2]);
-                    ushort durationIndex = UInt16.Parse(fields[3]);
-                    ushort rangeIndex = UInt16.Parse(fields[4]);
-                    byte schoolMask = Byte.Parse(fields[5]);
-                    float speed = Single.Parse(fields[6]);
-                    float launchDelay = Single.Parse(fields[7]);
-                    float minDuration = Single.Parse(fields[8]);
-                    uint spellIconFileDataId = UInt32.Parse(fields[9]);
-                    uint activeIconFileDataId = UInt32.Parse(fields[10]);
-                    uint attributes1 = UInt32.Parse(fields[11]);
-                    uint attributes2 = UInt32.Parse(fields[12]);
-                    uint attributes3 = UInt32.Parse(fields[13]);
-                    uint attributes4 = UInt32.Parse(fields[14]);
-                    uint attributes5 = UInt32.Parse(fields[15]);
-                    uint attributes6 = UInt32.Parse(fields[16]);
-                    uint attributes7 = UInt32.Parse(fields[17]);
-                    uint attributes8 = UInt32.Parse(fields[18]);
-                    uint attributes9 = UInt32.Parse(fields[19]);
-                    uint attributes10 = UInt32.Parse(fields[20]);
-                    uint attributes11 = UInt32.Parse(fields[21]);
-                    uint attributes12 = UInt32.Parse(fields[22]);
-                    uint attributes13 = UInt32.Parse(fields[23]);
-                    uint attributes14 = UInt32.Parse(fields[24]);
-                    uint spellId = UInt32.Parse(fields[25]);
+                    uint id = uint.Parse(fields[0]);
+                    byte difficultyId = byte.Parse(fields[1]);
+                    ushort castingTimeIndex = ushort.Parse(fields[2]);
+                    ushort durationIndex = ushort.Parse(fields[3]);
+                    ushort rangeIndex = ushort.Parse(fields[4]);
+                    byte schoolMask = byte.Parse(fields[5]);
+                    float speed = float.Parse(fields[6]);
+                    float launchDelay = float.Parse(fields[7]);
+                    float minDuration = float.Parse(fields[8]);
+                    uint spellIconFileDataId = uint.Parse(fields[9]);
+                    uint activeIconFileDataId = uint.Parse(fields[10]);
+                    uint attributes1 = uint.Parse(fields[11]);
+                    uint attributes2 = uint.Parse(fields[12]);
+                    uint attributes3 = uint.Parse(fields[13]);
+                    uint attributes4 = uint.Parse(fields[14]);
+                    uint attributes5 = uint.Parse(fields[15]);
+                    uint attributes6 = uint.Parse(fields[16]);
+                    uint attributes7 = uint.Parse(fields[17]);
+                    uint attributes8 = uint.Parse(fields[18]);
+                    uint attributes9 = uint.Parse(fields[19]);
+                    uint attributes10 = uint.Parse(fields[20]);
+                    uint attributes11 = uint.Parse(fields[21]);
+                    uint attributes12 = uint.Parse(fields[22]);
+                    uint attributes13 = uint.Parse(fields[23]);
+                    uint attributes14 = uint.Parse(fields[24]);
+                    uint spellId = uint.Parse(fields[25]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellMisc;
-                    record.HotfixId = HotfixSpellMiscBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SpellMisc,
+                        HotfixId = HotfixSpellMiscBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1513,7 +1529,7 @@ namespace HermesProxy.World
         public static void LoadSpellEffectHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellEffect{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1530,46 +1546,48 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    uint difficultyId = UInt32.Parse(fields[1]);
-                    uint effectIndex = UInt32.Parse(fields[2]);
-                    uint effect = UInt32.Parse(fields[3]);
-                    float effectAmplitude = Single.Parse(fields[4]);
-                    uint effectAttributes = UInt32.Parse(fields[5]);
-                    short effectAura = Int16.Parse(fields[6]);
-                    int effectAuraPeriod = Int32.Parse(fields[7]);
-                    int effectBasePoints = Int32.Parse(fields[8]);
-                    float effectBonusCoefficient = Single.Parse(fields[9]);
-                    float effectChainAmplitude = Single.Parse(fields[10]);
-                    int effectChainTargets = Int32.Parse(fields[11]);
-                    int effectDieSides = Int32.Parse(fields[12]);
-                    int effectItemType = Int32.Parse(fields[13]);
-                    int effectMechanic = Int32.Parse(fields[14]);
-                    float effectPointsPerResource = Single.Parse(fields[15]);
-                    float effectPosFacing = Single.Parse(fields[16]);
-                    float effectRealPointsPerLevel = Single.Parse(fields[17]);
-                    int EffectTriggerSpell = Int32.Parse(fields[18]);
-                    float bonusCoefficientFromAP = Single.Parse(fields[19]);
-                    float pvpMultiplier = Single.Parse(fields[20]);
-                    float coefficient = Single.Parse(fields[21]);
-                    float variance = Single.Parse(fields[22]);
-                    float resourceCoefficient = Single.Parse(fields[23]);
-                    float groupSizeBasePointsCoefficient = Single.Parse(fields[24]);
-                    int effectMiscValue1 = Int32.Parse(fields[25]);
-                    int effectMiscValue2 = Int32.Parse(fields[26]);
-                    uint effectRadiusIndex1 = UInt32.Parse(fields[27]);
-                    uint effectRadiusIndex2 = UInt32.Parse(fields[28]);
-                    int effectSpellClassMask1 = Int32.Parse(fields[29]);
-                    int effectSpellClassMask2 = Int32.Parse(fields[30]);
-                    int effectSpellClassMask3 = Int32.Parse(fields[31]);
-                    int effectSpellClassMask4 = Int32.Parse(fields[32]);
-                    short implicitTarget1 = Int16.Parse(fields[33]);
-                    short implicitTarget2 = Int16.Parse(fields[34]);
-                    uint spellId = UInt32.Parse(fields[35]);
+                    uint id = uint.Parse(fields[0]);
+                    uint difficultyId = uint.Parse(fields[1]);
+                    uint effectIndex = uint.Parse(fields[2]);
+                    uint effect = uint.Parse(fields[3]);
+                    float effectAmplitude = float.Parse(fields[4]);
+                    uint effectAttributes = uint.Parse(fields[5]);
+                    short effectAura = short.Parse(fields[6]);
+                    int effectAuraPeriod = int.Parse(fields[7]);
+                    int effectBasePoints = int.Parse(fields[8]);
+                    float effectBonusCoefficient = float.Parse(fields[9]);
+                    float effectChainAmplitude = float.Parse(fields[10]);
+                    int effectChainTargets = int.Parse(fields[11]);
+                    int effectDieSides = int.Parse(fields[12]);
+                    int effectItemType = int.Parse(fields[13]);
+                    int effectMechanic = int.Parse(fields[14]);
+                    float effectPointsPerResource = float.Parse(fields[15]);
+                    float effectPosFacing = float.Parse(fields[16]);
+                    float effectRealPointsPerLevel = float.Parse(fields[17]);
+                    int EffectTriggerSpell = int.Parse(fields[18]);
+                    float bonusCoefficientFromAP = float.Parse(fields[19]);
+                    float pvpMultiplier = float.Parse(fields[20]);
+                    float coefficient = float.Parse(fields[21]);
+                    float variance = float.Parse(fields[22]);
+                    float resourceCoefficient = float.Parse(fields[23]);
+                    float groupSizeBasePointsCoefficient = float.Parse(fields[24]);
+                    int effectMiscValue1 = int.Parse(fields[25]);
+                    int effectMiscValue2 = int.Parse(fields[26]);
+                    uint effectRadiusIndex1 = uint.Parse(fields[27]);
+                    uint effectRadiusIndex2 = uint.Parse(fields[28]);
+                    int effectSpellClassMask1 = int.Parse(fields[29]);
+                    int effectSpellClassMask2 = int.Parse(fields[30]);
+                    int effectSpellClassMask3 = int.Parse(fields[31]);
+                    int effectSpellClassMask4 = int.Parse(fields[32]);
+                    short implicitTarget1 = short.Parse(fields[33]);
+                    short implicitTarget2 = short.Parse(fields[34]);
+                    uint spellId = uint.Parse(fields[35]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellEffect;
-                    record.HotfixId = HotfixSpellEffectBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SpellEffect,
+                        HotfixId = HotfixSpellEffectBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1615,7 +1633,7 @@ namespace HermesProxy.World
         public static void LoadSpellXSpellVisualHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellXSpellVisual{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1632,28 +1650,30 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    byte difficultyId = Byte.Parse(fields[1]);
-                    uint spellVisualId = UInt32.Parse(fields[2]);
-                    float probability = Single.Parse(fields[3]);
-                    byte flags = Byte.Parse(fields[4]);
-                    byte priority = Byte.Parse(fields[5]);
-                    int spellIconFileId = Int32.Parse(fields[6]);
-                    int activeIconFileId = Int32.Parse(fields[7]);
-                    ushort viewerUnitConditionId = UInt16.Parse(fields[8]);
-                    uint viewerPlayerConditionId = UInt32.Parse(fields[9]);
-                    ushort casterUnitConditionId = UInt16.Parse(fields[10]);
-                    uint casterPlayerConditionId = UInt32.Parse(fields[11]);
-                    uint spellId = UInt32.Parse(fields[12]);
+                    uint id = uint.Parse(fields[0]);
+                    byte difficultyId = byte.Parse(fields[1]);
+                    uint spellVisualId = uint.Parse(fields[2]);
+                    float probability = float.Parse(fields[3]);
+                    byte flags = byte.Parse(fields[4]);
+                    byte priority = byte.Parse(fields[5]);
+                    int spellIconFileId = int.Parse(fields[6]);
+                    int activeIconFileId = int.Parse(fields[7]);
+                    ushort viewerUnitConditionId = ushort.Parse(fields[8]);
+                    uint viewerPlayerConditionId = uint.Parse(fields[9]);
+                    ushort casterUnitConditionId = ushort.Parse(fields[10]);
+                    uint casterPlayerConditionId = uint.Parse(fields[11]);
+                    uint spellId = uint.Parse(fields[12]);
 
                     if (SpellVisuals.ContainsKey(spellId))
                         SpellVisuals[spellId] = id;
                     else
                         SpellVisuals.Add(spellId, id);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.SpellXSpellVisual;
-                    record.HotfixId = HotfixSpellXSpellVisualBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.SpellXSpellVisual,
+                        HotfixId = HotfixSpellXSpellVisualBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -1677,7 +1697,7 @@ namespace HermesProxy.World
         public static void LoadItemSparseHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"ItemSparse{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1694,138 +1714,140 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    long allowableRace = Int64.Parse(fields[1]);
+                    uint id = uint.Parse(fields[0]);
+                    long allowableRace = long.Parse(fields[1]);
                     string description = fields[2];
                     string name4 = fields[3];
                     string name3 = fields[4];
                     string name2 = fields[5];
                     string name1 = fields[6];
-                    float dmgVariance = Single.Parse(fields[7]);
-                    uint durationInInventory = UInt32.Parse(fields[8]);
-                    float qualityModifier = Single.Parse(fields[9]);
-                    uint bagFamily = UInt32.Parse(fields[10]);
-                    float rangeMod = Single.Parse(fields[11]);
-                    float statPercentageOfSocket1 = Single.Parse(fields[12]);
-                    float statPercentageOfSocket2 = Single.Parse(fields[13]);
-                    float statPercentageOfSocket3 = Single.Parse(fields[14]);
-                    float statPercentageOfSocket4 = Single.Parse(fields[15]);
-                    float statPercentageOfSocket5 = Single.Parse(fields[16]);
-                    float statPercentageOfSocket6 = Single.Parse(fields[17]);
-                    float statPercentageOfSocket7 = Single.Parse(fields[18]);
-                    float statPercentageOfSocket8 = Single.Parse(fields[19]);
-                    float statPercentageOfSocket9 = Single.Parse(fields[20]);
-                    float statPercentageOfSocket10 = Single.Parse(fields[21]);
-                    int statPercentEditor1 = Int32.Parse(fields[22]);
-                    int statPercentEditor2 = Int32.Parse(fields[23]);
-                    int statPercentEditor3 = Int32.Parse(fields[24]);
-                    int statPercentEditor4 = Int32.Parse(fields[25]);
-                    int statPercentEditor5 = Int32.Parse(fields[26]);
-                    int statPercentEditor6 = Int32.Parse(fields[27]);
-                    int statPercentEditor7 = Int32.Parse(fields[28]);
-                    int statPercentEditor8 = Int32.Parse(fields[29]);
-                    int statPercentEditor9 = Int32.Parse(fields[30]);
-                    int statPercentEditor10 = Int32.Parse(fields[31]);
-                    int stackable = Int32.Parse(fields[32]);
-                    int maxCount = Int32.Parse(fields[33]);
-                    uint requiredAbility = UInt32.Parse(fields[34]);
-                    uint sellPrice = UInt32.Parse(fields[35]);
-                    uint buyPrice = UInt32.Parse(fields[36]);
-                    uint vendorStackCount = UInt32.Parse(fields[37]);
-                    float priceVariance = Single.Parse(fields[38]);
-                    float priceRandomValue = Single.Parse(fields[39]);
-                    int flags1 = Int32.Parse(fields[40]);
-                    int flags2 = Int32.Parse(fields[41]);
-                    int flags3 = Int32.Parse(fields[42]);
-                    int flags4 = Int32.Parse(fields[43]);
-                    int oppositeFactionItemId = Int32.Parse(fields[44]);
-                    uint maxDurability = UInt32.Parse(fields[45]);
-                    ushort itemNameDescriptionId = UInt16.Parse(fields[46]);
-                    ushort requiredTransmogHoliday = UInt16.Parse(fields[47]);
-                    ushort requiredHoliday = UInt16.Parse(fields[48]);
-                    ushort limitCategory = UInt16.Parse(fields[49]);
-                    ushort gemProperties = UInt16.Parse(fields[50]);
-                    ushort socketMatchEnchantmentId = UInt16.Parse(fields[51]);
-                    ushort totemCategoryId = UInt16.Parse(fields[52]);
-                    ushort instanceBound = UInt16.Parse(fields[53]);
-                    ushort zoneBound1 = UInt16.Parse(fields[54]);
-                    ushort zoneBound2 = UInt16.Parse(fields[55]);
-                    ushort itemSet = UInt16.Parse(fields[56]);
-                    ushort lockId = UInt16.Parse(fields[57]);
-                    ushort startQuestId = UInt16.Parse(fields[58]);
-                    ushort pageText = UInt16.Parse(fields[59]);
-                    ushort delay = UInt16.Parse(fields[60]);
-                    ushort requiredReputationId = UInt16.Parse(fields[61]);
-                    ushort requiredSkillRank = UInt16.Parse(fields[62]);
-                    ushort requiredSkill = UInt16.Parse(fields[63]);
-                    ushort itemLevel = UInt16.Parse(fields[64]);
-                    short allowableClass = Int16.Parse(fields[65]);
-                    ushort itemRandomSuffixGroupId = UInt16.Parse(fields[66]);
-                    ushort randomProperty = UInt16.Parse(fields[67]);
-                    ushort damageMin1 = UInt16.Parse(fields[68]);
-                    ushort damageMin2 = UInt16.Parse(fields[69]);
-                    ushort damageMin3 = UInt16.Parse(fields[70]);
-                    ushort damageMin4 = UInt16.Parse(fields[71]);
-                    ushort damageMin5 = UInt16.Parse(fields[72]);
-                    ushort damageMax1 = UInt16.Parse(fields[73]);
-                    ushort damageMax2 = UInt16.Parse(fields[74]);
-                    ushort damageMax3 = UInt16.Parse(fields[75]);
-                    ushort damageMax4 = UInt16.Parse(fields[76]);
-                    ushort damageMax5 = UInt16.Parse(fields[77]);
-                    short armor = Int16.Parse(fields[78]);
-                    short holyResistance = Int16.Parse(fields[79]);
-                    short fireResistance = Int16.Parse(fields[80]);
-                    short natureResistance = Int16.Parse(fields[81]);
-                    short frostResistance = Int16.Parse(fields[82]);
-                    short shadowResistance = Int16.Parse(fields[83]);
-                    short arcaneResistance = Int16.Parse(fields[84]);
-                    ushort scalingStatDistributionId = UInt16.Parse(fields[85]);
-                    byte expansionId = Byte.Parse(fields[86]);
-                    byte artifactId = Byte.Parse(fields[87]);
-                    byte spellWeight = Byte.Parse(fields[88]);
-                    byte spellWeightCategory = Byte.Parse(fields[89]);
-                    byte socketType1 = Byte.Parse(fields[90]);
-                    byte socketType2 = Byte.Parse(fields[91]);
-                    byte socketType3 = Byte.Parse(fields[92]);
-                    byte sheatheType = Byte.Parse(fields[93]);
-                    byte material = Byte.Parse(fields[94]);
-                    byte pageMaterial = Byte.Parse(fields[95]);
-                    byte pageLanguage = Byte.Parse(fields[96]);
-                    byte bonding = Byte.Parse(fields[97]);
-                    byte damageType = Byte.Parse(fields[98]);
-                    sbyte statType1 = SByte.Parse(fields[99]);
-                    sbyte statType2 = SByte.Parse(fields[100]);
-                    sbyte statType3 = SByte.Parse(fields[101]);
-                    sbyte statType4 = SByte.Parse(fields[102]);
-                    sbyte statType5 = SByte.Parse(fields[103]);
-                    sbyte statType6 = SByte.Parse(fields[104]);
-                    sbyte statType7 = SByte.Parse(fields[105]);
-                    sbyte statType8 = SByte.Parse(fields[106]);
-                    sbyte statType9 = SByte.Parse(fields[107]);
-                    sbyte statType10 = SByte.Parse(fields[108]);
-                    byte containerSlots = Byte.Parse(fields[109]);
-                    byte requiredReputationRank = Byte.Parse(fields[110]);
-                    byte requiredCityRank = Byte.Parse(fields[111]);
-                    byte requiredHonorRank = Byte.Parse(fields[112]);
-                    byte inventoryType = Byte.Parse(fields[113]);
-                    byte overallQualityId = Byte.Parse(fields[114]);
-                    byte ammoType = Byte.Parse(fields[115]);
-                    sbyte statValue1 = SByte.Parse(fields[116]);
-                    sbyte statValue2 = SByte.Parse(fields[117]);
-                    sbyte statValue3 = SByte.Parse(fields[118]);
-                    sbyte statValue4 = SByte.Parse(fields[119]);
-                    sbyte statValue5 = SByte.Parse(fields[120]);
-                    sbyte statValue6 = SByte.Parse(fields[121]);
-                    sbyte statValue7 = SByte.Parse(fields[122]);
-                    sbyte statValue8 = SByte.Parse(fields[123]);
-                    sbyte statValue9 = SByte.Parse(fields[124]);
-                    sbyte statValue10 = SByte.Parse(fields[125]);
-                    sbyte requiredLevel = SByte.Parse(fields[126]);
+                    float dmgVariance = float.Parse(fields[7]);
+                    uint durationInInventory = uint.Parse(fields[8]);
+                    float qualityModifier = float.Parse(fields[9]);
+                    uint bagFamily = uint.Parse(fields[10]);
+                    float rangeMod = float.Parse(fields[11]);
+                    float statPercentageOfSocket1 = float.Parse(fields[12]);
+                    float statPercentageOfSocket2 = float.Parse(fields[13]);
+                    float statPercentageOfSocket3 = float.Parse(fields[14]);
+                    float statPercentageOfSocket4 = float.Parse(fields[15]);
+                    float statPercentageOfSocket5 = float.Parse(fields[16]);
+                    float statPercentageOfSocket6 = float.Parse(fields[17]);
+                    float statPercentageOfSocket7 = float.Parse(fields[18]);
+                    float statPercentageOfSocket8 = float.Parse(fields[19]);
+                    float statPercentageOfSocket9 = float.Parse(fields[20]);
+                    float statPercentageOfSocket10 = float.Parse(fields[21]);
+                    int statPercentEditor1 = int.Parse(fields[22]);
+                    int statPercentEditor2 = int.Parse(fields[23]);
+                    int statPercentEditor3 = int.Parse(fields[24]);
+                    int statPercentEditor4 = int.Parse(fields[25]);
+                    int statPercentEditor5 = int.Parse(fields[26]);
+                    int statPercentEditor6 = int.Parse(fields[27]);
+                    int statPercentEditor7 = int.Parse(fields[28]);
+                    int statPercentEditor8 = int.Parse(fields[29]);
+                    int statPercentEditor9 = int.Parse(fields[30]);
+                    int statPercentEditor10 = int.Parse(fields[31]);
+                    int stackable = int.Parse(fields[32]);
+                    int maxCount = int.Parse(fields[33]);
+                    uint requiredAbility = uint.Parse(fields[34]);
+                    uint sellPrice = uint.Parse(fields[35]);
+                    uint buyPrice = uint.Parse(fields[36]);
+                    uint vendorStackCount = uint.Parse(fields[37]);
+                    float priceVariance = float.Parse(fields[38]);
+                    float priceRandomValue = float.Parse(fields[39]);
+                    int flags1 = int.Parse(fields[40]);
+                    int flags2 = int.Parse(fields[41]);
+                    int flags3 = int.Parse(fields[42]);
+                    int flags4 = int.Parse(fields[43]);
+                    int oppositeFactionItemId = int.Parse(fields[44]);
+                    uint maxDurability = uint.Parse(fields[45]);
+                    ushort itemNameDescriptionId = ushort.Parse(fields[46]);
+                    ushort requiredTransmogHoliday = ushort.Parse(fields[47]);
+                    ushort requiredHoliday = ushort.Parse(fields[48]);
+                    ushort limitCategory = ushort.Parse(fields[49]);
+                    ushort gemProperties = ushort.Parse(fields[50]);
+                    ushort socketMatchEnchantmentId = ushort.Parse(fields[51]);
+                    ushort totemCategoryId = ushort.Parse(fields[52]);
+                    ushort instanceBound = ushort.Parse(fields[53]);
+                    ushort zoneBound1 = ushort.Parse(fields[54]);
+                    ushort zoneBound2 = ushort.Parse(fields[55]);
+                    ushort itemSet = ushort.Parse(fields[56]);
+                    ushort lockId = ushort.Parse(fields[57]);
+                    ushort startQuestId = ushort.Parse(fields[58]);
+                    ushort pageText = ushort.Parse(fields[59]);
+                    ushort delay = ushort.Parse(fields[60]);
+                    ushort requiredReputationId = ushort.Parse(fields[61]);
+                    ushort requiredSkillRank = ushort.Parse(fields[62]);
+                    ushort requiredSkill = ushort.Parse(fields[63]);
+                    ushort itemLevel = ushort.Parse(fields[64]);
+                    short allowableClass = short.Parse(fields[65]);
+                    ushort itemRandomSuffixGroupId = ushort.Parse(fields[66]);
+                    ushort randomProperty = ushort.Parse(fields[67]);
+                    ushort damageMin1 = ushort.Parse(fields[68]);
+                    ushort damageMin2 = ushort.Parse(fields[69]);
+                    ushort damageMin3 = ushort.Parse(fields[70]);
+                    ushort damageMin4 = ushort.Parse(fields[71]);
+                    ushort damageMin5 = ushort.Parse(fields[72]);
+                    ushort damageMax1 = ushort.Parse(fields[73]);
+                    ushort damageMax2 = ushort.Parse(fields[74]);
+                    ushort damageMax3 = ushort.Parse(fields[75]);
+                    ushort damageMax4 = ushort.Parse(fields[76]);
+                    ushort damageMax5 = ushort.Parse(fields[77]);
+                    short armor = short.Parse(fields[78]);
+                    short holyResistance = short.Parse(fields[79]);
+                    short fireResistance = short.Parse(fields[80]);
+                    short natureResistance = short.Parse(fields[81]);
+                    short frostResistance = short.Parse(fields[82]);
+                    short shadowResistance = short.Parse(fields[83]);
+                    short arcaneResistance = short.Parse(fields[84]);
+                    ushort scalingStatDistributionId = ushort.Parse(fields[85]);
+                    byte expansionId = byte.Parse(fields[86]);
+                    byte artifactId = byte.Parse(fields[87]);
+                    byte spellWeight = byte.Parse(fields[88]);
+                    byte spellWeightCategory = byte.Parse(fields[89]);
+                    byte socketType1 = byte.Parse(fields[90]);
+                    byte socketType2 = byte.Parse(fields[91]);
+                    byte socketType3 = byte.Parse(fields[92]);
+                    byte sheatheType = byte.Parse(fields[93]);
+                    byte material = byte.Parse(fields[94]);
+                    byte pageMaterial = byte.Parse(fields[95]);
+                    byte pageLanguage = byte.Parse(fields[96]);
+                    byte bonding = byte.Parse(fields[97]);
+                    byte damageType = byte.Parse(fields[98]);
+                    sbyte statType1 = sbyte.Parse(fields[99]);
+                    sbyte statType2 = sbyte.Parse(fields[100]);
+                    sbyte statType3 = sbyte.Parse(fields[101]);
+                    sbyte statType4 = sbyte.Parse(fields[102]);
+                    sbyte statType5 = sbyte.Parse(fields[103]);
+                    sbyte statType6 = sbyte.Parse(fields[104]);
+                    sbyte statType7 = sbyte.Parse(fields[105]);
+                    sbyte statType8 = sbyte.Parse(fields[106]);
+                    sbyte statType9 = sbyte.Parse(fields[107]);
+                    sbyte statType10 = sbyte.Parse(fields[108]);
+                    byte containerSlots = byte.Parse(fields[109]);
+                    byte requiredReputationRank = byte.Parse(fields[110]);
+                    byte requiredCityRank = byte.Parse(fields[111]);
+                    byte requiredHonorRank = byte.Parse(fields[112]);
+                    byte inventoryType = byte.Parse(fields[113]);
+                    byte overallQualityId = byte.Parse(fields[114]);
+                    byte ammoType = byte.Parse(fields[115]);
+                    sbyte statValue1 = sbyte.Parse(fields[116]);
+                    sbyte statValue2 = sbyte.Parse(fields[117]);
+                    sbyte statValue3 = sbyte.Parse(fields[118]);
+                    sbyte statValue4 = sbyte.Parse(fields[119]);
+                    sbyte statValue5 = sbyte.Parse(fields[120]);
+                    sbyte statValue6 = sbyte.Parse(fields[121]);
+                    sbyte statValue7 = sbyte.Parse(fields[122]);
+                    sbyte statValue8 = sbyte.Parse(fields[123]);
+                    sbyte statValue9 = sbyte.Parse(fields[124]);
+                    sbyte statValue10 = sbyte.Parse(fields[125]);
+                    sbyte requiredLevel = sbyte.Parse(fields[126]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.ItemSparse;
-                    record.HotfixId = HotfixItemSparseBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        Status = HotfixStatus.Valid,
+                        TableHash = DB2Hash.ItemSparse,
+                        HotfixId = HotfixItemSparseBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.HotfixContent.WriteInt64(allowableRace);
@@ -1961,7 +1983,7 @@ namespace HermesProxy.World
         public static void LoadCreatureDisplayInfoHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"CreatureDisplayInfo{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1978,37 +2000,39 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    ushort modelId = UInt16.Parse(fields[1]);
-                    ushort soundId = UInt16.Parse(fields[2]);
-                    sbyte sizeClass = SByte.Parse(fields[3]);
-                    float creatureModelScale = Single.Parse(fields[4]);
-                    byte creatureModelAlpha = Byte.Parse(fields[5]);
-                    byte bloodId = Byte.Parse(fields[6]);
-                    int extendedDisplayInfoId = Int32.Parse(fields[7]);
-                    ushort nPCSoundId = UInt16.Parse(fields[8]);
-                    ushort particleColorId = UInt16.Parse(fields[9]);
-                    int portraitCreatureDisplayInfoId = Int32.Parse(fields[10]);
-                    int portraitTextureFileDataId = Int32.Parse(fields[11]);
-                    ushort objectEffectPackageId = UInt16.Parse(fields[12]);
-                    ushort animReplacementSetId = UInt16.Parse(fields[13]);
-                    byte flags = Byte.Parse(fields[14]);
-                    int stateSpellVisualKitId = Int32.Parse(fields[15]);
-                    float playerOverrideScale = Single.Parse(fields[16]);
-                    float petInstanceScale = Single.Parse(fields[17]);
-                    sbyte unarmedWeaponType = SByte.Parse(fields[18]);
-                    int mountPoofSpellVisualKitId = Int32.Parse(fields[19]);
-                    int dissolveEffectId = Int32.Parse(fields[20]);
-                    sbyte gender = SByte.Parse(fields[21]);
-                    int dissolveOutEffectId = Int32.Parse(fields[22]);
-                    sbyte creatureModelMinLod = SByte.Parse(fields[23]);
-                    int textureVariationFileDataId1 = Int32.Parse(fields[24]);
-                    int textureVariationFileDataId2 = Int32.Parse(fields[25]);
-                    int textureVariationFileDataId3 = Int32.Parse(fields[26]);
+                    uint id = uint.Parse(fields[0]);
+                    ushort modelId = ushort.Parse(fields[1]);
+                    ushort soundId = ushort.Parse(fields[2]);
+                    sbyte sizeClass = sbyte.Parse(fields[3]);
+                    float creatureModelScale = float.Parse(fields[4]);
+                    byte creatureModelAlpha = byte.Parse(fields[5]);
+                    byte bloodId = byte.Parse(fields[6]);
+                    int extendedDisplayInfoId = int.Parse(fields[7]);
+                    ushort nPCSoundId = ushort.Parse(fields[8]);
+                    ushort particleColorId = ushort.Parse(fields[9]);
+                    int portraitCreatureDisplayInfoId = int.Parse(fields[10]);
+                    int portraitTextureFileDataId = int.Parse(fields[11]);
+                    ushort objectEffectPackageId = ushort.Parse(fields[12]);
+                    ushort animReplacementSetId = ushort.Parse(fields[13]);
+                    byte flags = byte.Parse(fields[14]);
+                    int stateSpellVisualKitId = int.Parse(fields[15]);
+                    float playerOverrideScale = float.Parse(fields[16]);
+                    float petInstanceScale = float.Parse(fields[17]);
+                    sbyte unarmedWeaponType = sbyte.Parse(fields[18]);
+                    int mountPoofSpellVisualKitId = int.Parse(fields[19]);
+                    int dissolveEffectId = int.Parse(fields[20]);
+                    sbyte gender = sbyte.Parse(fields[21]);
+                    int dissolveOutEffectId = int.Parse(fields[22]);
+                    sbyte creatureModelMinLod = sbyte.Parse(fields[23]);
+                    int textureVariationFileDataId1 = int.Parse(fields[24]);
+                    int textureVariationFileDataId2 = int.Parse(fields[25]);
+                    int textureVariationFileDataId3 = int.Parse(fields[26]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.CreatureDisplayInfo;
-                    record.HotfixId = HotfixCreatureDisplayInfoBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.CreatureDisplayInfo,
+                        HotfixId = HotfixCreatureDisplayInfoBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -2046,7 +2070,7 @@ namespace HermesProxy.World
         public static void LoadCreatureDisplayInfoExtraHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"CreatureDisplayInfoExtra{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -2063,25 +2087,27 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    sbyte displayRaceId = SByte.Parse(fields[1]);
-                    sbyte displaySexId = SByte.Parse(fields[2]);
-                    sbyte displayClassId = SByte.Parse(fields[3]);
-                    sbyte skinId = SByte.Parse(fields[4]);
-                    sbyte faceId = SByte.Parse(fields[5]);
-                    sbyte hairStyleId = SByte.Parse(fields[6]);
-                    sbyte hairColorId = SByte.Parse(fields[7]);
-                    sbyte facialHairId = SByte.Parse(fields[8]);
-                    sbyte flags = SByte.Parse(fields[9]);
-                    int bakeMaterialResourcesId = Int32.Parse(fields[10]);
-                    int hDBakeMaterialResourcesId = Int32.Parse(fields[11]);
-                    byte customDisplayOption1 = Byte.Parse(fields[12]);
-                    byte customDisplayOption2 = Byte.Parse(fields[13]);
-                    byte customDisplayOption3 = Byte.Parse(fields[14]);
+                    uint id = uint.Parse(fields[0]);
+                    sbyte displayRaceId = sbyte.Parse(fields[1]);
+                    sbyte displaySexId = sbyte.Parse(fields[2]);
+                    sbyte displayClassId = sbyte.Parse(fields[3]);
+                    sbyte skinId = sbyte.Parse(fields[4]);
+                    sbyte faceId = sbyte.Parse(fields[5]);
+                    sbyte hairStyleId = sbyte.Parse(fields[6]);
+                    sbyte hairColorId = sbyte.Parse(fields[7]);
+                    sbyte facialHairId = sbyte.Parse(fields[8]);
+                    sbyte flags = sbyte.Parse(fields[9]);
+                    int bakeMaterialResourcesId = int.Parse(fields[10]);
+                    int hDBakeMaterialResourcesId = int.Parse(fields[11]);
+                    byte customDisplayOption1 = byte.Parse(fields[12]);
+                    byte customDisplayOption2 = byte.Parse(fields[13]);
+                    byte customDisplayOption3 = byte.Parse(fields[14]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.TableHash = DB2Hash.CreatureDisplayInfoExtra;
-                    record.HotfixId = HotfixCreatureDisplayInfoExtraBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        TableHash = DB2Hash.CreatureDisplayInfoExtra,
+                        HotfixId = HotfixCreatureDisplayInfoExtraBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.Status = HotfixStatus.Valid;
@@ -2107,7 +2133,7 @@ namespace HermesProxy.World
         public static void LoadCreatureDisplayInfoOptionHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"CreatureDisplayInfoOption{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -2124,15 +2150,17 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    uint id = UInt32.Parse(fields[0]);
-                    int chrCustomizationOptionId = Int32.Parse(fields[1]);
-                    int chrCustomizationChoiceId = Int32.Parse(fields[2]);
-                    int creatureDisplayInfoExtraId = Int32.Parse(fields[3]);
+                    uint id = uint.Parse(fields[0]);
+                    int chrCustomizationOptionId = int.Parse(fields[1]);
+                    int chrCustomizationChoiceId = int.Parse(fields[2]);
+                    int creatureDisplayInfoExtraId = int.Parse(fields[3]);
 
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.CreatureDisplayInfoOption;
-                    record.HotfixId = HotfixCreatureDisplayInfoOptionBegin + counter;
+                    HotfixRecord record = new()
+                    {
+                        Status = HotfixStatus.Valid,
+                        TableHash = DB2Hash.CreatureDisplayInfoOption,
+                        HotfixId = HotfixCreatureDisplayInfoOptionBegin + counter
+                    };
                     record.UniqueId = record.HotfixId;
                     record.RecordId = id;
                     record.HotfixContent.WriteInt32(chrCustomizationOptionId);
@@ -2164,7 +2192,7 @@ namespace HermesProxy.World
     public class Battleground
     {
         public bool IsArena;
-        public List<uint> MapIds = new List<uint>();
+        public List<uint> MapIds = new();
     }
     public class TaxiPath
     {

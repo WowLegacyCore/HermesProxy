@@ -36,7 +36,7 @@
         FAIL_UNLOCKABLE_LOCK    = 0x19, // Your account has been locked but can be unlocked.
         FAIL_CONVERSION_REQUIRE = 0x20, // This account needs to be converted to a Battle.net account. Please [Click Here] or go to: <site> to begin conversion.
         FAIL_DISCONNECTED       = 0xFF,
-        
+
         // HermesProxy internal variables
         FAIL_INTERNAL_ERROR     = 0xFE, // Internal error
         FAIL_WRONG_MODERN_VER   = 0xFD, // Modern client is using unsupported version

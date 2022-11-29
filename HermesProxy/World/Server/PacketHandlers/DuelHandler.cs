@@ -1,8 +1,4 @@
-﻿using Framework.Constants;
-using HermesProxy.Enums;
-using HermesProxy.World;
-using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
+﻿using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
 
 namespace HermesProxy.World.Server
@@ -13,9 +9,11 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CAN_DUEL)]
         void HandleCanDuel(CanDuel request)
         {
-            CanDuelResult result = new CanDuelResult();
-            result.TargetGUID = request.TargetGUID;
-            result.Result = true;
+            CanDuelResult result = new()
+            {
+                TargetGUID = request.TargetGUID,
+                Result = true
+            };
             SendPacket(result);
         }
 
@@ -24,13 +22,13 @@ namespace HermesProxy.World.Server
         {
             if (response.Accepted)
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_DUEL_ACCEPTED);
+                WorldPacket packet = new(Opcode.CMSG_DUEL_ACCEPTED);
                 packet.WriteGuid(response.ArbiterGUID.To64());
                 SendPacketToServer(packet);
             }
             else
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_DUEL_CANCELLED);
+                WorldPacket packet = new(Opcode.CMSG_DUEL_CANCELLED);
                 packet.WriteGuid(response.ArbiterGUID.To64());
                 SendPacketToServer(packet);
             }

@@ -1,5 +1,4 @@
-﻿using Framework;
-using Framework.Logging;
+﻿using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -16,8 +15,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_TIME_RESPONSE)]
         void HandleQueryTimeResponse(WorldPacket packet)
         {
-            QueryTimeResponse response = new QueryTimeResponse();
-            response.CurrentTime = packet.ReadInt32();
+            QueryTimeResponse response = new()
+            {
+                CurrentTime = packet.ReadInt32()
+            };
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) && packet.CanRead())
                 packet.ReadInt32(); // Next Daily Quest Reset Time
             SendPacketToClient(response);
@@ -25,7 +26,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_QUEST_INFO_RESPONSE)]
         void HandleQueryQuestInfoResponse(WorldPacket packet)
         {
-            QueryQuestInfoResponse response = new QueryQuestInfoResponse();
+            QueryQuestInfoResponse response = new();
             var id = packet.ReadEntry();
             response.QuestID = (uint)id.Key;
             if (id.Value) // entry is masked
@@ -61,13 +62,15 @@ namespace HermesProxy.World.Client
                 int factionValue = packet.ReadInt32(); // RequiredFactionValue
                 if (factionId != 0 && factionValue != 0)
                 {
-                    QuestObjective objective = new QuestObjective();
-                    objective.QuestID = response.QuestID;
-                    objective.Id = QuestObjective.QuestObjectiveCounter++;
-                    objective.StorageIndex = objectiveCounter++;
-                    objective.Type = QuestObjectiveType.MinReputation;
-                    objective.ObjectID = factionId;
-                    objective.Amount = factionValue;
+                    QuestObjective objective = new()
+                    {
+                        QuestID = response.QuestID,
+                        Id = QuestObjective.QuestObjectiveCounter++,
+                        StorageIndex = objectiveCounter++,
+                        Type = QuestObjectiveType.MinReputation,
+                        ObjectID = factionId,
+                        Amount = factionValue
+                    };
                     quest.Objectives.Add(objective);
                 }
             }
@@ -82,13 +85,15 @@ namespace HermesProxy.World.Client
                 quest.RewardMoney = rewOrReqMoney;
             else
             {
-                QuestObjective objective = new QuestObjective();
-                objective.QuestID = response.QuestID;
-                objective.Id = QuestObjective.QuestObjectiveCounter++;
-                objective.StorageIndex = objectiveCounter++;
-                objective.Type = QuestObjectiveType.Money;
-                objective.ObjectID = 0;
-                objective.Amount = -rewOrReqMoney;
+                QuestObjective objective = new()
+                {
+                    QuestID = response.QuestID,
+                    Id = QuestObjective.QuestObjectiveCounter++,
+                    StorageIndex = objectiveCounter++,
+                    Type = QuestObjectiveType.Money,
+                    ObjectID = 0,
+                    Amount = -rewOrReqMoney
+                };
                 quest.Objectives.Add(objective);
             }
             quest.RewardBonusMoney = packet.ReadUInt32();
@@ -114,13 +119,15 @@ namespace HermesProxy.World.Client
                 int requiredPlayerKills = packet.ReadInt32();
                 if (requiredPlayerKills != 0)
                 {
-                    QuestObjective objective = new QuestObjective();
-                    objective.QuestID = response.QuestID;
-                    objective.Id = QuestObjective.QuestObjectiveCounter++;
-                    objective.StorageIndex = objectiveCounter++;
-                    objective.Type = QuestObjectiveType.PlayerKills;
-                    objective.ObjectID = 0;
-                    objective.Amount = requiredPlayerKills;
+                    QuestObjective objective = new()
+                    {
+                        QuestID = response.QuestID,
+                        Id = QuestObjective.QuestObjectiveCounter++,
+                        StorageIndex = objectiveCounter++,
+                        Type = QuestObjectiveType.PlayerKills,
+                        ObjectID = 0,
+                        Amount = requiredPlayerKills
+                    };
                     quest.Objectives.Add(objective);
                 }
                 packet.ReadUInt32(); // RewardTalents
@@ -140,9 +147,11 @@ namespace HermesProxy.World.Client
 
             for (int i = 0; i < 6; i++)
             {
-                QuestInfoChoiceItem choiceItem = new QuestInfoChoiceItem();
-                choiceItem.ItemID = packet.ReadUInt32();
-                choiceItem.Quantity = packet.ReadUInt32();
+                QuestInfoChoiceItem choiceItem = new()
+                {
+                    ItemID = packet.ReadUInt32(),
+                    Quantity = packet.ReadUInt32()
+                };
 
                 ItemDisplayData item = GameData.GetItemDisplayData(choiceItem.ItemID);
                 if (item != null)
@@ -194,13 +203,15 @@ namespace HermesProxy.World.Client
 
                 if (creatureOrGoId != 0 && creatureOrGoAmount != 0)
                 {
-                    QuestObjective objective = new QuestObjective();
-                    objective.QuestID = response.QuestID;
-                    objective.Id = QuestObjective.QuestObjectiveCounter++;
-                    objective.StorageIndex = objectiveCounter++;
-                    objective.Type = isGo ? QuestObjectiveType.GameObject : QuestObjectiveType.Monster;
-                    objective.ObjectID = creatureOrGoId;
-                    objective.Amount = creatureOrGoAmount;
+                    QuestObjective objective = new()
+                    {
+                        QuestID = response.QuestID,
+                        Id = QuestObjective.QuestObjectiveCounter++,
+                        StorageIndex = objectiveCounter++,
+                        Type = isGo ? QuestObjectiveType.GameObject : QuestObjectiveType.Monster,
+                        ObjectID = creatureOrGoId,
+                        Amount = creatureOrGoAmount
+                    };
                     quest.Objectives.Add(objective);
                 }
 
@@ -230,13 +241,15 @@ namespace HermesProxy.World.Client
             {
                 if (requiredItemID[i] != 0 && requiredItemCount[i] != 0)
                 {
-                    QuestObjective objective = new QuestObjective();
-                    objective.QuestID = response.QuestID;
-                    objective.Id = QuestObjective.QuestObjectiveCounter++;
-                    objective.StorageIndex = objectiveCounter++;
-                    objective.Type = QuestObjectiveType.Item;
-                    objective.ObjectID = requiredItemID[i];
-                    objective.Amount = requiredItemCount[i];
+                    QuestObjective objective = new()
+                    {
+                        QuestID = response.QuestID,
+                        Id = QuestObjective.QuestObjectiveCounter++,
+                        StorageIndex = objectiveCounter++,
+                        Type = QuestObjectiveType.Item,
+                        ObjectID = requiredItemID[i],
+                        Amount = requiredItemCount[i]
+                    };
                     quest.Objectives.Add(objective);
                 }
             }
@@ -266,7 +279,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_CREATURE_RESPONSE)]
         void HandleQueryCreatureResponse(WorldPacket packet)
         {
-            QueryCreatureResponse response = new QueryCreatureResponse();
+            QueryCreatureResponse response = new();
             var id = packet.ReadEntry();
             response.CreatureID = (uint)id.Key;
             if (id.Value) // entry is masked
@@ -352,7 +365,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_GAME_OBJECT_RESPONSE)]
         void HandleQueryGameObjectResposne(WorldPacket packet)
         {
-            QueryGameObjectResponse response = new QueryGameObjectResponse();
+            QueryGameObjectResponse response = new();
             var id = packet.ReadEntry();
             response.GameObjectID = (uint)id.Key;
             response.Guid = WowGuid128.Empty;
@@ -403,20 +416,24 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_PAGE_TEXT_RESPONSE)]
         void HandleQueryPageTextResponse(WorldPacket packet)
         {
-            QueryPageTextResponse response = new QueryPageTextResponse();
-            response.PageTextID = packet.ReadUInt32();
-            response.Allow = true;
-            PageTextInfo page = new PageTextInfo();
-            page.Id = response.PageTextID;
-            page.Text = packet.ReadCString();
-            page.NextPageID = packet.ReadUInt32();
+            QueryPageTextResponse response = new()
+            {
+                PageTextID = packet.ReadUInt32(),
+                Allow = true
+            };
+            PageTextInfo page = new()
+            {
+                Id = response.PageTextID,
+                Text = packet.ReadCString(),
+                NextPageID = packet.ReadUInt32()
+            };
             response.Pages.Add(page);
             SendPacketToClient(response);
         }
         [PacketHandler(Opcode.SMSG_QUERY_NPC_TEXT_RESPONSE)]
         void HandleQueryNpcTextResponse(WorldPacket packet)
         {
-            QueryNPCTextResponse response = new QueryNPCTextResponse();
+            QueryNPCTextResponse response = new();
             var id = packet.ReadEntry();
             response.TextID = (uint)id.Key;
             if (id.Value) // entry is masked
@@ -445,7 +462,7 @@ namespace HermesProxy.World.Client
 
                 const string placeholderGossip = "Greetings $N";
 
-                if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText) ||
+                if (string.IsNullOrEmpty(maleText) && string.IsNullOrEmpty(femaleText) ||
                     maleText == placeholderGossip && femaleText == placeholderGossip && i != 0)
                     response.BroadcastTextID[i] = 0;
                 else
@@ -461,7 +478,7 @@ namespace HermesProxy.World.Client
             if (entry.Value)
                 return;
 
-            ItemTemplate item = new ItemTemplate
+            ItemTemplate item = new()
             {
                 Entry = (uint)entry.Key,
                 Class = packet.ReadInt32(),
@@ -647,9 +664,11 @@ namespace HermesProxy.World.Client
                 return;
             }
 
-            QueryPetNameResponse response = new QueryPetNameResponse();
-            response.UnitGUID = guid;
-            response.Name = packet.ReadCString();
+            QueryPetNameResponse response = new()
+            {
+                UnitGUID = guid,
+                Name = packet.ReadCString()
+            };
             if (response.Name.Length == 0)
             {
                 response.Allow = false;
@@ -686,8 +705,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_WHO)]
         void HandleWhoResponse(WorldPacket packet)
         {
-            WhoResponsePkt response = new WhoResponsePkt();
-            response.RequestID = GetSession().GameState.LastWhoRequestId;
+            WhoResponsePkt response = new()
+            {
+                RequestID = GetSession().GameState.LastWhoRequestId
+            };
             var count = packet.ReadUInt32();
             packet.ReadUInt32(); // Online count
             for (var i = 0; i < count; ++i)
@@ -709,7 +730,7 @@ namespace HermesProxy.World.Client
                 player.PlayerData.BnetAccountID = GetSession().GetBnetAccountGuidForPlayer(player.PlayerData.GuidActual);
                 player.PlayerData.VirtualRealmAddress = GetSession().RealmId.GetAddress();
 
-                if (!String.IsNullOrEmpty(player.GuildName))
+                if (!string.IsNullOrEmpty(player.GuildName))
                 {
                     player.GuildGUID = GetSession().GetGuildGuid(player.GuildName);
                     player.GuildVirtualRealmAddress = player.PlayerData.VirtualRealmAddress;

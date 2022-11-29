@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
-using Bgs.Protocol;
-using Bgs.Protocol.GameUtilities.V1;
-using BNetServer.Services;
 using Framework.Constants;
 using Framework.IO;
 using Framework.Logging;
-using Framework.Serialization;
-using Framework.Util;
-using Framework.Web;
 using Google.Protobuf;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
@@ -21,9 +13,11 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHANGE_REALM_TICKET)]
         void HandleChangeRealmTicket(ChangeRealmTicket request)
         {
-            ChangeRealmTicketResponse response = new();
-            response.Token = request.Token;
-            
+            ChangeRealmTicketResponse response = new()
+            {
+                Token = request.Token
+            };
+
             if (GetSession().AuthClient.Reconnect() != AuthResult.SUCCESS)
             {
                 response.Allow = false;

@@ -1,9 +1,5 @@
-﻿using System;
-using Framework.Constants;
-using HermesProxy.Enums;
-using HermesProxy.World;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 
 namespace HermesProxy.World.Server
@@ -14,7 +10,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUERY_GUILD_INFO)]
         void HandleQueryGuildInfo(QueryGuildInfo query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_GUILD_INFO);
+            WorldPacket packet = new(Opcode.CMSG_QUERY_GUILD_INFO);
             packet.WriteUInt32((uint)query.GuildGuid.GetCounter());
             SendPacketToServer(packet);
         }
@@ -25,7 +21,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return;
 
-            WorldPacket packet = new WorldPacket(Opcode.MSG_GUILD_PERMISSIONS);
+            WorldPacket packet = new(Opcode.MSG_GUILD_PERMISSIONS);
             SendPacketToServer(packet);
         }
 
@@ -35,24 +31,24 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return;
 
-            WorldPacket packet = new WorldPacket(Opcode.MSG_GUILD_BANK_MONEY_WITHDRAWN);
+            WorldPacket packet = new(Opcode.MSG_GUILD_BANK_MONEY_WITHDRAWN);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_GET_ROSTER)]
         void HandleGuildGetRoster(GuildGetRoster query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_INFO);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_INFO);
             SendPacketToServer(packet);
 
-            WorldPacket packet2 = new WorldPacket(Opcode.CMSG_GUILD_GET_ROSTER);
+            WorldPacket packet2 = new(Opcode.CMSG_GUILD_GET_ROSTER);
             SendPacketToServer(packet2);
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_UPDATE_MOTD_TEXT)]
         void HandleGuildUpdateMotdText(GuildUpdateMotdText text)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_UPDATE_MOTD_TEXT);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_UPDATE_MOTD_TEXT);
             packet.WriteCString(text.MotdText);
             SendPacketToServer(packet);
         }
@@ -60,7 +56,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_UPDATE_INFO_TEXT)]
         void HandleGuildUpdateInfoText(GuildUpdateInfoText text)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_UPDATE_INFO_TEXT);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_UPDATE_INFO_TEXT);
             packet.WriteCString(text.InfoText);
             SendPacketToServer(packet);
         }
@@ -68,7 +64,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_SET_MEMBER_NOTE)]
         void HandleGuildSetMemberNote(GuildSetMemberNote note)
         {
-            WorldPacket packet = new WorldPacket(note.IsPublic ? Opcode.CMSG_GUILD_SET_PUBLIC_NOTE : Opcode.CMSG_GUILD_SET_OFFICER_NOTE);
+            WorldPacket packet = new(note.IsPublic ? Opcode.CMSG_GUILD_SET_PUBLIC_NOTE : Opcode.CMSG_GUILD_SET_OFFICER_NOTE);
             packet.WriteCString(GetSession().GameState.GetPlayerName(note.NoteeGUID));
             packet.WriteCString(note.Note);
             SendPacketToServer(packet);
@@ -77,7 +73,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_PROMOTE_MEMBER)]
         void HandleGuildPromoteMember(GuildPromoteMember promote)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_PROMOTE_MEMBER);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_PROMOTE_MEMBER);
             packet.WriteCString(GetSession().GameState.GetPlayerName(promote.Promotee));
             SendPacketToServer(packet);
         }
@@ -85,7 +81,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_DEMOTE_MEMBER)]
         void HandleGuildDemoteMember(GuildDemoteMember demote)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DEMOTE_MEMBER);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_DEMOTE_MEMBER);
             packet.WriteCString(GetSession().GameState.GetPlayerName(demote.Demotee));
             SendPacketToServer(packet);
         }
@@ -93,7 +89,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_OFFICER_REMOVE_MEMBER)]
         void HandleGuildOfficerRemoveMember(GuildOfficerRemoveMember remove)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_OFFICER_REMOVE_MEMBER);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_OFFICER_REMOVE_MEMBER);
             packet.WriteCString(GetSession().GameState.GetPlayerName(remove.Removee));
             SendPacketToServer(packet);
         }
@@ -103,13 +99,13 @@ namespace HermesProxy.World.Server
         {
             if (invite.ArenaTeamId == 0)
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_INVITE_BY_NAME);
+                WorldPacket packet = new(Opcode.CMSG_GUILD_INVITE_BY_NAME);
                 packet.WriteCString(invite.Name);
                 SendPacketToServer(packet);
             }
             else
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_INVITE);
+                WorldPacket packet = new(Opcode.CMSG_ARENA_TEAM_INVITE);
                 packet.WriteUInt32(invite.ArenaTeamId);
                 packet.WriteCString(invite.Name);
                 SendPacketToServer(packet);
@@ -119,7 +115,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_SET_RANK_PERMISSIONS)]
         void HandleGuildSetRankPermissions(GuildSetRankPermissions rank)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_SET_RANK_PERMISSIONS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_SET_RANK_PERMISSIONS);
             packet.WriteUInt32(rank.RankID);
             packet.WriteUInt32(rank.Flags);
             packet.WriteCString(rank.RankName);
@@ -138,7 +134,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_ADD_RANK)]
         void HandleGuildAddRank(GuildAddRank rank)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_ADD_RANK);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_ADD_RANK);
             packet.WriteCString(rank.Name);
             SendPacketToServer(packet);
         }
@@ -146,14 +142,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_DELETE_RANK)]
         void HandleGuildDeleteRank(GuildDeleteRank rank)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DELETE_RANK);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_DELETE_RANK);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_SET_GUILD_MASTER)]
         void HandleGuildSetGuildMaster(GuildSetGuildMaster master)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_SET_GUILD_MASTER);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_SET_GUILD_MASTER);
             packet.WriteCString(master.NewMasterName);
             SendPacketToServer(packet);
         }
@@ -161,35 +157,35 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_LEAVE)]
         void HandleGuildLeave(GuildLeave leave)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_LEAVE);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_LEAVE);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_ACCEPT_GUILD_INVITE)]
         void HandleGuildAccept(AcceptGuildInvite accept)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_ACCEPT_GUILD_INVITE);
+            WorldPacket packet = new(Opcode.CMSG_ACCEPT_GUILD_INVITE);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_DECLINE_INVITATION)]
         void HandleGuildDecline(DeclineGuildInvite decline)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DECLINE_INVITATION);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_DECLINE_INVITATION);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_DELETE)]
         void HandleGuildDelete(GuildDelete delete)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DELETE);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_DELETE);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_SAVE_GUILD_EMBLEM)]
         void HandleSaveGuildEmblem(SaveGuildEmblem emblem)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_SAVE_GUILD_EMBLEM);
+            WorldPacket packet = new(Opcode.MSG_SAVE_GUILD_EMBLEM);
             packet.WriteGuid(emblem.DesignerGUID.To64());
             packet.WriteUInt32(emblem.EmblemStyle);
             packet.WriteUInt32(emblem.EmblemColor);
@@ -205,10 +201,10 @@ namespace HermesProxy.World.Server
             GetSession().GameState.CurrentPlayerStorage.Settings.SetAutoBlockGuildInvites(packet.GuildInvitesShouldGetBlocked);
 
             // Send update to client
-            ObjectUpdate updateData = new ObjectUpdate(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
+            ObjectUpdate updateData = new(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
             PlayerFlags flags = GetSession().GameState.CurrentPlayerStorage.Settings.CreateNewFlags();
             updateData.PlayerData.PlayerFlags = (uint) flags;
-            UpdateObject updatePacket = new UpdateObject(GetSession().GameState);
+            UpdateObject updatePacket = new(GetSession().GameState);
             updatePacket.ObjectUpdates.Add(updateData);
             GetSession().WorldClient.SendPacketToClient(updatePacket);
         }
@@ -216,14 +212,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_AUTO_DECLINE_INVITATION)]
         void HandleGuildAutoDeclineInvitation(AutoDeclineGuildInvite autoDecline)
         { // This is called when the client still receives a guild invite after enabling AutoDecline
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_DECLINE_INVITATION);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_DECLINE_INVITATION);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_GUILD_BANK_ACTIVATE)]
         void HandleGuildBankActivate(GuildBankAtivate activate)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_ACTIVATE);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_ACTIVATE);
             packet.WriteGuid(activate.BankGuid.To64());
             packet.WriteBool(activate.FullUpdate);
             SendPacketToServer(packet);
@@ -232,7 +228,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_QUERY_TAB)]
         void HandleGuildBankQueryTab(GuildBankQueryTab query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_QUERY_TAB);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_QUERY_TAB);
             packet.WriteGuid(query.BankGuid.To64());
             packet.WriteUInt8(query.Tab);
             packet.WriteBool(query.FullUpdate);
@@ -242,7 +238,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_DEPOSIT_MONEY)]
         void HandleGuildBankDepositMoney(GuildBankDepositMoney deposit)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_DEPOSIT_MONEY);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_DEPOSIT_MONEY);
             packet.WriteGuid(deposit.BankGuid.To64());
             packet.WriteUInt32((uint)deposit.Money);
             SendPacketToServer(packet);
@@ -251,7 +247,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_TEXT_QUERY)]
         void HandleGuildBankTextQuery(GuildBankTextQuery query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_QUERY_GUILD_BANK_TEXT);
+            WorldPacket packet = new(Opcode.MSG_QUERY_GUILD_BANK_TEXT);
             packet.WriteUInt8((byte)query.Tab);
             SendPacketToServer(packet);
         }
@@ -259,7 +255,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_UPDATE_TAB)]
         void HandleGuildBankUpdateTab(GuildBankUpdateTab update)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_UPDATE_TAB);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_UPDATE_TAB);
             packet.WriteGuid(update.BankGuid.To64());
             packet.WriteUInt8(update.BankTab);
             packet.WriteCString(update.Name);
@@ -270,7 +266,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_LOG_QUERY)]
         void HandleGuildBankLogQuery(GuildBankLogQuery query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_GUILD_BANK_LOG_QUERY);
+            WorldPacket packet = new(Opcode.MSG_GUILD_BANK_LOG_QUERY);
             packet.WriteUInt8((byte)query.Tab);
             SendPacketToServer(packet);
         }
@@ -278,7 +274,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_SET_TAB_TEXT)]
         void HandleGuildBankSetTabText(GuildBankSetTabText query)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SET_TAB_TEXT);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SET_TAB_TEXT);
             packet.WriteUInt8((byte)query.Tab);
             packet.WriteCString(query.TabText);
             SendPacketToServer(packet);
@@ -287,7 +283,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_BUY_TAB)]
         void HandleGuildBankBuyTab(GuildBankBuyTab buy)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_BUY_TAB);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_BUY_TAB);
             packet.WriteGuid(buy.BankGuid.To64());
             packet.WriteUInt8(buy.BankTab);
             SendPacketToServer(packet);
@@ -296,7 +292,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GUILD_BANK_WITHDRAW_MONEY)]
         void HandleGuildBankBuyTab(GuildBankWithdrawMoney withdraw)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_WITHDRAW_MONEY);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_WITHDRAW_MONEY);
             packet.WriteGuid(withdraw.BankGuid.To64());
             packet.WriteUInt32((uint)withdraw.Money);
             SendPacketToServer(packet);
@@ -306,7 +302,7 @@ namespace HermesProxy.World.Server
         void HandleGuildBankItem(AutoGuildBankItem item)
         {
             // moves an item from the player to the bank
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(false); // bank to bank
             packet.WriteUInt8(item.BankTab);
@@ -333,7 +329,7 @@ namespace HermesProxy.World.Server
         void HandleSplitItemToGuildBank(SplitItemToGuildBank item)
         {
             // moves a specific amount of stacks from the player to the bank
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(false); // bank to bank
             packet.WriteUInt8(item.BankTab);
@@ -359,7 +355,7 @@ namespace HermesProxy.World.Server
         void HandleAutoStoreGuildBankItem(AutoStoreGuildBankItem item)
         {
             // moves an item from the bank to the player
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(false); // bank to bank
             packet.WriteUInt8(item.BankTab);
@@ -376,7 +372,7 @@ namespace HermesProxy.World.Server
         void HandleStoreGuildBankItem(AutoGuildBankItem item)
         {
             // moves an item from the bank to a specific slot in the player inventory
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(false); // bank to bank
             packet.WriteUInt8(item.BankTab);
@@ -403,7 +399,7 @@ namespace HermesProxy.World.Server
         void HandleMergeGuildBankItemWithItem(SplitItemToGuildBank item)
         {
             // moves a specific amount of stacks from the bank to the player
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(false); // bank to bank
             packet.WriteUInt8(item.BankTab);
@@ -429,7 +425,7 @@ namespace HermesProxy.World.Server
         void HandleMoveGuildBankItem(MoveGuildBankItem item)
         {
             // moves an item from the bank to the bank
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(true); // bank to bank
             packet.WriteUInt8(item.BankTab2);
@@ -448,7 +444,7 @@ namespace HermesProxy.World.Server
         void HandleMoveGuildBankItem(SplitGuildBankItem item)
         {
             // moves a specific amount of stacks from the bank to the bank
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
+            WorldPacket packet = new(Opcode.CMSG_GUILD_BANK_SWAP_ITEMS);
             packet.WriteGuid(item.BankGuid.To64());
             packet.WriteBool(true); // bank to bank
             packet.WriteUInt8(item.BankTab2);

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.World.Enums
+﻿namespace HermesProxy.World.Enums
 {
     public enum BattlegroundListID : uint
     {
@@ -19,7 +13,7 @@ namespace HermesProxy.World.Enums
         WarsongGulch = 489,
         ArathiBasin = 529,
     }
-    
+
     public enum BattleGroundStatus : uint
     {
         None        = 0,    // first status, should mean bg is not instance

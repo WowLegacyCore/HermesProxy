@@ -1,7 +1,5 @@
-﻿using Framework;
-using HermesProxy.Enums;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
 
@@ -13,18 +11,22 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ATTACK_START)]
         void HandleAttackStart(WorldPacket packet)
         {
-            SAttackStart attack = new();
-            attack.Attacker = packet.ReadGuid().To128(GetSession().GameState);
-            attack.Victim = packet.ReadGuid().To128(GetSession().GameState);
+            SAttackStart attack = new()
+            {
+                Attacker = packet.ReadGuid().To128(GetSession().GameState),
+                Victim = packet.ReadGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_ATTACK_STOP)]
         void HandleAttackStop(WorldPacket packet)
         {
-            SAttackStop attack = new();
-            attack.Attacker = packet.ReadPackedGuid().To128(GetSession().GameState);
-            attack.Victim = packet.ReadPackedGuid().To128(GetSession().GameState);
-            attack.NowDead = packet.ReadUInt32() != 0;
+            SAttackStop attack = new()
+            {
+                Attacker = packet.ReadPackedGuid().To128(GetSession().GameState),
+                Victim = packet.ReadPackedGuid().To128(GetSession().GameState),
+                NowDead = packet.ReadUInt32() != 0
+            };
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_ATTACKER_STATE_UPDATE)]
@@ -84,19 +86,21 @@ namespace HermesProxy.World.Client
 
             if (hitInfo.HasAnyFlag(HitInfo.Unk0))
             {
-                attack.UnkState = new();
-                attack.UnkState.State1 = packet.ReadUInt32();
-                attack.UnkState.State2 = packet.ReadFloat();
-                attack.UnkState.State3 = packet.ReadFloat();
-                attack.UnkState.State4 = packet.ReadFloat();
-                attack.UnkState.State5 = packet.ReadFloat();
-                attack.UnkState.State6 = packet.ReadFloat();
-                attack.UnkState.State7 = packet.ReadFloat();
-                attack.UnkState.State8 = packet.ReadFloat();
-                attack.UnkState.State9 = packet.ReadFloat();
-                attack.UnkState.State10 = packet.ReadFloat();
-                attack.UnkState.State11 = packet.ReadFloat();
-                attack.UnkState.State12 = packet.ReadUInt32();
+                attack.UnkState = new()
+                {
+                    State1 = packet.ReadUInt32(),
+                    State2 = packet.ReadFloat(),
+                    State3 = packet.ReadFloat(),
+                    State4 = packet.ReadFloat(),
+                    State5 = packet.ReadFloat(),
+                    State6 = packet.ReadFloat(),
+                    State7 = packet.ReadFloat(),
+                    State8 = packet.ReadFloat(),
+                    State9 = packet.ReadFloat(),
+                    State10 = packet.ReadFloat(),
+                    State11 = packet.ReadFloat(),
+                    State12 = packet.ReadUInt32()
+                };
                 packet.ReadUInt32();
                 packet.ReadUInt32();
             }
@@ -106,29 +110,37 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ATTACKSWING_NOTINRANGE)]
         void HandleAttackSwingNotInRange(WorldPacket packet)
         {
-            AttackSwingError attack = new();
-            attack.Reason = AttackSwingErr.NotInRange;
+            AttackSwingError attack = new()
+            {
+                Reason = AttackSwingErr.NotInRange
+            };
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_ATTACKSWING_BADFACING)]
         void HandleAttackSwingBadFacing(WorldPacket packet)
         {
-            AttackSwingError attack = new();
-            attack.Reason = AttackSwingErr.BadFacing;
+            AttackSwingError attack = new()
+            {
+                Reason = AttackSwingErr.BadFacing
+            };
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_ATTACKSWING_DEADTARGET)]
         void HandleAttackSwingDeadTarget(WorldPacket packet)
         {
-            AttackSwingError attack = new();
-            attack.Reason = AttackSwingErr.DeadTarget;
+            AttackSwingError attack = new()
+            {
+                Reason = AttackSwingErr.DeadTarget
+            };
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_ATTACKSWING_CANT_ATTACK)]
         void HandleAttackSwingCantAttack(WorldPacket packet)
         {
-            AttackSwingError attack = new();
-            attack.Reason = AttackSwingErr.CantAttack;
+            AttackSwingError attack = new()
+            {
+                Reason = AttackSwingErr.CantAttack
+            };
             SendPacketToClient(attack);
         }
         [PacketHandler(Opcode.SMSG_CANCEL_COMBAT)]
@@ -140,17 +152,21 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_AI_REACTION)]
         void HandleAIReaction(WorldPacket packet)
         {
-            AIReaction reaction = new();
-            reaction.UnitGUID = packet.ReadGuid().To128(GetSession().GameState);
-            reaction.Reaction = packet.ReadUInt32();
+            AIReaction reaction = new()
+            {
+                UnitGUID = packet.ReadGuid().To128(GetSession().GameState),
+                Reaction = packet.ReadUInt32()
+            };
             SendPacketToClient(reaction);
         }
         [PacketHandler(Opcode.SMSG_PARTY_KILL_LOG)]
         void HandlePartyKillLog(WorldPacket packet)
         {
-            PartyKillLog log = new();
-            log.Player = packet.ReadGuid().To128(GetSession().GameState);
-            log.Victim = packet.ReadGuid().To128(GetSession().GameState);
+            PartyKillLog log = new()
+            {
+                Player = packet.ReadGuid().To128(GetSession().GameState),
+                Victim = packet.ReadGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(log);
         }
     }

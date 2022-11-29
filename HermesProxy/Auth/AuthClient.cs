@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Net;
@@ -25,14 +24,13 @@ namespace HermesProxy.Auth
             // Debugger.Log(0, "TraceMe", $"{b}");
 #endif
         };
-
-        GlobalSessionData _globalSession;
+        readonly GlobalSessionData _globalSession;
         Socket _clientSocket;
         TaskCompletionSource<AuthResult> _response;
         TaskCompletionSource _hasRealmlist;
         byte[] _passwordHash;
         BigInteger _key;
-        byte[] _m2; 
+        byte[] _m2;
         string _username;
         string _locale;
 
@@ -104,7 +102,7 @@ namespace HermesProxy.Auth
         {
             _response.TrySetResult(response);
         }
-        
+
         public void Disconnect()
         {
             if (!IsConnected())
@@ -202,7 +200,7 @@ namespace HermesProxy.Auth
 
         private void HandlePacket(byte[] buffer, int size)
         {
-            ByteBuffer packet = new ByteBuffer(buffer);
+            ByteBuffer packet = new(buffer);
             AuthCommand opcode = (AuthCommand)packet.ReadUInt8();
             Log.PrintNet(LogType.Debug, LogNetDir.S2P, $"Received opcode {opcode} size {size}.");
 
@@ -226,10 +224,10 @@ namespace HermesProxy.Auth
 
         private void SendLogonChallenge()
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
             buffer.WriteUInt8((byte)(LegacyVersion.ExpansionVersion > 1 ? 8 : 3));
-            buffer.WriteUInt16((UInt16)(_username.Length + 30));
+            buffer.WriteUInt16((ushort)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
             buffer.WriteUInt8(0);
             buffer.WriteUInt8(LegacyVersion.ExpansionVersion);
@@ -407,7 +405,7 @@ namespace HermesProxy.Auth
 
         private void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_PROOF);
             buffer.WriteBytes(A);
             buffer.WriteBytes(M1);
@@ -470,7 +468,7 @@ namespace HermesProxy.Auth
 
         public void RequestRealmListUpdate()
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)AuthCommand.REALM_LIST);
             for (int i = 0; i < 4; i++)
                 buffer.WriteUInt8(0);
@@ -493,12 +491,14 @@ namespace HermesProxy.Auth
             }
 
             Log.Print(LogType.Network, $"Received {realmsCount} realms.");
-            List<RealmInfo> realmList = new List<RealmInfo>();
+            List<RealmInfo> realmList = new();
 
             for (ushort i = 0; i < realmsCount; i++)
             {
-                RealmInfo realmInfo = new RealmInfo();
-                realmInfo.ID = i;
+                RealmInfo realmInfo = new()
+                {
+                    ID = i
+                };
 
                 if (Settings.ServerBuild < ClientVersionBuild.V2_0_3_6299)
                 {
@@ -515,7 +515,7 @@ namespace HermesProxy.Auth
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
                 realmInfo.Address = Dns.GetHostAddresses(strArr[0]).First().ToString();
-                realmInfo.Port = UInt16.Parse(strArr[1]);
+                realmInfo.Port = ushort.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();
                 realmInfo.Timezone = packet.ReadUInt8();

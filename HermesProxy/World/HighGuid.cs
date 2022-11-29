@@ -17,10 +17,10 @@ namespace HermesProxy.World
 
     public class HighGuidLegacy : HighGuid
     {
-        HighGuidTypeLegacy high;
+        readonly HighGuidTypeLegacy high;
         static readonly Dictionary<HighGuidTypeLegacy, HighGuidType> HighLegacyToHighType
-            = new Dictionary<HighGuidTypeLegacy, HighGuidType>
-        {
+            = new()
+            {
             { HighGuidTypeLegacy.None, HighGuidType.Null },
             { HighGuidTypeLegacy.Player, HighGuidType.Player },
             { HighGuidTypeLegacy.Group, HighGuidType.RaidGroup },
@@ -50,8 +50,8 @@ namespace HermesProxy.World
     {
         protected byte high;
         static readonly Dictionary<HighGuidType703, HighGuidType> High703ToHighType
-            = new Dictionary<HighGuidType703, HighGuidType>
-        {
+            = new()
+            {
             { HighGuidType703.Null,              HighGuidType.Null },
             { HighGuidType703.Uniq,              HighGuidType.Uniq },
             { HighGuidType703.Player,            HighGuidType.Player },

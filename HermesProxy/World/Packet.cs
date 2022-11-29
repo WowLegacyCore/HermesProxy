@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -130,7 +130,7 @@ namespace HermesProxy.World
         public ConnectionType GetConnection() { return connectionType; }
 
         byte[] buffer;
-        ConnectionType connectionType;
+        readonly ConnectionType connectionType;
         protected WorldPacket _worldPacket;
     }
 
@@ -254,11 +254,9 @@ namespace HermesProxy.World
                 return;
             }
 
-            byte lowMask, highMask;
-            byte[] lowPacked, highPacked;
 
-            var loSize = PackUInt64(guid.GetLowValue(), out lowMask, out lowPacked);
-            var hiSize = PackUInt64(guid.GetHighValue(), out highMask, out highPacked);
+            var loSize = PackUInt64(guid.GetLowValue(), out byte lowMask, out byte[] lowPacked);
+            var hiSize = PackUInt64(guid.GetHighValue(), out byte highMask, out byte[] highPacked);
 
             WriteUInt8(lowMask);
             WriteUInt8(highMask);
@@ -268,9 +266,7 @@ namespace HermesProxy.World
 
         public void WritePackedUInt64(ulong guid)
         {
-            byte mask;
-            byte[] packed;
-            var packedSize = PackUInt64(guid, out mask, out packed);
+            var packedSize = PackUInt64(guid, out byte mask, out byte[] packed);
 
             WriteUInt8(mask);
             WriteBytes(packed, packedSize);
@@ -314,7 +310,7 @@ namespace HermesProxy.World
         public long GetReceivedTime() { return m_receivedTime; }
         public void SetReceiveTime(long receivedTime) { m_receivedTime = receivedTime; }
 
-        uint opcode;
+        readonly uint opcode;
         long m_receivedTime;
     }
 

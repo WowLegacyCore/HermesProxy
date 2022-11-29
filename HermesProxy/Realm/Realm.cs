@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -38,7 +38,7 @@ public class Realm : IEquatable<Realm>
         else
             realmIp = IPAddress.Parse(Framework.Settings.ExternalAddress);
 
-        IPEndPoint endpoint = new IPEndPoint(realmIp, Framework.Settings.RealmPort);
+        IPEndPoint endpoint = new(realmIp, Framework.Settings.RealmPort);
 
         // Return external IP
         return endpoint;
@@ -49,7 +49,7 @@ public class Realm : IEquatable<Realm>
         return ConfigIdByType[Type];
     }
 
-    uint[] ConfigIdByType =
+    readonly uint[] ConfigIdByType =
     {
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
     };

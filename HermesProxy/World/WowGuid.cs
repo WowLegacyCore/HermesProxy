@@ -1,5 +1,4 @@
-﻿using Framework;
-using HermesProxy.World.Enums;
+﻿using HermesProxy.World.Enums;
 using Framework.Logging;
 
 namespace HermesProxy.World
@@ -148,7 +147,7 @@ namespace HermesProxy.World
 
     public class WowGuid128 : WowGuid
     {
-        public static WowGuid128 Empty = new WowGuid128();
+        public static WowGuid128 Empty = new();
 
         public WowGuid128()
         {
@@ -337,7 +336,7 @@ namespace HermesProxy.World
 
     public class WowGuid64 : WowGuid
     {
-        public static WowGuid64 Empty = new WowGuid64(0);
+        public static WowGuid64 Empty = new(0);
 
         public WowGuid64(ulong id)
         {

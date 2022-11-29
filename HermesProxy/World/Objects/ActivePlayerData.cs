@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace HermesProxy.World.Objects
 {
@@ -52,7 +48,7 @@ namespace HermesProxy.World.Objects
         public int? XP;
         public int? NextLevelXP;
         public int? TrialXP;
-        public SkillInfo Skill = new SkillInfo();
+        public SkillInfo Skill = new();
         public int? CharacterPoints;
         public int? MaxTalentTiers;
         public uint? TrackCreatureMask;

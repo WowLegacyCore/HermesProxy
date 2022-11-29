@@ -1,12 +1,9 @@
-﻿using Framework.Util;
-using HermesProxy.Enums;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Client;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Objects
 {
@@ -52,8 +49,7 @@ namespace HermesProxy.World.Objects
         /// <returns></returns>
         public static TK GetValue<T, TK>(this Dictionary<int, UpdateField> dict, T updateField) // where T: System.Enum // C# 7.3
         {
-            UpdateField uf;
-            if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(updateField), out uf))
+            if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(updateField), out UpdateField uf))
             {
                 var type = GetTypeCodeOfReturnValue<TK>();
                 switch (type)
@@ -84,8 +80,7 @@ namespace HermesProxy.World.Objects
         /// <returns></returns>
         public static IEnumerable<TK> GetValue<T, TK>(this Dictionary<int, List<UpdateField>> dict, T updateField) // where T: System.Enum // C# 7.3
         {
-            List<UpdateField> ufs;
-            if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(updateField), out ufs))
+            if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(updateField), out List<UpdateField> ufs))
             {
                 var type = GetTypeCodeOfReturnValue<TK>();
                 switch (type)
@@ -125,8 +120,7 @@ namespace HermesProxy.World.Objects
             var type = GetTypeCodeOfReturnValue<TK>();
             for (var i = 0; i < count; i++)
             {
-                UpdateField uf;
-                if (dict != null && dict.TryGetValue(firstUpdateField + i, out uf))
+                if (dict != null && dict.TryGetValue(firstUpdateField + i, out UpdateField uf))
                 {
                     switch (type)
                     {
@@ -180,8 +174,7 @@ namespace HermesProxy.World.Objects
 
             try
             {
-                UpdateField uf;
-                if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(updateField), out uf))
+                if (dict != null && dict.TryGetValue(LegacyVersion.GetUpdateField(updateField), out UpdateField uf))
                     return (TK)Enum.Parse(typeof(TK).GetGenericArguments()[0], uf.UInt32Value.ToString(CultureInfo.InvariantCulture));
             }
             catch (OverflowException) // Data wrongly parsed can result in very wtfy values

@@ -1,11 +1,5 @@
-﻿using Framework.Constants;
-using Framework.Logging;
-using HermesProxy.Enums;
-using HermesProxy.World;
-using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
+﻿using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
-using System;
 
 namespace HermesProxy.World.Server
 {
@@ -15,7 +9,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GAME_OBJ_USE)]
         void HandleGameObjUse(GameObjUse use)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GAME_OBJ_USE);
+            WorldPacket packet = new(Opcode.CMSG_GAME_OBJ_USE);
             packet.WriteGuid(use.Guid.To64());
             SendPacketToServer(packet);
         }

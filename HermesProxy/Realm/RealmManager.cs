@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -22,7 +22,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Timers;
 using System.Collections.Concurrent;
 using System.Text;
 using Framework.Realm;
@@ -40,10 +39,12 @@ public class RealmManager
 
     void LoadBuildInfo()
     {
-        RealmBuildInfo build = new RealmBuildInfo();
-        build.MajorVersion = ModernVersion.ExpansionVersion;
-        build.MinorVersion = ModernVersion.MajorVersion;
-        build.BugfixVersion = ModernVersion.MinorVersion;
+        RealmBuildInfo build = new()
+        {
+            MajorVersion = ModernVersion.ExpansionVersion,
+            MinorVersion = ModernVersion.MajorVersion,
+            BugfixVersion = ModernVersion.MinorVersion
+        };
 
         string hotfixVersion = "";
         if (!hotfixVersion.IsEmpty() && hotfixVersion.Length < build.HotfixVersion.Length)
@@ -59,7 +60,7 @@ public class RealmManager
 
     public void Close()
     {
-        
+
     }
 
     void UpdateRealm(Realm realm)
@@ -74,15 +75,17 @@ public class RealmManager
     public void AddRealm(uint id, string name, string externalAddress, ushort port, RealmType type, RealmFlags flags,
         byte characterCount, byte timezone, float populationLevel)
     {
-        Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
+        Dictionary<RealmId, string> existingRealms = new();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
-        var realm = new Realm();
-        realm.Name = name;
-        realm.ExternalAddress = IPAddress.Parse(externalAddress);
+        var realm = new Realm
+        {
+            Name = name,
+            ExternalAddress = IPAddress.Parse(externalAddress),
 
-        realm.Port = port;
+            Port = port
+        };
         RealmType realmType = type;
         if (realmType == RealmType.FFAPVP)
             realmType = RealmType.PVP;
@@ -169,8 +172,10 @@ public class RealmManager
     {
         foreach (string subRegion in GetSubRegions())
         {
-            var variant = new Bgs.Protocol.Variant();
-            variant.StringValue = subRegion;
+            var variant = new Bgs.Protocol.Variant
+            {
+                StringValue = subRegion
+            };
             response.AttributeValue.Add(variant);
         }
     }
@@ -182,13 +187,15 @@ public class RealmManager
         {
             if (!realm.Flags.HasAnyFlag(RealmFlags.Offline) && realm.Build == build)
             {
-                var realmEntry = new RealmEntry();
-                realmEntry.WowRealmAddress = (int)realm.Id.GetAddress();
-                realmEntry.CfgTimezonesID = 1;
-                realmEntry.PopulationState = Math.Max((int)realm.PopulationLevel, 1);
-                realmEntry.CfgCategoriesID = realm.Timezone;
+                var realmEntry = new RealmEntry
+                {
+                    WowRealmAddress = (int)realm.Id.GetAddress(),
+                    CfgTimezonesID = 1,
+                    PopulationState = Math.Max((int)realm.PopulationLevel, 1),
+                    CfgCategoriesID = realm.Timezone
+                };
 
-                ClientVersion version = new ClientVersion();
+                ClientVersion version = new();
                 RealmBuildInfo buildInfo = GetBuildInfo(realm.Build);
                 if (buildInfo != null)
                 {
@@ -231,7 +238,7 @@ public class RealmManager
             if (realm.Value.Build != build)
                 flag |= RealmFlags.VersionMismatch;
 
-            RealmListUpdate realmListUpdate = new RealmListUpdate();
+            RealmListUpdate realmListUpdate = new();
             realmListUpdate.Update.WowRealmAddress = (int)realm.Value.Id.GetAddress();
             realmListUpdate.Update.CfgTimezonesID = 1;
             realmListUpdate.Update.PopulationState = (realm.Value.Flags.HasAnyFlag(RealmFlags.Offline) ? 0 : Math.Max((int)realm.Value.PopulationLevel, 1));
@@ -276,13 +283,17 @@ public class RealmManager
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
                 return BattlenetRpcErrorCode.UserServerNotPermittedOnRealm;
 
-            RealmListServerIPAddresses serverAddresses = new RealmListServerIPAddresses();
-            AddressFamily addressFamily = new AddressFamily();
-            addressFamily.Id = 1;
+            RealmListServerIPAddresses serverAddresses = new();
+            AddressFamily addressFamily = new()
+            {
+                Id = 1
+            };
 
-            var address = new Address();
-            address.Ip = realm.GetAddressForClient(clientAddress).Address.ToString();
-            address.Port = Framework.Settings.RealmPort;
+            var address = new Address
+            {
+                Ip = realm.GetAddressForClient(clientAddress).Address.ToString(),
+                Port = Framework.Settings.RealmPort
+            };
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);
 
@@ -306,9 +317,9 @@ public class RealmManager
     public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
-    List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
-    ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
-    List<string> _subRegions = new List<string>();
+    readonly List<RealmBuildInfo> _builds = new();
+    readonly ConcurrentDictionary<RealmId, Realm> _realms = new();
+    readonly List<string> _subRegions = new();
 }
 
 public class RealmBuildInfo

@@ -1,14 +1,11 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using Framework.Networking;
 using Framework.Serialization;
 using Framework.Web;
 using System;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using HermesProxy.Auth;
 using HermesProxy.Enums;
@@ -52,7 +49,7 @@ namespace BNetServer.Networking
             string path = httpRequest.Path.Substring(BNET_SERVER_BASE_PATH.Length);
             string[] pathElements = path.Split('/');
 
-            switch (pathElements[0], httpRequest.Method) 
+            switch (pathElements[0], httpRequest.Method)
             {
                 case ("login", "GET"):
                     SendResponse(HttpCode.Ok, LoginServiceManager.Instance.GetFormInput());
@@ -72,12 +69,13 @@ namespace BNetServer.Networking
             if (loginForm == null)
                 return SendEmptyResponse(HttpCode.InternalServerError);
 
-            HermesProxy.GlobalSessionData globalSession = new();
-
-            // Format: "login/$platform/$build/$locale/"
-            globalSession.OS = pathElements[1];
-            globalSession.Build = uint.Parse(pathElements[2]);
-            globalSession.Locale = pathElements[3];
+            HermesProxy.GlobalSessionData globalSession = new()
+            {
+                // Format: "login/$platform/$build/$locale/"
+                OS = pathElements[1],
+                Build = uint.Parse(pathElements[2]),
+                Locale = pathElements[3]
+            };
 
             // Should never happen. Session.HandleLogon checks version already
             if (Framework.Settings.ClientBuild != (ClientVersionBuild) globalSession.Build)

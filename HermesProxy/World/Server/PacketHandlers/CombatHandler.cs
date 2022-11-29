@@ -1,8 +1,4 @@
-﻿using Framework.Constants;
-using HermesProxy.Enums;
-using HermesProxy.World;
-using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
+﻿using HermesProxy.World.Enums;
 using HermesProxy.World.Server.Packets;
 
 namespace HermesProxy.World.Server
@@ -13,20 +9,20 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ATTACK_SWING)]
         void HandleAttackSwing(AttackSwing attack)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_ATTACK_SWING);
+            WorldPacket packet = new(Opcode.CMSG_ATTACK_SWING);
             packet.WriteGuid(attack.Victim.To64());
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_ATTACK_STOP)]
         void HandleAttackSwing(AttackStop attack)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_ATTACK_STOP);
+            WorldPacket packet = new(Opcode.CMSG_ATTACK_STOP);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_SET_SHEATHED)]
         void HandleSetSheathed(SetSheathed sheath)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_SHEATHED);
+            WorldPacket packet = new(Opcode.CMSG_SET_SHEATHED);
             packet.WriteInt32(sheath.SheathState);
             SendPacketToServer(packet);
         }

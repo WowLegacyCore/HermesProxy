@@ -1,10 +1,7 @@
 ﻿using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
-using System;
-using System.Collections.Generic;
 using static HermesProxy.World.Server.Packets.PVPMatchStatisticsMessage;
 
 namespace HermesProxy.World.Client
@@ -15,8 +12,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BATTLEFIELD_LIST, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleBattlefieldListVanilla(WorldPacket packet)
         {
-            BattlefieldList bglist = new BattlefieldList();
-            bglist.BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState);
+            BattlefieldList bglist = new()
+            {
+                BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = GameData.GetBattlegroundIdFromMapId(packet.ReadUInt32());
             packet.ReadUInt8(); // bracket id
@@ -32,8 +31,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BATTLEFIELD_LIST, ClientVersionBuild.V2_0_1_6180, ClientVersionBuild.V3_0_2_9056)]
         void HandleBattlefieldListTBC(WorldPacket packet)
         {
-            BattlefieldList bglist = new BattlefieldList();
-            bglist.BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState);
+            BattlefieldList bglist = new()
+            {
+                BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.BattlemasterListID = packet.ReadUInt32();
             packet.ReadUInt8(); // bracket id
@@ -49,8 +50,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BATTLEFIELD_LIST, ClientVersionBuild.V3_0_2_9056)]
         void HandleBattlefieldListWotLK(WorldPacket packet)
         {
-            BattlefieldList bglist = new BattlefieldList();
-            bglist.BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState);
+            BattlefieldList bglist = new()
+            {
+                BattlemasterGuid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             GetSession().GameState.CurrentInteractedWithNPC = bglist.BattlemasterGuid;
             bglist.PvpAnywhere = packet.ReadBool(); // from UI
             bglist.BattlemasterListID = packet.ReadUInt32();
@@ -79,11 +82,11 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(bglist);
         }
-        
+
         [PacketHandler(Opcode.SMSG_BATTLEFIELD_STATUS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleBattlefieldStatusVanilla(WorldPacket packet)
         {
-            BattlefieldStatusHeader hdr = new BattlefieldStatusHeader();
+            BattlefieldStatusHeader hdr = new();
             hdr.Ticket.Id = 1 + packet.ReadUInt32(); // Queue Slot
             hdr.Ticket.RequesterGuid = GetSession().GameState.CurrentPlayerGuid;
             hdr.Ticket.Time = GetSession().GameState.GetBattleFieldQueueTime(hdr.Ticket.Id);
@@ -101,33 +104,41 @@ namespace HermesProxy.World.Client
                 {
                     case BattleGroundStatus.WaitQueue:
                     {
-                        BattlefieldStatusQueued queue = new BattlefieldStatusQueued();
-                        queue.Hdr = hdr;
-                        queue.AverageWaitTime = packet.ReadUInt32();
-                        queue.WaitTime = packet.ReadUInt32();
+                        BattlefieldStatusQueued queue = new()
+                        {
+                            Hdr = hdr,
+                            AverageWaitTime = packet.ReadUInt32(),
+                            WaitTime = packet.ReadUInt32()
+                        };
                         SendPacketToClient(queue);
                         break;
                     }
                     case BattleGroundStatus.WaitJoin:
                     {
-                        BattlefieldStatusNeedConfirmation confirm = new BattlefieldStatusNeedConfirmation();
-                        confirm.Hdr = hdr;
-                        confirm.Mapid = mapId;
-                        confirm.Timeout = packet.ReadUInt32();
+                        BattlefieldStatusNeedConfirmation confirm = new()
+                        {
+                            Hdr = hdr,
+                            Mapid = mapId,
+                            Timeout = packet.ReadUInt32()
+                        };
                         SendPacketToClient(confirm);
                         break;
                     }
                     case BattleGroundStatus.InProgress:
                     {
-                        BattlefieldStatusActive active = new BattlefieldStatusActive();
-                        active.Hdr = hdr;
-                        active.Mapid = mapId;
-                        active.ShutdownTimer = packet.ReadUInt32();
-                        active.StartTimer = packet.ReadUInt32();
+                        BattlefieldStatusActive active = new()
+                        {
+                            Hdr = hdr,
+                            Mapid = mapId,
+                            ShutdownTimer = packet.ReadUInt32(),
+                            StartTimer = packet.ReadUInt32()
+                        };
                         if (active.ShutdownTimer == 0)
                         {
-                            BattlegroundInit init = new BattlegroundInit();
-                            init.Milliseconds = 1154756799;
+                            BattlegroundInit init = new()
+                            {
+                                Milliseconds = 1154756799
+                            };
                             SendPacketToClient(init);
                         }
                         SendPacketToClient(active);
@@ -150,22 +161,26 @@ namespace HermesProxy.World.Client
                     var bgGroup = GetSession().GameState.CurrentGroups[1];
                     if (bgGroup != null)
                     {
-                        PartyUpdate party = new PartyUpdate();
-                        party.SequenceNum = GetSession().GameState.GroupUpdateCounter++;
-                        party.PartyFlags = GroupFlags.FakeRaid | GroupFlags.Destroyed;
-                        party.PartyIndex = 1;
-                        party.PartyGUID = bgGroup.PartyGUID;
-                        party.LeaderGUID = WowGuid128.Empty;
-                        party.MyIndex = -1;
+                        PartyUpdate party = new()
+                        {
+                            SequenceNum = GetSession().GameState.GroupUpdateCounter++,
+                            PartyFlags = GroupFlags.FakeRaid | GroupFlags.Destroyed,
+                            PartyIndex = 1,
+                            PartyGUID = bgGroup.PartyGUID,
+                            LeaderGUID = WowGuid128.Empty,
+                            MyIndex = -1
+                        };
                         GetSession().GameState.CurrentGroups[1] = null;
                         SendPacketToClient(party);
                     }
                 }
 
-                BattlefieldStatusFailed failed = new BattlefieldStatusFailed();
-                failed.Ticket = hdr.Ticket;
-                failed.Reason = 30;
-                failed.BattlefieldListId = GameData.GetBattlegroundIdFromMapId(queuedMapId);
+                BattlefieldStatusFailed failed = new()
+                {
+                    Ticket = hdr.Ticket,
+                    Reason = 30,
+                    BattlefieldListId = GameData.GetBattlegroundIdFromMapId(queuedMapId)
+                };
                 SendPacketToClient(failed);
                 GetSession().GameState.BattleFieldQueueTimes.Remove(hdr.Ticket.Id);
             }
@@ -175,7 +190,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BATTLEFIELD_STATUS, ClientVersionBuild.V2_0_1_6180)]
         void HandleBattlefieldStatusTBC(WorldPacket packet)
         {
-            BattlefieldStatusHeader hdr = new BattlefieldStatusHeader();
+            BattlefieldStatusHeader hdr = new();
             hdr.Ticket.Id = 1 + packet.ReadUInt32(); // Queue Slot
             hdr.Ticket.RequesterGuid = GetSession().GameState.CurrentPlayerGuid;
             hdr.Ticket.Time = GetSession().GameState.GetBattleFieldQueueTime(hdr.Ticket.Id);
@@ -203,18 +218,22 @@ namespace HermesProxy.World.Client
                 {
                     case BattleGroundStatus.WaitQueue:
                     {
-                        BattlefieldStatusQueued queue = new BattlefieldStatusQueued();
-                        queue.Hdr = hdr;
-                        queue.AverageWaitTime = packet.ReadUInt32();
-                        queue.WaitTime = packet.ReadUInt32();
+                        BattlefieldStatusQueued queue = new()
+                        {
+                            Hdr = hdr,
+                            AverageWaitTime = packet.ReadUInt32(),
+                            WaitTime = packet.ReadUInt32()
+                        };
                         SendPacketToClient(queue);
                         break;
                     }
                     case BattleGroundStatus.WaitJoin:
                     {
-                        BattlefieldStatusNeedConfirmation confirm = new BattlefieldStatusNeedConfirmation();
-                        confirm.Hdr = hdr;
-                        confirm.Mapid = packet.ReadUInt32();
+                        BattlefieldStatusNeedConfirmation confirm = new()
+                        {
+                            Hdr = hdr,
+                            Mapid = packet.ReadUInt32()
+                        };
                         if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_5_12213))
                             packet.ReadUInt64(); // unk
                         confirm.Timeout = packet.ReadUInt32();
@@ -223,9 +242,11 @@ namespace HermesProxy.World.Client
                     }
                     case BattleGroundStatus.InProgress:
                     {
-                        BattlefieldStatusActive active = new BattlefieldStatusActive();
-                        active.Hdr = hdr;
-                        active.Mapid = packet.ReadUInt32();
+                        BattlefieldStatusActive active = new()
+                        {
+                            Hdr = hdr,
+                            Mapid = packet.ReadUInt32()
+                        };
                         if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_5_12213))
                             packet.ReadUInt64(); // unk
                         active.ShutdownTimer = packet.ReadUInt32();
@@ -233,8 +254,10 @@ namespace HermesProxy.World.Client
                         active.ArenaFaction = packet.ReadUInt8();
                         if (active.ShutdownTimer == 0)
                         {
-                            BattlegroundInit init = new BattlegroundInit();
-                            init.Milliseconds = 1154756799;
+                            BattlegroundInit init = new()
+                            {
+                                Milliseconds = 1154756799
+                            };
                             SendPacketToClient(init);
                         }
                         SendPacketToClient(active);
@@ -249,10 +272,12 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                BattlefieldStatusFailed failed = new BattlefieldStatusFailed();
-                failed.Ticket = hdr.Ticket;
-                failed.Reason = 30;
-                failed.BattlefieldListId = GetSession().GameState.GetBattleFieldQueueType(hdr.Ticket.Id);
+                BattlefieldStatusFailed failed = new()
+                {
+                    Ticket = hdr.Ticket,
+                    Reason = 30,
+                    BattlefieldListId = GetSession().GameState.GetBattleFieldQueueType(hdr.Ticket.Id)
+                };
                 SendPacketToClient(failed);
                 GetSession().GameState.BattleFieldQueueTimes.Remove(hdr.Ticket.Id);
             }
@@ -262,28 +287,31 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_PVP_LOG_DATA, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandlePvPLogDataVanilla(WorldPacket packet)
         {
-            PVPMatchStatisticsMessage pvp = new PVPMatchStatisticsMessage();
+            PVPMatchStatisticsMessage pvp = new();
             if (packet.ReadBool()) // Has Winner
                 pvp.Winner = packet.ReadUInt8();
 
             int count = packet.ReadInt32();
             for (int i = 0; i < count; i++)
             {
-                PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
-                player.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
-                player.Rank = packet.ReadInt32();
-                player.Kills = packet.ReadUInt32();
-                player.Honor = new();
-                player.Honor.HonorKills = packet.ReadUInt32();
-                player.Honor.Deaths = packet.ReadUInt32();
-                player.Honor.ContributionPoints = packet.ReadUInt32();
+                PVPMatchPlayerStatistics player = new()
+                {
+                    PlayerGUID = packet.ReadGuid().To128(GetSession().GameState),
+                    Rank = packet.ReadInt32(),
+                    Kills = packet.ReadUInt32(),
+                    Honor = new()
+                    {
+                        HonorKills = packet.ReadUInt32(),
+                        Deaths = packet.ReadUInt32(),
+                        ContributionPoints = packet.ReadUInt32()
+                    }
+                };
 
                 int statsCount = packet.ReadInt32();
                 for (int j = 0; j < statsCount; j++)
                     player.Stats.Add(packet.ReadUInt32());
 
-                PlayerCache cache;
-                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out cache))
+                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out PlayerCache cache))
                 {
                     player.Sex = cache.SexId;
                     player.PlayerRace = cache.RaceId;
@@ -304,7 +332,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_PVP_LOG_DATA, ClientVersionBuild.V2_0_1_6180)]
         void HandlePvPLogDataTBC(WorldPacket packet)
         {
-            PVPMatchStatisticsMessage pvp = new PVPMatchStatisticsMessage();
+            PVPMatchStatisticsMessage pvp = new();
             if (packet.ReadBool()) // Has Arena Teams
             {
                 pvp.ArenaTeams = new ArenaTeamsInfo();
@@ -331,16 +359,20 @@ namespace HermesProxy.World.Client
             int count = packet.ReadInt32();
             for (int i = 0; i < count; i++)
             {
-                PVPMatchPlayerStatistics player = new PVPMatchPlayerStatistics();
-                player.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
-                player.Kills = packet.ReadUInt32();
+                PVPMatchPlayerStatistics player = new()
+                {
+                    PlayerGUID = packet.ReadGuid().To128(GetSession().GameState),
+                    Kills = packet.ReadUInt32()
+                };
 
                 if (pvp.ArenaTeams == null)
                 {
-                    player.Honor = new();
-                    player.Honor.HonorKills = packet.ReadUInt32();
-                    player.Honor.Deaths = packet.ReadUInt32();
-                    player.Honor.ContributionPoints = packet.ReadUInt32();
+                    player.Honor = new()
+                    {
+                        HonorKills = packet.ReadUInt32(),
+                        Deaths = packet.ReadUInt32(),
+                        ContributionPoints = packet.ReadUInt32()
+                    };
                 }
                 else
                 {
@@ -355,8 +387,7 @@ namespace HermesProxy.World.Client
                 for (int j = 0; j < statsCount; j++)
                     player.Stats.Add(packet.ReadUInt32());
 
-                PlayerCache cache;
-                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out cache))
+                if (GetSession().GameState.CachedPlayers.TryGetValue(player.PlayerGUID, out PlayerCache cache))
                 {
                     player.Sex = cache.SexId;
                     player.PlayerRace = cache.RaceId;
@@ -378,9 +409,11 @@ namespace HermesProxy.World.Client
 
         BattlegroundPlayerPosition ReadBattlegroundPlayerPosition(WorldPacket packet)
         {
-            BattlegroundPlayerPosition position = new BattlegroundPlayerPosition();
-            position.Guid = packet.ReadGuid().To128(GetSession().GameState);
-            position.Pos = packet.ReadVector2();
+            BattlegroundPlayerPosition position = new()
+            {
+                Guid = packet.ReadGuid().To128(GetSession().GameState),
+                Pos = packet.ReadVector2()
+            };
             return position;
         }
 
@@ -388,7 +421,7 @@ namespace HermesProxy.World.Client
         void HandleBattlegroundPlayerPositionsVanilla(WorldPacket packet)
         {
             GetSession().GameState.FlagCarrierGuids.Clear();
-            BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
+            BattlegroundPlayerPositions bglist = new();
             uint teamMembersCount = packet.ReadUInt32();
             for (uint i = 0; i < teamMembersCount; i++)
             {
@@ -420,7 +453,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS, ClientVersionBuild.V2_0_1_6180)]
         void HandleBattlegroundPlayerPositionsTBC(WorldPacket packet)
         {
-            BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
+            BattlegroundPlayerPositions bglist = new();
             uint teamMembersCount = packet.ReadUInt32();
             uint flagCarriersCount = packet.ReadUInt32();
             for (uint i = 0; i < teamMembersCount; i++)
@@ -453,34 +486,40 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BATTLEGROUND_PLAYER_LEFT)]
         void HandleBattlegroundPlayerLeftOrJoined(WorldPacket packet)
         {
-            BattlegroundPlayerLeftOrJoined player = new BattlegroundPlayerLeftOrJoined(packet.GetUniversalOpcode(false));
-            player.Guid = packet.ReadGuid().To128(GetSession().GameState);
+            BattlegroundPlayerLeftOrJoined player = new(packet.GetUniversalOpcode(false))
+            {
+                Guid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             SendPacketToClient(player);
         }
 
         [PacketHandler(Opcode.SMSG_AREA_SPIRIT_HEALER_TIME)]
         void HandleAreaSpiritHealerTime(WorldPacket packet)
         {
-            AreaSpiritHealerTime healer = new AreaSpiritHealerTime();
-            healer.HealerGuid = packet.ReadGuid().To128(GetSession().GameState);
-            healer.TimeLeft = packet.ReadUInt32();
+            AreaSpiritHealerTime healer = new()
+            {
+                HealerGuid = packet.ReadGuid().To128(GetSession().GameState),
+                TimeLeft = packet.ReadUInt32()
+            };
             SendPacketToClient(healer);
         }
 
         [PacketHandler(Opcode.SMSG_PVP_CREDIT)]
         void HandlePvPCredit(WorldPacket packet)
         {
-            PvPCredit credit = new PvPCredit();
-            credit.OriginalHonor = packet.ReadInt32();
-            credit.Target = packet.ReadGuid().To128(GetSession().GameState);
-            credit.Rank = packet.ReadUInt32();
+            PvPCredit credit = new()
+            {
+                OriginalHonor = packet.ReadInt32(),
+                Target = packet.ReadGuid().To128(GetSession().GameState),
+                Rank = packet.ReadUInt32()
+            };
             SendPacketToClient(credit);
         }
 
         [PacketHandler(Opcode.SMSG_PLAYER_SKINNED)]
         void HandlePlayerSkinned(WorldPacket packet)
         {
-            PlayerSkinned skinned = new PlayerSkinned();
+            PlayerSkinned skinned = new();
             if (packet.CanRead())
                 skinned.FreeRepop = packet.ReadBool();
             SendPacketToClient(skinned);

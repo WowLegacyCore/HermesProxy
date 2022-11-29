@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,10 +16,7 @@
  */
 
 
-using Framework.Constants;
-using Framework.GameMath;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using System;
 using System.Collections.Generic;
 
@@ -76,7 +73,7 @@ namespace HermesProxy.World.Server.Packets
         public uint SeasonWins;
         public uint TeamRating;
         public uint PlayerRating;
-        public List<ArenaTeamMember> Members = new List<ArenaTeamMember>();
+        public List<ArenaTeamMember> Members = new();
     }
 
     struct ArenaTeamMember

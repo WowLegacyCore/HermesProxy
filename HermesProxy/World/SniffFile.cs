@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World
 {
@@ -21,16 +17,17 @@ namespace HermesProxy.World
             _fileWriter = new BinaryWriter(File.Open(path, FileMode.Create));
             _gameVersion = build;
         }
-        BinaryWriter _fileWriter;
-        ushort _gameVersion;
-        System.Threading.Mutex _mutex = new System.Threading.Mutex();
+
+        readonly BinaryWriter _fileWriter;
+        readonly ushort _gameVersion;
+        readonly System.Threading.Mutex _mutex = new();
 
         public void WriteHeader()
         {
             _fileWriter.Write('P');
             _fileWriter.Write('K');
             _fileWriter.Write('T');
-            UInt16 sniffVersion = 0x201;
+            ushort sniffVersion = 0x201;
             _fileWriter.Write(sniffVersion);
             _fileWriter.Write(_gameVersion);
 

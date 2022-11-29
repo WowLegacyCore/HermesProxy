@@ -1,8 +1,6 @@
 ﻿using HermesProxy.Enums;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Net;
 using Framework.Logging;
 
@@ -31,13 +29,13 @@ namespace Framework
 
         public static bool VerifyConfig()
         {
-            
+
             if (ClientSeed.Length != 16)
             {
                 Log.Print(LogType.Server, "ClientSeed must have byte length of 16 (32 characters)");
                 return false;
             }
-            
+
             if (!IsValidPortNumber(RestPort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({RestPort}) out of allowed range (1-65535)");

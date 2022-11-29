@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Framework.Util;
-using HermesProxy.Auth;
 
 namespace BNetServer.Services
 {
@@ -167,9 +166,11 @@ namespace BNetServer.Services
             var realmCharacterCounts = new RealmCharacterCountList();
             foreach (var realm in GetSession().RealmManager.GetRealms())
             {
-                var countEntry = new RealmCharacterCountEntry();
-                countEntry.WowRealmAddress = (int) realm.Id.GetAddress();
-                countEntry.Count = realm.CharacterCount;
+                var countEntry = new RealmCharacterCountEntry
+                {
+                    WowRealmAddress = (int)realm.Id.GetAddress(),
+                    Count = realm.CharacterCount
+                };
                 realmCharacterCounts.Counts.Add(countEntry);
             }
 

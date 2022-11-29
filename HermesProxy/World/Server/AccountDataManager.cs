@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Framework;
 using Framework.Logging;
 
@@ -38,7 +37,7 @@ namespace HermesProxy.World.Server
 
             return path;
         }
-        
+
         public AccountMetaDataManager(string accountName)
         {
             _accountName = accountName;
@@ -60,7 +59,7 @@ namespace HermesProxy.World.Server
                 Log.Print(LogType.Error, $"Invalid split size in 'GetLastSelectedCharacter' for account '{_accountName}'");
                 return null;
             }
-            
+
             return (content[0], content[1], ulong.Parse(content[3]), long.Parse(content[2]));
         }
 
@@ -138,7 +137,7 @@ namespace HermesProxy.World.Server
             return loadedJson;
         }
     }
-    
+
     public class AccountData
     {
         public WowGuid128 Guid;
@@ -150,9 +149,9 @@ namespace HermesProxy.World.Server
     public class AccountDataManager
     {
         public AccountData[] Data;
-        string _accountName;
-        string _realmName;
-        
+        readonly string _accountName;
+        readonly string _realmName;
+
         public AccountDataManager(string accountName, string realmName)
         {
             _accountName = accountName;
@@ -215,7 +214,7 @@ namespace HermesProxy.World.Server
             {
                 using (FileStream file = File.OpenRead(GetFullFileName(guid, type)))
                 {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(GetFullFileName(guid, type))))
+                    using (BinaryReader reader = new(File.OpenRead(GetFullFileName(guid, type))))
                     {
                         data = new();
                         ulong guidLow = reader.ReadUInt64();
@@ -235,7 +234,7 @@ namespace HermesProxy.World.Server
                     }
                 }
             }
-            
+
             return data;
         }
 
@@ -252,7 +251,7 @@ namespace HermesProxy.World.Server
             Data[type].UncompressedSize = uncompressedSize;
             Data[type].CompressedData = compressedData;
 
-            using (BinaryWriter writer = new BinaryWriter(File.Open(GetFullFileName(guid, type), FileMode.Create)))
+            using (BinaryWriter writer = new(File.Open(GetFullFileName(guid, type), FileMode.Create)))
             {
                 writer.Write(guid.GetLowValue());
                 writer.Write(guid.GetHighValue());
@@ -272,7 +271,7 @@ namespace HermesProxy.World.Server
             {
                 using (FileStream file = File.OpenRead(fileName))
                 {
-                    using (BinaryReader reader = new BinaryReader(file))
+                    using (BinaryReader reader = new(file))
                     {
                         return File.ReadAllBytes(fileName);
                     }
@@ -286,7 +285,7 @@ namespace HermesProxy.World.Server
         {
             string fileName = Path.Combine(GetAccountDataDirectory(), "cuf.bin");
 
-            using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
+            using (BinaryWriter writer = new(File.Open(fileName, FileMode.Create)))
             {
                 writer.Write(data);
             }

@@ -1,9 +1,7 @@
 ﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
-using System.Collections.Generic;
 
 namespace HermesProxy.World.Client
 {
@@ -13,8 +11,10 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_AUCTION_HELLO)]
         void HandleAuctionHello(WorldPacket packet)
         {
-            AuctionHelloResponse auction = new AuctionHelloResponse();
-            auction.Guid = packet.ReadGuid().To128(GetSession().GameState);
+            AuctionHelloResponse auction = new()
+            {
+                Guid = packet.ReadGuid().To128(GetSession().GameState)
+            };
             GetSession().GameState.CurrentInteractedWithNPC = auction.Guid;
             auction.AuctionHouseID = packet.ReadUInt32();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_3_0_10958))
@@ -22,7 +22,7 @@ namespace HermesProxy.World.Client
             SendPacketToClient(auction);
 
             // Have to send this again here, or server does not reply for some reason.
-            WorldPacket packet2 = new WorldPacket(Opcode.CMSG_AUCTION_LIST_OWNED_ITEMS);
+            WorldPacket packet2 = new(Opcode.CMSG_AUCTION_LIST_OWNED_ITEMS);
             packet2.WriteGuid(auction.Guid.To64());
             packet2.WriteUInt32(0);
             SendPacketToServer(packet2);
@@ -30,10 +30,14 @@ namespace HermesProxy.World.Client
 
         AuctionItem ReadAuctionItem(WorldPacket packet)
         {
-            AuctionItem item = new AuctionItem();
-            item.AuctionID = packet.ReadUInt32();
-            item.Item = new();
-            item.Item.ItemID = packet.ReadUInt32();
+            AuctionItem item = new()
+            {
+                AuctionID = packet.ReadUInt32(),
+                Item = new()
+                {
+                    ItemID = packet.ReadUInt32()
+                }
+            };
 
             byte enchantmentCount;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -45,9 +49,11 @@ namespace HermesProxy.World.Client
 
             for (byte j = 0; j < enchantmentCount; ++j)
             {
-                ItemEnchantData enchant = new ItemEnchantData();
-                enchant.Slot = j;
-                enchant.ID = packet.ReadUInt32();
+                ItemEnchantData enchant = new()
+                {
+                    Slot = j,
+                    ID = packet.ReadUInt32()
+                };
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 {
                     enchant.Expiration = packet.ReadUInt32();
@@ -84,7 +90,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_AUCTION_LIST_OWNED_ITEMS_RESULT)]
         void HandleAuctionListMyItemsResult(WorldPacket packet)
         {
-            AuctionListMyItemsResult auction = new AuctionListMyItemsResult(packet.GetUniversalOpcode(false));
+            AuctionListMyItemsResult auction = new(packet.GetUniversalOpcode(false));
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i++)
             {
@@ -100,7 +106,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_AUCTION_LIST_ITEMS_RESULT)]
         void HandleAuctionListItemsResult(WorldPacket packet)
         {
-            AuctionListItemsResult auction = new AuctionListItemsResult();
+            AuctionListItemsResult auction = new();
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i++)
             {
@@ -117,10 +123,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_AUCTION_COMMAND_RESULT)]
         void HandleAuctionCommandResult(WorldPacket packet)
         {
-            AuctionCommandResult auction = new AuctionCommandResult();
-            auction.AuctionID = packet.ReadUInt32();
-            auction.Command = (AuctionHouseAction)packet.ReadUInt32();
-            auction.ErrorCode = (AuctionHouseError)packet.ReadUInt32();
+            AuctionCommandResult auction = new()
+            {
+                AuctionID = packet.ReadUInt32(),
+                Command = (AuctionHouseAction)packet.ReadUInt32(),
+                ErrorCode = (AuctionHouseError)packet.ReadUInt32()
+            };
             switch (auction.ErrorCode)
             {
                 case AuctionHouseError.Ok:
@@ -153,9 +161,9 @@ namespace HermesProxy.World.Client
                 packet.ReadFloat(); // Time Left
 
             string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
-                WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
+                WorldPacket query = new(Opcode.CMSG_ITEM_NAME_QUERY);
                 query.WriteUInt32(itemId);
                 query.WriteGuid(WowGuid64.Empty);
                 SendPacket(query);
@@ -170,7 +178,7 @@ namespace HermesProxy.World.Client
                 else
                     message = $"Your auction of {name} sold.";
 
-                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
+                ChatPkt chat = new(GetSession(), ChatMessageTypeModern.System, message);
                 SendPacketToClient(chat);
             }
         }
@@ -187,9 +195,9 @@ namespace HermesProxy.World.Client
             uint randomPropertyId = packet.ReadUInt32();
 
             string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
-                WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
+                WorldPacket query = new(Opcode.CMSG_ITEM_NAME_QUERY);
                 query.WriteUInt32(itemId);
                 query.WriteGuid(WowGuid64.Empty);
                 SendPacket(query);
@@ -202,7 +210,7 @@ namespace HermesProxy.World.Client
             else
                 message = $"You have been outbid on {name}.";
 
-            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
+            ChatPkt chat = new(GetSession(), ChatMessageTypeModern.System, message);
             SendPacketToClient(chat);
         }
     }

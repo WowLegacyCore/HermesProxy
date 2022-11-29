@@ -1,9 +1,5 @@
 ﻿using HermesProxy.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Enums
 {
@@ -87,8 +83,7 @@ namespace HermesProxy.World.Enums
 
         public static uint GetOpcodeValueForVersion(string opcodeName, ClientVersionBuild version)
         {
-            object opcode;
-            if (Enum.TryParse(GetOpcodesEnumForVersion(version), opcodeName, out opcode))
+            if (Enum.TryParse(GetOpcodesEnumForVersion(version), opcodeName, out object opcode))
                 return (uint)opcode;
 
             return 0;
@@ -108,8 +103,7 @@ namespace HermesProxy.World.Enums
 
         public static Opcode GetUniversalOpcode(string name)
         {
-            object opcode;
-            if (Enum.TryParse(typeof(Opcode), name, out opcode))
+            if (Enum.TryParse(typeof(Opcode), name, out object opcode))
                 return (Opcode)opcode;
 
             return Opcode.MSG_NULL_ACTION;
