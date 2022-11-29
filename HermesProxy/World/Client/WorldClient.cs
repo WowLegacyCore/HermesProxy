@@ -256,6 +256,7 @@ namespace HermesProxy.World.Client
 
         private void SendPacketToClientDirect(ServerPacket packet)
         {
+            var pendingPackets = GetSession().GameState.PendingUninstancedPackets;
             if (packet.GetConnection() == ConnectionType.Realm)
             {
                 GetSession().RealmSocket.SendPacket(packet);
@@ -265,8 +266,16 @@ namespace HermesProxy.World.Client
                 if (GetSession().InstanceSocket == null &&
                    !GetSession().GameState.IsConnectedToInstance)
                 {
-                    Log.PrintNet(LogType.Error, LogNetDir.P2C, $"Can't send opcode {packet.GetUniversalOpcode()} ({packet.GetOpcode()}) before entering world!");
-                    return;
+                    lock (pendingPackets)
+                    {
+                        if (GetSession().InstanceSocket == null &&
+                            !GetSession().GameState.IsConnectedToInstance)
+                        {
+                            pendingPackets.Enqueue(packet);
+                            Log.PrintNet(LogType.Warn, LogNetDir.P2C, $"Can't send opcode {packet.GetUniversalOpcode()} ({packet.GetOpcode()}) before entering world! Queue");
+                            return;
+                        }
+                    }
                 }
 
                 // block these packets until connected to instance
@@ -274,8 +283,21 @@ namespace HermesProxy.World.Client
                 {
                     Log.PrintNet(LogType.Network, LogNetDir.P2C, $"Waiting to send {packet.GetUniversalOpcode()} ({packet.GetOpcode()}).");
                     System.Threading.Thread.Sleep(200);
-                };
-                GetSession().InstanceSocket.SendPacket(packet);
+                }
+
+                var socket = GetSession().InstanceSocket;
+                if (pendingPackets.Count > 0)
+                {
+                    lock (pendingPackets)
+                    {
+                        while (pendingPackets.TryDequeue(out var oldPacket))
+                        {
+                            socket.SendPacket(oldPacket);
+                        }
+                    }
+                }
+
+                socket.SendPacket(packet);
             }
         }
 
