@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.Auth
+﻿namespace HermesProxy.Auth
 {
     // ReSharper disable InconsistentNaming
     public enum AuthCommand : byte

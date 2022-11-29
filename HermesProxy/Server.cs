@@ -5,7 +5,6 @@ using HermesProxy.World;
 using HermesProxy.World.Server;
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using BNetServer;

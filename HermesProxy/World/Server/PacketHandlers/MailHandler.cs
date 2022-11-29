@@ -1,8 +1,5 @@
-﻿using Framework.Constants;
-using HermesProxy.Enums;
-using HermesProxy.World;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System.Collections.Generic;
 using static HermesProxy.World.Server.Packets.SendMail;

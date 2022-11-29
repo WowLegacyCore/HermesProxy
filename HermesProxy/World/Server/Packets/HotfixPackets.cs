@@ -16,8 +16,6 @@
  */
 
 
-using Framework.Constants;
-using Framework.GameMath;
 using Framework.IO;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;

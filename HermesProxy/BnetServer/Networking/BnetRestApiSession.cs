@@ -1,14 +1,11 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Constants;
 using Framework.Networking;
 using Framework.Serialization;
 using Framework.Web;
 using System;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using HermesProxy.Auth;
 using HermesProxy.Enums;

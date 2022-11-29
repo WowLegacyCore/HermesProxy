@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.World.Objects.Version.V2_5_2_39570
+﻿namespace HermesProxy.World.Objects.Version.V2_5_2_39570
 {
     public struct CreateObjectBits
     {

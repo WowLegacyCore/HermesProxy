@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Framework.Constants;
 using Framework.Logging;
-using HermesProxy.Auth;
 using HermesProxy.Enums;
-using HermesProxy.World;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;

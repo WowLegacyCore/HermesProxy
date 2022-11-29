@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HermesProxy.World.Enums.V3_3_5_12340
+﻿namespace HermesProxy.World.Enums.V3_3_5_12340
 {
     public enum Opcode : uint
     {

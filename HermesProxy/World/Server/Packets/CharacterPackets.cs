@@ -19,7 +19,6 @@ using HermesProxy.World.Enums;
 using System;
 using System.Collections.Generic;
 using Framework.GameMath;
-using HermesProxy.World.Objects;
 using Framework.Constants;
 
 namespace HermesProxy.World.Server.Packets

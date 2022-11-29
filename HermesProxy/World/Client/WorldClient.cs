@@ -13,7 +13,6 @@ using Framework.Logging;
 using HermesProxy.World.Enums;
 using System.Reflection;
 using System.Threading.Tasks;
-using HermesProxy.World.Server;
 
 namespace HermesProxy.World.Client
 {

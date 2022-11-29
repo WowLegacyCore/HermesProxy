@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 
 namespace HermesProxy.World.Server.Packets

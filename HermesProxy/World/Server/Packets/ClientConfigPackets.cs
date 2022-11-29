@@ -16,9 +16,7 @@
  */
 
 using Framework.Constants;
-using Framework.IO;
 using HermesProxy.World.Enums;
-using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {

@@ -1,9 +1,6 @@
-﻿using Framework;
-using HermesProxy.Enums;
+﻿using HermesProxy.Enums;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
-using System;
 using static HermesProxy.World.Server.Packets.TradeUpdated;
 
 namespace HermesProxy.World.Client

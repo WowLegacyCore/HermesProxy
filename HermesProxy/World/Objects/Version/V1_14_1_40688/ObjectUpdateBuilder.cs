@@ -1,12 +1,7 @@
 ﻿using Framework.GameMath;
-using Framework.IO;
 using HermesProxy.World.Enums.V1_14_1_40688;
 using HermesProxy.World.Server.Packets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HermesProxy.World.Objects.Version.V1_14_1_40688
 {

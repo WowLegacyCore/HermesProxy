@@ -6,7 +6,6 @@ using Bgs.Protocol.Authentication.V1;
 using Bgs.Protocol.Challenge.V1;
 using Framework.Constants;
 using Framework.Logging;
-using Framework.Realm;
 using Google.Protobuf;
 using System;
 using BNetServer.Networking;

@@ -2,7 +2,6 @@
 
 using Framework.GameMath;
 using Framework.Logging;
-using Framework.Util;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;

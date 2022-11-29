@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Framework.Util;
-using HermesProxy.Auth;
 
 namespace BNetServer.Services
 {
