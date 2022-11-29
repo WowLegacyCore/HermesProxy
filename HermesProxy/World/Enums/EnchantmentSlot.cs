@@ -79,7 +79,7 @@
             public static int Max = 13;
         }
     }
-    
+
 
     public enum EnchantmentOffset
     {

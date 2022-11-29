@@ -23,6 +23,6 @@ namespace BNetServer
                 byte[] bytes = ms.ToArray();
                 Certificate = new X509Certificate2(bytes);
             }
-        }   
+        }
     }
 }

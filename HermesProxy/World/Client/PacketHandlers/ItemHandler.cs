@@ -34,7 +34,7 @@ namespace HermesProxy.World.Client
             bool fromNPC = packet.ReadUInt32() == 1;
             item.Created = packet.ReadUInt32() == 1;
             bool showInChat = packet.ReadUInt32() == 1;
-            
+
             if (fromNPC && !item.Created)
             {
                 item.DisplayText = ItemPushResult.DisplayType.Received;
@@ -84,7 +84,7 @@ namespace HermesProxy.World.Client
                 item.ItemGUID = GetSession().GameState.GetInventorySlotItem(item.SlotInBag).To128(GetSession().GameState);
             else
                 item.ItemGUID = WowGuid128.Empty;
-            
+
             SendPacketToClient(item);
         }
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_OK)]

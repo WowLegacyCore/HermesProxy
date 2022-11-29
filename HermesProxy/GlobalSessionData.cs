@@ -105,7 +105,7 @@ namespace HermesProxy
 
         private GameSessionData()
         {
-            
+
         }
 
         public static GameSessionData CreateNewGameSessionData(GlobalSessionData globalSession)
@@ -114,7 +114,7 @@ namespace HermesProxy
             self.CurrentPlayerStorage = new CurrentPlayerStorage(globalSession);
             return self;
         }
-        
+
         public uint GetCurrentGroupSize()
         {
             var group = GetCurrentGroup();
@@ -486,7 +486,7 @@ namespace HermesProxy
                 {
                     ObjectCacheMutex.ReleaseMutex();
                     return itr.Key;
-                }  
+                }
             }
             ObjectCacheMutex.ReleaseMutex();
             return null;
@@ -722,7 +722,7 @@ namespace HermesProxy
         public string OS;
         public uint Build;
         public GameSessionData GameState;
-        
+
         public RealmId RealmId;
         public RealmManager RealmManager = new();
         public Realm? Realm => RealmManager.GetRealm(RealmId);
@@ -743,7 +743,7 @@ namespace HermesProxy
         {
             GameState = GameSessionData.CreateNewGameSessionData(this);
         }
-        
+
         public void StoreGuildRankNames(uint guildId, List<string> ranks)
         {
             if (GuildRanks.ContainsKey(guildId))

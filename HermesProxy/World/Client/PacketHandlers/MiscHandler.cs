@@ -139,7 +139,7 @@ namespace HermesProxy.World.Client
         void HandleCorpseQuery(WorldPacket packet)
         {
             CorpseLocation corpse = new();
-            
+
             corpse.Valid = packet.ReadBool();
             if (!corpse.Valid)
             {

@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -615,7 +615,7 @@ namespace HermesProxy.World.Server
         {
             IPAddress externalIp = IPAddress.Parse(Framework.Settings.ExternalAddress);
             IPEndPoint instanceAddress = new IPEndPoint(externalIp, Framework.Settings.InstancePort);
-            
+
             _instanceConnectKey.AccountId = GetSession().AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
@@ -1084,10 +1084,10 @@ namespace HermesProxy.World.Server
 
             static Action<WorldSocket, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket
             {
-                // create first delegate. It is not fine because its 
+                // create first delegate. It is not fine because its
                 // signature contains unknown types T and P1
                 Action<WorldSocket, P1> d = (Action<WorldSocket, P1>)method.CreateDelegate(typeof(Action<WorldSocket, P1>));
-                // create another delegate having necessary signature. 
+                // create another delegate having necessary signature.
                 // It encapsulates first delegate with a closure
                 return delegate (WorldSocket target, ClientPacket p) { d(target, (P1)p); };
             }

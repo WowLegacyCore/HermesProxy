@@ -62,7 +62,7 @@ namespace HermesProxy.World.Server
                 GetSession().GameState.ObjectCacheMutex.WaitOne();
                 foreach (var obj in GetSession().GameState.ObjectCacheModern)
                 {
-                    if (obj.Key.GetObjectType() == ObjectType.Unit && 
+                    if (obj.Key.GetObjectType() == ObjectType.Unit &&
                         obj.Value.GetUpdateField<uint>(UNIT_NPC_FLAGS).HasAnyFlag(NPCFlags.QuestGiver))
                         npcGuids.Add(obj.Key);
                 }
@@ -121,7 +121,7 @@ namespace HermesProxy.World.Server
                     }
                 }
             }
-            
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_QUEST_GIVER_CHOOSE_REWARD);
             packet.WriteGuid(quest.QuestGiverGUID.To64());
             packet.WriteUInt32(quest.QuestID);

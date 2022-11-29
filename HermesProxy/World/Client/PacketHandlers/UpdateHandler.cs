@@ -140,7 +140,7 @@ namespace HermesProxy.World.Client
                         }
                         else
                             Log.Print(LogType.Error, $"Broken create1 without position for {guid}");
-                        
+
                         break;
                     }
                     case UpdateTypeLegacy.CreateObject2:
@@ -743,7 +743,7 @@ namespace HermesProxy.World.Client
                         else
                             dict[start + k] = fieldData[k];
                     }
-                }  
+                }
             }
 
             return dict;
@@ -885,7 +885,7 @@ namespace HermesProxy.World.Client
                     monsterMove.SplineTime = packet.ReadUInt32();
                     monsterMove.SplineTimeFull = packet.ReadUInt32();
                     monsterMove.SplineId = packet.ReadUInt32();
-                    
+
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                     {
                         packet.ReadFloat(); // Spline Duration Multiplier
@@ -1439,7 +1439,7 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_FIELD_POWER1 + i])
                         {
-                            if (powerUpdate != null && 
+                            if (powerUpdate != null &&
                                (guid == GetSession().GameState.CurrentPlayerGuid || guid == GetSession().GameState.CurrentPetGuid))
                                 powerUpdate.Powers.Add(new PowerUpdatePower(updates[UNIT_FIELD_POWER1 + i].Int32Value, (byte)i));
 
@@ -1455,7 +1455,7 @@ namespace HermesProxy.World.Client
                                     classId = GetSession().GameState.GetUnitClass(guid.To128(GetSession().GameState));
                                 powerSlot = ClassPowerTypes.GetPowerSlotForClass(classId, (PowerType)i);
                             }
-                                
+
                             if (powerSlot >= 0)
                                 updateData.UnitData.Power[powerSlot] = updates[UNIT_FIELD_POWER1 + i].Int32Value;
                         }
@@ -2047,7 +2047,7 @@ namespace HermesProxy.World.Client
                 int PLAYER_FIELD_BANK_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BANK_SLOT_1);
                 if (PLAYER_FIELD_BANK_SLOT_1 >= 0)
                 {
-                    int bankSlots = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 28 : 24; // 2.0.0.5965 Alpha 
+                    int bankSlots = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 28 : 24; // 2.0.0.5965 Alpha
                     for (int i = 0; i < bankSlots; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_BANK_SLOT_1 + i * 2])
@@ -2057,7 +2057,7 @@ namespace HermesProxy.World.Client
                 int PLAYER_FIELD_BANKBAG_SLOT_1 = LegacyVersion.GetUpdateField(PlayerField.PLAYER_FIELD_BANKBAG_SLOT_1);
                 if (PLAYER_FIELD_BANKBAG_SLOT_1 >= 0)
                 {
-                    int bankBagSlots = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 7 : 6; // 2.0.0.5965 Alpha 
+                    int bankBagSlots = LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180) ? 7 : 6; // 2.0.0.5965 Alpha
                     for (int i = 0; i < bankBagSlots; i++)
                     {
                         if (updateMaskArray[PLAYER_FIELD_BANKBAG_SLOT_1 + i * 2])
@@ -2133,7 +2133,7 @@ namespace HermesProxy.World.Client
                             sexId = cache.SexId;
                         }
                     }
-                    
+
                     if (raceId != Race.None && sexId != Gender.None)
                     {
                         var customizations = CharacterCustomizations.ConvertLegacyCustomizationsToModern(raceId, sexId, (byte)skin, (byte)face, (byte)hairStyle, (byte)hairColor, (byte)facialHair);
@@ -2432,7 +2432,7 @@ namespace HermesProxy.World.Client
                     }
                     else
                         updateData.ActivePlayerData.GrantableLevels = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 8) & 0xFF);
-                    
+
                     updateData.ActivePlayerData.MultiActionBars = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 16) & 0xFF);
                     updateData.ActivePlayerData.LifetimeMaxRank = (byte)((updates[PLAYER_FIELD_BYTES].UInt32Value >> 24) & 0xFF);
                 }
@@ -2572,7 +2572,7 @@ namespace HermesProxy.World.Client
                     for (int i = 0; i < 3; i++)
                     {
                         int startOffset = PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + i * sizePerEntry;
-                        
+
                         if (updateMaskArray[startOffset + teamIdOffset] &&
                             guid == GetSession().GameState.CurrentPlayerGuid)
                         {
@@ -2595,7 +2595,7 @@ namespace HermesProxy.World.Client
                                 SendPacketToClient(response);
                             }
                         }
-                        
+
                         /*
                         if (updateMaskArray[startOffset + teamMemberOffset])
                         {

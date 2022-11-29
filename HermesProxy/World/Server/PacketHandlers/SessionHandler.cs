@@ -15,7 +15,7 @@ namespace HermesProxy.World.Server
         {
             ChangeRealmTicketResponse response = new();
             response.Token = request.Token;
-            
+
             if (GetSession().AuthClient.Reconnect() != AuthResult.SUCCESS)
             {
                 response.Allow = false;

@@ -98,7 +98,7 @@ namespace HermesProxy.World.Server
                 failed.Reason = (uint)SpellCastResultClassic.SpellInProgress;
                 failed.CastID = castRequest.ServerGUID;
                 SendPacket(failed);
-            }    
+            }
         }
         [PacketHandler(Opcode.CMSG_CAST_SPELL)]
         void HandleCastSpell(CastSpell cast)
@@ -116,7 +116,7 @@ namespace HermesProxy.World.Server
                 castRequest.SpellId = cast.Cast.SpellID;
                 castRequest.SpellXSpellVisualId = cast.Cast.SpellXSpellVisualID;
                 castRequest.ClientGUID = cast.Cast.CastID;
-                
+
                 if (GetSession().GameState.CurrentClientSpecialCast != null)
                 {
                     castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, 10000 + cast.Cast.CastID.GetCounter());
@@ -133,7 +133,7 @@ namespace HermesProxy.World.Server
                     SendPacket(prepare);
 
                     GetSession().GameState.CurrentClientSpecialCast = castRequest;
-                } 
+                }
             }
             else
             {

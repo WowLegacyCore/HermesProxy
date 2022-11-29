@@ -917,7 +917,7 @@ namespace HermesProxy.World.Enums
             public const byte DefaultSize = 16;
         }
     }
-    
+
 
     public struct EquipmentSlot
     {

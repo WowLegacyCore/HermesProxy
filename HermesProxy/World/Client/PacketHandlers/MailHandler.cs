@@ -115,7 +115,7 @@ namespace HermesProxy.World.Client
                     {
                         mailItem.AttachID = 1;
                         mail.Attachments.Add(mailItem);
-                    }   
+                    }
                 }
 
                 mail.SentMoney = packet.ReadUInt32();

@@ -9,7 +9,7 @@ using Framework.Logging;
 namespace Framework
 {
     public class Configuration
-    { 
+    {
         private const string DEFAULT_CONFIG_FILE = "HermesProxy.config";
         private readonly KeyValueConfigurationCollection _settingsCollection;
 

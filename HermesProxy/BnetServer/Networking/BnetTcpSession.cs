@@ -44,12 +44,12 @@ namespace BNetServer.Networking
         }
 
         private List<byte> _currentBuffer = new List<byte>();
-        
+
         public override async Task ReadHandler(byte[] data, int receivedLength)
         {
             if (!IsOpen())
                 return;
-            
+
             _currentBuffer.AddRange(data.Take(receivedLength));
 
             await ProcessCurrentBuffer();
@@ -125,7 +125,7 @@ namespace BNetServer.Networking
     }
 
     public class AccountInfo
-    {   
+    {
         public uint Id;
         public WowGuid128 BnetAccountGuid => WowGuid128.Create(HighGuidType703.BNetAccount, Id);
         public string Login;

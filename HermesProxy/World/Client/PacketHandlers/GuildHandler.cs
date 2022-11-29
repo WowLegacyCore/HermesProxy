@@ -298,7 +298,7 @@ namespace HermesProxy.World.Client
                 }
                 SendPacketToClient(ranks);
             }
-            
+
 
             for (var i = 0; i < membersCount; i++)
             {
@@ -428,7 +428,7 @@ namespace HermesProxy.World.Client
                                 itemInfo.SocketEnchant.Add(gem);
                             }
                         }
-                    } 
+                    }
                 }
                 result.ItemInfo.Add(itemInfo);
             }
@@ -460,7 +460,7 @@ namespace HermesProxy.World.Client
                 GuildBankLogEntry logEntry = new GuildBankLogEntry();
                 logEntry.EntryType = packet.ReadInt8();
                 logEntry.PlayerGUID = packet.ReadGuid().To128(GetSession().GameState);
-                
+
                 if (result.Tab != maxTabs)
                 {
                     logEntry.ItemID = packet.ReadInt32();

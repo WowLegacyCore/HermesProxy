@@ -59,7 +59,7 @@ namespace BNetServer.Services
             StringBuilder prefix = new StringBuilder();
             prefix.Append($"[{_connectionPath}]");
             prefix.Append($"[{GetRemoteIpEndPoint()}");
-            
+
             if (GetSession() != null)
             {
                 if (GetSession().AccountInfo != null && !GetSession().AccountInfo.Login.IsEmpty())
@@ -68,7 +68,7 @@ namespace BNetServer.Services
                 if (GetSession().GameAccountInfo != null)
                     prefix.Append(", Game account: " + GetSession().GameAccountInfo.Name);
             }
-            
+
             prefix.Append(']');
 
             Log.Print(type, $"{prefix} {message}");

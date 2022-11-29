@@ -344,7 +344,7 @@ namespace HermesProxy.World.Client
                     update.ChangedBy = packet.ReadGuid().To128(GetSession().GameState);
                 else
                     update.ChangedBy = GetSession().GameState.CurrentPlayerGuid;
-                
+
                 update.Symbol = packet.ReadInt8();
                 update.Target = packet.ReadGuid().To128(GetSession().GameState);
                 SendPacketToClient(update);
@@ -469,7 +469,7 @@ namespace HermesProxy.World.Client
                     state.Pet = new PartyMemberPetStats();
                 state.Pet.NewPetGuid = packet.ReadGuid().To128(GetSession().GameState);
             }
-                
+
 
             if (updateFlags.HasFlag(GroupUpdateFlagVanilla.PetName))
             {
@@ -737,7 +737,7 @@ namespace HermesProxy.World.Client
                 state.PartyType[0] = 1;
                 state.PartyType[1] = 0;
             }
-            
+
             state.MemberGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
             var updateFlags = (GroupUpdateFlagVanilla)packet.ReadUInt32();
 

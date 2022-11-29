@@ -44,7 +44,7 @@ namespace HermesProxy.World.Server
                 packet.WriteUInt16(0);
                 packet.WriteUInt8(0);
             }
-            
+
             packet.WriteUInt32(petition.Index);
             packet.WriteUInt32(0);
             SendPacketToServer(packet);

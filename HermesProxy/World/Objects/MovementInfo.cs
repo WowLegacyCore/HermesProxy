@@ -178,7 +178,7 @@ namespace HermesProxy.World.Objects
                 else
                     flags |= (uint)MovementFlagVanilla.OnTransport;
             }
-            
+
             data.WriteUInt32(flags);
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -385,7 +385,7 @@ namespace HermesProxy.World.Objects
                 data.WriteBits(moveInfo.Flags, 30);
                 data.WriteBits(moveInfo.FlagsExtra, 18);
             }
-                
+
             data.WriteBit(moveInfo.TransportGuid != null);                 // HasTransport
             data.WriteBit(hasFall);                                        // HasFall
             data.WriteBit(HasSplineData);                                  // HasSpline - marks that the unit uses spline movement

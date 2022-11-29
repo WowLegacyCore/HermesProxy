@@ -346,7 +346,7 @@ namespace HermesProxy.World.Client
             {
                 return; // was handled by us
             }
-            
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_MESSAGECHAT);
             packet.WriteUInt32((uint)type);
             packet.WriteUInt32(lang);

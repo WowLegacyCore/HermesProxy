@@ -2557,7 +2557,7 @@ namespace HermesProxy.World.Objects
                         {
                             case LegacyCustomizationOption.Skin:
                                 return 19; // Orc Male - Skin Color
-                            case LegacyCustomizationOption.Face: 
+                            case LegacyCustomizationOption.Face:
                                 return 20; // Orc Male - Face
                             case LegacyCustomizationOption.HairStyle:
                                 return 21; // Orc Male - Hair Style
@@ -2620,7 +2620,7 @@ namespace HermesProxy.World.Objects
                         }
                     }
                     return 0;
-                } 
+                }
                 case Race.NightElf:
                 {
                     if (gender == Gender.Male)
@@ -2656,7 +2656,7 @@ namespace HermesProxy.World.Objects
                         }
                     }
                     return 0;
-                } 
+                }
                 case Race.Undead:
                 {
                     if (gender == Gender.Male)
@@ -2728,7 +2728,7 @@ namespace HermesProxy.World.Objects
                         }
                     }
                     return 0;
-                } 
+                }
                 case Race.Gnome:
                 {
                     if (gender == Gender.Male)
@@ -2800,7 +2800,7 @@ namespace HermesProxy.World.Objects
                         }
                     }
                     return 0;
-                } 
+                }
                 case Race.Goblin:
                 {
                     if (gender == Gender.Male)
@@ -2858,7 +2858,7 @@ namespace HermesProxy.World.Objects
                         }
                     }
                     return 0;
-                } 
+                }
                 case Race.Draenei:
                 {
                     if (gender == Gender.Male)
@@ -2894,7 +2894,7 @@ namespace HermesProxy.World.Objects
                         }
                     }
                     return 0;
-                } 
+                }
                 case Race.FelOrc:
                 {
                     if (gender == Gender.Male)

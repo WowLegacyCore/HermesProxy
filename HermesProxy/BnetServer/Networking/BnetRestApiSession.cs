@@ -49,7 +49,7 @@ namespace BNetServer.Networking
             string path = httpRequest.Path.Substring(BNET_SERVER_BASE_PATH.Length);
             string[] pathElements = path.Split('/');
 
-            switch (pathElements[0], httpRequest.Method) 
+            switch (pathElements[0], httpRequest.Method)
             {
                 case ("login", "GET"):
                     SendResponse(HttpCode.Ok, LoginServiceManager.Instance.GetFormInput());

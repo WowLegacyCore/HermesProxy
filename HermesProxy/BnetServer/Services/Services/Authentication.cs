@@ -44,7 +44,7 @@ namespace BNetServer.Services
             var endpoint = LoginServiceManager.Instance.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
             ChallengeExternalRequest externalChallenge = new();
-            externalChallenge.PayloadType = "web_auth_url";            
+            externalChallenge.PayloadType = "web_auth_url";
             externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/{logonRequest.Platform}/{logonRequest.ApplicationVersion}/{logonRequest.Locale}/");
 
             SendRequest(OriginalHash.ChallengeListener, 3, externalChallenge);

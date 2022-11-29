@@ -115,7 +115,7 @@ namespace HermesProxy.World
 
             return result;
         }
-        
+
         public static void StoreCreatureTemplate(uint entry, CreatureTemplate template)
         {
             if (CreatureTemplates.ContainsKey(entry))
@@ -983,7 +983,7 @@ namespace HermesProxy.World
                 }
             }
         }
-        
+
         #endregion
         #region HotFixes
         // Stores
@@ -1021,7 +1021,7 @@ namespace HermesProxy.World
             LoadCreatureDisplayInfoExtraHotfixes();
             LoadCreatureDisplayInfoOptionHotfixes();
         }
-        
+
         public static void LoadAreaTriggerHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"AreaTrigger{ModernVersion.ExpansionVersion}.csv");
@@ -1123,7 +1123,7 @@ namespace HermesProxy.World
                     uint parentTierIndex = uint.Parse(fields[10]);
                     ushort flags = ushort.Parse(fields[11]);
                     uint spellBookSpellID = uint.Parse(fields[12]);
-                    
+
                     HotfixRecord record = new HotfixRecord();
                     record.TableHash = DB2Hash.SkillLine;
                     record.HotfixId = HotfixSkillLineBegin + counter;

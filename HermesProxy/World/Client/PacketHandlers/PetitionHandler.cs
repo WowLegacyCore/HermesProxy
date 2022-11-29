@@ -19,7 +19,7 @@ namespace HermesProxy.World.Client
             for (var i = 0; i < count; i++)
             {
                 PetitionEntry petition = new PetitionEntry();
-                petition.Index = packet.ReadUInt32(); 
+                petition.Index = packet.ReadUInt32();
                 petition.CharterEntry = packet.ReadUInt32();
                 packet.ReadUInt32(); // Charter Display
                 petition.CharterCost = packet.ReadUInt32();

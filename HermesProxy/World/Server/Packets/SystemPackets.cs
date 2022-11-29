@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -125,7 +125,7 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WriteBit(BattlegroundsEnabled);
                 _worldPacket.WriteBit(RaceClassExpansionLevels != null);
             }
-            
+
             _worldPacket.FlushBits();
 
             {
@@ -371,7 +371,7 @@ namespace HermesProxy.World.Server.Packets
         public EuropaTicketConfig EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
-        public long TokenBalanceAmount;     // NYI 
+        public long TokenBalanceAmount;     // NYI
         public int MaxCharactersPerRealm;
         public uint BpayStoreProductDeliveryDelay;     // NYI
         public int ActiveCharacterUpgradeBoostType;     // NYI

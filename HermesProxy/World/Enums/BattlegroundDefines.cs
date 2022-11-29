@@ -13,7 +13,7 @@
         WarsongGulch = 489,
         ArathiBasin = 529,
     }
-    
+
     public enum BattleGroundStatus : uint
     {
         None        = 0,    // first status, should mean bg is not instance

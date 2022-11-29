@@ -76,7 +76,7 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(bglist);
         }
-        
+
         [PacketHandler(Opcode.SMSG_BATTLEFIELD_STATUS, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleBattlefieldStatusVanilla(WorldPacket packet)
         {

@@ -58,7 +58,7 @@ namespace HermesProxy.World.Client
 
                 spells.Cooldowns.Add(cooldown);
             }
-            
+
             SendPacketToClient(spells);
         }
 

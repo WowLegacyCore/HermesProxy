@@ -37,7 +37,7 @@ namespace HermesProxy.World.Server
 
             return path;
         }
-        
+
         public AccountMetaDataManager(string accountName)
         {
             _accountName = accountName;
@@ -59,7 +59,7 @@ namespace HermesProxy.World.Server
                 Log.Print(LogType.Error, $"Invalid split size in 'GetLastSelectedCharacter' for account '{_accountName}'");
                 return null;
             }
-            
+
             return (content[0], content[1], ulong.Parse(content[3]), long.Parse(content[2]));
         }
 
@@ -137,7 +137,7 @@ namespace HermesProxy.World.Server
             return loadedJson;
         }
     }
-    
+
     public class AccountData
     {
         public WowGuid128 Guid;
@@ -151,7 +151,7 @@ namespace HermesProxy.World.Server
         public AccountData[] Data;
         string _accountName;
         string _realmName;
-        
+
         public AccountDataManager(string accountName, string realmName)
         {
             _accountName = accountName;
@@ -234,7 +234,7 @@ namespace HermesProxy.World.Server
                     }
                 }
             }
-            
+
             return data;
         }
 

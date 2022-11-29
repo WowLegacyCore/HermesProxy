@@ -31,7 +31,7 @@ namespace HermesProxy.Auth
         TaskCompletionSource _hasRealmlist;
         byte[] _passwordHash;
         BigInteger _key;
-        byte[] _m2; 
+        byte[] _m2;
         string _username;
         string _locale;
 
@@ -103,7 +103,7 @@ namespace HermesProxy.Auth
         {
             _response.TrySetResult(response);
         }
-        
+
         public void Disconnect()
         {
             if (!IsConnected())

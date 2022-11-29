@@ -76,7 +76,7 @@ namespace HermesProxy.World.Client
                 WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                 SendPacket(packet2);
                 GetSession().GameState.HasWsgAllyFlagCarrier = update.Value == 2;
-            }    
+            }
             else if (update.VariableID == (uint)WorldStates.WsgFlagStateHorde)
             {
                 WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);

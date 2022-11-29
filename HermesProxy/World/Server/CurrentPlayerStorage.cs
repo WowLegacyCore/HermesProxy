@@ -68,7 +68,7 @@ public class PlayerSettings
     {
         Session.AccountMetaDataMgr.SaveCharacterSettingsStorage(Session.GameState.CurrentPlayerInfo.Realm.Name, Session.GameState.CurrentPlayerInfo.Name, _internalStorage);
     }
-    
+
     public class InternalStorage
     {
         // A JSON encoder / decoder is used to store the settings
@@ -136,7 +136,7 @@ public class CompletedQuestTracker
             _cachedQuestCompleted[idx] |= ((ulong)1) << bitIdx;
         }
     }
-    
+
     private void SendSingleUpdateToClient(uint questBit, bool isSet)
     {
         int idx = (int)(((questBit - 1) >> 6));
@@ -146,7 +146,7 @@ public class CompletedQuestTracker
             _cachedQuestCompleted[idx] |= ((ulong)1) << bitIdx;
         else
             _cachedQuestCompleted[idx] &= ~(((ulong)1) << bitIdx);
-        
+
         ObjectUpdate updateData = new ObjectUpdate(Session.GameState.CurrentPlayerGuid, UpdateTypeModern.Values, Session);
         updateData.ActivePlayerData.QuestCompleted[idx] = _cachedQuestCompleted[idx];
 

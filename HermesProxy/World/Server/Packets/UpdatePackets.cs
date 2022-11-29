@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -262,7 +262,7 @@ namespace HermesProxy.World.Server.Packets
             }
         }
     }
-    
+
     public class UpdateObject : ServerPacket
     {
         public UpdateObject(GameSessionData gameState) : base(Opcode.SMSG_UPDATE_OBJECT, ConnectionType.Instance)
@@ -318,8 +318,8 @@ namespace HermesProxy.World.Server.Packets
                     default:
                         throw new System.ArgumentOutOfRangeException("No object update builder defined for current build.");
                 }
-            }    
-            
+            }
+
             var bytes = data.GetData();
             buffer.WriteInt32(bytes.Length);
             buffer.WriteBytes(bytes);

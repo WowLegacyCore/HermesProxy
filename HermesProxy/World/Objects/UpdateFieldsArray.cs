@@ -280,7 +280,7 @@ namespace HermesProxy.World.Objects
             {
                 arrayMask.ValueCount = values.Length;
                 arrayMask.SetCount(values.Length);
-            } 
+            }
 
             for (var v = 0; v < values.Length; ++v)
             {
