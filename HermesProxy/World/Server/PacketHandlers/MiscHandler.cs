@@ -1,4 +1,5 @@
 ﻿using Framework.Constants;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -234,6 +235,12 @@ namespace HermesProxy.World.Server
             response.PvpCPExpCoefficient = 1639.28f;
             response.PvpCPNumerator = 0.00412f;
             SendPacket(response);
+        }
+
+        [PacketHandler(Opcode.CMSG_OBJECT_UPDATE_FAILED)]
+        void HandleObjectUpdateFailed(ObjectUpdateFailed fail)
+        {
+            Log.Print(LogType.Error, $"Object update failed for {fail.ObjectGuid}.");
         }
     }
 }

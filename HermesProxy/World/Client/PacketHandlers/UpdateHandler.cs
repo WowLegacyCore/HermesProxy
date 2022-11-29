@@ -818,6 +818,7 @@ namespace HermesProxy.World.Client
                         else if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalOrientation))
                         {
                             monsterMove.FinalOrientation = packet.ReadFloat();
+                            MovementInfo.ClampOrientation(ref monsterMove.FinalOrientation);
                             monsterMove.SplineType = SplineTypeModern.FacingAngle;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagWotLK.FinalPoint))
@@ -840,6 +841,7 @@ namespace HermesProxy.World.Client
                         else if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalOrientation))
                         {
                             monsterMove.FinalOrientation = packet.ReadFloat();
+                            MovementInfo.ClampOrientation(ref monsterMove.FinalOrientation);
                             monsterMove.SplineType = SplineTypeModern.FacingAngle;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagTBC.FinalPoint))
@@ -862,6 +864,7 @@ namespace HermesProxy.World.Client
                         else if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalOrientation))
                         {
                             monsterMove.FinalOrientation = packet.ReadFloat();
+                            MovementInfo.ClampOrientation(ref monsterMove.FinalOrientation);
                             monsterMove.SplineType = SplineTypeModern.FacingAngle;
                         }
                         else if (splineFlags.HasAnyFlag(SplineFlagVanilla.FinalPoint))
@@ -922,12 +925,10 @@ namespace HermesProxy.World.Client
                     moveInfo.TransportGuid = packet.ReadPackedGuid().To128(GetSession().GameState);
 
                     moveInfo.Position = packet.ReadVector3();
-                    moveInfo.TransportOffset.X = packet.ReadFloat();
-                    moveInfo.TransportOffset.Y = packet.ReadFloat();
-                    moveInfo.TransportOffset.Z = packet.ReadFloat();
+                    moveInfo.TransportOffset = packet.ReadVector3();
 
                     moveInfo.Orientation = packet.ReadFloat();
-                    moveInfo.TransportOffset.W = moveInfo.Orientation;
+                    moveInfo.TransportOrientation = moveInfo.Orientation;
 
                     moveInfo.CorpseOrientation = packet.ReadFloat();
                 }
