@@ -15,7 +15,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_TIME_RESPONSE)]
         void HandleQueryTimeResponse(WorldPacket packet)
         {
-            QueryTimeResponse response = new QueryTimeResponse
+            QueryTimeResponse response = new()
             {
                 CurrentTime = packet.ReadInt32()
             };
@@ -26,7 +26,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_QUEST_INFO_RESPONSE)]
         void HandleQueryQuestInfoResponse(WorldPacket packet)
         {
-            QueryQuestInfoResponse response = new QueryQuestInfoResponse();
+            QueryQuestInfoResponse response = new();
             var id = packet.ReadEntry();
             response.QuestID = (uint)id.Key;
             if (id.Value) // entry is masked
@@ -62,7 +62,7 @@ namespace HermesProxy.World.Client
                 int factionValue = packet.ReadInt32(); // RequiredFactionValue
                 if (factionId != 0 && factionValue != 0)
                 {
-                    QuestObjective objective = new QuestObjective
+                    QuestObjective objective = new()
                     {
                         QuestID = response.QuestID,
                         Id = QuestObjective.QuestObjectiveCounter++,
@@ -85,7 +85,7 @@ namespace HermesProxy.World.Client
                 quest.RewardMoney = rewOrReqMoney;
             else
             {
-                QuestObjective objective = new QuestObjective
+                QuestObjective objective = new()
                 {
                     QuestID = response.QuestID,
                     Id = QuestObjective.QuestObjectiveCounter++,
@@ -119,7 +119,7 @@ namespace HermesProxy.World.Client
                 int requiredPlayerKills = packet.ReadInt32();
                 if (requiredPlayerKills != 0)
                 {
-                    QuestObjective objective = new QuestObjective
+                    QuestObjective objective = new()
                     {
                         QuestID = response.QuestID,
                         Id = QuestObjective.QuestObjectiveCounter++,
@@ -147,7 +147,7 @@ namespace HermesProxy.World.Client
 
             for (int i = 0; i < 6; i++)
             {
-                QuestInfoChoiceItem choiceItem = new QuestInfoChoiceItem
+                QuestInfoChoiceItem choiceItem = new()
                 {
                     ItemID = packet.ReadUInt32(),
                     Quantity = packet.ReadUInt32()
@@ -203,7 +203,7 @@ namespace HermesProxy.World.Client
 
                 if (creatureOrGoId != 0 && creatureOrGoAmount != 0)
                 {
-                    QuestObjective objective = new QuestObjective
+                    QuestObjective objective = new()
                     {
                         QuestID = response.QuestID,
                         Id = QuestObjective.QuestObjectiveCounter++,
@@ -241,7 +241,7 @@ namespace HermesProxy.World.Client
             {
                 if (requiredItemID[i] != 0 && requiredItemCount[i] != 0)
                 {
-                    QuestObjective objective = new QuestObjective
+                    QuestObjective objective = new()
                     {
                         QuestID = response.QuestID,
                         Id = QuestObjective.QuestObjectiveCounter++,
@@ -279,7 +279,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_CREATURE_RESPONSE)]
         void HandleQueryCreatureResponse(WorldPacket packet)
         {
-            QueryCreatureResponse response = new QueryCreatureResponse();
+            QueryCreatureResponse response = new();
             var id = packet.ReadEntry();
             response.CreatureID = (uint)id.Key;
             if (id.Value) // entry is masked
@@ -365,7 +365,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_GAME_OBJECT_RESPONSE)]
         void HandleQueryGameObjectResposne(WorldPacket packet)
         {
-            QueryGameObjectResponse response = new QueryGameObjectResponse();
+            QueryGameObjectResponse response = new();
             var id = packet.ReadEntry();
             response.GameObjectID = (uint)id.Key;
             response.Guid = WowGuid128.Empty;
@@ -416,12 +416,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_PAGE_TEXT_RESPONSE)]
         void HandleQueryPageTextResponse(WorldPacket packet)
         {
-            QueryPageTextResponse response = new QueryPageTextResponse
+            QueryPageTextResponse response = new()
             {
                 PageTextID = packet.ReadUInt32(),
                 Allow = true
             };
-            PageTextInfo page = new PageTextInfo
+            PageTextInfo page = new()
             {
                 Id = response.PageTextID,
                 Text = packet.ReadCString(),
@@ -433,7 +433,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_NPC_TEXT_RESPONSE)]
         void HandleQueryNpcTextResponse(WorldPacket packet)
         {
-            QueryNPCTextResponse response = new QueryNPCTextResponse();
+            QueryNPCTextResponse response = new();
             var id = packet.ReadEntry();
             response.TextID = (uint)id.Key;
             if (id.Value) // entry is masked
@@ -478,7 +478,7 @@ namespace HermesProxy.World.Client
             if (entry.Value)
                 return;
 
-            ItemTemplate item = new ItemTemplate
+            ItemTemplate item = new()
             {
                 Entry = (uint)entry.Key,
                 Class = packet.ReadInt32(),
@@ -664,7 +664,7 @@ namespace HermesProxy.World.Client
                 return;
             }
 
-            QueryPetNameResponse response = new QueryPetNameResponse
+            QueryPetNameResponse response = new()
             {
                 UnitGUID = guid,
                 Name = packet.ReadCString()
@@ -705,7 +705,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_WHO)]
         void HandleWhoResponse(WorldPacket packet)
         {
-            WhoResponsePkt response = new WhoResponsePkt
+            WhoResponsePkt response = new()
             {
                 RequestID = GetSession().GameState.LastWhoRequestId
             };

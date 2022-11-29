@@ -39,7 +39,7 @@ public class RealmManager
 
     void LoadBuildInfo()
     {
-        RealmBuildInfo build = new RealmBuildInfo
+        RealmBuildInfo build = new()
         {
             MajorVersion = ModernVersion.ExpansionVersion,
             MinorVersion = ModernVersion.MajorVersion,
@@ -75,7 +75,7 @@ public class RealmManager
     public void AddRealm(uint id, string name, string externalAddress, ushort port, RealmType type, RealmFlags flags,
         byte characterCount, byte timezone, float populationLevel)
     {
-        Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
+        Dictionary<RealmId, string> existingRealms = new();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
@@ -195,7 +195,7 @@ public class RealmManager
                     CfgCategoriesID = realm.Timezone
                 };
 
-                ClientVersion version = new ClientVersion();
+                ClientVersion version = new();
                 RealmBuildInfo buildInfo = GetBuildInfo(realm.Build);
                 if (buildInfo != null)
                 {
@@ -238,7 +238,7 @@ public class RealmManager
             if (realm.Value.Build != build)
                 flag |= RealmFlags.VersionMismatch;
 
-            RealmListUpdate realmListUpdate = new RealmListUpdate();
+            RealmListUpdate realmListUpdate = new();
             realmListUpdate.Update.WowRealmAddress = (int)realm.Value.Id.GetAddress();
             realmListUpdate.Update.CfgTimezonesID = 1;
             realmListUpdate.Update.PopulationState = (realm.Value.Flags.HasAnyFlag(RealmFlags.Offline) ? 0 : Math.Max((int)realm.Value.PopulationLevel, 1));
@@ -283,8 +283,8 @@ public class RealmManager
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
                 return BattlenetRpcErrorCode.UserServerNotPermittedOnRealm;
 
-            RealmListServerIPAddresses serverAddresses = new RealmListServerIPAddresses();
-            AddressFamily addressFamily = new AddressFamily
+            RealmListServerIPAddresses serverAddresses = new();
+            AddressFamily addressFamily = new()
             {
                 Id = 1
             };
@@ -317,9 +317,9 @@ public class RealmManager
     public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
-    readonly List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
-    readonly ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
-    readonly List<string> _subRegions = new List<string>();
+    readonly List<RealmBuildInfo> _builds = new();
+    readonly ConcurrentDictionary<RealmId, Realm> _realms = new();
+    readonly List<string> _subRegions = new();
 }
 
 public class RealmBuildInfo

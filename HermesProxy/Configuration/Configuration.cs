@@ -51,7 +51,7 @@ namespace Framework
                 if (!File.Exists(configFile))
                     throw new FileNotFoundException($"File '{configFile}' was not found.");
 
-                ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap { ExeConfigFilename = configFile };
+                ExeConfigurationFileMap fileMap = new() { ExeConfigFilename = configFile };
                 var config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
                 settings = ((AppSettingsSection)config.Sections.Get("appSettings")).Settings;
             }

@@ -12,7 +12,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_TAXI_QUERY_AVAILABLE_NODES)]
         void HandleTaxiNodesQuery(InteractWithNPC interact)
         {
-            WorldPacket packet = new WorldPacket(interact.GetUniversalOpcode());
+            WorldPacket packet = new(interact.GetUniversalOpcode());
             packet.WriteGuid(interact.CreatureGUID.To64());
             SendPacketToServer(packet);
         }
@@ -20,7 +20,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ENABLE_TAXI_NODE)]
         void HandleEnableTaxiNode(InteractWithNPC interact)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_TALK_TO_GOSSIP);
+            WorldPacket packet = new(Opcode.CMSG_TALK_TO_GOSSIP);
             packet.WriteGuid(interact.CreatureGUID.To64());
             SendPacketToServer(packet);
         }
@@ -31,7 +31,7 @@ namespace HermesProxy.World.Server
             // direct path exist
             if (TaxiPathExist(GetSession().GameState.CurrentTaxiNode, taxi.Node))
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_ACTIVATE_TAXI);
+                WorldPacket packet = new(Opcode.CMSG_ACTIVATE_TAXI);
                 packet.WriteGuid(taxi.FlightMaster.To64());
                 packet.WriteUInt32(GetSession().GameState.CurrentTaxiNode);
                 packet.WriteUInt32(taxi.Node);
@@ -43,7 +43,7 @@ namespace HermesProxy.World.Server
                 if (path.Count <= 1) // no nodes found
                     return;
 
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_ACTIVATE_TAXI_EXPRESS);
+                WorldPacket packet = new(Opcode.CMSG_ACTIVATE_TAXI_EXPRESS);
                 packet.WriteGuid(taxi.FlightMaster.To64());
                 packet.WriteUInt32(0);                // total cost, not used
                 packet.WriteUInt32((uint)path.Count); // node count
@@ -72,7 +72,7 @@ namespace HermesProxy.World.Server
         HashSet<uint> GetTaxiPath(uint from, uint to, List<byte> usableNodes)
         {
             // shortest path node list
-            HashSet<uint> nodes = new HashSet<uint> { from };
+            HashSet<uint> nodes = new() { from };
             // copy taxi nodes graph and disable unknown nodes
             int[,] graphCopy = new int[GameData.TaxiNodesGraph.GetLength(0), GameData.TaxiNodesGraph.GetLength(1)];
             Buffer.BlockCopy(GameData.TaxiNodesGraph, 0, graphCopy, 0, GameData.TaxiNodesGraph.Length * sizeof(uint));

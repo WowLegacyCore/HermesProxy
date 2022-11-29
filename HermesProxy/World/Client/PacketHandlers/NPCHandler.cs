@@ -12,7 +12,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GOSSIP_MESSAGE)]
         void HandleGossipmessage(WorldPacket packet)
         {
-            GossipMessagePkt gossip = new GossipMessagePkt
+            GossipMessagePkt gossip = new()
             {
                 GossipGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -29,7 +29,7 @@ namespace HermesProxy.World.Client
 
             for (uint i = 0; i < optionsCount; i++)
             {
-                ClientGossipOption option = new ClientGossipOption
+                ClientGossipOption option = new()
                 {
                     OptionIndex = packet.ReadInt32(),
                     OptionIcon = packet.ReadUInt8(),
@@ -60,7 +60,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GOSSIP_COMPLETE)]
         void HandleGossipComplete(WorldPacket packet)
         {
-            GossipComplete gossip = new GossipComplete();
+            GossipComplete gossip = new();
             SendPacketToClient(gossip);
         }
 
@@ -81,7 +81,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BINDER_CONFIRM)]
         void HandleBinderConfirm(WorldPacket packet)
         {
-            BinderConfirm confirm = new BinderConfirm
+            BinderConfirm confirm = new()
             {
                 Guid = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -92,7 +92,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_VENDOR_INVENTORY)]
         void HandleVendorInventory(WorldPacket packet)
         {
-            VendorInventory vendor = new VendorInventory
+            VendorInventory vendor = new()
             {
                 VendorGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -130,7 +130,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SHOW_BANK)]
         void HandleShowBank(WorldPacket packet)
         {
-            ShowBank bank = new ShowBank
+            ShowBank bank = new()
             {
                 Guid = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -141,7 +141,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TRAINER_LIST)]
         void HandleTrainerList(WorldPacket packet)
         {
-            TrainerList trainer = new TrainerList
+            TrainerList trainer = new()
             {
                 TrainerGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -194,7 +194,7 @@ namespace HermesProxy.World.Client
                 TrainerFailedReason = packet.ReadUInt32()
             };
             SendPacketToClient(buy);
-            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).");
+            ChatPkt chat = new(GetSession(), ChatMessageTypeModern.System, $"Failed to learn Spell {buy.SpellID} (Reason {buy.TrainerFailedReason}).");
             SendPacketToClient(chat);
         }
 
@@ -212,7 +212,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SPIRIT_HEALER_CONFIRM)]
         void HandleSpiritHealerConfirm(WorldPacket packet)
         {
-            SpiritHealerConfirm confirm = new SpiritHealerConfirm
+            SpiritHealerConfirm confirm = new()
             {
                 Guid = packet.ReadGuid().To128(GetSession().GameState)
             };

@@ -48,7 +48,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_ROSTER)]
         void HandleArenaTeamRoster(WorldPacket packet)
         {
-            ArenaTeamRosterResponse arena = new ArenaTeamRosterResponse
+            ArenaTeamRosterResponse arena = new()
             {
                 TeamId = packet.ReadUInt32()
             };
@@ -62,8 +62,8 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < count; i++)
             {
-                ArenaTeamMember member = new ArenaTeamMember();
-                PlayerCache cache = new PlayerCache();
+                ArenaTeamMember member = new();
+                PlayerCache cache = new();
                 member.MemberGUID = packet.ReadGuid().To128(GetSession().GameState);
                 member.Online = packet.ReadBool();
                 member.Name = cache.Name = packet.ReadCString();
@@ -102,7 +102,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_EVENT)]
         void HandleArenaTeamEvent(WorldPacket packet)
         {
-            ArenaTeamEvent arena = new ArenaTeamEvent();
+            ArenaTeamEvent arena = new();
             var eventType = (ArenaTeamEventLegacy)packet.ReadUInt8();
             arena.Event = (ArenaTeamEventModern)Enum.Parse(typeof(ArenaTeamEventModern), eventType.ToString());
             byte count = packet.ReadUInt8();
@@ -130,7 +130,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_COMMAND_RESULT)]
         void HandleArenaTeamCommandResult(WorldPacket packet)
         {
-            ArenaTeamCommandResult arena = new ArenaTeamCommandResult
+            ArenaTeamCommandResult arena = new()
             {
                 Action = (ArenaTeamCommandType)packet.ReadUInt32(),
                 TeamName = packet.ReadCString(),
@@ -144,7 +144,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ARENA_TEAM_INVITE)]
         void HandleArenaTeamInvite(WorldPacket packet)
         {
-            ArenaTeamInvite arena = new ArenaTeamInvite
+            ArenaTeamInvite arena = new()
             {
                 PlayerName = packet.ReadCString(),
                 TeamName = packet.ReadCString()

@@ -13,7 +13,7 @@ namespace HermesProxy.World.Client
             if (!GetSession().GameState.IsFirstEnterWorld)
                 return;
 
-            InitializeFactions factions = new InitializeFactions();
+            InitializeFactions factions = new();
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i ++)
             {

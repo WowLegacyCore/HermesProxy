@@ -199,7 +199,7 @@ namespace HermesProxy.World.Server.Packets
         public uint ClubsPresenceUpdateTimer;
         public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
         public int ActiveSeason;
-        public List<GameRuleValuePair> GameRuleValues = new List<GameRuleValuePair>();
+        public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket;
         public short PlayerNameQueryTelemetryInterval;
         public uint KioskSessionMinutes;
@@ -379,7 +379,7 @@ namespace HermesProxy.World.Server.Packets
         public int MinimumExpansionLevel;
         public int MaximumExpansionLevel;
         public int ActiveSeason;
-        public List<GameRuleValuePair> GameRuleValues = new List<GameRuleValuePair>();
+        public List<GameRuleValuePair> GameRuleValues = new();
         public short MaxPlayerNameQueriesPerPacket;
         public short PlayerNameQueryTelemetryInterval;
         public uint KioskSessionMinutes;
@@ -402,7 +402,7 @@ namespace HermesProxy.World.Server.Packets
             }
         }
 
-        public List<string> Text = new List<string>();
+        public List<string> Text = new();
     }
 
     public class SetTimeZoneInformation : ServerPacket

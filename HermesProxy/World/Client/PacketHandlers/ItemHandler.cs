@@ -11,7 +11,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SET_PROFICIENCY)]
         void HandleSetProficiency(WorldPacket packet)
         {
-            SetProficiency proficiency = new SetProficiency
+            SetProficiency proficiency = new()
             {
                 ProficiencyClass = packet.ReadUInt8(),
                 ProficiencyMask = packet.ReadUInt32()
@@ -21,7 +21,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BUY_SUCCEEDED)]
         void HandleBuySucceeded(WorldPacket packet)
         {
-            BuySucceeded buy = new BuySucceeded
+            BuySucceeded buy = new()
             {
                 VendorGUID = packet.ReadGuid().To128(GetSession().GameState),
                 Slot = packet.ReadUInt32(),
@@ -33,7 +33,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ITEM_PUSH_RESULT)]
         void HandleItemPushResult(WorldPacket packet)
         {
-            ItemPushResult item = new ItemPushResult
+            ItemPushResult item = new()
             {
                 PlayerGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -96,7 +96,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_OK)]
         void HandleReadItemResultOk(WorldPacket packet)
         {
-            ReadItemResultOK read = new ReadItemResultOK
+            ReadItemResultOK read = new()
             {
                 ItemGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -105,7 +105,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_READ_ITEM_RESULT_FAILED)]
         void HandleReadItemResultFailed(WorldPacket packet)
         {
-            ReadItemResultFailed read = new ReadItemResultFailed
+            ReadItemResultFailed read = new()
             {
                 ItemGUID = packet.ReadGuid().To128(GetSession().GameState),
                 Subcode = 2
@@ -115,7 +115,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BUY_FAILED)]
         void HandleBuyFailed(WorldPacket packet)
         {
-            BuyFailed fail = new BuyFailed
+            BuyFailed fail = new()
             {
                 VendorGUID = packet.ReadGuid().To128(GetSession().GameState),
                 Slot = packet.ReadUInt32(),
@@ -198,7 +198,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DURABILITY_DAMAGE_DEATH)]
         void HandleDurabilityDamageDeath(WorldPacket packet)
         {
-            DurabilityDamageDeath death = new DurabilityDamageDeath
+            DurabilityDamageDeath death = new()
             {
                 Percent = 10
             };
@@ -207,7 +207,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ITEM_COOLDOWN)]
         void HandleItemCooldown(WorldPacket packet)
         {
-            ItemCooldown item = new ItemCooldown
+            ItemCooldown item = new()
             {
                 ItemGuid = packet.ReadGuid().To128(GetSession().GameState),
                 SpellID = packet.ReadUInt32(),
@@ -218,7 +218,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SELL_RESPONSE)]
         void HandleSellResponse(WorldPacket packet)
         {
-            SellResponse sell = new SellResponse
+            SellResponse sell = new()
             {
                 VendorGUID = packet.ReadGuid().To128(GetSession().GameState),
                 ItemGUID = packet.ReadGuid().To128(GetSession().GameState),
@@ -229,7 +229,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ITEM_ENCHANT_TIME_UPDATE)]
         void HandleItemEnchantTimeUpdate(WorldPacket packet)
         {
-            ItemEnchantTimeUpdate enchant = new ItemEnchantTimeUpdate
+            ItemEnchantTimeUpdate enchant = new()
             {
                 ItemGuid = packet.ReadGuid().To128(GetSession().GameState),
                 Slot = packet.ReadUInt32(),
@@ -242,7 +242,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_ENCHANTMENT_LOG)]
         void HandleEnchantmentLog(WorldPacket packet)
         {
-            EnchantmentLog enchantment = new EnchantmentLog();
+            EnchantmentLog enchantment = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 enchantment.Owner = packet.ReadPackedGuid().To128(GetSession().GameState);

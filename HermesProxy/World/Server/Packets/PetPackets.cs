@@ -292,7 +292,7 @@ namespace HermesProxy.World.Server.Packets
                 _worldPacket.WritePackedGuid128(guid);
         }
 
-        public List<WowGuid128> Guids = new List<WowGuid128>();
+        public List<WowGuid128> Guids = new();
     }
 
     class PetStableResult : ServerPacket

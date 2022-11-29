@@ -54,7 +54,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public float NextMailTime;
-        public List<MailNextTimeEntry> Mails = new List<MailNextTimeEntry>();
+        public List<MailNextTimeEntry> Mails = new();
 
         public class MailNextTimeEntry
         {

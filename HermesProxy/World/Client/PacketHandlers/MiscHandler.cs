@@ -10,7 +10,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TUTORIAL_FLAGS)]
         void HandleTutorialFlags(WorldPacket packet)
         {
-            TutorialFlags tutorials = new TutorialFlags();
+            TutorialFlags tutorials = new();
             for (byte i = 0; i < (byte)Tutorials.Max; ++i)
                 tutorials.TutorialData[i] = packet.ReadUInt32();
             SendPacketToClient(tutorials);
@@ -34,7 +34,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_BIND_POINT_UPDATE)]
         void HandleBindPointUpdate(WorldPacket packet)
         {
-            BindPointUpdate point = new BindPointUpdate
+            BindPointUpdate point = new()
             {
                 BindPosition = packet.ReadVector3(),
                 BindMapID = packet.ReadUInt32(),
@@ -46,7 +46,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PLAYER_BOUND)]
         void HandlePlayerBound(WorldPacket packet)
         {
-            PlayerBound bound = new PlayerBound
+            PlayerBound bound = new()
             {
                 BinderGUID = packet.ReadGuid().To128(GetSession().GameState),
                 AreaID = packet.ReadUInt32()
@@ -68,7 +68,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CORPSE_RECLAIM_DELAY)]
         void HandleCorpseReclaimDelay(WorldPacket packet)
         {
-            CorpseReclaimDelay delay = new CorpseReclaimDelay
+            CorpseReclaimDelay delay = new()
             {
                 Remaining = packet.ReadUInt32()
             };
@@ -78,7 +78,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TIME_SYNC_REQUEST)]
         void HandleTimeSyncRequest(WorldPacket packet)
         {
-            TimeSyncRequest sync = new TimeSyncRequest
+            TimeSyncRequest sync = new()
             {
                 SequenceIndex = packet.ReadUInt32()
             };
@@ -88,7 +88,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_WEATHER)]
         void HandleWeather(WorldPacket packet)
         {
-            WeatherPkt weather = new WeatherPkt();
+            WeatherPkt weather = new();
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 WeatherType type = (WeatherType)packet.ReadUInt32();
@@ -114,7 +114,7 @@ namespace HermesProxy.World.Client
             if (!GetSession().GameState.IsFirstEnterWorld)
                 return;
 
-            LoginSetTimeSpeed login = new LoginSetTimeSpeed
+            LoginSetTimeSpeed login = new()
             {
                 ServerTime = packet.ReadUInt32()
             };
@@ -136,7 +136,7 @@ namespace HermesProxy.World.Client
 
             if (GetSession().GameState.LastEnteredAreaTrigger != 0)
             {
-                AreaTriggerMessage denied = new AreaTriggerMessage
+                AreaTriggerMessage denied = new()
                 {
                     AreaTriggerID = GetSession().GameState.LastEnteredAreaTrigger
                 };
@@ -144,7 +144,7 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
+                ChatPkt chat = new(GetSession(), ChatMessageTypeModern.System, message);
                 SendPacketToClient(chat);
             }
         }
@@ -159,11 +159,11 @@ namespace HermesProxy.World.Client
             if (!corpse.Valid)
             {
                 {
-                    ChatPkt chatA = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
+                    ChatPkt chatA = new(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
                     SendPacketToClient(chatA);
-                    ChatPkt chatB = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV!FALSE!:{corpse.Valid}");
+                    ChatPkt chatB = new(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV!FALSE!:{corpse.Valid}");
                     SendPacketToClient(chatB);
-                    ChatPkt chatC = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
+                    ChatPkt chatC = new(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
                     SendPacketToClient(chatC);
                 }
                 return;
@@ -179,13 +179,13 @@ namespace HermesProxy.World.Client
             corpse.Transport = WowGuid128.Empty;
 
             {
-                ChatPkt chatA = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
+                ChatPkt chatA = new(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
                 SendPacketToClient(chatA);
-                ChatPkt chatB = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV:{corpse.Valid}\nI:{corpse.Player == GetSession().GameState.CurrentPlayerGuid}\nC:{GetSession().GameState.CurrentPlayerGuid == GetSession().GameState.CurrentPlayerInfo.CharacterGuid}\nM:{corpse.MapID}/{corpse.ActualMapID}\nCP:{corpse.Position}\nPP:");
+                ChatPkt chatB = new(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV:{corpse.Valid}\nI:{corpse.Player == GetSession().GameState.CurrentPlayerGuid}\nC:{GetSession().GameState.CurrentPlayerGuid == GetSession().GameState.CurrentPlayerInfo.CharacterGuid}\nM:{corpse.MapID}/{corpse.ActualMapID}\nCP:{corpse.Position}\nPP:");
                 SendPacketToClient(chatB);
-                ChatPkt chatC = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"And just to verify is that your current character name?: {GetSession().GameState.CurrentPlayerInfo.Name}-{GetSession().GameState.CurrentPlayerInfo.Realm.Name}");
+                ChatPkt chatC = new(GetSession(), ChatMessageTypeModern.System, $"And just to verify is that your current character name?: {GetSession().GameState.CurrentPlayerInfo.Name}-{GetSession().GameState.CurrentPlayerInfo.Realm.Name}");
                 SendPacketToClient(chatC);
-                ChatPkt chatD = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
+                ChatPkt chatD = new(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
                 SendPacketToClient(chatD);
             }
 

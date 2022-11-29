@@ -76,7 +76,7 @@ namespace HermesProxy.World.Server
         {
             if (!castRequest.HasStarted)
             {
-                SpellPrepare prepare2 = new SpellPrepare
+                SpellPrepare prepare2 = new()
                 {
                     ClientCastID = castRequest.ClientGUID,
                     ServerCastID = castRequest.ServerGUID
@@ -117,7 +117,7 @@ namespace HermesProxy.World.Server
             if (GameData.NextMeleeSpells.Contains(cast.Cast.SpellID) ||
                 GameData.AutoRepeatSpells.Contains(cast.Cast.SpellID))
             {
-                ClientCastRequest castRequest = new ClientCastRequest
+                ClientCastRequest castRequest = new()
                 {
                     Timestamp = Environment.TickCount,
                     SpellId = cast.Cast.SpellID,
@@ -135,7 +135,7 @@ namespace HermesProxy.World.Server
                 {
                     castRequest.ServerGUID = WowGuid128.Create(HighGuidType703.Cast, SpellCastSource.Normal, (uint)GetSession().GameState.CurrentMapId, cast.Cast.SpellID, cast.Cast.SpellID + GetSession().GameState.CurrentPlayerGuid.GetCounter());
 
-                    SpellPrepare prepare = new SpellPrepare
+                    SpellPrepare prepare = new()
                     {
                         ClientCastID = cast.Cast.CastID,
                         ServerCastID = castRequest.ServerGUID
@@ -147,7 +147,7 @@ namespace HermesProxy.World.Server
             }
             else
             {
-                ClientCastRequest castRequest = new ClientCastRequest
+                ClientCastRequest castRequest = new()
                 {
                     Timestamp = Environment.TickCount,
                     SpellId = cast.Cast.SpellID,
@@ -184,7 +184,7 @@ namespace HermesProxy.World.Server
 
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CAST_SPELL);
+            WorldPacket packet = new(Opcode.CMSG_CAST_SPELL);
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 packet.WriteUInt32(cast.Cast.SpellID);
@@ -211,7 +211,7 @@ namespace HermesProxy.World.Server
             if (Settings.ServerSpellDelay > 0)
                 Thread.Sleep(Settings.ServerSpellDelay);
 
-            ClientCastRequest castRequest = new ClientCastRequest
+            ClientCastRequest castRequest = new()
             {
                 Timestamp = Environment.TickCount,
                 SpellId = cast.Cast.SpellID,
@@ -247,7 +247,7 @@ namespace HermesProxy.World.Server
 
             SpellCastTargetFlags targetFlags = ConvertSpellTargetFlags(cast.Cast.Target);
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_CAST_SPELL);
+            WorldPacket packet = new(Opcode.CMSG_PET_CAST_SPELL);
             packet.WriteGuid(cast.PetGUID.To64());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.WriteUInt8(0); // cast count
@@ -265,7 +265,7 @@ namespace HermesProxy.World.Server
             if (Settings.ServerSpellDelay > 0)
                 Thread.Sleep(Settings.ServerSpellDelay);
 
-            ClientCastRequest castRequest = new ClientCastRequest
+            ClientCastRequest castRequest = new()
             {
                 Timestamp = Environment.TickCount,
                 SpellId = use.Cast.SpellID,
@@ -300,7 +300,7 @@ namespace HermesProxy.World.Server
 
             GetSession().GameState.CurrentClientNormalCast = castRequest;
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_USE_ITEM);
+            WorldPacket packet = new(Opcode.CMSG_USE_ITEM);
             byte containerSlot = use.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.PackSlot) : use.PackSlot;
             byte slot = use.PackSlot == Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(use.Slot) : use.Slot;
             packet.WriteUInt8(containerSlot);
@@ -323,7 +323,7 @@ namespace HermesProxy.World.Server
             if (Settings.ServerSpellDelay > 0)
                 Thread.Sleep(Settings.ServerSpellDelay);
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CAST);
+            WorldPacket packet = new(Opcode.CMSG_CANCEL_CAST);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.WriteUInt8(0);
             packet.WriteUInt32(cast.SpellID);
@@ -337,14 +337,14 @@ namespace HermesProxy.World.Server
             if (Settings.ServerSpellDelay > 0)
                 Thread.Sleep(Settings.ServerSpellDelay);
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_CHANNELLING);
+            WorldPacket packet = new(Opcode.CMSG_CANCEL_CHANNELLING);
             packet.WriteInt32(cast.SpellID);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_CANCEL_AURA)]
         void HandleCancelAura(CancelAura aura)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AURA);
+            WorldPacket packet = new(Opcode.CMSG_CANCEL_AURA);
             packet.WriteUInt32(aura.SpellID);
             SendPacketToServer(packet);
         }
@@ -353,7 +353,7 @@ namespace HermesProxy.World.Server
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_MOUNT_AURA);
+                WorldPacket packet = new(Opcode.CMSG_CANCEL_MOUNT_AURA);
                 SendPacketToServer(packet);
             }
             else
@@ -371,7 +371,7 @@ namespace HermesProxy.World.Server
 
                     if (GameData.MountAuras.Contains(aura.SpellID))
                     {
-                        WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AURA);
+                        WorldPacket packet = new(Opcode.CMSG_CANCEL_AURA);
                         packet.WriteUInt32(aura.SpellID);
                         SendPacketToServer(packet);
                     }
@@ -386,13 +386,13 @@ namespace HermesProxy.World.Server
             if (Settings.ServerSpellDelay > 0)
                 Thread.Sleep(Settings.ServerSpellDelay);
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
+            WorldPacket packet = new(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
             SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_LEARN_TALENT)]
         void HandleLearnTalent(LearnTalent talent)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_LEARN_TALENT);
+            WorldPacket packet = new(Opcode.CMSG_LEARN_TALENT);
             packet.WriteUInt32(talent.TalentID);
             packet.WriteUInt32(talent.Rank);
             SendPacketToServer(packet);
@@ -400,7 +400,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_RESURRECT_RESPONSE)]
         void HandleResurrectResponse(ResurrectResponse revive)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_RESURRECT_RESPONSE);
+            WorldPacket packet = new(Opcode.CMSG_RESURRECT_RESPONSE);
             packet.WriteGuid(revive.CasterGUID.To64());
             packet.WriteUInt8((byte)(revive.Response != 0 ? 0 : 1));
             SendPacketToServer(packet);
@@ -408,7 +408,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SELF_RES)]
         void HandleSelfRes(SelfRes revive)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SELF_RES);
+            WorldPacket packet = new(Opcode.CMSG_SELF_RES);
             SendPacketToServer(packet);
         }
 
@@ -418,7 +418,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return;
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_TOTEM_DESTROYED);
+            WorldPacket packet = new(Opcode.CMSG_TOTEM_DESTROYED);
             packet.WriteUInt8(totem.Slot);
             SendPacketToServer(packet);
         }

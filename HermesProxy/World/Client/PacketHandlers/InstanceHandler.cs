@@ -10,7 +10,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_UPDATE_INSTANCE_OWNERSHIP)]
         void HandleUpdateInstanceOwnership(WorldPacket packet)
         {
-            UpdateInstanceOwnership instance = new UpdateInstanceOwnership
+            UpdateInstanceOwnership instance = new()
             {
                 IOwnInstance = packet.ReadUInt32()
             };
@@ -20,7 +20,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INSTANCE_RESET)]
         void HandleInstanceReset(WorldPacket packet)
         {
-            InstanceReset reset = new InstanceReset
+            InstanceReset reset = new()
             {
                 MapID = packet.ReadUInt32()
             };
@@ -30,7 +30,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INSTANCE_RESET_FAILED)]
         void HandleInstanceResetFailed(WorldPacket packet)
         {
-            InstanceResetFailed reset = new InstanceResetFailed
+            InstanceResetFailed reset = new()
             {
                 ResetFailedReason = (ResetFailedReason)packet.ReadUInt32(),
                 MapID = packet.ReadUInt32()
@@ -41,7 +41,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_RESET_FAILED_NOTIFY)]
         void HandleResetFailedNotify(WorldPacket packet)
         {
-            ResetFailedNotify reset = new ResetFailedNotify();
+            ResetFailedNotify reset = new();
             packet.ReadUInt32(); // Map ID
             SendPacketToClient(reset);
         }
@@ -49,11 +49,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_RAID_INSTANCE_INFO)]
         void HandleRaidInstanceInfo(WorldPacket packet)
         {
-            RaidInstanceInfo infos = new RaidInstanceInfo();
+            RaidInstanceInfo infos = new();
             int count = packet.ReadInt32();
             for (var i = 0; i < count; ++i)
             {
-                InstanceLock instance = new InstanceLock
+                InstanceLock instance = new()
                 {
                     MapID = packet.ReadUInt32()
                 };
@@ -91,7 +91,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INSTANCE_SAVE_CREATED)]
         void HandleInstanceSaveCreated(WorldPacket packet)
         {
-            InstanceSaveCreated save = new InstanceSaveCreated
+            InstanceSaveCreated save = new()
             {
                 Gm = packet.ReadUInt32() != 0
             };
@@ -101,7 +101,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_RAID_GROUP_ONLY)]
         void HandleRaidGroupOnly(WorldPacket packet)
         {
-            RaidGroupOnly save = new RaidGroupOnly
+            RaidGroupOnly save = new()
             {
                 Delay = packet.ReadInt32(),
                 Reason = (RaidGroupReason)packet.ReadUInt32()
@@ -112,7 +112,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_RAID_INSTANCE_MESSAGE)]
         void HandleRaidInstanceMessage(WorldPacket packet)
         {
-            RaidInstanceMessage instance = new RaidInstanceMessage
+            RaidInstanceMessage instance = new()
             {
                 Type = (InstanceResetWarningType)packet.ReadUInt32(),
                 MapID = packet.ReadUInt32()

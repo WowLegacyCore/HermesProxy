@@ -12,12 +12,12 @@ namespace HermesProxy.World.Server
         {
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_FRIEND_LIST);
+                WorldPacket packet = new(Opcode.CMSG_FRIEND_LIST);
                 SendPacketToServer(packet);
             }
             else
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_CONTACT_LIST);
+                WorldPacket packet = new(Opcode.CMSG_CONTACT_LIST);
                 packet.WriteUInt32((uint)contacts.Flags);
                 SendPacketToServer(packet);
             }
@@ -26,7 +26,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ADD_FRIEND)]
         void HandleAddFriend(AddFriend friend)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_ADD_FRIEND);
+            WorldPacket packet = new(Opcode.CMSG_ADD_FRIEND);
             packet.WriteCString(friend.Name);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.WriteCString(friend.Note);
@@ -36,7 +36,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ADD_IGNORE)]
         void HandleAddIgnore(AddIgnore ignore)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_ADD_IGNORE);
+            WorldPacket packet = new(Opcode.CMSG_ADD_IGNORE);
             packet.WriteCString(ignore.Name);
             SendPacketToServer(packet);
         }
@@ -45,7 +45,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_DEL_IGNORE)]
         void HandleDelFriend(DelFriend friend)
         {
-            WorldPacket packet = new WorldPacket(friend.GetUniversalOpcode());
+            WorldPacket packet = new(friend.GetUniversalOpcode());
             packet.WriteGuid(friend.Guid.To64());
             SendPacketToServer(packet);
         }
@@ -56,7 +56,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return;
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_CONTACT_NOTES);
+            WorldPacket packet = new(Opcode.CMSG_SET_CONTACT_NOTES);
             packet.WriteGuid(friend.Guid.To64());
             packet.WriteCString(friend.Notes);
             SendPacketToServer(packet);

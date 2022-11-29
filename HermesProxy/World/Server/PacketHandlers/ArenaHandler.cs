@@ -13,7 +13,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180) ||
                 GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex] == 0)
             {
-                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse
+                ArenaTeamRosterResponse response = new()
                 {
                     TeamSize = ModernVersion.GetArenaTeamSizeFromIndex(arena.TeamIndex)
                 };
@@ -21,11 +21,11 @@ namespace HermesProxy.World.Server
             }
             else
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
+                WorldPacket packet = new(Opcode.CMSG_ARENA_TEAM_QUERY);
                 packet.WriteUInt32(GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex]);
                 SendPacketToServer(packet);
 
-                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
+                WorldPacket packet2 = new(Opcode.CMSG_ARENA_TEAM_ROSTER);
                 packet2.WriteUInt32(GetSession().GameState.CurrentArenaTeamIds[arena.TeamIndex]);
                 SendPacketToServer(packet2);
             }
@@ -36,7 +36,7 @@ namespace HermesProxy.World.Server
         {
             if (GetSession().GameState.ArenaTeams.TryGetValue(arena.TeamId, out ArenaTeamData team))
             {
-                ArenaTeamQueryResponse response = new ArenaTeamQueryResponse
+                ArenaTeamQueryResponse response = new()
                 {
                     TeamId = arena.TeamId,
                     Emblem = new ArenaTeamEmblem
@@ -58,7 +58,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA)]
         void HandleBattlematerJoinArena(BattlemasterJoinArena join)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
+            WorldPacket packet = new(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
             packet.WriteGuid(join.Guid.To64());
             packet.WriteUInt8(join.TeamIndex);
             packet.WriteBool(true); // As Group
@@ -69,7 +69,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_BATTLEMASTER_JOIN_SKIRMISH)]
         void HandleBattlematerJoinSkirmish(BattlemasterJoinSkirmish join)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
+            WorldPacket packet = new(Opcode.CMSG_BATTLEMASTER_JOIN_ARENA);
             packet.WriteGuid(join.Guid.To64());
             packet.WriteUInt8(join.TeamSize);
             packet.WriteBool(join.AsGroup);
@@ -81,7 +81,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ARENA_TEAM_LEADER)]
         void HandleArenaUnimplemented(ArenaTeamRemove arena)
         {
-            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            WorldPacket packet = new(arena.GetUniversalOpcode());
             packet.WriteUInt32(arena.TeamId);
             packet.WriteCString(GetSession().GameState.GetPlayerName(arena.PlayerGuid));
             SendPacketToServer(packet);
@@ -91,7 +91,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ARENA_TEAM_LEAVE)]
         void HandleArenaTeamLeave(ArenaTeamLeave arena)
         {
-            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            WorldPacket packet = new(arena.GetUniversalOpcode());
             packet.WriteUInt32(arena.TeamId);
             SendPacketToServer(packet);
         }
@@ -100,7 +100,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ARENA_TEAM_DECLINE)]
         void HandleArenaTeamInviteResponse(ArenaTeamAccept arena)
         {
-            WorldPacket packet = new WorldPacket(arena.GetUniversalOpcode());
+            WorldPacket packet = new(arena.GetUniversalOpcode());
             SendPacketToServer(packet);
         }
     }

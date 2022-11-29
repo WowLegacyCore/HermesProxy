@@ -65,7 +65,7 @@ namespace HermesProxy.World.Server
         ZLib.z_stream _compressionStream;
         readonly ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         GlobalSessionData _globalSession;
-        readonly System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
+        readonly System.Threading.Mutex _sendMutex = new();
 
         private BnetServices.ServiceManager _bnetRpc;
 
@@ -616,7 +616,7 @@ namespace HermesProxy.World.Server
         public void SendConnectToInstance(ConnectToSerial serial)
         {
             IPAddress externalIp = IPAddress.Parse(Framework.Settings.ExternalAddress);
-            IPEndPoint instanceAddress = new IPEndPoint(externalIp, Framework.Settings.InstancePort);
+            IPEndPoint instanceAddress = new(externalIp, Framework.Settings.InstancePort);
 
             _instanceConnectKey.AccountId = GetSession().AccountInfo.Id;
             _instanceConnectKey.connectionType = ConnectionType.Instance;
@@ -746,8 +746,8 @@ namespace HermesProxy.World.Server
                 // Send current home realm. Also there is no need to send it later in realm queries.
                 response.SuccessInfo.VirtualRealms.Add(new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName));
 
-                List<RaceClassAvailability> availableRaces = new List<RaceClassAvailability>();
-                RaceClassAvailability race = new RaceClassAvailability
+                List<RaceClassAvailability> availableRaces = new();
+                RaceClassAvailability race = new()
                 {
                     RaceID = 1
                 };
@@ -1028,7 +1028,7 @@ namespace HermesProxy.World.Server
 
         public void SendAvailableHotfixes()
         {
-            AvailableHotfixes hotfixes = new AvailableHotfixes
+            AvailableHotfixes hotfixes = new()
             {
                 VirtualRealmAddress = GetSession().RealmId.GetAddress()
             };
@@ -1060,7 +1060,7 @@ namespace HermesProxy.World.Server
             WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
             GetSession().AccountDataMgr.LoadAllData(guid);
 
-            AccountDataTimes accountData = new AccountDataTimes
+            AccountDataTimes accountData = new()
             {
                 PlayerGuid = guid,
                 ServerTime = Time.UnixTime

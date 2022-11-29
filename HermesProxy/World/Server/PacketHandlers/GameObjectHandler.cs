@@ -9,7 +9,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_GAME_OBJ_USE)]
         void HandleGameObjUse(GameObjUse use)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_GAME_OBJ_USE);
+            WorldPacket packet = new(Opcode.CMSG_GAME_OBJ_USE);
             packet.WriteGuid(use.Guid.To64());
             SendPacketToServer(packet);
         }

@@ -38,7 +38,7 @@ public class Realm : IEquatable<Realm>
         else
             realmIp = IPAddress.Parse(Framework.Settings.ExternalAddress);
 
-        IPEndPoint endpoint = new IPEndPoint(realmIp, Framework.Settings.RealmPort);
+        IPEndPoint endpoint = new(realmIp, Framework.Settings.RealmPort);
 
         // Return external IP
         return endpoint;

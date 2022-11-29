@@ -54,7 +54,7 @@ namespace HermesProxy.World.Objects
 
         public MovementInfo CopyFromMe()
         {
-            MovementInfo copy = new MovementInfo
+            MovementInfo copy = new()
             {
                 Flags = this.Flags,
                 FlagsExtra = this.FlagsExtra,

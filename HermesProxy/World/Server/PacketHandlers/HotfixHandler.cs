@@ -191,7 +191,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_HOTFIX_REQUEST)]
         void HandleHotfixRequest(HotfixRequest request)
         {
-            HotfixConnect connect = new HotfixConnect();
+            HotfixConnect connect = new();
             foreach (uint id in request.Hotfixes)
             {
                 if (GameData.Hotfixes.TryGetValue(id, out HotfixRecord record))

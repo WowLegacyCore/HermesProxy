@@ -20,7 +20,7 @@ namespace HermesProxy.World.Client
             var count = packet.ReadUInt8();
             for (var i = 0; i < count; i++)
             {
-                PetitionEntry petition = new PetitionEntry
+                PetitionEntry petition = new()
                 {
                     Index = packet.ReadUInt32(),
                     CharterEntry = packet.ReadUInt32()
@@ -55,7 +55,7 @@ namespace HermesProxy.World.Client
             var counter = packet.ReadUInt8();
             for (var i = 0; i < counter; i++)
             {
-                PetitionSignature signature = new PetitionSignature
+                PetitionSignature signature = new()
                 {
                     Signer = packet.ReadGuid().To128(GetSession().GameState),
                     Choice = packet.ReadInt32()
@@ -127,7 +127,7 @@ namespace HermesProxy.World.Client
             string name = GetSession().GameState.GetPlayerName(guid);
             if (!string.IsNullOrEmpty(name))
             {
-                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"{name} has declined your guild invitation.");
+                ChatPkt chat = new(GetSession(), ChatMessageTypeModern.System, $"{name} has declined your guild invitation.");
                 SendPacketToClient(chat);
             }
         }

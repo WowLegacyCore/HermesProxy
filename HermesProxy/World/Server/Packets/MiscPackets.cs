@@ -365,7 +365,7 @@ namespace HermesProxy.World.Server.Packets
                 task.Write(_worldPacket);
         }
 
-        public List<TaskProgress> Tasks = new List<TaskProgress>();
+        public List<TaskProgress> Tasks = new();
     }
 
     public class TaskProgress
@@ -384,7 +384,7 @@ namespace HermesProxy.World.Server.Packets
         public uint FailureTime;
         public uint Flags;
         public uint Unk;
-        public List<ushort> Progress = new List<ushort>();
+        public List<ushort> Progress = new();
     }
 
     public class InitialSetup : ServerPacket
@@ -685,7 +685,7 @@ namespace HermesProxy.World.Server.Packets
 
         public void AddBlacklist(int activity, int reason)
         {
-            LFGListBlacklistEntry entry = new LFGListBlacklistEntry
+            LFGListBlacklistEntry entry = new()
             {
                 ActivityID = activity,
                 Reason = reason
@@ -693,7 +693,7 @@ namespace HermesProxy.World.Server.Packets
             Blacklist.Add(entry);
         }
 
-        public List<LFGListBlacklistEntry> Blacklist = new List<LFGListBlacklistEntry>();
+        public List<LFGListBlacklistEntry> Blacklist = new();
     }
 
     public struct LFGListBlacklistEntry

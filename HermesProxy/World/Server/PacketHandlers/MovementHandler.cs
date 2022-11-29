@@ -46,7 +46,7 @@ namespace HermesProxy.World.Server
             if (opcode == 0)
                 opcode = Opcodes.GetOpcodeValueForVersion("MSG_MOVE_SET_FACING", Framework.Settings.ServerBuild);
 
-            WorldPacket packet = new WorldPacket(opcode);
+            WorldPacket packet = new(opcode);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movement.Guid.To64());
             movement.MoveInfo.WriteMovementInfoLegacy(packet);
@@ -56,7 +56,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_TELEPORT_ACK)]
         void HandleMoveTeleportAck(MoveTeleportAck teleport)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_TELEPORT_ACK);
+            WorldPacket packet = new(Opcode.MSG_MOVE_TELEPORT_ACK);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(teleport.MoverGUID.To64());
             else
@@ -69,7 +69,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_WORLD_PORT_RESPONSE)]
         void HandleWorldPortResponse(WorldPortResponse teleport)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_WORLDPORT_ACK);
+            WorldPacket packet = new(Opcode.MSG_MOVE_WORLDPORT_ACK);
             SendPacketToServer(packet);
         }
 
@@ -90,7 +90,7 @@ namespace HermesProxy.World.Server
                           or Opcode.CMSG_MOVE_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK)
                 return; // This is probably an ack by our swim to fly speed change for vanilla
 
-            WorldPacket packet = new WorldPacket(opcode);
+            WorldPacket packet = new(opcode);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(speed.MoverGUID.To64());
             else
@@ -123,7 +123,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_WATER_WALK_ACK)]
         void HandleMoveForceAck1(MovementAckMessage movementAck)
         {
-            WorldPacket packet = new WorldPacket(movementAck.GetUniversalOpcode());
+            WorldPacket packet = new(movementAck.GetUniversalOpcode());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movementAck.MoverGUID.To64());
             else
@@ -141,7 +141,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_GRAVITY_ENABLE_ACK)]
         void HandleMoveForceAck2(MovementAckMessage movementAck)
         {
-            WorldPacket packet = new WorldPacket(movementAck.GetUniversalOpcode());
+            WorldPacket packet = new(movementAck.GetUniversalOpcode());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movementAck.MoverGUID.To64());
             else
@@ -154,7 +154,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SET_ACTIVE_MOVER)]
         void HandleMoveSetActiveMover(SetActiveMover move)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTIVE_MOVER);
+            WorldPacket packet = new(Opcode.CMSG_SET_ACTIVE_MOVER);
             packet.WriteGuid(move.MoverGUID.To64());
             SendPacketToServer(packet);
         }
@@ -162,7 +162,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)]
         void HandleMoveInitActiveMoverComplete(InitActiveMoverComplete move)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTIVE_MOVER);
+            WorldPacket packet = new(Opcode.CMSG_SET_ACTIVE_MOVER);
             packet.WriteGuid(GetSession().GameState.CurrentPlayerGuid.To64());
             SendPacketToServer(packet);
         }
@@ -170,7 +170,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_SPLINE_DONE)]
         void HandleMoveSplineDone(MoveSplineDone movement)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_SPLINE_DONE);
+            WorldPacket packet = new(Opcode.CMSG_MOVE_SPLINE_DONE);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movement.Guid.To64());
             movement.MoveInfo.WriteMovementInfoLegacy(packet);
@@ -183,7 +183,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_TIME_SKIPPED)]
         void HandleMoveSplineDone(MoveTimeSkipped movement)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_TIME_SKIPPED);
+            WorldPacket packet = new(Opcode.CMSG_MOVE_TIME_SKIPPED);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movement.MoverGUID.To64());
             else

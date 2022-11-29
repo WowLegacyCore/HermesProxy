@@ -10,7 +10,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PETITION_BUY)]
         void HandlePetitionBuy(PetitionBuy petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_PETITION_BUY);
+            WorldPacket packet = new(Opcode.CMSG_PETITION_BUY);
             packet.WriteGuid(petition.Unit.To64());
             packet.WriteUInt32(0);
             packet.WriteUInt64(0);
@@ -53,7 +53,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PETITION_SHOW_SIGNATURES)]
         void HandlePetitionShowSignatures(PetitionShowSignatures petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_PETITION_SHOW_SIGNATURES);
+            WorldPacket packet = new(Opcode.CMSG_PETITION_SHOW_SIGNATURES);
             packet.WriteGuid(petition.Item.To64());
             SendPacketToServer(packet);
         }
@@ -61,7 +61,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUERY_PETITION)]
         void HandleQueryPetition(QueryPetition petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_QUERY_PETITION);
+            WorldPacket packet = new(Opcode.CMSG_QUERY_PETITION);
             packet.WriteUInt32(petition.PetitionID);
             packet.WriteGuid(petition.ItemGUID.To64());
             SendPacketToServer(packet);
@@ -70,7 +70,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PETITION_RENAME_GUILD)]
         void HandlePetitionRenameGuild(PetitionRenameGuild petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_PETITION_RENAME);
+            WorldPacket packet = new(Opcode.MSG_PETITION_RENAME);
             packet.WriteGuid(petition.PetitionGuid.To64());
             packet.WriteCString(petition.NewGuildName);
             SendPacketToServer(packet);
@@ -79,7 +79,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_OFFER_PETITION)]
         void HandleOfferPetition(OfferPetition petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_OFFER_PETITION);
+            WorldPacket packet = new(Opcode.CMSG_OFFER_PETITION);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.WriteUInt32(petition.UnkInt);
             packet.WriteGuid(petition.ItemGUID.To64());
@@ -90,7 +90,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_DECLINE_PETITION)]
         void HandleDeclinePetition(DeclinePetition petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_PETITION_DECLINE);
+            WorldPacket packet = new(Opcode.MSG_PETITION_DECLINE);
             packet.WriteGuid(petition.PetitionGUID.To64());
             SendPacketToServer(packet);
         }
@@ -98,7 +98,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SIGN_PETITION)]
         void HandleSignPetition(SignPetition petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SIGN_PETITION);
+            WorldPacket packet = new(Opcode.CMSG_SIGN_PETITION);
             packet.WriteGuid(petition.PetitionGUID.To64());
             packet.WriteUInt8(petition.Choice);
             SendPacketToServer(packet);
@@ -107,7 +107,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_TURN_IN_PETITION)]
         void HandleTurnInPetition(TurnInPetition petition)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_TURN_IN_PETITION);
+            WorldPacket packet = new(Opcode.CMSG_TURN_IN_PETITION);
             packet.WriteGuid(petition.Item.To64());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {

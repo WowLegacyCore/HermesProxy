@@ -11,7 +11,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FRIEND_LIST)]
         void HandleFriendList(WorldPacket packet)
         {
-            ContactList contacts = new ContactList
+            ContactList contacts = new()
             {
                 Flags = SocialFlag.Friend
             };
@@ -19,7 +19,7 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < count; i++)
             {
-                ContactInfo contact = new ContactInfo
+                ContactInfo contact = new()
                 {
                     TypeFlags = SocialFlag.Friend,
                     Guid = packet.ReadGuid().To128(GetSession().GameState)
@@ -43,7 +43,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_IGNORE_LIST)]
         void HandleIgnoreList(WorldPacket packet)
         {
-            ContactList contacts = new ContactList
+            ContactList contacts = new()
             {
                 Flags = SocialFlag.Ignored
             };
@@ -51,7 +51,7 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < count; i++)
             {
-                ContactInfo contact = new ContactInfo
+                ContactInfo contact = new()
                 {
                     TypeFlags = SocialFlag.Ignored,
                     Guid = packet.ReadGuid().To128(GetSession().GameState)
@@ -68,7 +68,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CONTACT_LIST)]
         void HandleContactList(WorldPacket packet)
         {
-            ContactList contacts = new ContactList
+            ContactList contacts = new()
             {
                 Flags = (SocialFlag)packet.ReadUInt32()
             };
@@ -76,7 +76,7 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < count; i++)
             {
-                ContactInfo contact = new ContactInfo
+                ContactInfo contact = new()
                 {
                     Guid = packet.ReadGuid().To128(GetSession().GameState)
                 };
@@ -104,7 +104,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_FRIEND_STATUS)]
         void HandleFriendStatus(WorldPacket packet)
         {
-            FriendStatusPkt friend = new FriendStatusPkt
+            FriendStatusPkt friend = new()
             {
                 FriendResult = (FriendsResult)packet.ReadUInt8(),
                 Guid = packet.ReadGuid().To128(GetSession().GameState)

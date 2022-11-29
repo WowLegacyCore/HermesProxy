@@ -12,33 +12,33 @@ namespace HermesProxy.World
     public static class GameData
     {
         // From CSV
-        public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
-        public static Dictionary<uint, ItemDisplayData> ItemDisplayDataStore = new Dictionary<uint, ItemDisplayData>();
-        public static Dictionary<uint, Battleground> Battlegrounds = new Dictionary<uint, Battleground>();
-        public static Dictionary<uint, ChatChannel> ChatChannels = new Dictionary<uint, ChatChannel>();
-        public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new Dictionary<uint, Dictionary<uint, byte>>();
-        public static Dictionary<uint, uint> ItemEnchantVisuals = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> SpellVisuals = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> TotemSpells = new Dictionary<uint, uint>();
-        public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
-        public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
-        public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
-        public static Dictionary<uint, string> AreaNames = new Dictionary<uint, string>();
-        public static HashSet<uint> DispellSpells = new HashSet<uint>();
-        public static HashSet<uint> StackableAuras = new HashSet<uint>();
-        public static HashSet<uint> MountAuras = new HashSet<uint>();
-        public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
-        public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
-        public static Dictionary<uint, TaxiPath> TaxiPaths = new Dictionary<uint, TaxiPath>();
+        public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new();
+        public static Dictionary<uint, ItemDisplayData> ItemDisplayDataStore = new();
+        public static Dictionary<uint, Battleground> Battlegrounds = new();
+        public static Dictionary<uint, ChatChannel> ChatChannels = new();
+        public static Dictionary<uint, Dictionary<uint, byte>> ItemEffects = new();
+        public static Dictionary<uint, uint> ItemEnchantVisuals = new();
+        public static Dictionary<uint, uint> SpellVisuals = new();
+        public static Dictionary<uint, uint> LearnSpells = new();
+        public static Dictionary<uint, uint> TotemSpells = new();
+        public static Dictionary<uint, uint> Gems = new();
+        public static Dictionary<uint, float> UnitDisplayScales = new();
+        public static Dictionary<uint, uint> TransportPeriods = new();
+        public static Dictionary<uint, string> AreaNames = new();
+        public static HashSet<uint> DispellSpells = new();
+        public static HashSet<uint> StackableAuras = new();
+        public static HashSet<uint> MountAuras = new();
+        public static HashSet<uint> NextMeleeSpells = new();
+        public static HashSet<uint> AutoRepeatSpells = new();
+        public static Dictionary<uint, TaxiPath> TaxiPaths = new();
         public static int[,] TaxiNodesGraph = new int[250,250];
-        public static Dictionary<uint /*questId*/, uint /*questBit*/> QuestBits = new Dictionary<uint, uint>();
+        public static Dictionary<uint /*questId*/, uint /*questBit*/> QuestBits = new();
 
         // From Server
-        public static Dictionary<uint, ItemTemplate> ItemTemplates = new Dictionary<uint, ItemTemplate>();
-        public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new Dictionary<uint, CreatureTemplate>();
-        public static Dictionary<uint, QuestTemplate> QuestTemplates = new Dictionary<uint, QuestTemplate>();
-        public static Dictionary<uint, string> ItemNames = new Dictionary<uint, string>();
+        public static Dictionary<uint, ItemTemplate> ItemTemplates = new();
+        public static Dictionary<uint, CreatureTemplate> CreatureTemplates = new();
+        public static Dictionary<uint, QuestTemplate> QuestTemplates = new();
+        public static Dictionary<uint, string> ItemNames = new();
 
         #region GettersAndSetters
         public static void StoreItemName(uint entry, string name)
@@ -156,7 +156,7 @@ namespace HermesProxy.World
             }
             else
             {
-                Dictionary<uint, byte> dict = new Dictionary<uint, byte>();
+                Dictionary<uint, byte> dict = new();
                 dict.Add(spellId, slot);
                 ItemEffects.Add(itemId, dict);
             }
@@ -265,7 +265,7 @@ namespace HermesProxy.World
 
         public static List<ChatChannel> GetChatChannelsWithFlags(ChannelFlags flags)
         {
-            List<ChatChannel> channels = new List<ChatChannel>();
+            List<ChatChannel> channels = new();
             foreach (var channel in ChatChannels)
             {
                 if ((channel.Value.Flags & flags) == flags)
@@ -355,7 +355,7 @@ namespace HermesProxy.World
         public static void LoadBroadcastTexts()
         {
             var path = Path.Combine("CSV", $"BroadcastTexts{LegacyVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -369,7 +369,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    BroadcastText broadcastText = new BroadcastText
+                    BroadcastText broadcastText = new()
                     {
                         Entry = uint.Parse(fields[0]),
                         MaleText = fields[1].TrimEnd().Replace("\0", "").Replace("~", "\n"),
@@ -390,7 +390,7 @@ namespace HermesProxy.World
         public static void LoadItemTemplates()
         {
             var path = Path.Combine("CSV", $"Items{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -404,7 +404,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ItemDisplayData item = new ItemDisplayData
+                    ItemDisplayData item = new()
                     {
                         Entry = uint.Parse(fields[0]),
                         DisplayId = uint.Parse(fields[1]),
@@ -418,7 +418,7 @@ namespace HermesProxy.World
         public static void LoadBattlegrounds()
         {
             var path = Path.Combine("CSV", "Battlegrounds.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -432,7 +432,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    Battleground bg = new Battleground();
+                    Battleground bg = new();
                     uint bgId = uint.Parse(fields[0]);
                     bg.IsArena = byte.Parse(fields[1]) != 0;
                     for (int i = 0; i < 6; i++)
@@ -450,7 +450,7 @@ namespace HermesProxy.World
         public static void LoadChatChannels()
         {
             var path = Path.Combine("CSV", "ChatChannels.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -464,7 +464,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    ChatChannel channel = new ChatChannel
+                    ChatChannel channel = new()
                     {
                         Id = uint.Parse(fields[0]),
                         Flags = (ChannelFlags)uint.Parse(fields[1]),
@@ -478,7 +478,7 @@ namespace HermesProxy.World
         public static void LoadItemEnchantVisuals()
         {
             var path = Path.Combine("CSV", $"ItemEnchantVisuals{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -502,7 +502,7 @@ namespace HermesProxy.World
         public static void LoadSpellVisuals()
         {
             var path = Path.Combine("CSV", $"SpellVisuals{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -526,7 +526,7 @@ namespace HermesProxy.World
         public static void LoadLearnSpells()
         {
             var path = Path.Combine("CSV", "LearnSpells.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -554,7 +554,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"TotemSpells.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -581,7 +581,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"Gems{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -608,7 +608,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", "UnitDisplayScales.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -632,7 +632,7 @@ namespace HermesProxy.World
         public static void LoadTransports()
         {
             var path = Path.Combine("CSV", $"Transports{LegacyVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -656,7 +656,7 @@ namespace HermesProxy.World
         public static void LoadAreaNames()
         {
             var path = Path.Combine("CSV", $"AreaNames.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -683,7 +683,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", "DispellSpells.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -709,7 +709,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"StackableAuras{LegacyVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -735,7 +735,7 @@ namespace HermesProxy.World
                 return;
 
             var path = Path.Combine("CSV", $"MountAuras.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -758,7 +758,7 @@ namespace HermesProxy.World
         public static void LoadMeleeSpells()
         {
             var path = Path.Combine("CSV", $"MeleeSpells{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -781,7 +781,7 @@ namespace HermesProxy.World
         public static void LoadAutoRepeatSpells()
         {
             var path = Path.Combine("CSV", $"AutoRepeatSpells{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -803,7 +803,7 @@ namespace HermesProxy.World
         public static void LoadTaxiPaths()
         {
             var path = Path.Combine("CSV", $"TaxiPath{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -819,7 +819,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiPath taxiPath = new TaxiPath
+                    TaxiPath taxiPath = new()
                     {
                         Id = uint.Parse(fields[0]),
                         From = uint.Parse(fields[1]),
@@ -834,9 +834,9 @@ namespace HermesProxy.World
         public static void LoadTaxiPathNodesGraph()
         {
             // Load TaxiNodes (used in calculating first and last parts of path)
-            Dictionary<uint, TaxiNode> TaxiNodes = new Dictionary<uint, TaxiNode>();
+            Dictionary<uint, TaxiNode> TaxiNodes = new();
             var pathNodes = Path.Combine("CSV", $"TaxiNodes{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(pathNodes))
+            using (TextFieldParser csvParser = new(pathNodes))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -850,7 +850,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiNode taxiNode = new TaxiNode
+                    TaxiNode taxiNode = new()
                     {
                         Id = uint.Parse(fields[0]),
                         mapId = uint.Parse(fields[1]),
@@ -862,9 +862,9 @@ namespace HermesProxy.World
                 }
             }
             // Load TaxiPathNode (used in calculating rest of path)
-            Dictionary<uint, TaxiPathNode> TaxiPathNodes = new Dictionary<uint, TaxiPathNode>();
+            Dictionary<uint, TaxiPathNode> TaxiPathNodes = new();
             var pathPathNodes = Path.Combine("CSV", $"TaxiPathNode{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(pathPathNodes))
+            using (TextFieldParser csvParser = new(pathPathNodes))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -878,7 +878,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    TaxiPathNode taxiPathNode = new TaxiPathNode
+                    TaxiPathNode taxiPathNode = new()
                     {
                         Id = uint.Parse(fields[0]),
                         pathId = uint.Parse(fields[1]),
@@ -909,7 +909,7 @@ namespace HermesProxy.World
                         continue;
 
                     // save all node ids of this path
-                    HashSet<uint> pathNodeList = new HashSet<uint>();
+                    HashSet<uint> pathNodeList = new();
                     foreach (var itr in TaxiPathNodes)
                     {
                         TaxiPathNode pNode = itr.Value;
@@ -960,7 +960,7 @@ namespace HermesProxy.World
         public static void LoadQuestBits()
         {
             var path = Path.Combine("CSV", $"QuestV2_{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1001,7 +1001,7 @@ namespace HermesProxy.World
         public const uint HotfixCreatureDisplayInfoBegin = 220000;
         public const uint HotfixCreatureDisplayInfoExtraBegin = 230000;
         public const uint HotfixCreatureDisplayInfoOptionBegin = 240000;
-        public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
+        public static Dictionary<uint, HotfixRecord> Hotfixes = new();
         public static void LoadHotfixes()
         {
             LoadAreaTriggerHotfixes();
@@ -1024,7 +1024,7 @@ namespace HermesProxy.World
         public static void LoadAreaTriggerHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"AreaTrigger{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1041,7 +1041,7 @@ namespace HermesProxy.World
                     // Read current line fields, pointer moves to the next line.
                     string[] fields = csvParser.ReadFields();
 
-                    AreaTrigger at = new AreaTrigger
+                    AreaTrigger at = new()
                     {
                         Message = fields[0],
                         PositionX = float.Parse(fields[1]),
@@ -1063,7 +1063,7 @@ namespace HermesProxy.World
                         Flags = byte.Parse(fields[17])
                     };
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.AreaTrigger,
                         HotfixId = HotfixAreaTriggerBegin + counter
@@ -1096,7 +1096,7 @@ namespace HermesProxy.World
         public static void LoadSkillLineHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SkillLine{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1127,7 +1127,7 @@ namespace HermesProxy.World
                     ushort flags = ushort.Parse(fields[11]);
                     uint spellBookSpellID = uint.Parse(fields[12]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SkillLine,
                         HotfixId = HotfixSkillLineBegin + counter
@@ -1155,7 +1155,7 @@ namespace HermesProxy.World
         public static void LoadSkillRaceClassInfoHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SkillRaceClassInfo{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1181,7 +1181,7 @@ namespace HermesProxy.World
                     byte minLevel = byte.Parse(fields[6]);
                     ushort skillTierId = ushort.Parse(fields[7]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SkillRaceClassInfo,
                         HotfixId = HotfixSkillRaceClassInfoBegin + counter
@@ -1203,7 +1203,7 @@ namespace HermesProxy.World
         public static void LoadSkillLineAbilityHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SkillLineAbility{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1239,7 +1239,7 @@ namespace HermesProxy.World
                     uint characterPoints2 = uint.Parse(fields[16]);
 
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SkillLineAbility,
                         HotfixId = HotfixSkillLineAbilityBegin + counter
@@ -1271,7 +1271,7 @@ namespace HermesProxy.World
         public static void LoadSpellHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"Spell{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1293,7 +1293,7 @@ namespace HermesProxy.World
                     string description = fields[2];
                     string auraDescription = fields[3];
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.Spell,
                         HotfixId = HotfixSpellBegin + counter
@@ -1311,7 +1311,7 @@ namespace HermesProxy.World
         public static void LoadSpellNameHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellName{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1331,7 +1331,7 @@ namespace HermesProxy.World
                     uint id = uint.Parse(fields[0]);
                     string name = fields[1];
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SpellName,
                         HotfixId = HotfixSpellNameBegin + counter
@@ -1347,7 +1347,7 @@ namespace HermesProxy.World
         public static void LoadSpellLevelsHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellLevels{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1372,7 +1372,7 @@ namespace HermesProxy.World
                     byte maxPassiveAuraLevel = byte.Parse(fields[5]);
                     uint spellId = uint.Parse(fields[6]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SpellLevels,
                         HotfixId = HotfixSpellLevelsBegin + counter
@@ -1393,7 +1393,7 @@ namespace HermesProxy.World
         public static void LoadSpellAuraOptionsHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellAuraOptions{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1421,7 +1421,7 @@ namespace HermesProxy.World
                     uint procTypeMask1 = uint.Parse(fields[8]);
                     uint spellId = uint.Parse(fields[9]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SpellAuraOptions,
                         HotfixId = HotfixSpellAuraOptionsBegin + counter
@@ -1445,7 +1445,7 @@ namespace HermesProxy.World
         public static void LoadSpellMiscHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellMisc{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1489,7 +1489,7 @@ namespace HermesProxy.World
                     uint attributes14 = uint.Parse(fields[24]);
                     uint spellId = uint.Parse(fields[25]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SpellMisc,
                         HotfixId = HotfixSpellMiscBegin + counter
@@ -1529,7 +1529,7 @@ namespace HermesProxy.World
         public static void LoadSpellEffectHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellEffect{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1583,7 +1583,7 @@ namespace HermesProxy.World
                     short implicitTarget2 = short.Parse(fields[34]);
                     uint spellId = uint.Parse(fields[35]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SpellEffect,
                         HotfixId = HotfixSpellEffectBegin + counter
@@ -1633,7 +1633,7 @@ namespace HermesProxy.World
         public static void LoadSpellXSpellVisualHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"SpellXSpellVisual{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1669,7 +1669,7 @@ namespace HermesProxy.World
                     else
                         SpellVisuals.Add(spellId, id);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.SpellXSpellVisual,
                         HotfixId = HotfixSpellXSpellVisualBegin + counter
@@ -1697,7 +1697,7 @@ namespace HermesProxy.World
         public static void LoadItemSparseHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"ItemSparse{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -1842,7 +1842,7 @@ namespace HermesProxy.World
                     sbyte statValue10 = sbyte.Parse(fields[125]);
                     sbyte requiredLevel = sbyte.Parse(fields[126]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         Status = HotfixStatus.Valid,
                         TableHash = DB2Hash.ItemSparse,
@@ -1983,7 +1983,7 @@ namespace HermesProxy.World
         public static void LoadCreatureDisplayInfoHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"CreatureDisplayInfo{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -2028,7 +2028,7 @@ namespace HermesProxy.World
                     int textureVariationFileDataId2 = int.Parse(fields[25]);
                     int textureVariationFileDataId3 = int.Parse(fields[26]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.CreatureDisplayInfo,
                         HotfixId = HotfixCreatureDisplayInfoBegin + counter
@@ -2070,7 +2070,7 @@ namespace HermesProxy.World
         public static void LoadCreatureDisplayInfoExtraHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"CreatureDisplayInfoExtra{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -2103,7 +2103,7 @@ namespace HermesProxy.World
                     byte customDisplayOption2 = byte.Parse(fields[13]);
                     byte customDisplayOption3 = byte.Parse(fields[14]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         TableHash = DB2Hash.CreatureDisplayInfoExtra,
                         HotfixId = HotfixCreatureDisplayInfoExtraBegin + counter
@@ -2133,7 +2133,7 @@ namespace HermesProxy.World
         public static void LoadCreatureDisplayInfoOptionHotfixes()
         {
             var path = Path.Combine("CSV", "Hotfix", $"CreatureDisplayInfoOption{ModernVersion.ExpansionVersion}.csv");
-            using (TextFieldParser csvParser = new TextFieldParser(path))
+            using (TextFieldParser csvParser = new(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
                 csvParser.SetDelimiters(new string[] { "," });
@@ -2155,7 +2155,7 @@ namespace HermesProxy.World
                     int chrCustomizationChoiceId = int.Parse(fields[2]);
                     int creatureDisplayInfoExtraId = int.Parse(fields[3]);
 
-                    HotfixRecord record = new HotfixRecord
+                    HotfixRecord record = new()
                     {
                         Status = HotfixStatus.Valid,
                         TableHash = DB2Hash.CreatureDisplayInfoOption,
@@ -2192,7 +2192,7 @@ namespace HermesProxy.World
     public class Battleground
     {
         public bool IsArena;
-        public List<uint> MapIds = new List<uint>();
+        public List<uint> MapIds = new();
     }
     public class TaxiPath
     {

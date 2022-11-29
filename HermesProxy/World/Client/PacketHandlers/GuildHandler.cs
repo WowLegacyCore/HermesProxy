@@ -47,7 +47,7 @@ namespace HermesProxy.World.Client
                     uint rankId = GetSession().GetGuildRankIdByName(GetSession().GameState.GetPlayerGuildId(GetSession().GameState.CurrentPlayerGuid), strings[2]);
                     if (officer != null && player != null)
                     {
-                        GuildSendRankChange promote = new GuildSendRankChange
+                        GuildSendRankChange promote = new()
                         {
                             Officer = officer,
                             Other = player,
@@ -60,7 +60,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.MOTD:
                 {
-                    GuildEventMotd motd = new GuildEventMotd
+                    GuildEventMotd motd = new()
                     {
                         MotdText = strings[0]
                     };
@@ -69,7 +69,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.PlayerJoined:
                 {
-                    GuildEventPlayerJoined joined = new GuildEventPlayerJoined
+                    GuildEventPlayerJoined joined = new()
                     {
                         Guid = guid,
                         VirtualRealmAddress = GetSession().RealmId.GetAddress(),
@@ -80,7 +80,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.PlayerLeft:
                 {
-                    GuildEventPlayerLeft left = new GuildEventPlayerLeft
+                    GuildEventPlayerLeft left = new()
                     {
                         Removed = false,
                         LeaverGUID = guid,
@@ -92,7 +92,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.PlayerRemoved:
                 {
-                    GuildEventPlayerLeft removed = new GuildEventPlayerLeft
+                    GuildEventPlayerLeft removed = new()
                     {
                         Removed = true,
                         LeaverGUID = guid,
@@ -115,7 +115,7 @@ namespace HermesProxy.World.Client
                     WowGuid128 newLeader = GetSession().GameState.GetPlayerGuidByName(strings[1]);
                     if (oldLeader != null && newLeader != null)
                     {
-                        GuildEventNewLeader leader = new GuildEventNewLeader
+                        GuildEventNewLeader leader = new()
                         {
                             OldLeaderGUID = oldLeader,
                             OldLeaderVirtualRealmAddress = GetSession().RealmId.GetAddress(),
@@ -130,7 +130,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.Disbanded:
                 {
-                    GuildEventDisbanded disband = new GuildEventDisbanded();
+                    GuildEventDisbanded disband = new();
                     SendPacketToClient(disband);
                     break;
                 }
@@ -140,7 +140,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.RankUpdated:
                 {
-                    GuildEventRanksUpdated ranks = new GuildEventRanksUpdated();
+                    GuildEventRanksUpdated ranks = new();
                     SendPacketToClient(ranks);
                     break;
                 }
@@ -151,7 +151,7 @@ namespace HermesProxy.World.Client
                 case GuildEventType.PlayerSignedOn:
                 case GuildEventType.PlayerSignedOff:
                 {
-                    GuildEventPresenceChange presence = new GuildEventPresenceChange
+                    GuildEventPresenceChange presence = new()
                     {
                         Guid = guid,
                         VirtualRealmAddress = GetSession().RealmId.GetAddress(),
@@ -167,13 +167,13 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.BankTabPurchased:
                 {
-                    GuildEventTabAdded tab = new GuildEventTabAdded();
+                    GuildEventTabAdded tab = new();
                     SendPacketToClient(tab);
                     break;
                 }
                 case GuildEventType.BankTabUpdated:
                 {
-                    GuildEventTabModified tab = new GuildEventTabModified
+                    GuildEventTabModified tab = new()
                     {
                         Name = strings[0],
                         Icon = strings[1]
@@ -183,7 +183,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.BankMoneyUpdate:
                 {
-                    GuildEventBankMoneyChanged money = new GuildEventBankMoneyChanged
+                    GuildEventBankMoneyChanged money = new()
                     {
                         Money = (ulong)int.Parse(strings[0], System.Globalization.NumberStyles.HexNumber)
                     };
@@ -196,7 +196,7 @@ namespace HermesProxy.World.Client
                 }
                 case GuildEventType.BankTextChanged:
                 {
-                    GuildEventTabTextChanged tab = new GuildEventTabTextChanged();
+                    GuildEventTabTextChanged tab = new();
                     SendPacketToClient(tab);
                     break;
                 }
@@ -220,13 +220,13 @@ namespace HermesProxy.World.Client
             };
             GetSession().StoreGuildGuidAndName(guild.GuildGUID, guild.Info.GuildName);
 
-            List<string> ranks = new List<string>();
+            List<string> ranks = new();
             for (uint i = 0; i < 10; i++)
             {
                 string rankName = packet.ReadCString();
                 if (!string.IsNullOrEmpty(rankName))
                 {
-                    RankInfo rank = new RankInfo
+                    RankInfo rank = new()
                     {
                         RankID = i,
                         RankOrder = i,
@@ -299,10 +299,10 @@ namespace HermesProxy.World.Client
             var ranksCount = packet.ReadInt32();
             if (ranksCount > 0)
             {
-                GuildRanks ranks = new GuildRanks();
+                GuildRanks ranks = new();
                 for (byte i = 0; i < ranksCount; i++)
                 {
-                    GuildRankData rank = new GuildRankData
+                    GuildRankData rank = new()
                     {
                         RankID = i,
                         RankOrder = i,
@@ -328,8 +328,8 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < membersCount; i++)
             {
-                GuildRosterMemberData member = new GuildRosterMemberData();
-                PlayerCache cache = new PlayerCache();
+                GuildRosterMemberData member = new();
+                PlayerCache cache = new();
                 member.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 member.VirtualRealmAddress = GetSession().RealmId.GetAddress();
                 member.Status = packet.ReadUInt8();
@@ -416,7 +416,7 @@ namespace HermesProxy.World.Client
                 var size = packet.ReadUInt8();
                 for (var i = 0; i < size; i++)
                 {
-                    GuildBankTabInfo tabInfo = new GuildBankTabInfo
+                    GuildBankTabInfo tabInfo = new()
                     {
                         TabIndex = i,
                         Name = packet.ReadCString(),
@@ -429,7 +429,7 @@ namespace HermesProxy.World.Client
             var slots = packet.ReadUInt8();
             for (var i = 0; i < slots; i++)
             {
-                GuildBankItemInfo itemInfo = new GuildBankItemInfo
+                GuildBankItemInfo itemInfo = new()
                 {
                     Slot = packet.ReadUInt8()
                 };
@@ -462,7 +462,7 @@ namespace HermesProxy.World.Client
                             uint itemId = GameData.GetGemFromEnchantId(enchantId);
                             if (itemId != 0)
                             {
-                                ItemGemData gem = new ItemGemData
+                                ItemGemData gem = new()
                                 {
                                     Slot = slot
                                 };
@@ -503,7 +503,7 @@ namespace HermesProxy.World.Client
             byte logSize = packet.ReadUInt8();
             for (byte i = 0; i < logSize; i++)
             {
-                GuildBankLogEntry logEntry = new GuildBankLogEntry
+                GuildBankLogEntry logEntry = new()
                 {
                     EntryType = packet.ReadInt8(),
                     PlayerGUID = packet.ReadGuid().To128(GetSession().GameState)

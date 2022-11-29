@@ -11,7 +11,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_NOTIFY_RECEIVED_MAIL)]
         void HandleNotifyReceivedMail(WorldPacket packet)
         {
-            NotifyReceivedMail mail = new NotifyReceivedMail
+            NotifyReceivedMail mail = new()
             {
                 Delay = packet.ReadFloat()
             };
@@ -21,7 +21,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_QUERY_NEXT_MAIL_TIME)]
         void HandleQueryNextMailTime(WorldPacket packet)
         {
-            MailQueryNextTimeResult result = new MailQueryNextTimeResult
+            MailQueryNextTimeResult result = new()
             {
                 NextMailTime = packet.ReadFloat()
             };
@@ -29,7 +29,7 @@ namespace HermesProxy.World.Client
             {
                 if (result.NextMailTime == 0)
                 {
-                    MailNextTimeEntry mail = new MailNextTimeEntry
+                    MailNextTimeEntry mail = new()
                     {
                         SenderGuid = GetSession().GameState.CurrentPlayerGuid,
                         AltSenderID = 0,
@@ -45,7 +45,7 @@ namespace HermesProxy.World.Client
                 var count = packet.ReadUInt32();
                 for (var i = 0; i < count; ++i)
                 {
-                    MailNextTimeEntry mail = new MailNextTimeEntry
+                    MailNextTimeEntry mail = new()
                     {
                         SenderGuid = packet.ReadGuid().To128(GetSession().GameState),
                         AltSenderID = packet.ReadInt32(),
@@ -62,7 +62,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MAIL_LIST_RESULT)]
         void HandleMailListResult(WorldPacket packet)
         {
-            MailListResult result = new MailListResult();
+            MailListResult result = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 result.TotalNumRecords = packet.ReadInt32();
 
@@ -73,7 +73,7 @@ namespace HermesProxy.World.Client
 
             for (var i = 0; i < count; ++i)
             {
-                MailListEntry mail = new MailListEntry();
+                MailListEntry mail = new();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     packet.ReadUInt16(); // Message Size
@@ -105,7 +105,7 @@ namespace HermesProxy.World.Client
                     if (mail.ItemTextId != 0 && !GetSession().GameState.ItemTexts.ContainsKey(mail.ItemTextId))
                     {
                         GetSession().GameState.RequestedItemTextIds.Add(mail.ItemTextId);
-                        WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_TEXT_QUERY);
+                        WorldPacket query = new(Opcode.CMSG_ITEM_TEXT_QUERY);
                         query.WriteUInt32(mail.ItemTextId);
                         query.WriteInt32(mail.MailID);
                         query.WriteUInt32(0); // unk
@@ -195,7 +195,7 @@ namespace HermesProxy.World.Client
 
         MailAttachedItem ReadMailItem(WorldPacket packet)
         {
-            MailAttachedItem mailItem = new MailAttachedItem();
+            MailAttachedItem mailItem = new();
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
@@ -215,7 +215,7 @@ namespace HermesProxy.World.Client
 
             for (byte k = 0; k < enchantmentCount; ++k)
             {
-                ItemEnchantData enchant = new ItemEnchantData
+                ItemEnchantData enchant = new()
                 {
                     Slot = k
                 };
@@ -250,7 +250,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MAIL_COMMAND_RESULT)]
         void HandleMailCommandResult(WorldPacket packet)
         {
-            MailCommandResult mail = new MailCommandResult
+            MailCommandResult mail = new()
             {
                 MailID = packet.ReadUInt32(),
                 Command = (MailActionType)packet.ReadUInt32(),

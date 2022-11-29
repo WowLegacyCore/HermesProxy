@@ -147,10 +147,10 @@ public class CompletedQuestTracker
         else
             _cachedQuestCompleted[idx] &= ~(((ulong)1) << bitIdx);
 
-        ObjectUpdate updateData = new ObjectUpdate(Session.GameState.CurrentPlayerGuid, UpdateTypeModern.Values, Session);
+        ObjectUpdate updateData = new(Session.GameState.CurrentPlayerGuid, UpdateTypeModern.Values, Session);
         updateData.ActivePlayerData.QuestCompleted[idx] = _cachedQuestCompleted[idx];
 
-        UpdateObject updatePacket = new UpdateObject(Session.GameState);
+        UpdateObject updatePacket = new(Session.GameState);
         updatePacket.ObjectUpdates.Add(updateData);
         Session.WorldClient.SendPacketToClient(updatePacket);
     }

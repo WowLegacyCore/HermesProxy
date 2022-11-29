@@ -168,7 +168,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteString(InfoText);
         }
 
-        public List<GuildRosterMemberData> MemberData = new List<GuildRosterMemberData>();
+        public List<GuildRosterMemberData> MemberData = new();
         public string WelcomeText;
         public string InfoText;
         public uint CreateDate;
@@ -266,7 +266,7 @@ namespace HermesProxy.World.Server.Packets
             Ranks.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<GuildRankData> Ranks = new List<GuildRankData>();
+        public List<GuildRankData> Ranks = new();
     }
 
     public class GuildRankData

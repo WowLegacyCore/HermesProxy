@@ -926,8 +926,8 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public WowGuid128 PlayerGUID;
-        public List<PvPBracketInspectData> Brackets = new List<PvPBracketInspectData>();
-        public List<ArenaTeamInspectData> ArenaTeams = new List<ArenaTeamInspectData>();
+        public List<PvPBracketInspectData> Brackets = new();
+        public List<ArenaTeamInspectData> ArenaTeams = new();
     }
 
     public class PvPBracketInspectData

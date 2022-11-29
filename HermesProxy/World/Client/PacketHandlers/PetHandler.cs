@@ -67,7 +67,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_ACTION_SOUND)]
         void HandlePetActionSound(WorldPacket packet)
         {
-            PetActionSound sound = new PetActionSound
+            PetActionSound sound = new()
             {
                 UnitGUID = packet.ReadGuid().To128(GetSession().GameState),
                 Action = packet.ReadUInt32()
@@ -78,7 +78,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_BROKEN)]
         void HandlePetBroken(WorldPacket packet)
         {
-            PrintNotification notify = new PrintNotification
+            PrintNotification notify = new()
             {
                 NotifyText = "Your pet has run away"
             };
@@ -88,7 +88,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_LIST_STABLED_PETS)]
         void HandleListStabledPets(WorldPacket packet)
         {
-            PetGuids pets = new PetGuids();
+            PetGuids pets = new();
             var updateFields = GetSession().GameState.GetCachedObjectFieldsLegacy(GetSession().GameState.CurrentPlayerGuid);
             int UNIT_FIELD_SUMMON = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_SUMMON);
             if (UNIT_FIELD_SUMMON >= 0 && updateFields.ContainsKey(UNIT_FIELD_SUMMON))
@@ -99,7 +99,7 @@ namespace HermesProxy.World.Client
             }
             SendPacketToClient(pets);
 
-            PetStableList stable = new PetStableList
+            PetStableList stable = new()
             {
                 StableMaster = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -107,7 +107,7 @@ namespace HermesProxy.World.Client
             stable.NumStableSlots = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)
             {
-                PetStableInfo pet = new PetStableInfo
+                PetStableInfo pet = new()
                 {
                     PetNumber = packet.ReadUInt32(),
                     CreatureID = packet.ReadUInt32(),
@@ -126,7 +126,7 @@ namespace HermesProxy.World.Client
                     pet.DisplayID = template.Display.CreatureDisplay[0].CreatureDisplayID;
                 else
                 {
-                    WorldPacket query = new WorldPacket(Opcode.CMSG_QUERY_CREATURE);
+                    WorldPacket query = new(Opcode.CMSG_QUERY_CREATURE);
                     query.WriteUInt32(pet.CreatureID);
                     query.WriteGuid(WowGuid64.Empty);
                     SendPacket(query);
@@ -140,7 +140,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PET_STABLE_RESULT)]
         void HandlePetStableResult(WorldPacket packet)
         {
-            PetStableResult stable = new PetStableResult
+            PetStableResult stable = new()
             {
                 Result = packet.ReadUInt8()
             };

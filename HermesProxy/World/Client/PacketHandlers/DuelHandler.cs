@@ -9,7 +9,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_REQUESTED)]
         void HandleDuelRequested(WorldPacket packet)
         {
-            DuelRequested duel = new DuelRequested
+            DuelRequested duel = new()
             {
                 ArbiterGUID = packet.ReadGuid().To128(GetSession().GameState),
                 RequestedByGUID = packet.ReadGuid().To128(GetSession().GameState)
@@ -21,7 +21,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_COUNTDOWN)]
         void HandleDuelCountdown(WorldPacket packet)
         {
-            DuelCountdown duel = new DuelCountdown
+            DuelCountdown duel = new()
             {
                 Countdown = packet.ReadUInt32()
             };
@@ -31,7 +31,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_COMPLETE)]
         void HandleDuelComplete(WorldPacket packet)
         {
-            DuelComplete duel = new DuelComplete
+            DuelComplete duel = new()
             {
                 Started = packet.ReadBool()
             };
@@ -41,7 +41,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_WINNER)]
         void HandleDuelWinner(WorldPacket packet)
         {
-            DuelWinner duel = new DuelWinner
+            DuelWinner duel = new()
             {
                 Fled = packet.ReadBool(),
                 BeatenName = packet.ReadCString(),
@@ -55,14 +55,14 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DUEL_IN_BOUNDS)]
         void HandleDuelInBounds(WorldPacket packet)
         {
-            DuelInBounds duel = new DuelInBounds();
+            DuelInBounds duel = new();
             SendPacketToClient(duel);
         }
 
         [PacketHandler(Opcode.SMSG_DUEL_OUT_OF_BOUNDS)]
         void HandleDuelOutOfBounds(WorldPacket packet)
         {
-            DuelOutOfBounds duel = new DuelOutOfBounds();
+            DuelOutOfBounds duel = new();
             SendPacketToClient(duel);
         }
     }

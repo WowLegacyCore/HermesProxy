@@ -14,14 +14,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_ENUM_CHARACTERS)]
         void HandleEnumCharacters(EnumCharacters charEnum)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_ENUM_CHARACTERS);
+            WorldPacket packet = new(Opcode.CMSG_ENUM_CHARACTERS);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_CREATE_CHARACTER)]
         void HandleCreateCharacter(CreateCharacter charCreate)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CREATE_CHARACTER);
+            WorldPacket packet = new(Opcode.CMSG_CREATE_CHARACTER);
             packet.WriteCString(charCreate.CreateInfo.Name);
             packet.WriteUInt8((byte)charCreate.CreateInfo.RaceId);
             packet.WriteUInt8((byte)charCreate.CreateInfo.ClassId);
@@ -40,7 +40,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHAR_DELETE)]
         void HandleCharDelete(CharDelete charDelete)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAR_DELETE);
+            WorldPacket packet = new(Opcode.CMSG_CHAR_DELETE);
             packet.WriteGuid(charDelete.Guid.To64());
             SendPacketToServer(packet);
         }
@@ -63,7 +63,7 @@ namespace HermesProxy.World.Server
                 GetSession().GameState.CurrentPlayerStorage.LoadCurrentPlayer();
             }
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
+            WorldPacket packet = new(Opcode.CMSG_NAME_QUERY);
             packet.WriteGuid(queryPlayerName.Player.To64());
             SendPacketToServer(packet, GetSession().GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
         }
@@ -87,7 +87,7 @@ namespace HermesProxy.World.Server
             GetSession().AccountMetaDataMgr.SaveLastSelectedCharacter(realm.Name, selectedChar.Name, playerLogin.Guid.Low, Time.UnixTime);
 
             GetSession().GameState.IsFirstEnterWorld = true;
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
+            WorldPacket packet = new(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());
             SendPacketToServer(packet);
             SendConnectToInstance(ConnectToSerial.WorldAttempt1);
@@ -97,21 +97,21 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_LOGOUT_REQUEST)]
         void HandleLogoutRequest(LogoutRequest logoutRequest)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_LOGOUT_REQUEST);
+            WorldPacket packet = new(Opcode.CMSG_LOGOUT_REQUEST);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_LOGOUT_CANCEL)]
         void HandleLogoutCancel(LogoutCancel logoutCancel)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_LOGOUT_CANCEL);
+            WorldPacket packet = new(Opcode.CMSG_LOGOUT_CANCEL);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_REQUEST_PLAYED_TIME)]
         void HandleRequestPlayedTime(RequestPlayedTime played)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_REQUEST_PLAYED_TIME);
+            WorldPacket packet = new(Opcode.CMSG_REQUEST_PLAYED_TIME);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.WriteBool(played.TriggerScriptEvent);
             SendPacketToServer(packet);
@@ -121,14 +121,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_TOGGLE_PVP)]
         void HandleTogglePvP(TogglePvP pvp)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_TOGGLE_PVP);
+            WorldPacket packet = new(Opcode.CMSG_TOGGLE_PVP);
             SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_SET_PVP)]
         void HandleTogglePvP(SetPvP pvp)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_TOGGLE_PVP);
+            WorldPacket packet = new(Opcode.CMSG_TOGGLE_PVP);
             packet.WriteBool(pvp.Enable);
             SendPacketToServer(packet);
         }
@@ -136,7 +136,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SET_ACTION_BUTTON)]
         void HandleSetActionButton(SetActionButton button)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTION_BUTTON);
+            WorldPacket packet = new(Opcode.CMSG_SET_ACTION_BUTTON);
             packet.WriteUInt8(button.Index);
             packet.WriteUInt16(button.Action);
             packet.WriteUInt16(button.Type);
@@ -146,7 +146,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SET_ACTION_BAR_TOGGLES)]
         void HandleSetActionBarToggles(SetActionBarToggles bars)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_ACTION_BAR_TOGGLES);
+            WorldPacket packet = new(Opcode.CMSG_SET_ACTION_BAR_TOGGLES);
             packet.WriteUInt8(bars.Mask);
             SendPacketToServer(packet);
         }
@@ -154,7 +154,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_UNLEARN_SKILL)]
         void HandleUnlearnSkill(UnlearnSkill skill)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_UNLEARN_SKILL);
+            WorldPacket packet = new(Opcode.CMSG_UNLEARN_SKILL);
             packet.WriteUInt32(skill.SkillLine);
             SendPacketToServer(packet);
         }
@@ -163,7 +163,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_PLAYER_SHOWING_HELM)]
         void HandleShowHelmOrCloak(PlayerShowingHelmOrCloak show)
         {
-            WorldPacket packet = new WorldPacket(show.GetUniversalOpcode());
+            WorldPacket packet = new(show.GetUniversalOpcode());
             packet.WriteBool(show.Showing);
             SendPacketToServer(packet);
         }
@@ -171,7 +171,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_INSPECT)]
         void HandleInspect(Inspect inspect)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_INSPECT);
+            WorldPacket packet = new(Opcode.CMSG_INSPECT);
             packet.WriteGuid(inspect.Target.To64());
             SendPacketToServer(packet);
         }
@@ -179,7 +179,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_INSPECT_HONOR_STATS)]
         void HandleInspectHonorStats(Inspect inspect)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_INSPECT_HONOR_STATS);
+            WorldPacket packet = new(Opcode.MSG_INSPECT_HONOR_STATS);
             packet.WriteGuid(inspect.Target.To64());
             SendPacketToServer(packet);
         }
@@ -189,13 +189,13 @@ namespace HermesProxy.World.Server
         {
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                WorldPacket packet = new WorldPacket(Opcode.MSG_INSPECT_ARENA_TEAMS);
+                WorldPacket packet = new(Opcode.MSG_INSPECT_ARENA_TEAMS);
                 packet.WriteGuid(inspect.Target.To64());
                 SendPacketToServer(packet);
             }
             else
             {
-                InspectPvP pvp = new InspectPvP
+                InspectPvP pvp = new()
                 {
                     PlayerGUID = inspect.Target
                 };
@@ -209,7 +209,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHARACTER_RENAME_REQUEST)]
         void HandleCharacterRenameRequest(CharacterRenameRequest rename)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHARACTER_RENAME_REQUEST);
+            WorldPacket packet = new(Opcode.CMSG_CHARACTER_RENAME_REQUEST);
             packet.WriteGuid(rename.Guid.To64());
             packet.WriteCString(rename.NewName);
             SendPacketToServer(packet);

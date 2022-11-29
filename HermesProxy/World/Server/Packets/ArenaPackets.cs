@@ -73,7 +73,7 @@ namespace HermesProxy.World.Server.Packets
         public uint SeasonWins;
         public uint TeamRating;
         public uint PlayerRating;
-        public List<ArenaTeamMember> Members = new List<ArenaTeamMember>();
+        public List<ArenaTeamMember> Members = new();
     }
 
     struct ArenaTeamMember

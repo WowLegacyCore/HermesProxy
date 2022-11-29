@@ -17,7 +17,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_MOTD)]
         void HandleMotd(WorldPacket packet)
         {
-            MOTD motd = new MOTD();
+            MOTD motd = new();
             uint count = packet.ReadUInt32();
             for (uint i = 0; i < count; i++)
                 motd.Text.Add(packet.ReadCString());

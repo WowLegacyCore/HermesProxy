@@ -200,7 +200,7 @@ namespace HermesProxy.Auth
 
         private void HandlePacket(byte[] buffer, int size)
         {
-            ByteBuffer packet = new ByteBuffer(buffer);
+            ByteBuffer packet = new(buffer);
             AuthCommand opcode = (AuthCommand)packet.ReadUInt8();
             Log.PrintNet(LogType.Debug, LogNetDir.S2P, $"Received opcode {opcode} size {size}.");
 
@@ -224,7 +224,7 @@ namespace HermesProxy.Auth
 
         private void SendLogonChallenge()
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
             buffer.WriteUInt8((byte)(LegacyVersion.ExpansionVersion > 1 ? 8 : 3));
             buffer.WriteUInt16((ushort)(_username.Length + 30));
@@ -405,7 +405,7 @@ namespace HermesProxy.Auth
 
         private void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)AuthCommand.LOGON_PROOF);
             buffer.WriteBytes(A);
             buffer.WriteBytes(M1);
@@ -468,7 +468,7 @@ namespace HermesProxy.Auth
 
         public void RequestRealmListUpdate()
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)AuthCommand.REALM_LIST);
             for (int i = 0; i < 4; i++)
                 buffer.WriteUInt8(0);
@@ -491,11 +491,11 @@ namespace HermesProxy.Auth
             }
 
             Log.Print(LogType.Network, $"Received {realmsCount} realms.");
-            List<RealmInfo> realmList = new List<RealmInfo>();
+            List<RealmInfo> realmList = new();
 
             for (ushort i = 0; i < realmsCount; i++)
             {
-                RealmInfo realmInfo = new RealmInfo
+                RealmInfo realmInfo = new()
                 {
                     ID = i
                 };

@@ -271,19 +271,19 @@ namespace HermesProxy.World.Server.Packets
                 {
                     case ClientVersionBuild.V1_14_0_40237:
                     {
-                        Objects.Version.V1_14_0_40237.ObjectUpdateBuilder builder = new Objects.Version.V1_14_0_40237.ObjectUpdateBuilder(update, _gameState);
+                        Objects.Version.V1_14_0_40237.ObjectUpdateBuilder builder = new(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
                     }
                     case ClientVersionBuild.V1_14_1_40688:
                     {
-                        Objects.Version.V1_14_1_40688.ObjectUpdateBuilder builder = new Objects.Version.V1_14_1_40688.ObjectUpdateBuilder(update, _gameState);
+                        Objects.Version.V1_14_1_40688.ObjectUpdateBuilder builder = new(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
                     }
                     case ClientVersionBuild.V2_5_2_39570:
                     {
-                        Objects.Version.V2_5_2_39570.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_39570.ObjectUpdateBuilder(update, _gameState);
+                        Objects.Version.V2_5_2_39570.ObjectUpdateBuilder builder = new(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
                     }
@@ -305,9 +305,9 @@ namespace HermesProxy.World.Server.Packets
         public ushort MapID;
         public byte[] Data;
 
-        public List<WowGuid128> OutOfRangeGuids = new List<WowGuid128>();
-        public List<WowGuid128> DestroyedGuids = new List<WowGuid128>();
-        public List<ObjectUpdate> ObjectUpdates = new List<ObjectUpdate>();
+        public List<WowGuid128> OutOfRangeGuids = new();
+        public List<WowGuid128> DestroyedGuids = new();
+        public List<ObjectUpdate> ObjectUpdates = new();
     }
 
     public class PowerUpdate : ServerPacket

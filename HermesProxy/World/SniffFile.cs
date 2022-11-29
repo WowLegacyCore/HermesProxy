@@ -20,7 +20,7 @@ namespace HermesProxy.World
 
         readonly BinaryWriter _fileWriter;
         readonly ushort _gameVersion;
-        readonly System.Threading.Mutex _mutex = new System.Threading.Mutex();
+        readonly System.Threading.Mutex _mutex = new();
 
         public void WriteHeader()
         {

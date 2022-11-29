@@ -135,7 +135,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_STATUS)]
         void HandleQuestGiverStatus(WorldPacket packet)
         {
-            QuestGiverStatusPkt response = new QuestGiverStatusPkt();
+            QuestGiverStatusPkt response = new();
             response.QuestGiver.Guid = packet.ReadGuid().To128(GetSession().GameState);
             response.QuestGiver.Status = LegacyVersion.ConvertQuestGiverStatus(packet.ReadUInt8());
             SendPacketToClient(response);
@@ -144,7 +144,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_STATUS_MULTIPLE)]
         void HandleQuestGiverStatusMultple(WorldPacket packet)
         {
-            QuestGiverStatusMultiple response = new QuestGiverStatusMultiple();
+            QuestGiverStatusMultiple response = new();
             int count = packet.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -161,7 +161,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_QUEST_LIST_MESSAGE)]
         void HandleQuestGiverQuestListMessage(WorldPacket packet)
         {
-            QuestGiverQuestListMessage quests = new QuestGiverQuestListMessage
+            QuestGiverQuestListMessage quests = new()
             {
                 QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -207,7 +207,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_REQUEST_ITEMS)]
         void HandleQuestGiverRequestItems(WorldPacket packet)
         {
-            QuestGiverRequestItems quest = new QuestGiverRequestItems
+            QuestGiverRequestItems quest = new()
             {
                 QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -259,7 +259,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_OFFER_REWARD_MESSAGE)]
         void HandleQuestGiverOfferRewardMessage(WorldPacket packet)
         {
-            QuestGiverOfferRewardMessage quest = new QuestGiverOfferRewardMessage();
+            QuestGiverOfferRewardMessage quest = new();
             quest.QuestData.QuestGiverGUID = packet.ReadGuid().To128(GetSession().GameState);
             GetSession().GameState.CurrentInteractedWithNPC = quest.QuestData.QuestGiverGUID;
             quest.QuestData.QuestGiverCreatureID = quest.QuestData.QuestGiverGUID.GetEntry();
@@ -296,7 +296,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_QUEST_COMPLETE)]
         void HandleQuestGiverQuestComplete(WorldPacket packet)
         {
-            QuestGiverQuestComplete quest = new QuestGiverQuestComplete
+            QuestGiverQuestComplete quest = new()
             {
                 QuestID = packet.ReadUInt32()
             };
@@ -359,7 +359,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_QUEST_FAILED)]
         void HandleQuestGiverQuestFailed(WorldPacket packet)
         {
-            QuestGiverQuestFailed quest = new QuestGiverQuestFailed
+            QuestGiverQuestFailed quest = new()
             {
                 QuestID = packet.ReadUInt32(),
                 Reason = LegacyVersion.ConvertInventoryResult(packet.ReadUInt32())
@@ -370,7 +370,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_GIVER_INVALID_QUEST)]
         void HandleQuestGiverInvalidQuest(WorldPacket packet)
         {
-            QuestGiverInvalidQuest quest = new QuestGiverInvalidQuest
+            QuestGiverInvalidQuest quest = new()
             {
                 Reason = (QuestFailedReasons)packet.ReadUInt32()
             };
@@ -382,7 +382,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_FAILED_TIMER)]
         void HandleQuestUpdateStatus(WorldPacket packet)
         {
-            QuestUpdateStatus quest = new QuestUpdateStatus(packet.GetUniversalOpcode(false))
+            QuestUpdateStatus quest = new(packet.GetUniversalOpcode(false))
             {
                 QuestID = packet.ReadUInt32()
             };
@@ -408,7 +408,7 @@ namespace HermesProxy.World.Client
 
                     if (GameData.GetQuestTemplate((uint)logEntry.QuestID) == null)
                     {
-                        WorldPacket packet2 = new WorldPacket(Opcode.CMSG_QUERY_QUEST_INFO);
+                        WorldPacket packet2 = new(Opcode.CMSG_QUERY_QUEST_INFO);
                         packet2.WriteUInt32((uint)logEntry.QuestID);
                         SendPacketToServer(packet2);
                     }
@@ -419,7 +419,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_UPDATE_ADD_KILL)]
         void HandleQuestUpdateAddKill(WorldPacket packet)
         {
-            QuestUpdateAddCredit credit = new QuestUpdateAddCredit
+            QuestUpdateAddCredit credit = new()
             {
                 QuestID = packet.ReadUInt32()
             };
@@ -435,7 +435,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUEST_CONFIRM_ACCEPT)]
         void HandleQuestConfirmAccept(WorldPacket packet)
         {
-            QuestConfirmAccept quest = new QuestConfirmAccept
+            QuestConfirmAccept quest = new()
             {
                 QuestID = packet.ReadUInt32(),
                 QuestTitle = packet.ReadCString(),
@@ -447,7 +447,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_QUEST_PUSH_RESULT)]
         void HandleQuestPushResult(WorldPacket packet)
         {
-            QuestPushResult quest = new QuestPushResult
+            QuestPushResult quest = new()
             {
                 SenderGUID = packet.ReadGuid().To128(GetSession().GameState),
                 Result = (QuestPushReason)packet.ReadUInt8()

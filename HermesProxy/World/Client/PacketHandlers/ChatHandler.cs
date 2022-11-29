@@ -55,7 +55,7 @@ namespace HermesProxy.World.Client
 
                     GetSession().GameState.SetChannelId(channelName, channelId);
 
-                    ChannelNotifyJoined joined = new ChannelNotifyJoined
+                    ChannelNotifyJoined joined = new()
                     {
                         Channel = channelName,
                         ChannelFlags = flags,
@@ -68,7 +68,7 @@ namespace HermesProxy.World.Client
                 }
                 case ChatNotify.YouLeft:
                 {
-                    ChannelNotifyLeft left = new ChannelNotifyLeft
+                    ChannelNotifyLeft left = new()
                     {
                         Channel = channelName
                     };
@@ -138,7 +138,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CHANNEL_LIST)]
         void HandleChannelList(WorldPacket packet)
         {
-            ChannelListResponse list = new ChannelListResponse();
+            ChannelListResponse list = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 list.Display = packet.ReadBool();
             else
@@ -148,7 +148,7 @@ namespace HermesProxy.World.Client
             int count = packet.ReadInt32();
             for (int i = 0; i < count; i++)
             {
-                ChannelPlayer member = new ChannelPlayer
+                ChannelPlayer member = new()
                 {
                     Guid = packet.ReadGuid().To128(GetSession().GameState),
                     VirtualRealmAddress = GetSession().RealmId.GetAddress(),
@@ -221,7 +221,7 @@ namespace HermesProxy.World.Client
                 return;
 
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
-            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, text, language, sender, senderName, receiver, "", channelName, chatFlags, addonPrefix);
+            ChatPkt chat = new(GetSession(), chatTypeModern, text, language, sender, senderName, receiver, "", channelName, chatFlags, addonPrefix);
             SendPacketToClient(chat);
         }
 
@@ -342,7 +342,7 @@ namespace HermesProxy.World.Client
                 return;
 
             ChatMessageTypeModern chatTypeModern = (ChatMessageTypeModern)Enum.Parse(typeof(ChatMessageTypeModern), chatType.ToString());
-            ChatPkt chat = new ChatPkt(GetSession(), chatTypeModern, text, language, sender, senderName, receiver, receiverName, channelName, chatFlags, addonPrefix, achievementId);
+            ChatPkt chat = new(GetSession(), chatTypeModern, text, language, sender, senderName, receiver, receiverName, channelName, chatFlags, addonPrefix, achievementId);
             SendPacketToClient(chat);
         }
 
@@ -353,7 +353,7 @@ namespace HermesProxy.World.Client
                 return; // was handled by us
             }
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MESSAGECHAT);
+            WorldPacket packet = new(Opcode.CMSG_MESSAGECHAT);
             packet.WriteUInt32((uint)type);
             packet.WriteUInt32(lang);
 
@@ -429,7 +429,7 @@ namespace HermesProxy.World.Client
                 return; // was handled by us
             }
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MESSAGECHAT);
+            WorldPacket packet = new(Opcode.CMSG_MESSAGECHAT);
             packet.WriteUInt32((uint)type);
             packet.WriteUInt32(lang);
 
@@ -467,7 +467,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_EMOTE)]
         void HandleEmote(WorldPacket packet)
         {
-            EmoteMessage emote = new EmoteMessage
+            EmoteMessage emote = new()
             {
                 EmoteID = packet.ReadUInt32(),
                 Guid = packet.ReadGuid().To128(GetSession().GameState)
@@ -478,7 +478,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TEXT_EMOTE)]
         void HandleTextEmote(WorldPacket packet)
         {
-            STextEmote emote = new STextEmote
+            STextEmote emote = new()
             {
                 SourceGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
@@ -495,7 +495,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PRINT_NOTIFICATION)]
         void HandlePrintNotification(WorldPacket packet)
         {
-            PrintNotification notify = new PrintNotification
+            PrintNotification notify = new()
             {
                 NotifyText = packet.ReadCString()
             };
@@ -505,7 +505,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CHAT_PLAYER_NOTFOUND)]
         void HandleChatPlayerNotFound(WorldPacket packet)
         {
-            ChatPlayerNotfound error = new ChatPlayerNotfound
+            ChatPlayerNotfound error = new()
             {
                 Name = packet.ReadCString()
             };
@@ -515,7 +515,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_DEFENSE_MESSAGE)]
         void HandleDefenseMessage(WorldPacket packet)
         {
-            DefenseMessage message = new DefenseMessage
+            DefenseMessage message = new()
             {
                 ZoneID = packet.ReadUInt32()
             };
@@ -527,7 +527,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CHAT_SERVER_MESSAGE)]
         void HandleChatServerMessage(WorldPacket packet)
         {
-            ChatServerMessage message = new ChatServerMessage
+            ChatServerMessage message = new()
             {
                 MessageID = packet.ReadInt32(),
                 StringParam = packet.ReadCString()
@@ -537,7 +537,7 @@ namespace HermesProxy.World.Client
 
         public void SendChatJoinChannel(int channelId, string channelName, string password)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_JOIN_CHANNEL);
+            WorldPacket packet = new(Opcode.CMSG_CHAT_JOIN_CHANNEL);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 packet.WriteInt32(channelId);
@@ -551,7 +551,7 @@ namespace HermesProxy.World.Client
 
         public void SendChatLeaveChannel(int channelId, string channelName)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_LEAVE_CHANNEL);
+            WorldPacket packet = new(Opcode.CMSG_CHAT_LEAVE_CHANNEL);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                 packet.WriteInt32(channelId);
             packet.WriteCString(channelName);

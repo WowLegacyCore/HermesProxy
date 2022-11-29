@@ -12,7 +12,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PARTY_COMMAND_RESULT)]
         void HandlePartyCommandResult(WorldPacket packet)
         {
-            PartyCommandResult party = new PartyCommandResult
+            PartyCommandResult party = new()
             {
                 Command = (byte)packet.ReadUInt32(),
                 Name = packet.ReadCString(),
@@ -26,7 +26,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GROUP_DECLINE)]
         void HandleGroupDecline(WorldPacket packet)
         {
-            GroupDecline party = new GroupDecline
+            GroupDecline party = new()
             {
                 Name = packet.ReadCString()
             };
@@ -36,7 +36,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_PARTY_INVITE)]
         void HandleGroupInvite(WorldPacket packet)
         {
-            PartyInvite party = new PartyInvite();
+            PartyInvite party = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 party.CanAccept = packet.ReadBool();
 
@@ -68,7 +68,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GROUP_LIST, ClientVersionBuild.Zero, ClientVersionBuild.V2_0_1_6180)]
         void HandleGroupListVanilla(WorldPacket packet)
         {
-            PartyUpdate party = new PartyUpdate
+            PartyUpdate party = new()
             {
                 SequenceNum = GetSession().GameState.GroupUpdateCounter++
             };
@@ -101,7 +101,7 @@ namespace HermesProxy.World.Client
                 else
                     party.PartyType = GroupType.Normal;
 
-                PartyPlayerInfo player = new PartyPlayerInfo
+                PartyPlayerInfo player = new()
                 {
                     GUID = GetSession().GameState.CurrentPlayerGuid
                 };
@@ -114,7 +114,7 @@ namespace HermesProxy.World.Client
                 bool allAssist = true;
                 for (uint i = 0; i < membersCount; i++)
                 {
-                    PartyPlayerInfo member = new PartyPlayerInfo
+                    PartyPlayerInfo member = new()
                     {
                         Name = packet.ReadCString(),
                         GUID = packet.ReadGuid().To128(GetSession().GameState),
@@ -163,7 +163,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GROUP_LIST, ClientVersionBuild.V2_0_1_6180)]
         void HandleGroupListTBC(WorldPacket packet)
         {
-            PartyUpdate party = new PartyUpdate
+            PartyUpdate party = new()
             {
                 SequenceNum = GetSession().GameState.GroupUpdateCounter++
             };
@@ -188,7 +188,7 @@ namespace HermesProxy.World.Client
                 else
                     party.PartyType = GroupType.Normal;
 
-                PartyPlayerInfo player = new PartyPlayerInfo
+                PartyPlayerInfo player = new()
                 {
                     GUID = GetSession().GameState.CurrentPlayerGuid
                 };
@@ -201,7 +201,7 @@ namespace HermesProxy.World.Client
                 bool allAssist = true;
                 for (uint i = 0; i < membersCount; i++)
                 {
-                    PartyPlayerInfo member = new PartyPlayerInfo
+                    PartyPlayerInfo member = new()
                     {
                         Name = packet.ReadCString(),
                         GUID = packet.ReadGuid().To128(GetSession().GameState),
@@ -260,14 +260,14 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_GROUP_UNINVITE)]
         void HandleGroupUninvite(WorldPacket packet)
         {
-            GroupUninvite party = new GroupUninvite();
+            GroupUninvite party = new();
             SendPacketToClient(party);
         }
 
         [PacketHandler(Opcode.SMSG_GROUP_NEW_LEADER)]
         void HandleGroupNewLeader(WorldPacket packet)
         {
-            GroupNewLeader party = new GroupNewLeader
+            GroupNewLeader party = new()
             {
                 Name = packet.ReadCString(),
                 PartyIndex = GetSession().GameState.GetCurrentPartyIndex()
@@ -280,7 +280,7 @@ namespace HermesProxy.World.Client
         {
             if (!packet.CanRead())
             {
-                ReadyCheckStarted ready = new ReadyCheckStarted
+                ReadyCheckStarted ready = new()
                 {
                     InitiatorGUID = GetSession().GameState.GetCurrentGroupLeader(),
                     PartyIndex = GetSession().GameState.GetCurrentPartyIndex(),
@@ -290,7 +290,7 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                ReadyCheckResponse ready = new ReadyCheckResponse
+                ReadyCheckResponse ready = new()
                 {
                     Player = packet.ReadGuid().To128(GetSession().GameState),
                     IsReady = packet.ReadBool(),
@@ -302,7 +302,7 @@ namespace HermesProxy.World.Client
                 if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.GetCurrentGroupSize())
                 {
                     GetSession().GameState.GroupReadyCheckResponses = 0;
-                    ReadyCheckCompleted completed = new ReadyCheckCompleted
+                    ReadyCheckCompleted completed = new()
                     {
                         PartyIndex = GetSession().GameState.GetCurrentPartyIndex(),
                         PartyGUID = GetSession().GameState.GetCurrentGroupGuid()
@@ -315,7 +315,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_RAID_READY_CHECK, ClientVersionBuild.V2_0_1_6180)]
         void HandleRaidReadyCheck(WorldPacket packet)
         {
-            ReadyCheckStarted ready = new ReadyCheckStarted
+            ReadyCheckStarted ready = new()
             {
                 InitiatorGUID = packet.ReadGuid().To128(GetSession().GameState),
                 PartyIndex = GetSession().GameState.GetCurrentPartyIndex(),
@@ -327,7 +327,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_RAID_READY_CHECK_CONFIRM, ClientVersionBuild.V2_0_1_6180)]
         void HandleRaidReadyCheckConfirm(WorldPacket packet)
         {
-            ReadyCheckResponse ready = new ReadyCheckResponse
+            ReadyCheckResponse ready = new()
             {
                 Player = packet.ReadGuid().To128(GetSession().GameState),
                 IsReady = packet.ReadBool(),
@@ -339,7 +339,7 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.GroupReadyCheckResponses >= GetSession().GameState.GetCurrentGroupSize())
             {
                 GetSession().GameState.GroupReadyCheckResponses = 0;
-                ReadyCheckCompleted completed = new ReadyCheckCompleted
+                ReadyCheckCompleted completed = new()
                 {
                     PartyIndex = GetSession().GameState.GetCurrentPartyIndex(),
                     PartyGUID = GetSession().GameState.GetCurrentGroupGuid()
@@ -351,7 +351,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_RAID_READY_CHECK_FINISHED, ClientVersionBuild.V2_0_1_6180)]
         void HandleRaidReadyCheckFinished(WorldPacket packet)
         {
-            ReadyCheckCompleted ready = new ReadyCheckCompleted
+            ReadyCheckCompleted ready = new()
             {
                 PartyIndex = GetSession().GameState.GetCurrentPartyIndex(),
                 PartyGUID = GetSession().GameState.GetCurrentGroupGuid()
@@ -365,7 +365,7 @@ namespace HermesProxy.World.Client
             bool isFullUpdate = packet.ReadBool();
             if (isFullUpdate)
             {
-                SendRaidTargetUpdateAll update = new SendRaidTargetUpdateAll
+                SendRaidTargetUpdateAll update = new()
                 {
                     PartyIndex = GetSession().GameState.GetCurrentPartyIndex()
                 };
@@ -379,7 +379,7 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                SendRaidTargetUpdateSingle update = new SendRaidTargetUpdateSingle
+                SendRaidTargetUpdateSingle update = new()
                 {
                     PartyIndex = GetSession().GameState.GetCurrentPartyIndex()
                 };
@@ -398,7 +398,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SUMMON_REQUEST)]
         void HandleSummonRequest(WorldPacket packet)
         {
-            SummonRequest summon = new SummonRequest
+            SummonRequest summon = new()
             {
                 SummonerGUID = packet.ReadGuid().To128(GetSession().GameState),
                 SummonerVirtualRealmAddress = GetSession().RealmId.GetAddress(),
@@ -418,13 +418,13 @@ namespace HermesProxy.World.Client
             {
                 if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
                 {
-                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                     SendPacket(packet2);
                     _requestBgPlayerPosCounter = 0;
                 }
             }
 
-            PartyMemberPartialState state = new PartyMemberPartialState
+            PartyMemberPartialState state = new()
             {
                 AffectedGUID = packet.ReadPackedGuid().To128(GetSession().GameState)
             };
@@ -476,7 +476,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -502,7 +502,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -569,7 +569,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -596,7 +596,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -620,13 +620,13 @@ namespace HermesProxy.World.Client
             {
                 if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
                 {
-                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                     SendPacket(packet2);
                     _requestBgPlayerPosCounter = 0;
                 }
             }
 
-            PartyMemberPartialState state = new PartyMemberPartialState
+            PartyMemberPartialState state = new()
             {
                 AffectedGUID = packet.ReadPackedGuid().To128(GetSession().GameState)
             };
@@ -676,7 +676,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -742,7 +742,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -767,13 +767,13 @@ namespace HermesProxy.World.Client
             {
                 if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
                 {
-                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                     SendPacket(packet2);
                     _requestBgPlayerPosCounter = 0;
                 }
             }
 
-            PartyMemberFullState state = new PartyMemberFullState();
+            PartyMemberFullState state = new();
             if (GetSession().GameState.IsInBattleground())
             {
                 state.PartyType[0] = 0;
@@ -831,7 +831,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -857,7 +857,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -924,7 +924,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -951,7 +951,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -975,13 +975,13 @@ namespace HermesProxy.World.Client
             {
                 if (_requestBgPlayerPosCounter++ > 10) // don't spam every time somebody moves
                 {
-                    WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                    WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                     SendPacket(packet2);
                     _requestBgPlayerPosCounter = 0;
                 }
             }
 
-            PartyMemberFullState state = new PartyMemberFullState();
+            PartyMemberFullState state = new();
             if (GetSession().GameState.IsInBattleground())
             {
                 state.PartyType[0] = 0;
@@ -1037,7 +1037,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -1103,7 +1103,7 @@ namespace HermesProxy.World.Client
                     if ((auraMask & (1ul << i)) == 0)
                         continue;
 
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates
+                    PartyMemberAuraStates aura = new()
                     {
                         SpellId = packet.ReadUInt16()
                     };
@@ -1123,7 +1123,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_MINIMAP_PING)]
         void HandleMinimapPing(WorldPacket packet)
         {
-            MinimapPing ping = new MinimapPing
+            MinimapPing ping = new()
             {
                 SenderGUID = packet.ReadGuid().To128(GetSession().GameState),
                 Position = packet.ReadVector2()
@@ -1134,7 +1134,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_RANDOM_ROLL)]
         void HandleRandomRoll(WorldPacket packet)
         {
-            RandomRoll roll = new RandomRoll
+            RandomRoll roll = new()
             {
                 Min = packet.ReadInt32(),
                 Max = packet.ReadInt32(),

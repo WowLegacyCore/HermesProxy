@@ -25,7 +25,7 @@ namespace HermesProxy.World.Client
             GetSession().GameState.ObjectCacheModern.Remove(guid);
             GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
 
-            UpdateObject updateObject = new UpdateObject(GetSession().GameState);
+            UpdateObject updateObject = new(GetSession().GameState);
             updateObject.DestroyedGuids.Add(guid);
             SendPacketToClient(updateObject);
         }
@@ -48,9 +48,9 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                 packet.ReadBool(); // Has Transport
 
-            HashSet<uint> missingItemTemplates = new HashSet<uint>();
-            List<AuraUpdate> auraUpdates = new List<AuraUpdate>();
-            UpdateObject updateObject = new UpdateObject(GetSession().GameState);
+            HashSet<uint> missingItemTemplates = new();
+            List<AuraUpdate> auraUpdates = new();
+            UpdateObject updateObject = new(GetSession().GameState);
 
             for (var i = 0; i < count; i++)
             {
@@ -64,9 +64,9 @@ namespace HermesProxy.World.Client
                         var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
 
-                        ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
-                        AuraUpdate auraUpdate = new AuraUpdate(guid, false);
-                        PowerUpdate powerUpdate = new PowerUpdate(guid);
+                        ObjectUpdate updateData = new(guid, UpdateTypeModern.Values, GetSession());
+                        AuraUpdate auraUpdate = new(guid, false);
+                        PowerUpdate powerUpdate = new(guid);
                         ReadValuesUpdateBlock(packet, guid, updateData, auraUpdate, powerUpdate, i);
 
                         if (powerUpdate.Powers.Count != 0)
@@ -106,15 +106,15 @@ namespace HermesProxy.World.Client
                         if (guid == GetSession().GameState.CurrentPlayerGuid &&
                             GetSession().GameState.IsInFarSight)
                         {
-                            UpdateObject updateObject2 = new UpdateObject(GetSession().GameState);
-                            ObjectUpdate updateData2 = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
+                            UpdateObject updateObject2 = new(GetSession().GameState);
+                            ObjectUpdate updateData2 = new(guid, UpdateTypeModern.Values, GetSession());
                             updateData2.ActivePlayerData.FarsightObject = WowGuid128.Empty;
                             updateObject2.ObjectUpdates.Add(updateData2);
                             SendPacketToClient(updateObject2);
                         }
 
-                        ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject1, GetSession());
-                        AuraUpdate auraUpdate = new AuraUpdate(guid, true);
+                        ObjectUpdate updateData = new(guid, UpdateTypeModern.CreateObject1, GetSession());
+                        AuraUpdate auraUpdate = new(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
                         if (updateData.Guid == GetSession().GameState.CurrentPlayerGuid)
@@ -154,8 +154,8 @@ namespace HermesProxy.World.Client
                         var guid = oldGuid.To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
 
-                        ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.CreateObject2, GetSession());
-                        AuraUpdate auraUpdate = new AuraUpdate(guid, true);
+                        ObjectUpdate updateData = new(guid, UpdateTypeModern.CreateObject2, GetSession());
+                        AuraUpdate auraUpdate = new(guid, true);
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
                         if (guid.IsItem() && updateData.ObjectData.EntryID != null &&
@@ -194,7 +194,7 @@ namespace HermesProxy.World.Client
 
             foreach (uint itemId in missingItemTemplates)
             {
-                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ITEM_QUERY_SINGLE);
+                WorldPacket packet2 = new(Opcode.CMSG_ITEM_QUERY_SINGLE);
                 packet2.WriteUInt32(itemId);
                 if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                     packet2.WriteGuid(WowGuid64.Empty);
@@ -217,16 +217,16 @@ namespace HermesProxy.World.Client
             {
                 if (GetSession().GameState.FlatSpellMods.Count > 0)
                 {
-                    SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
+                    SetSpellModifier spell = new(Opcode.SMSG_SET_FLAT_SPELL_MODIFIER);
                     foreach (var modItr in GetSession().GameState.FlatSpellMods)
                     {
-                        SpellModifierInfo mod = new SpellModifierInfo
+                        SpellModifierInfo mod = new()
                         {
                             ModIndex = modItr.Key
                         };
                         foreach (var dataItr in modItr.Value)
                         {
-                            SpellModifierData data = new SpellModifierData
+                            SpellModifierData data = new()
                             {
                                 ClassIndex = dataItr.Key,
                                 ModifierValue = dataItr.Value
@@ -239,16 +239,16 @@ namespace HermesProxy.World.Client
                 }
                 if (GetSession().GameState.PctSpellMods.Count > 0)
                 {
-                    SetSpellModifier spell = new SetSpellModifier(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
+                    SetSpellModifier spell = new(Opcode.SMSG_SET_PCT_SPELL_MODIFIER);
                     foreach (var modItr in GetSession().GameState.PctSpellMods)
                     {
-                        SpellModifierInfo mod = new SpellModifierInfo
+                        SpellModifierInfo mod = new()
                         {
                             ModIndex = modItr.Key
                         };
                         foreach (var dataItr in modItr.Value)
                         {
-                            SpellModifierData data = new SpellModifierData
+                            SpellModifierData data = new()
                             {
                                 ClassIndex = dataItr.Key,
                                 ModifierValue = dataItr.Value
@@ -282,7 +282,7 @@ namespace HermesProxy.World.Client
                 }
                 if (resetBgPlayerPositions)
                 {
-                    BattlegroundPlayerPositions bglist = new BattlegroundPlayerPositions();
+                    BattlegroundPlayerPositions bglist = new();
                     SendPacketToClient(bglist);
                 }
             }
@@ -588,7 +588,7 @@ namespace HermesProxy.World.Client
                     updateFieldType = fieldInfo.Format;
                 }
 
-                List<UpdateField> fieldData = new List<UpdateField>();
+                List<UpdateField> fieldData = new();
                 for (int k = start; k < i; ++k)
                 {
                     if (oldValues == null || !oldValues.TryGetValue(k, out UpdateField updateField))
@@ -799,7 +799,7 @@ namespace HermesProxy.World.Client
                 if (moveFlags.HasAnyFlag(MovementFlagWotLK.SplineEnabled))
                 {
                     moveInfo.HasSplineData = true;
-                    ServerSideMovement monsterMove = new ServerSideMovement();
+                    ServerSideMovement monsterMove = new();
 
                     if (moveInfo.TransportGuid != null)
                         monsterMove.TransportGuid = moveInfo.TransportGuid;
@@ -1090,7 +1090,7 @@ namespace HermesProxy.World.Client
             if (spellId == 0)
                 return null;
 
-            AuraDataInfo data = new AuraDataInfo
+            AuraDataInfo data = new()
             {
                 CastID = WowGuid128.Create(HighGuidType703.Cast, World.Enums.SpellCastSource.Aura, (uint)GetSession().GameState.CurrentMapId, (uint)spellId, guid.GetCounter()),
                 SpellID = spellId,
@@ -1507,7 +1507,7 @@ namespace HermesProxy.World.Client
                             uint itemId = GameData.GetItemIdWithDisplayId(itemDisplayId);
                             if (itemId != 0)
                             {
-                                VisibleItem visibleItem = new VisibleItem
+                                VisibleItem visibleItem = new()
                                 {
                                     ItemID = (int)itemId
                                 };
@@ -1523,7 +1523,7 @@ namespace HermesProxy.World.Client
                     {
                         if (updateMaskArray[UNIT_VIRTUAL_ITEM_SLOT_ID + i])
                         {
-                            VisibleItem visibleItem = new VisibleItem
+                            VisibleItem visibleItem = new()
                             {
                                 ItemID = updates[UNIT_VIRTUAL_ITEM_SLOT_ID + i].Int32Value
                             };
@@ -1715,7 +1715,7 @@ namespace HermesProxy.World.Client
                 int UNIT_CHANNEL_SPELL = LegacyVersion.GetUpdateField(UnitField.UNIT_CHANNEL_SPELL);
                 if (UNIT_CHANNEL_SPELL >= 0 && updateMaskArray[UNIT_CHANNEL_SPELL])
                 {
-                    UnitChannel channel = new UnitChannel
+                    UnitChannel channel = new()
                     {
                         SpellID = updates[UNIT_CHANNEL_SPELL].Int32Value
                     };
@@ -1914,7 +1914,7 @@ namespace HermesProxy.World.Client
                             updateMaskArray[UNIT_FIELD_AURALEVELS + i / 4] ||
                             updateMaskArray[UNIT_FIELD_AURAAPPLICATIONS + i / 4])
                         {
-                            AuraInfo aura = new AuraInfo
+                            AuraInfo aura = new()
                             {
                                 Slot = i,
                                 AuraData = ReadAuraSlot(i, guid, updates)
@@ -2593,17 +2593,17 @@ namespace HermesProxy.World.Client
 
                             if (teamId != 0)
                             {
-                                WorldPacket packet = new WorldPacket(Opcode.CMSG_ARENA_TEAM_QUERY);
+                                WorldPacket packet = new(Opcode.CMSG_ARENA_TEAM_QUERY);
                                 packet.WriteUInt32(teamId);
                                 SendPacketToServer(packet);
 
-                                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_ARENA_TEAM_ROSTER);
+                                WorldPacket packet2 = new(Opcode.CMSG_ARENA_TEAM_ROSTER);
                                 packet2.WriteUInt32(teamId);
                                 SendPacketToServer(packet2);
                             }
                             else
                             {
-                                ArenaTeamRosterResponse response = new ArenaTeamRosterResponse
+                                ArenaTeamRosterResponse response = new()
                                 {
                                     TeamSize = ModernVersion.GetArenaTeamSizeFromIndex((uint)i)
                                 };
@@ -2657,10 +2657,10 @@ namespace HermesProxy.World.Client
                     if (PLAYER_FIELD_HONOR_CURRENCY >= 0 && PLAYER_FIELD_ARENA_CURRENCY >= 0 &&
                        (updateMaskArray[PLAYER_FIELD_HONOR_CURRENCY] || updateMaskArray[PLAYER_FIELD_ARENA_CURRENCY]))
                     {
-                        SetupCurrency currencies = new SetupCurrency();
+                        SetupCurrency currencies = new();
                         if (updates.ContainsKey(PLAYER_FIELD_ARENA_CURRENCY))
                         {
-                            SetupCurrency.Record honor = new SetupCurrency.Record
+                            SetupCurrency.Record honor = new()
                             {
                                 Type = (uint)Currency.ArenaPoints,
                                 Quantity = updates[PLAYER_FIELD_ARENA_CURRENCY].UInt32Value
@@ -2669,7 +2669,7 @@ namespace HermesProxy.World.Client
                         }
                         if (updates.ContainsKey(PLAYER_FIELD_HONOR_CURRENCY))
                         {
-                            SetupCurrency.Record honor = new SetupCurrency.Record
+                            SetupCurrency.Record honor = new()
                             {
                                 Type = (uint)Currency.HonorPoints,
                                 Quantity = updates[PLAYER_FIELD_HONOR_CURRENCY].UInt32Value

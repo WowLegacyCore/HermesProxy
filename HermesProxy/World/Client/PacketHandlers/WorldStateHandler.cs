@@ -11,7 +11,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INIT_WORLD_STATES)]
         void HandleInitWorldStates(WorldPacket packet)
         {
-            InitWorldStates states = new InitWorldStates
+            InitWorldStates states = new()
             {
                 MapID = packet.ReadUInt32()
             };
@@ -45,7 +45,7 @@ namespace HermesProxy.World.Client
 
             if (GetSession().GameState.HasWsgHordeFlagCarrier || GetSession().GameState.HasWsgAllyFlagCarrier)
             {
-                WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                 SendPacket(packet2);
             }
 
@@ -68,7 +68,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_UPDATE_WORLD_STATE)]
         void HandleUpdateWorldState(WorldPacket packet)
         {
-            UpdateWorldState update = new UpdateWorldState
+            UpdateWorldState update = new()
             {
                 VariableID = packet.ReadUInt32(),
                 Value = packet.ReadInt32()
@@ -77,13 +77,13 @@ namespace HermesProxy.World.Client
 
             if (update.VariableID == (uint)WorldStates.WsgFlagStateAlliance)
             {
-                WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                 SendPacket(packet2);
                 GetSession().GameState.HasWsgAllyFlagCarrier = update.Value == 2;
             }
             else if (update.VariableID == (uint)WorldStates.WsgFlagStateHorde)
             {
-                WorldPacket packet2 = new WorldPacket(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
+                WorldPacket packet2 = new(Opcode.MSG_BATTLEGROUND_PLAYER_POSITIONS);
                 SendPacket(packet2);
                 GetSession().GameState.HasWsgHordeFlagCarrier = update.Value == 2;
             }

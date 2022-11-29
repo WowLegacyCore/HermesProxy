@@ -92,7 +92,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_START_ROLL)]
         void HandleLootStartRoll(WorldPacket packet)
         {
-            StartLootRoll loot = new StartLootRoll();
+            StartLootRoll loot = new();
             WowGuid64 owner = packet.ReadGuid();
             loot.LootObj = owner.ToLootGuid();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -116,7 +116,7 @@ namespace HermesProxy.World.Client
 
             if (GetSession().GameState.IsPassingOnLoot)
             {
-                WorldPacket packet2 = new WorldPacket(Opcode.CMSG_LOOT_ROLL);
+                WorldPacket packet2 = new(Opcode.CMSG_LOOT_ROLL);
                 packet2.WriteGuid(owner);
                 packet2.WriteUInt32(loot.Item.LootListID);
                 packet2.WriteUInt8((byte)RollType.Pass);
@@ -127,7 +127,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_ROLL)]
         void HandleLootRoll(WorldPacket packet)
         {
-            LootRollBroadcast loot = new LootRollBroadcast();
+            LootRollBroadcast loot = new();
             WowGuid64 owner = packet.ReadGuid();
             loot.LootObj = owner.ToLootGuid();
             loot.Item.LootListID = (byte)packet.ReadUInt32();
@@ -158,7 +158,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_ROLL_WON)]
         void HandleLootRollWon(WorldPacket packet)
         {
-            LootRollWon loot = new LootRollWon
+            LootRollWon loot = new()
             {
                 LootObj = packet.ReadGuid().ToLootGuid()
             };
@@ -174,7 +174,7 @@ namespace HermesProxy.World.Client
                 loot.MainSpec = 128;
             SendPacketToClient(loot);
 
-            LootRollsComplete complete = new LootRollsComplete
+            LootRollsComplete complete = new()
             {
                 LootObj = loot.LootObj,
                 LootListID = loot.Item.LootListID
@@ -185,7 +185,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOOT_ALL_PASSED)]
         void HandleLootAllPassed(WorldPacket packet)
         {
-            LootAllPassed loot = new LootAllPassed
+            LootAllPassed loot = new()
             {
                 LootObj = packet.ReadGuid().ToLootGuid()
             };
@@ -196,7 +196,7 @@ namespace HermesProxy.World.Client
             loot.Item.Quantity = 1;
             SendPacketToClient(loot);
 
-            LootRollsComplete complete = new LootRollsComplete
+            LootRollsComplete complete = new()
             {
                 LootObj = loot.LootObj,
                 LootListID = loot.Item.LootListID
@@ -210,7 +210,7 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.LastLootTargetGuid == null)
                 return;
 
-            LootList list = new LootList
+            LootList list = new()
             {
                 Owner = GetSession().GameState.LastLootTargetGuid.To128(GetSession().GameState),
                 LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid(),
@@ -218,7 +218,7 @@ namespace HermesProxy.World.Client
             };
             SendPacketToClient(list);
 
-            MasterLootCandidateList loot = new MasterLootCandidateList
+            MasterLootCandidateList loot = new()
             {
                 LootObj = GetSession().GameState.LastLootTargetGuid.ToLootGuid()
             };

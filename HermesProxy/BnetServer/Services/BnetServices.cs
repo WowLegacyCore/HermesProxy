@@ -56,7 +56,7 @@ namespace BNetServer.Services
 
         private void ServiceLog(LogType type, string message)
         {
-            StringBuilder prefix = new StringBuilder();
+            StringBuilder prefix = new();
             prefix.Append($"[{_connectionPath}]");
             prefix.Append($"[{GetRemoteIpEndPoint()}");
 

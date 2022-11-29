@@ -31,7 +31,7 @@ namespace HermesProxy.World.Server
 
         void HandleChatChannelCommand(ChannelCommand command)
         {
-            WorldPacket packet = new WorldPacket(command.GetUniversalOpcode());
+            WorldPacket packet = new(command.GetUniversalOpcode());
             packet.WriteCString(command.ChannelName);
             SendPacketToServer(packet);
         }
@@ -39,7 +39,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHAT_CHANNEL_LIST)]
         void HandleChatChannelList(ChannelCommand command)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_LIST);
+            WorldPacket packet = new(Opcode.CMSG_CHAT_CHANNEL_LIST);
             packet.WriteCString(command.ChannelName);
             SendPacketToServer(packet);
             GetSession().GameState.ChannelDisplayList = false;
@@ -50,13 +50,13 @@ namespace HermesProxy.World.Server
         {
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_LIST);
+                WorldPacket packet = new(Opcode.CMSG_CHAT_CHANNEL_LIST);
                 packet.WriteCString(command.ChannelName);
                 SendPacketToServer(packet);
             }
             else
             {
-                WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_DISPLAY_LIST);
+                WorldPacket packet = new(Opcode.CMSG_CHAT_CHANNEL_DISPLAY_LIST);
                 packet.WriteCString(command.ChannelName);
                 SendPacketToServer(packet);
             }
@@ -69,7 +69,7 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
                 return;
 
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CHAT_CHANNEL_DECLINE_INVITE);
+            WorldPacket packet = new(Opcode.CMSG_CHAT_CHANNEL_DECLINE_INVITE);
             packet.WriteCString(command.ChannelName);
             SendPacketToServer(packet);
         }
@@ -218,7 +218,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SEND_TEXT_EMOTE)]
         void HandleSendTextEmote(CTextEmote emote)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_SEND_TEXT_EMOTE);
+            WorldPacket packet = new(Opcode.CMSG_SEND_TEXT_EMOTE);
             packet.WriteInt32(emote.EmoteID);
             packet.WriteInt32(emote.SoundIndex);
             packet.WriteGuid(emote.Target.To64());

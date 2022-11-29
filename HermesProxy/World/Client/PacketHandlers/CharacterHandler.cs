@@ -28,8 +28,8 @@ namespace HermesProxy.World.Client
             byte count = packet.ReadUInt8();
             for (byte i = 0; i < count; i++)
             {
-                EnumCharactersResult.CharacterInfo char1 = new EnumCharactersResult.CharacterInfo();
-                PlayerCache cache = new PlayerCache();
+                EnumCharactersResult.CharacterInfo char1 = new();
+                PlayerCache cache = new();
                 char1.Guid = packet.ReadGuid().To128(GetSession().GameState);
                 char1.Name = cache.Name = packet.ReadCString();
                 char1.RaceId = cache.RaceId = (Race)packet.ReadUInt8();
@@ -136,7 +136,7 @@ namespace HermesProxy.World.Client
         {
             byte result = packet.ReadUInt8();
 
-            CreateChar createChar = new CreateChar
+            CreateChar createChar = new()
             {
                 Guid = new WowGuid128()
             };
@@ -158,7 +158,7 @@ namespace HermesProxy.World.Client
         {
             byte result = packet.ReadUInt8();
 
-            DeleteChar deleteChar = new DeleteChar();
+            DeleteChar deleteChar = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
             {
                 Enums.TBC.ResponseCodes legacyCode = (Enums.TBC.ResponseCodes)result;
@@ -175,7 +175,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_QUERY_PLAYER_NAME_RESPONSE)]
         void HandleQueryPlayerNameResponse(WorldPacket packet)
         {
-            QueryPlayerNameResponse response = new QueryPlayerNameResponse();
+            QueryPlayerNameResponse response = new();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
             {
                 response.Player = response.Data.GuidActual = packet.ReadPackedGuid().To128(GetSession().GameState);
@@ -190,7 +190,7 @@ namespace HermesProxy.World.Client
             else
                 response.Player = response.Data.GuidActual = packet.ReadGuid().To128(GetSession().GameState);
 
-            PlayerCache cache = new PlayerCache();
+            PlayerCache cache = new();
             response.Data.Name = cache.Name = packet.ReadCString();
             packet.ReadCString(); // realm name
 
@@ -233,7 +233,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOGIN_VERIFY_WORLD)]
         void HandleLoginVerifyWorld(WorldPacket packet)
         {
-            LoginVerifyWorld verify = new LoginVerifyWorld
+            LoginVerifyWorld verify = new()
             {
                 MapID = packet.ReadUInt32()
             };
@@ -273,7 +273,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_CHARACTER_LOGIN_FAILED)]
         void HandleCharacterLoginFailed(WorldPacket packet)
         {
-            CharacterLoginFailed failed = new CharacterLoginFailed
+            CharacterLoginFailed failed = new()
             {
                 Code = (Framework.Constants.LoginFailureReason)packet.ReadUInt8()
             };
@@ -292,7 +292,7 @@ namespace HermesProxy.World.Client
                     return;
             }
 
-            List<int> buttons = new List<int>();
+            List<int> buttons = new();
 
             int buttonCount = 120;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
@@ -315,7 +315,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOGOUT_RESPONSE)]
         void HandleLogoutResponse(WorldPacket packet)
         {
-            LogoutResponse logout = new LogoutResponse
+            LogoutResponse logout = new()
             {
                 LogoutResult = packet.ReadInt32(),
                 Instant = packet.ReadBool()
@@ -326,7 +326,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOGOUT_COMPLETE)]
         void HandleLogoutComplete(WorldPacket packet)
         {
-            LogoutComplete logout = new LogoutComplete();
+            LogoutComplete logout = new();
             SendPacketToClient(logout);
 
             GetSession().GameState = GameSessionData.CreateNewGameSessionData(GetSession());
@@ -337,7 +337,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LOGOUT_CANCEL_ACK)]
         void HandleLogoutCancelAck(WorldPacket packet)
         {
-            LogoutCancelAck logout = new LogoutCancelAck();
+            LogoutCancelAck logout = new();
             SendPacketToClient(logout);
         }
 
@@ -378,7 +378,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_LEVEL_UP_INFO)]
         void HandleLevelUpInfo(WorldPacket packet)
         {
-            LevelUpInfo info = new LevelUpInfo
+            LevelUpInfo info = new()
             {
                 Level = packet.ReadInt32(),
                 HealthDelta = packet.ReadInt32()
@@ -396,14 +396,14 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_UPDATE_COMBO_POINTS)]
         void HandleUpdateComboPoints(WorldPacket packet)
         {
-            ObjectUpdate updateData = new ObjectUpdate(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
+            ObjectUpdate updateData = new(GetSession().GameState.CurrentPlayerGuid, UpdateTypeModern.Values, GetSession());
             updateData.ActivePlayerData.ComboTarget = packet.ReadPackedGuid().To128(GetSession().GameState);
             byte comboPoints = packet.ReadUInt8();
             sbyte powerSlot = ClassPowerTypes.GetPowerSlotForClass(GetSession().GameState.GetUnitClass(GetSession().GameState.CurrentPlayerGuid), PowerType.ComboPoints);
             if (powerSlot >= 0)
                 updateData.UnitData.Power[powerSlot] = comboPoints;
 
-            UpdateObject updatePacket = new UpdateObject(GetSession().GameState);
+            UpdateObject updatePacket = new(GetSession().GameState);
             updatePacket.ObjectUpdates.Add(updateData);
             SendPacketToClient(updatePacket);
         }
@@ -412,7 +412,7 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_INSPECT_TALENT)]
         void HandleInspectResult(WorldPacket packet)
         {
-            InspectResult inspect = new InspectResult();
+            InspectResult inspect = new();
             if (packet.GetUniversalOpcode(false) == Opcode.SMSG_INSPECT_RESULT)
                 inspect.DisplayInfo.GUID = packet.ReadGuid().To128(GetSession().GameState);
             else
@@ -440,7 +440,7 @@ namespace HermesProxy.World.Client
                             uint itemId = updates[PLAYER_VISIBLE_ITEM_1_0 + i * offset].UInt32Value;
                             if (itemId != 0)
                             {
-                                InspectItemData itemData = new InspectItemData
+                                InspectItemData itemData = new()
                                 {
                                     Index = i
                                 };
@@ -461,7 +461,7 @@ namespace HermesProxy.World.Client
                             uint itemId = updates[PLAYER_VISIBLE_ITEM_1_ENTRYID + i * offset].UInt32Value;
                             if (itemId != 0)
                             {
-                                InspectItemData itemData = new InspectItemData
+                                InspectItemData itemData = new()
                                 {
                                     Index = i
                                 };
@@ -524,7 +524,7 @@ namespace HermesProxy.World.Client
 
             if (ModernVersion.ExpansionVersion == 1)
             {
-                InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic
+                InspectHonorStatsResultClassic inspect = new()
                 {
                     PlayerGUID = playerGuid,
                     LifetimeHighestRank = lifetimeHighestRank,
@@ -548,7 +548,7 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                InspectHonorStatsResultTBC inspect = new InspectHonorStatsResultTBC
+                InspectHonorStatsResultTBC inspect = new()
                 {
                     PlayerGUID = playerGuid,
                     LifetimeHighestRank = lifetimeHighestRank,
@@ -572,7 +572,7 @@ namespace HermesProxy.World.Client
 
             if (ModernVersion.ExpansionVersion == 1)
             {
-                InspectHonorStatsResultClassic inspect = new InspectHonorStatsResultClassic
+                InspectHonorStatsResultClassic inspect = new()
                 {
                     PlayerGUID = playerGuid,
                     LifetimeHighestRank = lifetimeHighestRank,
@@ -586,7 +586,7 @@ namespace HermesProxy.World.Client
             }
             else
             {
-                InspectHonorStatsResultTBC inspect = new InspectHonorStatsResultTBC
+                InspectHonorStatsResultTBC inspect = new()
                 {
                     PlayerGUID = playerGuid,
                     LifetimeHighestRank = lifetimeHighestRank,
@@ -600,11 +600,11 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_INSPECT_ARENA_TEAMS)]
         void HandleInspectArenaTeams(WorldPacket packet)
         {
-            InspectPvP inspect = new InspectPvP
+            InspectPvP inspect = new()
             {
                 PlayerGUID = packet.ReadGuid().To128(GetSession().GameState)
             };
-            ArenaTeamInspectData team = new ArenaTeamInspectData();
+            ArenaTeamInspectData team = new();
             byte slot = packet.ReadUInt8();
             uint teamId = packet.ReadUInt32();
             team.TeamGuid = WowGuid128.Create(HighGuidType703.ArenaTeam, teamId);

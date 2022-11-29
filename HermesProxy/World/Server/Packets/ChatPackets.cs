@@ -530,6 +530,6 @@ namespace HermesProxy.World.Server.Packets
                 Prefixes.Add(_worldPacket.ReadString(_worldPacket.ReadBits<uint>(5)));
         }
 
-        public List<string> Prefixes = new List<string>();
+        public List<string> Prefixes = new();
     }
 }

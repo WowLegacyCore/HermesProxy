@@ -102,7 +102,7 @@ namespace HermesProxy.World.Server.Packets
 
             for (int i = 0; i < classFiltersCount; ++i)
             {
-                ClassFilter classFilter = new ClassFilter
+                ClassFilter classFilter = new()
                 {
                     ItemClass = _worldPacket.ReadInt32()
                 };
@@ -110,7 +110,7 @@ namespace HermesProxy.World.Server.Packets
                 uint subClassFiltersCount = _worldPacket.ReadBits<uint>(5);
                 for (uint j = 0; j < subClassFiltersCount; ++j)
                 {
-                    SubClassFilter filter = new SubClassFilter
+                    SubClassFilter filter = new()
                     {
                         ItemSubclass = _worldPacket.ReadInt32(),
                         InvTypeMask = _worldPacket.ReadUInt32()
@@ -126,7 +126,7 @@ namespace HermesProxy.World.Server.Packets
             var sorts = new WorldPacket(_worldPacket.GetOpcode(), data);
             for (var i = 0; i < sortCount; ++i)
             {
-                AuctionSort sort = new AuctionSort
+                AuctionSort sort = new()
                 {
                     Type = sorts.ReadUInt8(),
                     Direction = sorts.ReadUInt8()
@@ -145,7 +145,7 @@ namespace HermesProxy.World.Server.Packets
         public string Name;
         public bool OnlyUsable;
         public bool ExactMatch;
-        public List<ClassFilter> ClassFilters = new List<ClassFilter>();
+        public List<ClassFilter> ClassFilters = new();
         public List<AuctionSort> Sorts = new();
     }
 

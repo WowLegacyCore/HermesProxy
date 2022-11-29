@@ -214,7 +214,7 @@ namespace HermesProxy.World.Server
             {
                 using (FileStream file = File.OpenRead(GetFullFileName(guid, type)))
                 {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(GetFullFileName(guid, type))))
+                    using (BinaryReader reader = new(File.OpenRead(GetFullFileName(guid, type))))
                     {
                         data = new();
                         ulong guidLow = reader.ReadUInt64();
@@ -251,7 +251,7 @@ namespace HermesProxy.World.Server
             Data[type].UncompressedSize = uncompressedSize;
             Data[type].CompressedData = compressedData;
 
-            using (BinaryWriter writer = new BinaryWriter(File.Open(GetFullFileName(guid, type), FileMode.Create)))
+            using (BinaryWriter writer = new(File.Open(GetFullFileName(guid, type), FileMode.Create)))
             {
                 writer.Write(guid.GetLowValue());
                 writer.Write(guid.GetHighValue());
@@ -271,7 +271,7 @@ namespace HermesProxy.World.Server
             {
                 using (FileStream file = File.OpenRead(fileName))
                 {
-                    using (BinaryReader reader = new BinaryReader(file))
+                    using (BinaryReader reader = new(file))
                     {
                         return File.ReadAllBytes(fileName);
                     }
@@ -285,7 +285,7 @@ namespace HermesProxy.World.Server
         {
             string fileName = Path.Combine(GetAccountDataDirectory(), "cuf.bin");
 
-            using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
+            using (BinaryWriter writer = new(File.Open(fileName, FileMode.Create)))
             {
                 writer.Write(data);
             }

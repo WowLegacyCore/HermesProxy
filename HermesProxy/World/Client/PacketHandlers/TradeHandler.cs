@@ -53,7 +53,7 @@ namespace HermesProxy.World.Client
             trade.ProposedEnchantment = packet.ReadInt32();
             while (packet.CanRead())
             {
-                TradeItem item = new TradeItem
+                TradeItem item = new()
                 {
                     Unwrapped = new UnwrappedTradeItem(),
                     Slot = packet.ReadUInt8()
