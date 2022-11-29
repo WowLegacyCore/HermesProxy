@@ -2731,6 +2731,13 @@ namespace HermesProxy.World.Client
                     {   // Quaternion to rotate the pivot point of the transport movement by 180°
                         updateData.GameObjectData.ParentRotation = new float?[] { -4.371139E-08f, 0,  1, 0 };
                     }
+
+                    // Fix for Zangarmarsh Elevator
+                    const int zangarmarshElevator = 183177;
+                    if (updateData.ObjectData.EntryID is zangarmarshElevator)
+                    {   // Super weird angle -88°
+                        updateData.GameObjectData.ParentRotation = new float?[] { 0, 0, -0.69465846f, 0.7193397f };
+                    }
                 }
                 int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);
                 if (GAMEOBJECT_STATE >= 0 && updateMaskArray[GAMEOBJECT_STATE])
