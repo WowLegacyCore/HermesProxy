@@ -2697,16 +2697,38 @@ namespace HermesProxy.World.Client
                     const int tramSouthWestmost = 176083;
                     const int tramNorthWestmost = 176084;
                     const int tramNorthEastmost = 176085;
+                    const int zangarmarshElevator = 183177;
 
-                    if (updateData.ObjectData.EntryID is tramSouthEastmost or tramNorthWestmost or tramNorthEastmost)
+                    switch (updateData.ObjectData.EntryID)
                     {
-                        var rot = updateData.CreateData.MoveInfo.Rotation.AsEulerAngles();
-                        rot.Yaw *= -1; // Rotate the cart content by 180°, so players who stand on the left side of the cart are actually on the left side
-                        updateData.CreateData.MoveInfo.Rotation = rot.AsQuaternion();
+                        case tramSouthEastmost:
+                        case tramNorthWestmost:
+                        case tramNorthEastmost:
+                        {
+                            var rot = updateData.CreateData.MoveInfo.Rotation.AsEulerAngles();
+                            rot.Yaw *= -1; // Rotate the cart content by 180°, so players who stand on the left side of the cart are actually on the left side
+                            updateData.CreateData.MoveInfo.Rotation = rot.AsQuaternion();
+                            break;
+                        }
                     }
-                    if (updateData.ObjectData.EntryID is tramNorthMiddle or tramSouthMiddle or tramSouthWestmost or tramNorthEastmost)
-                    {   // Quaternion to rotate the pivot point of the transport movement by 180°
-                        updateData.GameObjectData.ParentRotation = new float?[] { -4.371139E-08f, 0, 1, 0 };
+
+                    switch (updateData.ObjectData.EntryID)
+                    {
+                        case tramNorthMiddle:
+                        case tramSouthMiddle:
+                        case tramSouthWestmost:
+                        case tramNorthEastmost:
+                        {
+                            // Quaternion to rotate the pivot point of the transport movement by 180°
+                            updateData.GameObjectData.ParentRotation = new float?[] { -4.371139E-08f, 0, 1, 0 };
+                            break;
+                        }
+                        case zangarmarshElevator:
+                        {
+                            // Super weird angle -88°
+                            updateData.GameObjectData.ParentRotation = new float?[] { 0, 0, -0.69465846f, 0.7193397f };
+                            break;
+                        }
                     }
                 }
                 int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);
