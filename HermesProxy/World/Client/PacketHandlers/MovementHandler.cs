@@ -114,6 +114,8 @@ namespace HermesProxy.World.Client
             teleport.MoveCounter = packet.ReadUInt32();
             MovementInfo moveInfo = new();
             moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
+            moveInfo.Flags = (uint)(((MovementFlagWotLK)moveInfo.Flags).CastFlags<MovementFlagModern>());
+            moveInfo.ValidateMovementInfo();
             teleport.Position = moveInfo.Position;
             teleport.Orientation = moveInfo.Orientation;
             teleport.TransportGUID = moveInfo.TransportGuid;
@@ -378,6 +380,7 @@ namespace HermesProxy.World.Client
                 {
                     moveSpline.SplineType = SplineTypeModern.FacingAngle;
                     moveSpline.FinalOrientation = packet.ReadFloat();
+                    MovementInfo.ClampOrientation(ref moveSpline.FinalOrientation);
                     break;
                 }
                 case SplineTypeLegacy.Stop:

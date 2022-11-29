@@ -38,7 +38,8 @@ namespace HermesProxy.World.Objects
         public float Orientation;
         public float CorpseOrientation;
         public WowGuid128 TransportGuid;
-        public Vector4 TransportOffset;
+        public Vector3 TransportOffset;
+        public float TransportOrientation;
         public uint TransportTime;
         public uint TransportTime2;
         public sbyte TransportSeat = -1;
@@ -75,6 +76,7 @@ namespace HermesProxy.World.Objects
             copy.CorpseOrientation = this.CorpseOrientation;
             copy.TransportGuid = this.TransportGuid;
             copy.TransportOffset = this.TransportOffset;
+            copy.TransportOrientation = this.TransportOrientation;
             copy.TransportTime = this.TransportTime;
             copy.TransportTime2 = this.TransportTime2;
             copy.TransportSeat = this.TransportSeat;
@@ -139,7 +141,8 @@ namespace HermesProxy.World.Objects
                 else
                     info.TransportGuid = packet.ReadGuid().To128(gameState);
 
-                info.TransportOffset = packet.ReadVector4();
+                info.TransportOffset = packet.ReadVector3();
+                info.TransportOrientation = packet.ReadFloat();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     info.TransportTime = packet.ReadUInt32();
@@ -215,7 +218,8 @@ namespace HermesProxy.World.Objects
                 else
                     data.WriteGuid(info.TransportGuid.To64());
 
-                data.WriteVector4(info.TransportOffset);
+                data.WriteVector3(info.TransportOffset);
+                data.WriteFloat(info.TransportOrientation);
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     data.WriteUInt32(info.TransportTime);
@@ -346,7 +350,8 @@ namespace HermesProxy.World.Objects
         {
             var moveInfo = this;
             moveInfo.TransportGuid = data.ReadPackedGuid128();
-            moveInfo.TransportOffset = data.ReadVector4();
+            moveInfo.TransportOffset = data.ReadVector3();
+            moveInfo.TransportOrientation = data.ReadFloat();
             moveInfo.TransportSeat = data.ReadInt8();           // VehicleSeatIndex
             moveInfo.TransportTime = data.ReadUInt32();         // MoveTime
 
@@ -445,7 +450,7 @@ namespace HermesProxy.World.Objects
             data.WriteFloat(moveInfo.TransportOffset.X);
             data.WriteFloat(moveInfo.TransportOffset.Y);
             data.WriteFloat(moveInfo.TransportOffset.Z);
-            data.WriteFloat(moveInfo.TransportOffset.W);
+            data.WriteFloat(moveInfo.TransportOrientation);
             data.WriteInt8(moveInfo.TransportSeat);
             data.WriteUInt32(moveInfo.TransportTime);
 
@@ -460,9 +465,20 @@ namespace HermesProxy.World.Objects
                 data.WriteUInt32(moveInfo.VehicleId);
         }
 
+        public static void ClampOrientation(ref float orientation)
+        {
+            while (orientation < 0)
+                orientation += (float)(Math.PI * 2f);
+            while (orientation > (float)(Math.PI * 2f))
+                orientation -= (float)(Math.PI * 2f);
+        }
+
         // Must be called only after movement flags are converted to modern enum!
         public void ValidateMovementInfo()
         {
+            ClampOrientation(ref Orientation);
+            ClampOrientation(ref TransportOrientation);
+
             var RemoveViolatingFlags = new Action<bool, MovementFlagModern>((check, maskToRemove) =>
             {
                 if (check)
