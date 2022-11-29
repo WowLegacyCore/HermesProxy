@@ -17,7 +17,7 @@ namespace HermesProxy.World
 
     public class HighGuidLegacy : HighGuid
     {
-        HighGuidTypeLegacy high;
+        readonly HighGuidTypeLegacy high;
         static readonly Dictionary<HighGuidTypeLegacy, HighGuidType> HighLegacyToHighType
             = new Dictionary<HighGuidTypeLegacy, HighGuidType>
         {

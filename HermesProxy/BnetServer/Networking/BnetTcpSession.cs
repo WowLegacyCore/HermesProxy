@@ -43,7 +43,7 @@ namespace BNetServer.Networking
             return true;
         }
 
-        private List<byte> _currentBuffer = new List<byte>();
+        private readonly List<byte> _currentBuffer = new List<byte>();
 
         public override async Task ReadHandler(byte[] data, int receivedLength)
         {

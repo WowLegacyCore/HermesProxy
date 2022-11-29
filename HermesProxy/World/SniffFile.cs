@@ -17,9 +17,10 @@ namespace HermesProxy.World
             _fileWriter = new BinaryWriter(File.Open(path, FileMode.Create));
             _gameVersion = build;
         }
-        BinaryWriter _fileWriter;
-        ushort _gameVersion;
-        System.Threading.Mutex _mutex = new System.Threading.Mutex();
+
+        readonly BinaryWriter _fileWriter;
+        readonly ushort _gameVersion;
+        readonly System.Threading.Mutex _mutex = new System.Threading.Mutex();
 
         public void WriteHeader()
         {

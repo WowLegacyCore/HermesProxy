@@ -49,24 +49,23 @@ namespace HermesProxy.World.Server
         static readonly byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
         static readonly int HeaderSize = 16;
-
-        SocketBuffer _headerBuffer;
-        SocketBuffer _packetBuffer;
+        readonly SocketBuffer _headerBuffer;
+        readonly SocketBuffer _packetBuffer;
 
         ConnectionType _connectType;
         ulong _key;
 
         byte[] _serverChallenge;
-        WorldCrypt _worldCrypt;
+        readonly WorldCrypt _worldCrypt;
         byte[] _sessionKey;
-        byte[] _encryptKey;
+        readonly byte[] _encryptKey;
         ConnectToKey _instanceConnectKey;
         RealmId _realmId;
 
         ZLib.z_stream _compressionStream;
-        ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
+        readonly ConcurrentDictionary<Opcode, PacketHandler> _clientPacketTable = new();
         GlobalSessionData _globalSession;
-        System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
+        readonly System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
 
         private BnetServices.ServiceManager _bnetRpc;
 
@@ -653,7 +652,7 @@ namespace HermesProxy.World.Server
                 _worldPacket.WriteUInt8((byte)Code);
             }
 
-            LoginFailureReason Code;
+            readonly LoginFailureReason Code;
         }
         public void AbortLogin(LoginFailureReason reason)
         {
@@ -1092,8 +1091,8 @@ namespace HermesProxy.World.Server
                 return delegate (WorldSocket target, ClientPacket p) { d(target, (P1)p); };
             }
 
-            Action<WorldSocket, ClientPacket> methodCaller;
-            Type packetType;
+            readonly Action<WorldSocket, ClientPacket> methodCaller;
+            readonly Type packetType;
         }
 
         public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)

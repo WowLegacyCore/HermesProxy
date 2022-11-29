@@ -170,8 +170,8 @@ namespace HermesProxy.World.Server.Packets
         public int CategoryRecoveryTime;
         public float ModRate = 1.0f;
         public bool OnHold;
-        uint? unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
-        uint? unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
+        readonly uint? unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
+        readonly uint? unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
     }
 
     public class SendSpellCharges : ServerPacket
@@ -325,11 +325,11 @@ namespace HermesProxy.World.Server.Packets
         public ushort CastLevel = 1;
         public byte Applications = 1;
         public int ContentTuningID;
-        ContentTuningParams ContentTuning;
+        readonly ContentTuningParams ContentTuning;
         public WowGuid128 CastUnit;
         public int? Duration;
         public int? Remaining;
-        float? TimeMod;
+        readonly float? TimeMod;
         public List<float> Points = new();
         public List<float> EstimatedPoints = new();
     }

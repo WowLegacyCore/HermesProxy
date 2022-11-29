@@ -150,8 +150,7 @@ namespace HermesProxy.World.Server.Packets
         public uint ZoneID;
         public uint AreaID;
         public uint MapID;
-
-        List<WorldStateInfo> Worldstates = new();
+        readonly List<WorldStateInfo> Worldstates = new();
 
         struct WorldStateInfo
         {

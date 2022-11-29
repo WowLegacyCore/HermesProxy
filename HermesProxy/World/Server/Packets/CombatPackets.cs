@@ -218,11 +218,11 @@ namespace HermesProxy.World.Server.Packets
             }
         }
 
-        long Health;
-        int AttackPower;
-        int SpellPower;
-        uint Armor;
-        List<SpellLogPowerData> PowerData = new();
+        readonly long Health;
+        readonly int AttackPower;
+        readonly int SpellPower;
+        readonly uint Armor;
+        readonly List<SpellLogPowerData> PowerData = new();
     }
 
     public struct SpellLogPowerData

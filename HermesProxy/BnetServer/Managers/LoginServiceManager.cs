@@ -6,16 +6,14 @@ using Framework.Logging;
 using Framework.Web;
 using System;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 
 namespace BNetServer
 {
     public class LoginServiceManager : Singleton<LoginServiceManager>
     {
-        FormInputs formInputs;
+        readonly FormInputs formInputs;
         IPEndPoint externalAddress;
         IPEndPoint localAddress;
-        X509Certificate2 certificate;
 
         LoginServiceManager()
         {

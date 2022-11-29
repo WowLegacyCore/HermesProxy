@@ -25,7 +25,7 @@ namespace HermesProxy.World.Client
         LegacyWorldCrypt _worldCrypt;
         Dictionary<Opcode, Action<WorldPacket>> _packetHandlers;
         GlobalSessionData _globalSession;
-        System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
+        readonly System.Threading.Mutex _sendMutex = new System.Threading.Mutex();
 
         // packet order is not always the same as new client, sometimes we need to delay packet until another one
         Dictionary<Opcode, List<WorldPacket>> _delayedPacketsToServer;

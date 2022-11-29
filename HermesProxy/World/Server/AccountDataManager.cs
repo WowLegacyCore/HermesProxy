@@ -149,8 +149,8 @@ namespace HermesProxy.World.Server
     public class AccountDataManager
     {
         public AccountData[] Data;
-        string _accountName;
-        string _realmName;
+        readonly string _accountName;
+        readonly string _realmName;
 
         public AccountDataManager(string accountName, string realmName)
         {

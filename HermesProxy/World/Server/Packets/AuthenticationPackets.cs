@@ -52,7 +52,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt32(Serial);
         }
 
-        uint Serial;
+        readonly uint Serial;
     }
 
     class AuthChallenge : ServerPacket
@@ -413,10 +413,10 @@ namespace HermesProxy.World.Server.Packets
 
     class EnterEncryptedMode : ServerPacket
     {
-        byte[] EncryptionKey;
-        bool Enabled;
+        readonly byte[] EncryptionKey;
+        readonly bool Enabled;
 
-        static byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
+        static readonly byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
 
         public EnterEncryptedMode(byte[] encryptionKey, bool enabled) : base(Opcode.SMSG_ENTER_ENCRYPTED_MODE)
         {

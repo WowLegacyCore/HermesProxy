@@ -24,8 +24,7 @@ namespace HermesProxy.Auth
             // Debugger.Log(0, "TraceMe", $"{b}");
 #endif
         };
-
-        GlobalSessionData _globalSession;
+        readonly GlobalSessionData _globalSession;
         Socket _clientSocket;
         TaskCompletionSource<AuthResult> _response;
         TaskCompletionSource _hasRealmlist;

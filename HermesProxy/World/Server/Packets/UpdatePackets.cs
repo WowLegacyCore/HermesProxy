@@ -328,7 +328,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBytes(Data);
         }
 
-        GameSessionData _gameState;
+        readonly GameSessionData _gameState;
         public uint NumObjUpdates;
         public ushort MapID;
         public byte[] Data;

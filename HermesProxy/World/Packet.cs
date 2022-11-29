@@ -130,7 +130,7 @@ namespace HermesProxy.World
         public ConnectionType GetConnection() { return connectionType; }
 
         byte[] buffer;
-        ConnectionType connectionType;
+        readonly ConnectionType connectionType;
         protected WorldPacket _worldPacket;
     }
 
@@ -314,7 +314,7 @@ namespace HermesProxy.World
         public long GetReceivedTime() { return m_receivedTime; }
         public void SetReceiveTime(long receivedTime) { m_receivedTime = receivedTime; }
 
-        uint opcode;
+        readonly uint opcode;
         long m_receivedTime;
     }
 

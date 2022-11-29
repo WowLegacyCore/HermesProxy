@@ -258,10 +258,11 @@ namespace HermesProxy.World.Objects
             m_updateMask = new UpdateMask(size);
             m_fieldBuffer = new();
         }
-        uint ValuesCount;
-        UpdateTypeModern m_updateType;
-        UpdateMask m_updateMask;
-        ByteBuffer m_fieldBuffer;
+
+        readonly uint ValuesCount;
+        readonly UpdateTypeModern m_updateType;
+        readonly UpdateMask m_updateMask;
+        readonly ByteBuffer m_fieldBuffer;
 
         public void WriteToPacket(ByteBuffer buffer)
         {

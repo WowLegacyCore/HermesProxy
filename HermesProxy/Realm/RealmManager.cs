@@ -305,9 +305,9 @@ public class RealmManager
     public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
-    List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
-    ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
-    List<string> _subRegions = new List<string>();
+    readonly List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
+    readonly ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
+    readonly List<string> _subRegions = new List<string>();
 }
 
 public class RealmBuildInfo

@@ -14,7 +14,7 @@ namespace BNetServer.Services
     public partial class BnetServices
     {
         private static uint _serverInvokedRequestToken = 0;
-        private Dictionary<uint /*requestId*/, Action<CodedInputStream> /*callbackHandler*/> _callbackHandlers = new();
+        private readonly Dictionary<uint /*requestId*/, Action<CodedInputStream> /*callbackHandler*/> _callbackHandlers = new();
 
         private GlobalSessionData _globalSession;
         private readonly byte[] _clientSecret = new byte[32];
