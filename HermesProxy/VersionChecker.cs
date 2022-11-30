@@ -98,6 +98,8 @@ namespace HermesProxy
             switch (version)
             {
                 case ClientVersionBuild.V1_12_1_5875:
+                case ClientVersionBuild.V1_12_2_6005:
+                case ClientVersionBuild.V1_12_3_6141:
                     return ClientVersionBuild.V1_12_1_5875;
                 case ClientVersionBuild.V2_4_3_8606:
                     return ClientVersionBuild.V2_4_3_8606;
@@ -216,6 +218,19 @@ namespace HermesProxy
                 }
             }
 
+            return null;
+        }
+
+        public static Type GetResponseCodesEnum()
+        {
+            switch (Opcodes.GetOpcodesDefiningBuild(Build))
+            {
+                case ClientVersionBuild.V1_12_1_5875:
+                    return typeof(World.Enums.V1_12_1_5875.ResponseCodes);
+                case ClientVersionBuild.V2_4_3_8606:
+                case ClientVersionBuild.V3_3_5a_12340:
+                    return typeof(World.Enums.V2_4_3_8606.ResponseCodes);
+            }
             return null;
         }
 
@@ -568,6 +583,18 @@ namespace HermesProxy
             return null;
         }
 
+        public static Type GetResponseCodesEnum()
+        {
+            switch (Opcodes.GetOpcodesDefiningBuild(Build))
+            {
+                case ClientVersionBuild.V2_5_2_39570:
+                    return typeof(World.Enums.V2_5_2_39570.ResponseCodes);
+                case ClientVersionBuild.V1_14_1_40688:
+                    return typeof(World.Enums.V1_14_1_40688.ResponseCodes);
+            }
+            return null;
+        }
+
         public static byte ExpansionVersion { get; private set; }
         public static byte MajorVersion { get; private set; }
         public static byte MinorVersion { get; private set; }
@@ -856,6 +883,13 @@ namespace HermesProxy
                     return 2;
             }
             return 0;
+        }
+
+        public static byte ConvertResponseCodesValue(byte legacyValue)
+        {
+            string legacyName = Enum.ToObject(LegacyVersion.GetResponseCodesEnum(), legacyValue).ToString();
+            byte modernValue = (byte)Enum.Parse(GetResponseCodesEnum(), legacyName);
+            return modernValue;
         }
     }
 }

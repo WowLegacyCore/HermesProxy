@@ -138,5 +138,7 @@ namespace HermesProxy.World.Enums
         CanSafeFall        = 0x08000000,
         Hover              = 0x10000000,
         DisableCollision   = 0x20000000,
+
+        MaskMoving = Forward | Backward | StrafeLeft | StrafeRight | Falling | Ascending | Descending,
     }
 }

@@ -287,5 +287,13 @@ namespace HermesProxy.World.Client
             uint serial = packet.ReadUInt32();
             SendPacketToClient(new Pong(serial));
         }
+
+        [PacketHandler(Opcode.SMSG_ZONE_UNDER_ATTACK)]
+        void HandleZoneUnderAttack(WorldPacket packet)
+        {
+            ZoneUnderAttack zone = new();
+            zone.AreaID = packet.ReadInt32();
+            SendPacketToClient(zone);
+        }
     }
 }

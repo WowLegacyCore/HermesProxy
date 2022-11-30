@@ -125,10 +125,6 @@ namespace HermesProxy.World.Server.Packets
                     CreateData.MoveInfo.Flags &= ~(uint)MovementFlagModern.WalkMode;
                 if (CreateData.MoveInfo.FlagsExtra == 0)
                     CreateData.MoveInfo.FlagsExtra = 512;
-                if (CreateData.MoveInfo.Orientation < 0)
-                    CreateData.MoveInfo.Orientation += (float)(Math.PI * 2f);
-                if (CreateData.MoveInfo.Orientation > (float)(Math.PI * 2f))
-                    CreateData.MoveInfo.Orientation -= (float)(Math.PI * 2f);
             }
             if (CreateData.MoveSpline != null)
             {
@@ -372,5 +368,17 @@ namespace HermesProxy.World.Server.Packets
 
         public int Power;
         public byte PowerType;
+    }
+
+    public class ObjectUpdateFailed : ClientPacket
+    {
+        public ObjectUpdateFailed(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ObjectGuid = _worldPacket.ReadPackedGuid128();
+        }
+
+        public WowGuid128 ObjectGuid;
     }
 }

@@ -53,6 +53,7 @@ namespace HermesProxy.World.Client
             moveUpdate.MoveInfo = new();
             moveUpdate.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             moveUpdate.MoveInfo.Flags = (uint)(((MovementFlagWotLK)moveUpdate.MoveInfo.Flags).CastFlags<MovementFlagModern>());
+            moveUpdate.MoveInfo.ValidateMovementInfo();
             SendPacketToClient(moveUpdate);
         }
 
@@ -68,6 +69,7 @@ namespace HermesProxy.World.Client
             knockback.MoveInfo.JumpCosAngle = packet.ReadFloat();
             knockback.MoveInfo.JumpHorizontalSpeed = packet.ReadFloat();
             knockback.MoveInfo.JumpVerticalSpeed = packet.ReadFloat();
+            knockback.MoveInfo.ValidateMovementInfo();
             SendPacketToClient(knockback);
         }
 
@@ -112,6 +114,8 @@ namespace HermesProxy.World.Client
             teleport.MoveCounter = packet.ReadUInt32();
             MovementInfo moveInfo = new();
             moveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
+            moveInfo.Flags = (uint)(((MovementFlagWotLK)moveInfo.Flags).CastFlags<MovementFlagModern>());
+            moveInfo.ValidateMovementInfo();
             teleport.Position = moveInfo.Position;
             teleport.Orientation = moveInfo.Orientation;
             teleport.TransportGUID = moveInfo.TransportGuid;
@@ -285,6 +289,7 @@ namespace HermesProxy.World.Client
             speed.MoveInfo.ReadMovementInfoLegacy(packet, GetSession().GameState);
             var newFlags = ((MovementFlagWotLK)speed.MoveInfo.Flags).CastFlags<MovementFlagModern>();
             speed.MoveInfo.Flags = (uint)(newFlags);
+            speed.MoveInfo.ValidateMovementInfo();
             speed.Speed = packet.ReadFloat();
             SendPacketToClient(speed);
 
@@ -404,6 +409,7 @@ namespace HermesProxy.World.Client
                 {
                     moveSpline.SplineType = SplineTypeModern.FacingAngle;
                     moveSpline.FinalOrientation = packet.ReadFloat();
+                    MovementInfo.ClampOrientation(ref moveSpline.FinalOrientation);
                     break;
                 }
                 case SplineTypeLegacy.Stop:

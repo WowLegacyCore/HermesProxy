@@ -761,4 +761,16 @@ namespace HermesProxy.World.Server.Packets
 
         public WowGuid128 Guid;
     }
+
+    public class ZoneUnderAttack : ServerPacket
+    {
+        public ZoneUnderAttack() : base(Opcode.SMSG_ZONE_UNDER_ATTACK) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(AreaID);
+        }
+
+        public int AreaID;
+    }
 }
