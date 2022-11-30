@@ -2854,6 +2854,18 @@ namespace HermesProxy.World.Client
                 if (CORPSE_FIELD_FLAGS >= 0 && updateMaskArray[CORPSE_FIELD_FLAGS])
                 {
                     updateData.CorpseData.Flags = updates[CORPSE_FIELD_FLAGS].UInt32Value;
+
+                    // These flags have a different meaning in modern client.
+                    if (updateData.CorpseData.Flags.HasAnyFlag(CorpseFlags.HideHelm))
+                    {
+                        updateData.CorpseData.Flags &= ~(uint)CorpseFlags.HideHelm;
+                        updateData.CorpseData.Items[EquipmentSlot.Head] = null;
+                    }
+                    if (updateData.CorpseData.Flags.HasAnyFlag(CorpseFlags.HideCloak))
+                    {
+                        updateData.CorpseData.Flags &= ~(uint)CorpseFlags.HideCloak;
+                        updateData.CorpseData.Items[EquipmentSlot.Cloak] = null;
+                    }
                 }
                 int CORPSE_FIELD_DYNAMIC_FLAGS = LegacyVersion.GetUpdateField(CorpseField.CORPSE_FIELD_DYNAMIC_FLAGS);
                 if (CORPSE_FIELD_DYNAMIC_FLAGS >= 0 && updateMaskArray[CORPSE_FIELD_DYNAMIC_FLAGS])
