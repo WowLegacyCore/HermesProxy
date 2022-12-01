@@ -142,20 +142,9 @@ namespace HermesProxy.World.Client
         void HandleCorpseQuery(WorldPacket packet)
         {
             CorpseLocation corpse = new();
-            
             corpse.Valid = packet.ReadBool();
             if (!corpse.Valid)
-            {
-                {
-                    ChatPkt chatA = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                    SendPacketToClient(chatA);
-                    ChatPkt chatB = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV!FALSE!:{corpse.Valid}");
-                    SendPacketToClient(chatB);
-                    ChatPkt chatC = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                    SendPacketToClient(chatC);
-                }
                 return;
-            }
 
             corpse.MapID = packet.ReadInt32();
             corpse.Position = packet.ReadVector3();
@@ -165,18 +154,6 @@ namespace HermesProxy.World.Client
 
             corpse.Player = GetSession().GameState.CurrentPlayerGuid;
             corpse.Transport = WowGuid128.Empty;
-
-            {
-                ChatPkt chatA = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                SendPacketToClient(chatA);
-                ChatPkt chatB = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV:{corpse.Valid}\nI:{corpse.Player == GetSession().GameState.CurrentPlayerGuid}\nC:{GetSession().GameState.CurrentPlayerGuid == GetSession().GameState.CurrentPlayerInfo.CharacterGuid}\nM:{corpse.MapID}/{corpse.ActualMapID}\nCP:{corpse.Position}\nPP:");
-                SendPacketToClient(chatB);
-                ChatPkt chatC = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"And just to verify is that your current character name?: {GetSession().GameState.CurrentPlayerInfo.Name}-{GetSession().GameState.CurrentPlayerInfo.Realm.Name}");
-                SendPacketToClient(chatC);
-                ChatPkt chatD = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                SendPacketToClient(chatD);
-            }
-
             SendPacketToClient(corpse);
         }
 
