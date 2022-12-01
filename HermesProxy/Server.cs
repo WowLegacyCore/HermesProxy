@@ -5,6 +5,8 @@ using HermesProxy.World;
 using HermesProxy.World.Server;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -14,30 +16,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using BNetServer;
 using Framework;
+using HermesProxy.Configuration;
 
 namespace HermesProxy
 {
     partial class Server
     {
-        static void Main(string[] args)
+        public static void ServerMain(CommandLineArguments args)
         {
-            //Set Culture
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-
 #if !DEBUG
-            if (!args.Any(a => a.Trim().Contains("--no-version-check")))
-                CheckForUpdate().Wait();
+            if (!args.DisableVersionCheck)
+                CheckForUpdate().WaitAsync(TimeSpan.FromSeconds(8)).Wait(); // Max wait 8 sec, maybe there is some wierd network error
 #endif
 
             Log.Print(LogType.Server, "Starting Hermes Proxy...");
             Log.Print(LogType.Server, $"Version {GetVersionInformation()}");
             Log.Start();
 
-            if (!Settings.VerifyConfig())
+            var config = ConfigurationParser.ParseFromFile(args.ConfigFileLocation, args.OverwrittenConfigValues);
+            if (!Settings.LoadAndVerifyFrom(config))
             {
-                Console.WriteLine("The verification of the config failed");
-                Environment.Exit(1);
+                Log.Print(LogType.Error, "The verification of the config failed");
+                return;
             }
             Log.DebugLogEnabled = Settings.DebugOutput;
 
@@ -71,8 +71,6 @@ namespace HermesProxy
             Console.WriteLine($"(bnetSocketServer.IsListening: {bnetSocketServer.IsListening}");
             Console.WriteLine($"(realmSocketServer.IsListening: {realmSocketServer.IsListening}");
             Console.WriteLine($"(worldSocketServer.IsListening: {worldSocketServer.IsListening}");
-
-            ExitNow();
         }
 
         private static SocketManager<TSocketType> StartServer<TSocketType>(IPEndPoint bindIp) where TSocketType : ISocket
@@ -88,13 +86,6 @@ namespace HermesProxy
             Thread.Sleep(50); // Lets wait until the thread has been logged
 
             return socketManager;
-        }
-
-        static void ExitNow()
-        {
-            Console.WriteLine("Halting process...");
-            Thread.Sleep(10_000);
-            Environment.Exit(-1);
         }
 
         private static async Task CheckForUpdate()
