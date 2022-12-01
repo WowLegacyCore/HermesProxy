@@ -141,42 +141,21 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.MSG_CORPSE_QUERY)]
         void HandleCorpseQuery(WorldPacket packet)
         {
-            CorpseLocation corpse = new();
-            
+            CorpseLocation corpse = new()
+            {
+                Player = GetSession().GameState.CurrentPlayerGuid,
+                Transport = WowGuid128.Empty,
+            };
+
             corpse.Valid = packet.ReadBool();
-            if (!corpse.Valid)
+            if (corpse.Valid)
             {
-                {
-                    ChatPkt chatA = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                    SendPacketToClient(chatA);
-                    ChatPkt chatB = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV!FALSE!:{corpse.Valid}");
-                    SendPacketToClient(chatB);
-                    ChatPkt chatC = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                    SendPacketToClient(chatC);
-                }
-                return;
+                corpse.ActualMapID = packet.ReadInt32();
+                corpse.Position = packet.ReadVector3();
+                corpse.MapID = packet.ReadInt32();
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
+                    packet.ReadInt32(); // Corpse Low GUID
             }
-
-            corpse.MapID = packet.ReadInt32();
-            corpse.Position = packet.ReadVector3();
-            corpse.ActualMapID = packet.ReadInt32();
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
-                packet.ReadInt32(); // Corpse Low GUID
-
-            corpse.Player = GetSession().GameState.CurrentPlayerGuid;
-            corpse.Transport = WowGuid128.Empty;
-
-            {
-                ChatPkt chatA = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                SendPacketToClient(chatA);
-                ChatPkt chatB = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"HermesProxy: Did you log out? If you see this message and you cant find your corpse/rezz please report this on GitHub: \nV:{corpse.Valid}\nI:{corpse.Player == GetSession().GameState.CurrentPlayerGuid}\nC:{GetSession().GameState.CurrentPlayerGuid == GetSession().GameState.CurrentPlayerInfo.CharacterGuid}\nM:{corpse.MapID}/{corpse.ActualMapID}\nCP:{corpse.Position}\nPP:");
-                SendPacketToClient(chatB);
-                ChatPkt chatC = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"And just to verify is that your current character name?: {GetSession().GameState.CurrentPlayerInfo.Name}-{GetSession().GameState.CurrentPlayerInfo.Realm.Name}");
-                SendPacketToClient(chatC);
-                ChatPkt chatD = new ChatPkt(GetSession(), ChatMessageTypeModern.System, $"----------------------------");
-                SendPacketToClient(chatD);
-            }
-
             SendPacketToClient(corpse);
         }
 

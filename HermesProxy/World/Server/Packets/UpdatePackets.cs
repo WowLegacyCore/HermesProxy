@@ -164,6 +164,12 @@ namespace HermesProxy.World.Server.Packets
                     else
                         CorpseData.ClassId = 1;
                 }
+                if (CorpseData.FactionTemplate == null && CorpseData.Owner != null)
+                {
+                    int ownerFaction = GlobalSession.GameState.GetLegacyFieldValueInt32(CorpseData.Owner, UnitField.UNIT_FIELD_FACTIONTEMPLATE);
+                    if (ownerFaction != 0)
+                        CorpseData.FactionTemplate = ownerFaction;
+                }
             }
             if (UnitData != null)
             {
