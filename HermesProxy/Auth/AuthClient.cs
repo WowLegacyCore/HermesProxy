@@ -13,6 +13,7 @@ using Framework.Cryptography;
 using Framework;
 using Framework.IO;
 using Framework.Logging;
+using Framework.Networking;
 
 namespace HermesProxy.Auth
 {
@@ -59,10 +60,11 @@ namespace HermesProxy.Auth
 
             try
             {
-                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort})");
+                var serverIpAddress = NetworkUtils.ResolveOrDirectIp(Settings.ServerAddress); 
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort}) (resolved as: {serverIpAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
-                var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
+                var endPoint = new IPEndPoint(serverIpAddress, Settings.ServerPort);
                 _clientSocket.BeginConnect(endPoint, ConnectCallback, null);
             }
             catch (Exception ex)
@@ -83,10 +85,11 @@ namespace HermesProxy.Auth
 
             try
             {
-                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Re-Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort})");
+                var serverIpAddress = NetworkUtils.ResolveOrDirectIp(Settings.ServerAddress); 
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort}) (resolved as: {serverIpAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
-                var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
+                var endPoint = new IPEndPoint(serverIpAddress, Settings.ServerPort);
                 _clientSocket.BeginConnect(endPoint, ConnectCallback, null);
             }
             catch (Exception ex)

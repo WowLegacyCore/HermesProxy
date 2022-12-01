@@ -5,47 +5,20 @@ using System.Globalization;
 using System.IO;
 using Framework.Logging;
 
-
-namespace Framework
+namespace HermesProxy.Configuration
 {
-    public class Configuration
+    public class ConfigurationParser
     { 
-        private const string DEFAULT_CONFIG_FILE = "HermesProxy.config";
         private readonly KeyValueConfigurationCollection _settingsCollection;
 
-        public Configuration(KeyValueConfigurationCollection configCollection)
+        public ConfigurationParser(KeyValueConfigurationCollection configCollection)
         {
             _settingsCollection = configCollection;
         }
 
-        public static Configuration LoadDefaultConfiguration()
+        public static ConfigurationParser ParseFromFile(string configFile, Dictionary<string, string> overwrittenValues)
         {
-            var args = Environment.GetCommandLineArgs();
-            var opts = new Dictionary<string, string>();
-
-            string configFile = DEFAULT_CONFIG_FILE;
             KeyValueConfigurationCollection settings;
-
-            for (int i = 1; i < args.Length - 1; ++i)
-            {
-                string opt = args[i];
-                if (!opt.StartsWith("--", StringComparison.CurrentCultureIgnoreCase))
-                    break;
-
-                // analyze options
-                string optname = opt.Substring(2);
-                switch (optname)
-                {
-                    case "ConfigFile":
-                    configFile = args[i + 1];
-                    break;
-                    default:
-                    opts.Add(optname, args[i + 1]);
-                    break;
-                }
-                ++i;
-            }
-
             try
             {
                 if (!File.Exists(configFile))
@@ -62,13 +35,13 @@ namespace Framework
             }
 
             // override config options with options from command line
-            foreach (var pair in opts)
+            foreach (var pair in overwrittenValues)
             {
                 settings.Remove(pair.Key);
                 settings.Add(pair.Key, pair.Value);
             }
 
-            return new Configuration(settings);
+            return new ConfigurationParser(settings);
         }
 
         public string GetString(string key, string defValue)
