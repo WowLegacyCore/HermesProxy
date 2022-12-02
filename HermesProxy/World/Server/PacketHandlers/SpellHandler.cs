@@ -7,6 +7,7 @@ using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
 using System.Threading;
+using Framework.Logging;
 
 namespace HermesProxy.World.Server
 {
@@ -155,8 +156,10 @@ namespace HermesProxy.World.Server
                     }
                     else
                     {
+                        // Sometimes we dont clear the CurrentCast when we dont get the correct SMSG_SPELL_GO
                         if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10000 < castRequest.Timestamp)
                         {
+                            Log.Print(LogType.Warn, $"Clearing CurrentClientNormalCast because of 10 sec timeout! (oldSpell:{GetSession().GameState.CurrentClientNormalCast.SpellId} newSpell:{castRequest.SpellId})");
                             SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
                             GetSession().GameState.CurrentClientNormalCast = null;
                             foreach (var pending in GetSession().GameState.PendingClientCasts)
@@ -217,8 +220,10 @@ namespace HermesProxy.World.Server
                 }
                 else
                 {
+                    // Sometimes we dont clear the CurrentCast when we dont get the correct SMSG_SPELL_GO
                     if (GetSession().GameState.CurrentClientPetCast.Timestamp + 10000 < castRequest.Timestamp)
                     {
+                        Log.Print(LogType.Warn, $"Clearing CurrentClientPetCast because of 10 sec timeout! (oldSpell:{GetSession().GameState.CurrentClientPetCast.SpellId} newSpell:{castRequest.SpellId})");
                         SendCastRequestFailed(GetSession().GameState.CurrentClientPetCast, true);
                         GetSession().GameState.CurrentClientPetCast = null;
                         foreach (var pending in GetSession().GameState.PendingClientPetCasts)
@@ -270,8 +275,10 @@ namespace HermesProxy.World.Server
                 }
                 else
                 {
+                    // Sometimes we dont clear the CurrentCast when we dont get the correct SMSG_SPELL_GO
                     if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10000 < castRequest.Timestamp)
                     {
+                        Log.Print(LogType.Warn, $"Clearing CurrentClientNormalCast because of 10 sec timeout! (oldSpell:{GetSession().GameState.CurrentClientNormalCast.SpellId} newSpell:{castRequest.SpellId})");
                         SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
                         GetSession().GameState.CurrentClientNormalCast = null;
                         foreach (var pending in GetSession().GameState.PendingClientCasts)
