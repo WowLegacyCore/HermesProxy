@@ -1005,6 +1005,7 @@ namespace HermesProxy.World
         public const uint HotfixCreatureDisplayInfoBegin = 220000;
         public const uint HotfixCreatureDisplayInfoExtraBegin = 230000;
         public const uint HotfixCreatureDisplayInfoOptionBegin = 240000;
+        public const uint HotfixItemEffectBegin = 250000;
         public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
         public static void LoadHotfixes()
         {
@@ -1023,6 +1024,7 @@ namespace HermesProxy.World
             LoadCreatureDisplayInfoHotfixes();
             LoadCreatureDisplayInfoExtraHotfixes();
             LoadCreatureDisplayInfoOptionHotfixes();
+            LoadItemEffectHotfixes();
         }
         
         public static void LoadAreaTriggerHotfixes()
@@ -2138,6 +2140,56 @@ namespace HermesProxy.World
                     record.HotfixContent.WriteInt32(chrCustomizationOptionId);
                     record.HotfixContent.WriteInt32(chrCustomizationChoiceId);
                     record.HotfixContent.WriteInt32(creatureDisplayInfoExtraId);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadItemEffectHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"ItemEffect{ModernVersion.ExpansionVersion}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = uint.Parse(fields[0]);
+                    byte legacySlotIndex = byte.Parse(fields[1]);
+                    byte triggerType = byte.Parse(fields[2]);
+                    short charges = short.Parse(fields[3]);
+                    int coolDownMSec = int.Parse(fields[4]);
+                    int categoryCoolDownMSec = int.Parse(fields[5]);
+                    short spellCategoryId = short.Parse(fields[6]);
+                    int spellId = int.Parse(fields[7]);
+                    short chrSpecializationId = short.Parse(fields[8]);
+                    int parentItemId = int.Parse(fields[9]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.Status = HotfixStatus.Valid;
+                    record.TableHash = DB2Hash.ItemEffect;
+                    record.HotfixId = HotfixItemEffectBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.HotfixContent.WriteUInt8(legacySlotIndex);
+                    record.HotfixContent.WriteUInt8(triggerType);
+                    record.HotfixContent.WriteInt16(charges);
+                    record.HotfixContent.WriteInt32(coolDownMSec);
+                    record.HotfixContent.WriteInt32(categoryCoolDownMSec);
+                    record.HotfixContent.WriteInt16(spellCategoryId);
+                    record.HotfixContent.WriteInt32(spellId);
+                    record.HotfixContent.WriteInt16(chrSpecializationId);
+                    record.HotfixContent.WriteInt32(parentItemId);
                     Hotfixes.Add(record.HotfixId, record);
                 }
             }
