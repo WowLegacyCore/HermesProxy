@@ -29,6 +29,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
         public static Dictionary<uint, string> AreaNames = new Dictionary<uint, string>();
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
+        public static Dictionary<uint, List<float>> SpellEffectPoints = new();
         public static HashSet<uint> StackableAuras = new HashSet<uint>();
         public static HashSet<uint> MountAuras = new HashSet<uint>();
         public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
@@ -357,6 +358,7 @@ namespace HermesProxy.World
             LoadTransports();
             LoadAreaNames();
             LoadDispellSpells();
+            LoadSpellEffectPoints();
             LoadStackableAuras();
             LoadMountAuras();
             LoadMeleeSpells();
@@ -709,6 +711,43 @@ namespace HermesProxy.World
 
                     uint spellId = UInt32.Parse(fields[0]);
                     DispellSpells.Add(spellId);
+                }
+            }
+        }
+
+        public static void LoadSpellEffectPoints()
+        {
+            var path = Path.Combine("CSV", $"SpellEffectPoints{LegacyVersion.ExpansionVersion}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+
+                    // Those basePoints are usually incremented by 1, only few test spell have another value there (baseDice)
+                    int basePointsEff1 = int.Parse(fields[2]);
+                    if (basePointsEff1 != 0)
+                        basePointsEff1 += 1;
+
+                    int basePointsEff2 = int.Parse(fields[3]);
+                    if (basePointsEff2 != 0)
+                        basePointsEff2 += 1;
+
+                    int basePointsEff3 = int.Parse(fields[4]);
+                    if (basePointsEff3 != 0)
+                        basePointsEff3 += 1;
+
+                    SpellEffectPoints.Add(spellId, new List<float>{ basePointsEff1, basePointsEff2, basePointsEff3 });
                 }
             }
         }

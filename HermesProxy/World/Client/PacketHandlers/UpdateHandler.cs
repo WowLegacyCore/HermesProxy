@@ -1127,6 +1127,9 @@ namespace HermesProxy.World.Client
             if (GameData.StackableAuras.Contains(spellId))
                 data.Applications++;
 
+            if (GameData.SpellEffectPoints.TryGetValue(spellId, out var basePoints))
+                data.Points = basePoints;
+
             return data;
         }
 
