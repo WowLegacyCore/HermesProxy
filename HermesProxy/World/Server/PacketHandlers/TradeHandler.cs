@@ -1,4 +1,5 @@
 ﻿using Framework.Constants;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -21,6 +22,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SET_TRADE_GOLD)]
         void HandleSetTradeGold(SetTradeGold trade)
         {
+            var tradeSession = GetSession().GameState.CurrentTrade;
+            if (tradeSession == null)
+            {
+                Log.Print(LogType.Error, "Got CMSG_SET_TRADE_GOLD without trade session");
+                return;
+            }
+            tradeSession.ClientStateIndex++;
+            
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_TRADE_GOLD);
             packet.WriteInt32((int)trade.Coinage);
             SendPacketToServer(packet);
@@ -48,6 +57,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CLEAR_TRADE_ITEM)]
         void HandleClearTradeItem(ClearTradeItem trade)
         {
+            var tradeSession = GetSession().GameState.CurrentTrade;
+            if (tradeSession == null)
+            {
+                Log.Print(LogType.Error, "Got CMSG_SET_TRADE_GOLD without trade session");
+                return;
+            }
+            tradeSession.ClientStateIndex++;
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_CLEAR_TRADE_ITEM);
             packet.WriteUInt8(trade.TradeSlot);
             SendPacketToServer(packet);
@@ -56,6 +73,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_SET_TRADE_ITEM)]
         void HandleSetTradeItem(SetTradeItem trade)
         {
+            var tradeSession = GetSession().GameState.CurrentTrade;
+            if (tradeSession == null)
+            {
+                Log.Print(LogType.Error, "Got CMSG_SET_TRADE_GOLD without trade session");
+                return;
+            }
+            tradeSession.ClientStateIndex++;
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_TRADE_ITEM);
             packet.WriteUInt8(trade.TradeSlot);
             byte containerSlot = trade.PackSlot != Enums.Classic.InventorySlots.Bag0 ? ModernVersion.AdjustInventorySlot(trade.PackSlot) : trade.PackSlot;

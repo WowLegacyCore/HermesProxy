@@ -55,7 +55,10 @@ namespace HermesProxy.World.Server
                 SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.UnitMinipet))
                 packet.WritePackedGuid(target.Unit.To64());
 
-            if (targetFlags.HasAnyFlag(SpellCastTargetFlags.Item | SpellCastTargetFlags.TradeItem))
+            // Check if the user wants to target the "Will not be traded" slot
+            if (targetFlags.HasFlag(SpellCastTargetFlags.TradeItem) && target.Item == WowGuid128.Create(HighGuidType703.Uniq, 10))
+                packet.WritePackedGuid(new WowGuid64((ulong) TradeSlots.NonTraded));
+            else if (targetFlags.HasFlag(SpellCastTargetFlags.Item))
                 packet.WritePackedGuid(target.Item.To64());
 
             if (targetFlags.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
