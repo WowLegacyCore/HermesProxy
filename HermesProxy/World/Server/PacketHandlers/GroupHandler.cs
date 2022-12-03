@@ -42,6 +42,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_LEAVE_GROUP)]
         void HandleLeaveGroup(LeaveGroup leave)
         {
+            GetSession().GameState.WeWantToLeaveGroup = true;
             WorldPacket packet = new WorldPacket(Opcode.CMSG_GROUP_DISBAND);
             SendPacketToServer(packet);
         }
