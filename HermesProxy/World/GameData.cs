@@ -306,6 +306,31 @@ namespace HermesProxy.World
             return false;
         }
 
+        public static bool IsHordeRace(Race raceId)
+        {
+            switch (raceId)
+            {
+                case Race.Orc:
+                case Race.Undead:
+                case Race.Tauren:
+                case Race.Troll:
+                case Race.BloodElf:
+                case Race.Goblin:
+                    return true;
+            }
+            return false;
+        }
+
+        /// returns 0 when unknown
+        public static int GetFactionByRace(Race race)
+        {
+            if (IsAllianceRace(race))
+                return 1;
+            if (IsHordeRace(race)) 
+                return 2;
+            return 0;
+        }
+
         public static BroadcastText GetBroadcastText(uint entry)
         {
             BroadcastText data;
