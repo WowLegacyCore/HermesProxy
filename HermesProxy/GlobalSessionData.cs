@@ -28,6 +28,18 @@ namespace HermesProxy
         public ulong LastLoginUnixSec;
     }
 
+    public class TradeSession
+    {
+        public static uint GlobalTradeIdCounter; // Fallback for pre 2.0.0 servers
+        public uint TradeId;
+
+        public WowGuid128 Partner;
+        public WowGuid128 PartnerAccount;
+
+        public uint ClientStateIndex = 1; // incremented for every update on out side
+        public uint ServerStateIndex = 1; // incremented by any trade action
+    }
+
     public class GameSessionData
     {
         public bool HasWsgHordeFlagCarrier;
@@ -103,6 +115,7 @@ namespace HermesProxy
         public HashSet<string> AddonPrefixes = new HashSet<string>();
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
+        public TradeSession? CurrentTrade = null;
 
         private GameSessionData()
         {
