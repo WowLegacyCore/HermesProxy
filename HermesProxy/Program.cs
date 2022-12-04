@@ -26,8 +26,7 @@ public class Program
         };
 
         var parser = new CommandLineBuilder(commandTree)
-            .UseHelp()
-            .UseParseErrorReporting()
+            .UseDefaults()
             .Build();
 
         commandTree.SetHandler((ctx) =>
@@ -108,7 +107,7 @@ public class Program
         public static readonly Option<string[]> OverwrittenConfigValues = new(
             name: "--set",
             description: "Overwrites a specific config value. Example: --set ServerAddress=logon.example.com"
-            ) { AllowMultipleArgumentsPerToken = true };
+            );
     }
 }
 
