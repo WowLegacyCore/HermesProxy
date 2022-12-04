@@ -1173,6 +1173,17 @@ namespace HermesProxy.World.Client
             if (OBJECT_FIELD_SCALE_X >= 0 && updateMaskArray[OBJECT_FIELD_SCALE_X])
             {
                 updateData.ObjectData.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                if (guid == GetSession().GameState.CurrentPlayerGuid)
+                {
+                    var cachedMountId = GetSession().GameState.GetLegacyFieldValueFloat(guid, UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                    MoveSetCollisionHeight height = new();
+                    height.MoverGUID = guid;
+                    height.Height = cachedMountId != 0 ? 3.081099f : 2.438083f;
+                    height.Height *= updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                    height.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                    height.Reason = 2; // Force
+                    SendPacketToClient(height);
+                }
             }
 
             // Item Fields
@@ -1629,6 +1640,12 @@ namespace HermesProxy.World.Client
                         height.MoverGUID = guid;
                         height.Height = updateData.UnitData.MountDisplayID != 0 ? 3.081099f : 2.438083f;
                         height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
+                        var cachedScale = GetSession().GameState.GetLegacyFieldValueFloat(GetSession().GameState.CurrentPlayerGuid, ObjectField.OBJECT_FIELD_SCALE_X);
+                        if (cachedScale != 0)
+                        {
+                            height.Scale = cachedScale;
+                            height.Height *= height.Scale;
+                        }
                         height.Reason = 1; // Mount
                         SendPacketToClient(height);
                     }
