@@ -317,11 +317,12 @@ namespace HermesProxy.World.Server
 
         public void HandlePacket(WorldPacket packet)
         {
-            var handler = GetHandler(packet.GetUniversalOpcode(true));
+            Opcode universalOpcode = packet.GetUniversalOpcode(isModern: true);
+            var handler = GetHandler(universalOpcode);
             if (handler != null)
                 handler.Invoke(this, packet);
             else
-                Log.Print(LogType.Warn, $"No handler for opcode {packet.GetUniversalOpcode(true)} ({packet.GetOpcode()})");
+                Log.PrintNet(LogType.Warn, LogNetDir.C2P, $"No handler for opcode {universalOpcode} ({packet.GetOpcode()}) (Got unknown packet from ModernClient)");
         }
 
         private void SendPacketToServer(WorldPacket packet, Opcode delayUntilOpcode = Opcode.MSG_NULL_ACTION)

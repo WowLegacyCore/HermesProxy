@@ -371,7 +371,7 @@ namespace HermesProxy.World.Client
                     }
                     else
                     {
-                        Log.Print(LogType.Warn, $"No handler for opcode {universalOpcode} ({packet.GetOpcode()})");
+                        Log.PrintNet(LogType.Warn, LogNetDir.S2P, $"No handler for opcode {universalOpcode} ({packet.GetOpcode()}) (Got unknown packet from WorldServer)");
                         if (_isSuccessful == null)
                             _isSuccessful = false;
                     }
