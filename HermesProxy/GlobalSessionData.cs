@@ -66,6 +66,7 @@ namespace HermesProxy
         public int GroupUpdateCounter;
         public uint GroupReadyCheckResponses;
         public World.Server.Packets.PartyUpdate[] CurrentGroups = new World.Server.Packets.PartyUpdate[2];
+        public bool WeWantToLeaveGroup; // Only send kick message when we dont initiated the group-leave
         public WowGuid128 CurrentPlayerGuid;
         public long CurrentPlayerCreateTime;
         public OwnCharacterInfo CurrentPlayerInfo;

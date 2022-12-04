@@ -144,6 +144,9 @@ namespace HermesProxy.World.Client
                 party.LeaderGUID = WowGuid128.Empty;
                 party.MyIndex = -1;
                 GetSession().GameState.CurrentGroups[party.PartyIndex] = null;
+
+                if (!GetSession().GameState.WeWantToLeaveGroup)
+                    SendPacketToClient(new GroupUninvite()); // Send kick message
             }
 
             SendPacketToClient(party);
@@ -221,6 +224,7 @@ namespace HermesProxy.World.Client
                 else
                     party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
 
+                GetSession().GameState.WeWantToLeaveGroup = false;
                 GetSession().GameState.CurrentGroups[party.PartyIndex] = party;
             }
             else
@@ -231,6 +235,9 @@ namespace HermesProxy.World.Client
                 party.LeaderGUID = WowGuid128.Empty;
                 party.MyIndex = -1;
                 GetSession().GameState.CurrentGroups[party.PartyIndex] = null;
+
+                if (!GetSession().GameState.WeWantToLeaveGroup)
+                    SendPacketToClient(new GroupUninvite()); // Send kick message
             }
 
             SendPacketToClient(party);
