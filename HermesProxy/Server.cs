@@ -25,8 +25,12 @@ namespace HermesProxy
         public static void ServerMain(CommandLineArguments args)
         {
 #if !DEBUG
-            if (!args.DisableVersionCheck)
-                CheckForUpdate().WaitAsync(TimeSpan.FromSeconds(8)).Wait(); // Max wait 8 sec, maybe there is some wierd network error
+            try
+            {
+                if (!args.DisableVersionCheck)
+                    CheckForUpdate().WaitAsync(TimeSpan.FromSeconds(15)).Wait(); // Max wait 15 sec, maybe there is some wierd network error
+            }
+            catch { /* ignore */ }
 #endif
 
             Log.Print(LogType.Server, "Starting Hermes Proxy...");
