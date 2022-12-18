@@ -1,4 +1,10 @@
 SpellId,NameSubText,Description,AuraDescription
+"1243","Rank 1","Power infuses the target, increasing their Stamina by $s1 for $d.","Increases Stamina by $s1."
+"1244","Rank 2","Power infuses the target, increasing their Stamina by $s1 for $d.","Increases Stamina by $s1."
+"1245","Rank 3","Power infuses the target, increasing their Stamina by $s1 for $d.","Increases Stamina by $s1."
+"2791","Rank 4","Power infuses the target, increasing their Stamina by $s1 for $d.","Increases Stamina by $s1."
+"10937","Rank 5","Power infuses the target, increasing their Stamina by $s1 for $d.","Increases Stamina by $s1."
+"10938","Rank 6","Power infuses the target, increasing their Stamina by $s1 for $d.","Increases Stamina by $s1."
 "32950","","",""
 "33388","Apprentice","",""
 "33389","","Allows the player to ride basic ground mounts that require a riding skill of 75.",""
