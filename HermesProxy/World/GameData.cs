@@ -33,6 +33,7 @@ namespace HermesProxy.World
         public static HashSet<uint> MountAuras = new HashSet<uint>();
         public static HashSet<uint> NextMeleeSpells = new HashSet<uint>();
         public static HashSet<uint> AutoRepeatSpells = new HashSet<uint>();
+        public static HashSet<uint> AuraSpells = new HashSet<uint>();
         public static Dictionary<uint, TaxiPath> TaxiPaths = new Dictionary<uint, TaxiPath>();
         public static int[,] TaxiNodesGraph = new int[250,250];
 
@@ -352,6 +353,7 @@ namespace HermesProxy.World
             LoadMountAuras();
             LoadMeleeSpells();
             LoadAutoRepeatSpells();
+            LoadAuraSpells();
             LoadTaxiPaths();
             LoadTaxiPathNodesGraph();
             LoadHotfixes();
@@ -797,6 +799,28 @@ namespace HermesProxy.World
 
                     uint spellId = UInt32.Parse(fields[0]);
                     AutoRepeatSpells.Add(spellId);
+                }
+            }
+        }
+        public static void LoadAuraSpells()
+        {
+            var path = Path.Combine("CSV", $"AuraSpells{LegacyVersion.ExpansionVersion}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint spellId = UInt32.Parse(fields[0]);
+                    AuraSpells.Add(spellId);
                 }
             }
         }

@@ -25,6 +25,7 @@ namespace HermesProxy.World.Client
             GetSession().GameState.ObjectCacheLegacy.Remove(guid);
             GetSession().GameState.ObjectCacheModern.Remove(guid);
             GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+            GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
 
             UpdateObject updateObject = new UpdateObject(GetSession().GameState);
             updateObject.DestroyedGuids.Add(guid);
@@ -303,6 +304,7 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.ObjectCacheLegacy.Remove(guid);
                 GetSession().GameState.ObjectCacheModern.Remove(guid);
                 GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+                GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
                 updateObject.OutOfRangeGuids.Add(guid);
             }
         }
@@ -1904,7 +1906,7 @@ namespace HermesProxy.World.Client
                                     aura.AuraData.Duration = durationFull;
                                     aura.AuraData.Remaining = durationLeft;
                                 }
-                                aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, i);
+                                aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, i, aura.AuraData.SpellID);
                             }
                             else if (updateMaskArray[UNIT_FIELD_AURA + i])
                             {

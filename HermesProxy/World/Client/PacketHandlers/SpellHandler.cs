@@ -428,6 +428,12 @@ namespace HermesProxy.World.Client
                 spell.Cast.SpellXSpellVisualID = GetSession().GameState.CurrentClientPetCast.SpellXSpellVisualId;
                 GetSession().GameState.CurrentClientPetCast = null;
             }
+            if (!spell.Cast.CasterUnit.IsEmpty() && GameData.AuraSpells.Contains((uint)spell.Cast.SpellID))
+            {
+                foreach (WowGuid128 target in spell.Cast.HitTargets)
+                    GetSession().GameState.StoreLastAuraCasterOnTarget(target, (uint)spell.Cast.SpellID, spell.Cast.CasterUnit);
+            }
+                
             SendPacketToClient(spell);
         }
 
@@ -1085,7 +1091,7 @@ namespace HermesProxy.World.Client
             if (aura.AuraData.SpellID != spellId)
                 return;
 
-            aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, slot);
+            aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, slot, spellId);
             aura.AuraData.Flags |= AuraFlagsModern.Duration;
             aura.AuraData.Duration = durationFull;
             aura.AuraData.Remaining = durationLeft;

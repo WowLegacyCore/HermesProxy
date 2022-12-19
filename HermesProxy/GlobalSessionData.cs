@@ -90,7 +90,8 @@ namespace HermesProxy
         public HashSet<string> AddonPrefixes = new HashSet<string>();
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
-        
+        public Dictionary<WowGuid128, Dictionary<uint, WowGuid128>> LastAuraCasterOnTarget = new Dictionary<WowGuid128, Dictionary<uint, WowGuid128>>();
+
         public uint GetCurrentGroupSize()
         {
             var group = GetCurrentGroup();
@@ -414,6 +415,49 @@ namespace HermesProxy
             if (UnitAuraCaster.ContainsKey(target) &&
                 UnitAuraCaster[target].ContainsKey(slot))
                 return UnitAuraCaster[target][slot];
+
+            return null;
+        }
+        public WowGuid128 GetAuraCaster(WowGuid128 target, byte slot, uint spellId)
+        {
+            WowGuid128 caster = GetAuraCaster(target, slot);
+            if (caster == null)
+            {
+                caster = GetLastAuraCasterOnTarget(target, spellId);
+                if (caster != null)
+                    StoreAuraCaster(target, slot, caster);
+            }
+
+            return caster;
+        }
+        public void StoreLastAuraCasterOnTarget(WowGuid128 target, uint spellId, WowGuid128 caster)
+        {
+            if (LastAuraCasterOnTarget.ContainsKey(target))
+            {
+                if (LastAuraCasterOnTarget[target].ContainsKey(spellId))
+                    LastAuraCasterOnTarget[target][spellId] = caster;
+                else
+                    LastAuraCasterOnTarget[target].Add(spellId, caster);
+            }
+            else
+            {
+                Dictionary<uint, WowGuid128> casterDict = new Dictionary<uint, WowGuid128>();
+                casterDict.Add(spellId, caster);
+                LastAuraCasterOnTarget.Add(target, casterDict);
+            }
+        }
+        public WowGuid128 GetLastAuraCasterOnTarget(WowGuid128 target, uint spellId)
+        {
+            if (LastAuraCasterOnTarget.ContainsKey(target))
+            {
+                WowGuid128 caster;
+                if (LastAuraCasterOnTarget[target].TryGetValue(spellId, out caster))
+                {
+                    LastAuraCasterOnTarget[target].Remove(spellId);
+                    return caster;
+                }
+            }
+            
             return null;
         }
         public void StorePlayerGuildId(WowGuid128 guid, uint guildId)
