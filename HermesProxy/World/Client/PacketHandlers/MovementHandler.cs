@@ -407,9 +407,10 @@ namespace HermesProxy.World.Client
                 if (splineFlags == SplineFlagVanilla.Runmode) // Default spline flags used by Vanilla and TBC servers
                 {
                     moveSpline.SplineFlags = SplineFlagModern.Unknown5;
-                    if (((UnitFlagsVanilla)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS) & UnitFlagsVanilla.CanSwim) != 0)
+                    UnitFlagsVanilla unitFlags = (UnitFlagsVanilla)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS);
+                    if (unitFlags.HasFlag(UnitFlagsVanilla.CanSwim))
                         moveSpline.SplineFlags |= SplineFlagModern.CanSwim;
-                    if (type == SplineTypeLegacy.Normal)
+                    if (type == SplineTypeLegacy.Normal && !unitFlags.HasFlag(UnitFlagsVanilla.InCombat))
                         moveSpline.SplineFlags |= SplineFlagModern.Steering | SplineFlagModern.Unknown10;
                 }
                 else
@@ -426,9 +427,10 @@ namespace HermesProxy.World.Client
                 if (splineFlags == SplineFlagTBC.Runmode) // Default spline flags used by Vanilla and TBC servers
                 {
                     moveSpline.SplineFlags = SplineFlagModern.Unknown5;
-                    if (((UnitFlags)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS) & UnitFlags.CanSwim) != 0)
+                    UnitFlags unitFlags = (UnitFlags)GetSession().GameState.GetLegacyFieldValueUInt32(guid, UnitField.UNIT_FIELD_FLAGS);
+                    if (unitFlags.HasFlag(UnitFlags.CanSwim))
                         moveSpline.SplineFlags |= SplineFlagModern.CanSwim;
-                    if (type == SplineTypeLegacy.Normal)
+                    if (type == SplineTypeLegacy.Normal && !unitFlags.HasFlag(UnitFlags.InCombat))
                         moveSpline.SplineFlags |= SplineFlagModern.Steering | SplineFlagModern.Unknown10;
                 }
                 else
