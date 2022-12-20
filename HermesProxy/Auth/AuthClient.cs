@@ -484,7 +484,7 @@ namespace HermesProxy.Auth
                 realmInfo.Name = packet.ReadCString();
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
-                realmInfo.Address = Dns.GetHostAddresses(strArr[0]).GetValue(0).ToString();
+                realmInfo.Address = Dns.GetHostAddresses(strArr[0].Trim()).GetValue(0).ToString();
                 realmInfo.Port = UInt16.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();
