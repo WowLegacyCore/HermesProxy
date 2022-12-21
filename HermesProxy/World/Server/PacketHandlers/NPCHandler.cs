@@ -1,4 +1,5 @@
 ﻿using Framework.Constants;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World;
 using HermesProxy.World.Enums;
@@ -67,9 +68,28 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CONFIRM_RESPEC_WIPE)]
         void HandleConfirmRespecWipe(ConfirmRespecWipe respec)
         {
-            WorldPacket packet = new WorldPacket(Opcode.MSG_TALENT_WIPE_CONFIRM);
-            packet.WriteGuid(respec.TrainerGUID.To64());
-            SendPacketToServer(packet);
+            switch (respec.RespecType)
+            {
+                case SpecResetType.Talents:
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.MSG_TALENT_WIPE_CONFIRM);
+                    packet.WriteGuid(respec.TrainerGUID.To64());
+                    SendPacketToServer(packet);
+                    break;
+                }
+                case SpecResetType.PetTalents:
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.CMSG_PET_UNLEARN);
+                    packet.WriteGuid(respec.TrainerGUID.To64());
+                    SendPacketToServer(packet);
+                    break;
+                }
+                default:
+                {
+                    Log.Print(LogType.Error, $"Unhandled respec type {respec.RespecType}.");
+                    break;
+                }
+            }
         }
     }
 }
