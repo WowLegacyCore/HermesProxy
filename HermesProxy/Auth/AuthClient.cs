@@ -98,7 +98,47 @@ namespace HermesProxy.Auth
                 _clientSocket.ReceiveBufferSize = 65535;
                 byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
                 _clientSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveCallback, buffer);
-                SendLogonChallenge();
+                SendLogonChallenge(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
+            }
+        }
+
+        public AuthResult Reconnect()
+        {
+            _response = new();
+
+            try
+            {
+                Log.Print(LogType.Network, "Reconnecting to auth server...");
+                _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                // Connect to the specified host.
+                var endPoint = new IPEndPoint(IPAddress.Parse(Settings.ServerAddress), Settings.ServerPort);
+                _clientSocket.BeginConnect(endPoint, ReconnectCallback, null);
+            }
+            catch (Exception ex)
+            {
+                Log.Print(LogType.Error, $"Socket Error: {ex.Message}");
+                _response.SetResult(AuthResult.FAIL_INTERNAL_ERROR);
+            }
+
+            _response.Task.Wait();
+
+            return _response.Task.Result;
+        }
+
+        private void ReconnectCallback(IAsyncResult AR)
+        {
+            try
+            {
+                _clientSocket.EndConnect(AR);
+                _clientSocket.ReceiveBufferSize = 65535;
+                byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
+                _clientSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveCallback, buffer);
+                SendLogonChallenge(true);
             }
             catch (Exception ex)
             {
@@ -179,6 +219,12 @@ namespace HermesProxy.Auth
                 case AuthCommand.LOGON_PROOF:
                     HandleLogonProof(packet);
                     break;
+                case AuthCommand.RECONNECT_CHALLENGE:
+                    HandleReconnectChallenge(packet);
+                    break;
+                case AuthCommand.RECONNECT_PROOF:
+                    HandleReconnectProof(packet);
+                    break;
                 case AuthCommand.REALM_LIST:
                     HandleRealmList(packet);
                     break;
@@ -189,10 +235,10 @@ namespace HermesProxy.Auth
             }
         }
 
-        private void SendLogonChallenge()
+        private void SendLogonChallenge(bool reconnect)
         {
             ByteBuffer buffer = new ByteBuffer();
-            buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
+            buffer.WriteUInt8((byte)(reconnect ? AuthCommand.RECONNECT_CHALLENGE : AuthCommand.LOGON_CHALLENGE));
             buffer.WriteUInt8((byte)(LegacyVersion.ExpansionVersion > 1 ? 8 : 3));
             buffer.WriteUInt16((UInt16)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
@@ -211,6 +257,12 @@ namespace HermesProxy.Auth
             buffer.WriteUInt8((byte)_username.Length);
             buffer.WriteBytes(Encoding.ASCII.GetBytes(_username.ToUpper()));
             SendPacket(buffer);
+        }
+
+        private byte[] GetClientIntegrityHash(byte[] versionChallenge)
+        {
+            // NYI
+            return new byte[20];
         }
 
         private void HandleLogonChallenge(ByteBuffer packet)
@@ -367,7 +419,8 @@ namespace HermesProxy.Auth
 
             #endregion
 
-            SendLogonProof(A.ToCleanByteArray(), m1Hash, new byte[20]);
+            byte[] crc = HashAlgorithm.SHA1.Hash(A.ToCleanByteArray(), GetClientIntegrityHash(challenge_version));
+            SendLogonProof(A.ToCleanByteArray(), m1Hash, crc);
         }
 
         private void SendLogonProof(byte[] A, byte[] M1, byte[] crc)
@@ -428,6 +481,45 @@ namespace HermesProxy.Auth
                 Log.Print(LogType.Network, "Authentication succeeded!");
                 SetAuthResponse(AuthResult.SUCCESS);
             }
+        }
+
+        public void HandleReconnectChallenge(ByteBuffer packet)
+        {
+            packet.ReadUInt8(); // always 0
+            byte[] reconnectProof = packet.ReadBytes(16);
+            byte[] versionChallenge = packet.ReadBytes(16);
+
+            var rand = System.Security.Cryptography.RandomNumberGenerator.Create();
+            byte[] R1 = new byte[16];
+            rand.GetBytes(R1);
+            byte[] R2 = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(_username.ToUpper()), R1, reconnectProof, GetSessionKey());
+            byte[] R3 = HashAlgorithm.SHA1.Hash(R1, new byte[20]); // version challenge not actually used on reconnect
+
+            SendReconnectProof(R1, R2, R3);
+        }
+
+        private void SendReconnectProof(byte[] R1, byte[] R2, byte[] R3)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteUInt8((byte)AuthCommand.RECONNECT_PROOF);
+            buffer.WriteBytes(R1); // size 16
+            buffer.WriteBytes(R2); // size 20
+            buffer.WriteBytes(R3); // size 20
+            buffer.WriteUInt8(0);
+            SendPacket(buffer);
+        }
+
+        public void HandleReconnectProof(ByteBuffer packet)
+        {
+            AuthResult error = (AuthResult)packet.ReadUInt8();
+            if (error != AuthResult.SUCCESS)
+            {
+                Log.Print(LogType.Error, $"Reconnect failed. Reason: {error}");
+                SetAuthResponse(error);
+                return;
+            }
+
+            SetAuthResponse(AuthResult.SUCCESS);
         }
 
         public void RequestRealmListAndWait()

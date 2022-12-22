@@ -83,7 +83,7 @@ namespace HermesProxy.World.Server.Packets
 
         public uint Token;
         public bool Allow = true;
-        public ByteBuffer Ticket;
+        public ByteBuffer Ticket = new ByteBuffer();
     }
 
     class BattlenetRequest : ClientPacket
