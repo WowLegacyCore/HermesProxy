@@ -12,23 +12,24 @@ using System.Text;
 using System.Threading.Tasks;
 using HermesProxy.Auth;
 using HermesProxy.Enums;
+using HermesProxy.World.Server;
 
 namespace BNetServer.Networking
 {
-    public class RestSession : SSLSocket
+    public class BnetRestApiSession : SSLSocket
     {
         private const string BNET_SERVER_BASE_PATH = "/bnetserver/";
         private const string TICKET_PREFIX = "HP-"; // Hermes Proxy
-        
-        public RestSession(Socket socket) : base(socket) { }
+
+        public BnetRestApiSession(Socket socket) : base(socket) { }
 
         public override void Accept()
         {
             // Setup SSL connection
-            AsyncHandshake(Global.LoginServiceMgr.GetCertificate());
+            AsyncHandshake(BnetServerCertificate.Certificate);
         }
 
-        public override async void ReadHandler(byte[] data, int receivedLength)
+        public override async Task ReadHandler(byte[] data, int receivedLength)
         {
             var httpRequest = HttpHelper.ParseRequest(data, receivedLength);
             if (httpRequest == null || !RequestRouter(httpRequest))
@@ -54,7 +55,7 @@ namespace BNetServer.Networking
             switch (pathElements[0], httpRequest.Method) 
             {
                 case ("login", "GET"):
-                    SendResponse(HttpCode.Ok, Global.LoginServiceMgr.GetFormInput());
+                    SendResponse(HttpCode.Ok, LoginServiceManager.Instance.GetFormInput());
                     return true;
                 case ("login", "POST"):
                     HandleLoginRequest(pathElements, httpRequest);
@@ -75,8 +76,8 @@ namespace BNetServer.Networking
 
             // Format: "login/$platform/$build/$locale/"
             globalSession.OS = pathElements[1];
-            globalSession.Build =  UInt32.Parse(pathElements[2]);
-            globalSession.Locale =  pathElements[3];
+            globalSession.Build = uint.Parse(pathElements[2]);
+            globalSession.Locale = pathElements[3];
 
             // Should never happen. Session.HandleLogon checks version already
             if (Framework.Settings.ClientBuild != (ClientVersionBuild) globalSession.Build)
@@ -89,7 +90,7 @@ namespace BNetServer.Networking
             {
                 switch (field.Id)
                 {
-                    case "account_name": login = field.Value; break;
+                    case "account_name": login = field.Value.Trim().ToUpperInvariant(); break;
                     case "password": password = field.Value; break;
                 }
             }
@@ -101,7 +102,8 @@ namespace BNetServer.Networking
                 return SendAuthError(response);
             }
             else
-            { // Ticket creation
+            {
+                // Ticket creation
                 LogonResult loginResult = new();
                 byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
                 string loginTicket = TICKET_PREFIX + ticket.ToHexString();
@@ -109,8 +111,8 @@ namespace BNetServer.Networking
                 globalSession.LoginTicket = loginTicket;
                 globalSession.Username = login;
                 globalSession.Password = password;
-                Global.AddNewSessionByName(login, globalSession);
-                Global.AddNewSessionByTicket(loginTicket, globalSession);
+                BnetSessionTicketStorage.AddNewSessionByName(login, globalSession);
+                BnetSessionTicketStorage.AddNewSessionByTicket(loginTicket, globalSession);
 
                 loginResult.LoginTicket = loginTicket;
                 loginResult.AuthenticationState = "DONE";
@@ -132,6 +134,7 @@ namespace BNetServer.Networking
                 AuthResult.FAIL_INCORRECT_PASSWORD => ("LOGIN", "UNABLE_TO_DECODE", "Invalid password."),
                 AuthResult.FAIL_BANNED             => ("LOGIN", "UNABLE_TO_DECODE", "This account has been closed and is no longer available for use."),
                 AuthResult.FAIL_SUSPENDED          => ("LOGIN", "UNABLE_TO_DECODE", "This account has been temporarily suspended."),
+                AuthResult.FAIL_VERSION_INVALID    => ("LOGIN", "UNABLE_TO_DECODE", "Your version is not supported by this server.\nMake sure you are using the latest HermesProxy version from GitHub."),
 
                 AuthResult.FAIL_INTERNAL_ERROR     => ("LOGON", "UNABLE_TO_DECODE", "There was an internal error. Please try again later."),
                 _ => ("LOGON", "UNABLE_TO_DECODE", $"Error: {response}"),

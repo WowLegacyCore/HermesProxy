@@ -141,7 +141,7 @@ namespace HermesProxy.World.Client
                     Log.Print(LogType.Error, "Socket Closed By Server");
                     if (_isSuccessful == null)
                         _isSuccessful = false;
-                    else
+                    else if (GetSession().WorldClient == this)
                         GetSession().OnDisconnect();
                     return;
                 }
@@ -157,7 +157,7 @@ namespace HermesProxy.World.Client
                         Log.Print(LogType.Error, "Socket Closed By Server");
                         if (_isSuccessful == null)
                             _isSuccessful = false;
-                        else
+                        else if (GetSession().WorldClient == this)
                             GetSession().OnDisconnect();
                         return;
                     }

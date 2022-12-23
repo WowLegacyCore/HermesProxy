@@ -5,16 +5,13 @@ using Bgs.Protocol.Account.V1;
 using Framework.Constants;
 using System.Collections.Generic;
 
-namespace BNetServer.Networking
+namespace BNetServer.Services
 {
-    public partial class Session
+    public partial class BnetServices
     {
-        [Service(OriginalHash.AccountService, 30)]
+        [Service(ServiceRequirement.LoggedIn, OriginalHash.AccountService, 30)]
         BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
         {
-            if (!_authed)
-                return BattlenetRpcErrorCode.Denied;
-
             if (request.Options.FieldPrivacyInfo)
             {
                 response.State = new AccountState();
@@ -30,21 +27,18 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.AccountService, 31)]
+        [Service(ServiceRequirement.LoggedIn, OriginalHash.AccountService, 31)]
         BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
         {
-            if (!_authed)
-                return BattlenetRpcErrorCode.Denied;
-
             if (request.Options.FieldGameLevelInfo)
             {
-                var gameAccountInfo = _globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = GetSession().AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State = new GameAccountState();
                     response.State.GameLevelInfo = new GameLevelInfo();
                     response.State.GameLevelInfo.Name = gameAccountInfo.DisplayName;
-                    response.State.GameLevelInfo.Program = 5730135; // WoW
+                    response.State.GameLevelInfo.Program = 0x576f57; // "WoW" in Hex
                 }
 
                 response.Tags = new GameAccountFieldTags();
@@ -58,7 +52,7 @@ namespace BNetServer.Networking
 
                 response.State.GameStatus = new GameStatus();
 
-                var gameAccountInfo = _globalSession.AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = GetSession().AccountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;
@@ -66,7 +60,7 @@ namespace BNetServer.Networking
                     response.State.GameStatus.SuspensionExpires = (gameAccountInfo.UnbanDate * 1000000);
                 }
 
-                response.State.GameStatus.Program = 5730135; // WoW
+                response.State.GameStatus.Program = 0x576f57; // "WoW" in Hex
                 response.Tags.GameStatusTag = 0x98B75F99;
             }
 

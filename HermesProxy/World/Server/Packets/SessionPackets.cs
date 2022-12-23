@@ -22,9 +22,9 @@ using System.Collections.Generic;
 
 namespace HermesProxy.World.Server.Packets
 {
-    class Notification : ServerPacket
+    class BattlenetNotification : ServerPacket
     {
-        public Notification() : base(Opcode.SMSG_BATTLENET_NOTIFICATION) { }
+        public BattlenetNotification() : base(Opcode.SMSG_BATTLENET_NOTIFICATION) { }
 
         public override void Write()
         {
@@ -37,19 +37,19 @@ namespace HermesProxy.World.Server.Packets
         public ByteBuffer Data = new();
     }
 
-    class Response : ServerPacket
+    class BattlenetResponse : ServerPacket
     {
-        public Response() : base(Opcode.SMSG_BATTLENET_RESPONSE) { }
+        public BattlenetResponse() : base(Opcode.SMSG_BATTLENET_RESPONSE) { }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32((uint)BnetStatus);
+            _worldPacket.WriteUInt32((uint)Status);
             Method.Write(_worldPacket);
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data);
         }
 
-        public BattlenetRpcErrorCode BnetStatus = BattlenetRpcErrorCode.Ok;
+        public BattlenetRpcErrorCode Status = BattlenetRpcErrorCode.Ok;
         public MethodCall Method;
         public ByteBuffer Data = new();
     }
@@ -121,6 +121,16 @@ namespace HermesProxy.World.Server.Packets
     {
         public uint GetServiceHash() { return (uint)(Type >> 32); }
         public uint GetMethodId() { return (uint)(Type & 0xFFFFFFFF); }
+
+        public void SetServiceHash(uint serviceHash)
+        {
+            Type = (Type & 0x00000000_FFFFFFFF) | (((ulong)serviceHash) << 32);
+        }
+
+        public void SetMethodId(uint methodId)
+        {
+            Type = (Type & 0xFFFFFFFF_00000000) | methodId;
+        }
 
         public void Read(ByteBuffer data)
         {

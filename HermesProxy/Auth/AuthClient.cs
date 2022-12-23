@@ -44,7 +44,7 @@ namespace HermesProxy.Auth
             _response = new ();
             _hasRealmList = false;
 
-            string authstring = $"{_username.ToUpper()}:{password}";
+            string authstring = $"{_username}:{password}";
             _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
 
             try
@@ -255,7 +255,7 @@ namespace HermesProxy.Auth
             buffer.WriteUInt32((uint)0x3c);
             buffer.WriteUInt32(16777343); // IP (127.0.0.1)
             buffer.WriteUInt8((byte)_username.Length);
-            buffer.WriteBytes(Encoding.ASCII.GetBytes(_username.ToUpper()));
+            buffer.WriteBytes(Encoding.ASCII.GetBytes(_username));
             SendPacket(buffer);
         }
 
@@ -390,7 +390,7 @@ namespace HermesProxy.Auth
             //Console.WriteLine($"gHash={gHash.ToHexString()}");
 
             // hash username
-            byte[] userHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(_username.ToUpper()));
+            byte[] userHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(_username));
 
             // our proof
             byte[] m1Hash = HashAlgorithm.SHA1.Hash
@@ -487,12 +487,12 @@ namespace HermesProxy.Auth
         {
             packet.ReadUInt8(); // always 0
             byte[] reconnectProof = packet.ReadBytes(16);
-            byte[] versionChallenge = packet.ReadBytes(16);
+            packet.ReadBytes(16); // version challenge
 
             var rand = System.Security.Cryptography.RandomNumberGenerator.Create();
             byte[] R1 = new byte[16];
             rand.GetBytes(R1);
-            byte[] R2 = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(_username.ToUpper()), R1, reconnectProof, GetSessionKey());
+            byte[] R2 = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(_username), R1, reconnectProof, GetSessionKey());
             byte[] R3 = HashAlgorithm.SHA1.Hash(R1, new byte[20]); // version challenge not actually used on reconnect
 
             SendReconnectProof(R1, R2, R3);
@@ -524,6 +524,7 @@ namespace HermesProxy.Auth
 
         public void RequestRealmListAndWait()
         {
+            _hasRealmList = false;
             SendRealmListRequest();
             while (!_hasRealmList && IsConnected())
             {
