@@ -106,12 +106,13 @@ namespace HermesProxy.World.Server
             if (GetSession().AuthClient != null)
                 GetSession().AuthClient.Disconnect();
 
+            SendConnectToInstance(ConnectToSerial.WorldAttempt1);
+            GetSession().GameState.IsConnectedToInstance = true;
             GetSession().GameState.IsFirstEnterWorld = true;
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());
             SendPacketToServer(packet);
-            SendConnectToInstance(ConnectToSerial.WorldAttempt1);
-            GetSession().GameState.IsConnectedToInstance = true;
         }
 
         [PacketHandler(Opcode.CMSG_LOGOUT_REQUEST)]
