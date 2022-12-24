@@ -169,6 +169,8 @@ namespace HermesProxy.World.Server.Packets
                     int ownerFaction = GlobalSession.GameState.GetLegacyFieldValueInt32(CorpseData.Owner, UnitField.UNIT_FIELD_FACTIONTEMPLATE);
                     if (ownerFaction != 0)
                         CorpseData.FactionTemplate = ownerFaction;
+                    else if (CorpseData.RaceId != null)
+                        CorpseData.FactionTemplate = (int)GameData.GetFactionForRace((uint)CorpseData.RaceId);
                 }
             }
             if (UnitData != null)

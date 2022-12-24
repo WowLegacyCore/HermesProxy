@@ -28,6 +28,7 @@ namespace HermesProxy.World
         public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
         public static Dictionary<uint, string> AreaNames = new Dictionary<uint, string>();
+        public static Dictionary<uint, uint> RaceFaction = new Dictionary<uint, uint>();
         public static HashSet<uint> DispellSpells = new HashSet<uint>();
         public static HashSet<uint> StackableAuras = new HashSet<uint>();
         public static HashSet<uint> MountAuras = new HashSet<uint>();
@@ -244,6 +245,14 @@ namespace HermesProxy.World
             return "";
         }
 
+        public static uint GetFactionForRace(uint race)
+        {
+            uint faction;
+            if (RaceFaction.TryGetValue(race, out faction))
+                return faction;
+            return 1;
+        }
+
         public static uint GetBattlegroundIdFromMapId(uint mapId)
         {
             foreach (var bg in Battlegrounds)
@@ -348,6 +357,7 @@ namespace HermesProxy.World
             LoadUnitDisplayScales();
             LoadTransports();
             LoadAreaNames();
+            LoadRaceFaction();
             LoadDispellSpells();
             LoadStackableAuras();
             LoadMountAuras();
@@ -675,6 +685,30 @@ namespace HermesProxy.World
                     uint id = UInt32.Parse(fields[0]);
                     string name = fields[1];
                     AreaNames.Add(id, name);
+                }
+            }
+        }
+
+        public static void LoadRaceFaction()
+        {
+            var path = Path.Combine("CSV", $"RaceFaction.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    uint faction = UInt32.Parse(fields[1]);
+                    RaceFaction.Add(id, faction);
                 }
             }
         }
