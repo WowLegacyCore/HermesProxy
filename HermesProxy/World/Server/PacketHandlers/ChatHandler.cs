@@ -6,6 +6,10 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace HermesProxy.World.Server
 {
@@ -80,46 +84,66 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_AFK)]
         void HandleChatMessageAFK(ChatMessageAFK afk)
         {
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(afk.Text);
+            if (toBeSentTextParts.Count < 1)
+                return;
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Afk, 0, afk.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Afk, 0, toBeSentTextParts[0], "", "");
             else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Afk, 0, afk.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Afk, 0, toBeSentTextParts[0], "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_DND)]
         void HandleChatMessageDND(ChatMessageDND dnd)
         {
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(dnd.Text);
+            if (toBeSentTextParts.Count < 1)
+                return;
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, dnd.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, toBeSentTextParts[0], "", "");
             else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, dnd.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, toBeSentTextParts[0], "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_CHANNEL)]
         void HandleChatMessageChannel(ChatMessageChannel channel)
         {
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, channel.Text, channel.Target, "");
-            else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, channel.Text, channel.Target, "");
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(channel.Text);
+            foreach (string text in toBeSentTextParts)
+            {
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, text, channel.Target, "");
+                else
+                    GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, text, channel.Target, "");
+            }
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_WHISPER)]
         void HandleChatMessageWhisper(ChatMessageWhisper whisper)
         {
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
-            else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Whisper, whisper.Language, whisper.Text, "", whisper.Target);
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(whisper.Text);
+            foreach (string text in toBeSentTextParts)
+            {
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Whisper, whisper.Language, text, "", whisper.Target);
+                else
+                    GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Whisper, whisper.Language, text, "", whisper.Target);
+            }
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_EMOTE)]
         void HandleChatMessageWhisper(ChatMessageEmote emote)
         {
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(emote.Text);
+            if (toBeSentTextParts.Count < 1)
+                return;
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Emote, 0, emote.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Emote, 0, toBeSentTextParts[0], "", "");
             else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Emote, 0, emote.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Emote, 0, toBeSentTextParts[0], "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_GUILD)]
@@ -168,15 +192,19 @@ namespace HermesProxy.World.Server
                     return;
             }
 
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(packet.Text);
+            foreach (string text in toBeSentTextParts)
             {
-                ChatMessageTypeWotLK chatMsg = (ChatMessageTypeWotLK)Enum.Parse(typeof(ChatMessageTypeWotLK), type.ToString());
-                GetSession().WorldClient.SendMessageChatWotLK(chatMsg, packet.Language, packet.Text, "", "");
-            }
-            else
-            {
-                ChatMessageTypeVanilla chatMsg = (ChatMessageTypeVanilla)Enum.Parse(typeof(ChatMessageTypeVanilla), type.ToString());
-                GetSession().WorldClient.SendMessageChatVanilla(chatMsg, packet.Language, packet.Text, "", "");
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                {
+                    ChatMessageTypeWotLK chatMsg = (ChatMessageTypeWotLK)Enum.Parse(typeof(ChatMessageTypeWotLK), type.ToString());
+                    GetSession().WorldClient.SendMessageChatWotLK(chatMsg, packet.Language, text, "", "");
+                }
+                else
+                {
+                    ChatMessageTypeVanilla chatMsg = (ChatMessageTypeVanilla)Enum.Parse(typeof(ChatMessageTypeVanilla), type.ToString());
+                    GetSession().WorldClient.SendMessageChatVanilla(chatMsg, packet.Language, text, "", "");
+                }
             }
         }
 
@@ -239,6 +267,43 @@ namespace HermesProxy.World.Server
         void HandleChatUnregisterAllAddonPrefixes(EmptyClientPacket addons)
         {
             GetSession().GameState.AddonPrefixes.Clear();
+        }
+
+        private static List<string> ConvertTextMessageIntoMaxLengthParts(string originalTextMessage)
+        {
+            List<string> toBeSendTextParts = new List<string>();
+            const int maxAllowedTextLength = 255;
+            if (originalTextMessage.Length <= maxAllowedTextLength)
+            {
+                // We fit in a single packet
+                toBeSendTextParts.Add(originalTextMessage);
+            }
+            else
+            {
+                // We must split the text into chunks of max length 255
+                // Since we dont want to break item links, we first split the text by links
+                var linkBegin = @"(?=\|c[a-f0-9]{8}\|H)";
+                var linkEnd = @"(?<=\|h\|r)";
+                var splitted = Regex.Split(originalTextMessage, $"{linkBegin}|{linkEnd}");
+                var splittedAndSlicedToMaxLength = splitted.SelectMany(x => x.Chunk(maxAllowedTextLength));
+
+                var strBuilder = new StringBuilder();
+                foreach (var part in splittedAndSlicedToMaxLength)
+                {
+                    string strPart = string.Concat(part);
+                    if ((strBuilder.Length + strPart.Length) > maxAllowedTextLength)
+                    { // Flush now
+                        toBeSendTextParts.Add(strBuilder.ToString());
+                        strBuilder.Clear();
+                    }
+                    strBuilder.Append(strPart);
+                }
+
+                // Flush last part of the message
+                toBeSendTextParts.Add(strBuilder.ToString());
+            }
+
+            return toBeSendTextParts;
         }
     }
 }

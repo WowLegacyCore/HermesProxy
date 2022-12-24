@@ -272,6 +272,14 @@ namespace System
             return list;
         }
 
+        public static IEnumerable<IEnumerable<TValue>> Chunk<TValue>(this IEnumerable<TValue> values, int chunkSize)
+        {
+            return values
+                   .Select((v, i) => new { v, groupIndex = i / chunkSize })
+                   .GroupBy(x => x.groupIndex)
+                   .Select(g => g.Select(x => x.v));
+        }
+
         public static T CastFlags<T> (this Enum input) where T : struct, Enum
         {
             uint result = 0;
