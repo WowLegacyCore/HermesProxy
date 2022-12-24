@@ -1158,6 +1158,22 @@ namespace HermesProxy.World.Client
             if (OBJECT_FIELD_SCALE_X >= 0 && updateMaskArray[OBJECT_FIELD_SCALE_X])
             {
                 updateData.ObjectData.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                if (guid == GetSession().GameState.CurrentPlayerGuid &&
+                    LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
+                {
+                    int cachedMountId = 0;
+                    int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                    if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID))
+                        cachedMountId = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
+
+                    MoveSetCollisionHeight height = new();
+                    height.MoverGUID = guid;
+                    height.Height = cachedMountId != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
+                    height.Height *= updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                    height.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                    height.Reason = 2; // Force
+                    SendPacketToClient(height);
+                }
             }
 
             // Item Fields
@@ -1612,8 +1628,19 @@ namespace HermesProxy.World.Client
                     {
                         MoveSetCollisionHeight height = new();
                         height.MoverGUID = guid;
-                        height.Height = updateData.UnitData.MountDisplayID != 0 ? 3.081099f : 2.438083f;
+                        height.Height = updateData.UnitData.MountDisplayID != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
                         height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
+
+                        float cachedScale = 0;
+                        if (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X))
+                            cachedScale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+
+                        if (cachedScale != 0)
+                        {
+                            height.Scale = cachedScale;
+                            height.Height *= height.Scale;
+                        }
+
                         height.Reason = 1; // Mount
                         SendPacketToClient(height);
                     }
