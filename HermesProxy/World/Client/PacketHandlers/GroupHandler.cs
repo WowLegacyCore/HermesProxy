@@ -16,7 +16,11 @@ namespace HermesProxy.World.Client
             PartyCommandResult party = new PartyCommandResult();
             party.Command = (byte)packet.ReadUInt32();
             party.Name = packet.ReadCString();
-            party.Result = (byte)packet.ReadUInt32();
+            uint partyResult = packet.ReadUInt32();
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                party.Result = (byte)partyResult;
+            else
+                party.Result = (byte)Enum.Parse(typeof(PartyResultModern), ((PartyResultVanilla)partyResult).ToString());
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
                 party.ResultData = packet.ReadUInt32();
             SendPacketToClient(party);
