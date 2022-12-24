@@ -142,68 +142,69 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_AUCTION_OWNER_NOTIFICATION)]
         void HandleAuctionOwnerNotification(WorldPacket packet)
         {
-            uint auctionId = packet.ReadUInt32();
-            uint bidAmount = packet.ReadUInt32();
+            AuctionOwnerNotification info = new AuctionOwnerNotification();
+            info.AuctionID = packet.ReadUInt32();
+            info.BidAmount = packet.ReadUInt32();
             uint minIncrement = packet.ReadUInt32();
             WowGuid buyer = packet.ReadGuid();
-            uint itemId = packet.ReadUInt32();
-            uint randomPropertyId = packet.ReadUInt32();
+            info.Item.ItemID = packet.ReadUInt32();
+            info.Item.RandomPropertiesID = packet.ReadUInt32();
 
+            float mailDelay;
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                packet.ReadFloat(); // Time Left
-
-            string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
-            {
-                WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
-                query.WriteUInt32(itemId);
-                query.WriteGuid(WowGuid64.Empty);
-                SendPacket(query);
-                return;
-            }
+                mailDelay = packet.ReadFloat();
+            else
+                mailDelay = 3600;
 
             if (buyer.IsEmpty())
             {
-                string message;
-                if (bidAmount == 0)
-                    message = $"Your auction of {name} has expired.";
-                else
-                    message = $"Your auction of {name} sold.";
-
-                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
-                SendPacketToClient(chat);
+                // BidAmount != 0 -> Your auction of X sold.
+                // BidAmount == 0 -> Your auction of X has expired.
+                AuctionClosedNotification auction = new AuctionClosedNotification();
+                auction.Info = info;
+                auction.Sold = info.BidAmount != 0;
+                auction.ProceedsMailDelay = mailDelay;
+                SendPacketToClient(auction);
+            }
+            else
+            {
+                // A buyer has been found for your auction of X.
+                AuctionOwnerBidNotification auction = new AuctionOwnerBidNotification();
+                auction.Info = info;
+                auction.MinIncrement = minIncrement;
+                auction.Bidder = buyer.To128(GetSession().GameState);
+                SendPacketToClient(auction);
             }
         }
 
         [PacketHandler(Opcode.SMSG_AUCTION_BIDDER_NOTIFICATION)]
         void HandleAuctionBidderNotification(WorldPacket packet)
         {
+            AuctionBidderNotification info = new AuctionBidderNotification();
             uint auctionHouseId = packet.ReadUInt32();
-            uint auctionId = packet.ReadUInt32();
-            WowGuid buyer = packet.ReadGuid();
+            info.AuctionID = packet.ReadUInt32();
+            info.Bidder = packet.ReadGuid().To128(GetSession().GameState);
             uint bidAmount = packet.ReadUInt32();
             uint minIncrement = packet.ReadUInt32();
-            uint itemId = packet.ReadUInt32();
-            uint randomPropertyId = packet.ReadUInt32();
+            info.Item.ItemID = packet.ReadUInt32();
+            info.Item.RandomPropertiesID = packet.ReadUInt32();
 
-            string name = GameData.GetItemName(itemId);
-            if (String.IsNullOrEmpty(name))
-            {
-                WorldPacket query = new WorldPacket(Opcode.CMSG_ITEM_NAME_QUERY);
-                query.WriteUInt32(itemId);
-                query.WriteGuid(WowGuid64.Empty);
-                SendPacket(query);
-                return;
-            }
-
-            string message;
             if (bidAmount == 0)
-                message = $"You won an auction for {name}.";
+            {
+                // You won an auction for X.
+                AuctionWonNotification auction = new AuctionWonNotification();
+                auction.Info = info;
+                SendPacketToClient(auction);
+            }
             else
-                message = $"You have been outbid on {name}.";
-
-            ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, message);
-            SendPacketToClient(chat);
+            {
+                // You have been outbid on X.
+                AuctionOutbidNotification auction = new AuctionOutbidNotification();
+                auction.Info = info;
+                auction.BidAmount = bidAmount;
+                auction.MinIncrement = minIncrement;
+                SendPacketToClient(auction);
+            }
         }
     }
 }
