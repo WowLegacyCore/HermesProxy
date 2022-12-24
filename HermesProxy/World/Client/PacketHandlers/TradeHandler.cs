@@ -1,4 +1,5 @@
 ﻿using Framework;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -16,15 +17,40 @@ namespace HermesProxy.World.Client
         {
             TradeStatusPkt trade = new();
             trade.Status = (TradeStatus)packet.ReadUInt32();
+
+            TradeSession tradeSession = GetSession().GameState.CurrentTrade;
+            if (tradeSession == null)
+            {
+                switch (trade.Status)
+                {
+                    case TradeStatus.Initiated:
+                    case TradeStatus.Proposed:
+                    {
+                        tradeSession = new TradeSession();
+                        GetSession().GameState.CurrentTrade = tradeSession;
+                        break;
+                    }
+                    default:
+                    {
+                        Log.Print(LogType.Error, $"Got SMSG_TRADE_STATUS without trade session (status: {trade.Status})");
+                        SendPacketToClient(new TradeStatusPkt { Status = TradeStatus.Cancelled });
+                        return;
+                    }
+                }
+            } 
+
             switch (trade.Status)
             {
                 case TradeStatus.Proposed:
-                    trade.Partner = packet.ReadGuid().To128(GetSession().GameState);
-                    trade.PartnerAccount = GetSession().GetGameAccountGuidForPlayer(trade.Partner);
+                    trade.Partner = tradeSession.Partner = packet.ReadGuid().To128(GetSession().GameState);
+                    trade.PartnerAccount = tradeSession.PartnerAccount = GetSession().GetGameAccountGuidForPlayer(trade.Partner);
                     break;
                 case TradeStatus.Initiated:
                     if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                         trade.Id = packet.ReadUInt32();
+                    else
+                        trade.Id = TradeSession.GlobalTradeIdCounter++;
+                    tradeSession.TradeId = trade.Id;
                     break;
                 case TradeStatus.Failed:
                     trade.BagResult = LegacyVersion.ConvertInventoryResult(packet.ReadUInt32());
@@ -36,18 +62,46 @@ namespace HermesProxy.World.Client
                     trade.TradeSlot = packet.ReadUInt8();
                     break;
             }
+
+            bool tradeIsDone = trade.Status is not (TradeStatus.Proposed or TradeStatus.Initiated or TradeStatus.Accepted or TradeStatus.Unaccepted or TradeStatus.StateChanged or TradeStatus.WrongRealm);
+            if (tradeIsDone)
+                GetSession().GameState.CurrentTrade = null;
+
             SendPacketToClient(trade);
         }
 
         [PacketHandler(Opcode.SMSG_TRADE_STATUS_EXTENDED)]
         void HandleTradeStatusExtended(WorldPacket packet)
         {
+            var tradeSession = GetSession().GameState.CurrentTrade;
+            if (tradeSession == null)
+            {
+                Log.Print(LogType.Error, "Got SMSG_TRADE_STATUS_EXTENDED without trade session");
+                return;
+            }
+            tradeSession.ServerStateIndex++;
+
             TradeUpdated trade = new();
             trade.WhichPlayer = packet.ReadUInt8();
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                trade.Id = packet.ReadUInt32();
-            trade.ClientStateIndex = packet.ReadUInt32();
-            trade.CurrentStateIndex = packet.ReadUInt32();
+            {
+                var actualTradeId = packet.ReadUInt32();
+                if (actualTradeId != trade.Id)
+                {
+                    Log.Print(LogType.Error, $"Got SMSG_TRADE_STATUS_EXTENDED with wrong tradeId (expected {trade.Id} but got {actualTradeId})");
+                    return;
+                }
+            }
+            trade.Id = tradeSession.TradeId;
+
+            // these might be the client/current state indexes
+            // but mangos sends TRADE_SLOT_COUNT here
+            packet.ReadUInt32();
+            packet.ReadUInt32();
+
+            trade.ClientStateIndex = tradeSession.ClientStateIndex;
+            trade.CurrentStateIndex = tradeSession.ServerStateIndex;
+
             trade.Gold = packet.ReadUInt32();
             trade.ProposedEnchantment = packet.ReadInt32();
             while (packet.CanRead())

@@ -18,6 +18,19 @@ namespace HermesProxy
         public Gender SexId;
         public byte Level;
     }
+
+    public class TradeSession
+    {
+        public static uint GlobalTradeIdCounter; // Fallback for pre 2.0.0 servers
+        public uint TradeId;
+
+        public WowGuid128 Partner;
+        public WowGuid128 PartnerAccount;
+
+        public uint ClientStateIndex = 1; // incremented for every update on out side
+        public uint ServerStateIndex = 1; // incremented by any trade action
+    }
+
     public class GameSessionData
     {
         public bool HasWsgHordeFlagCarrier;
@@ -91,6 +104,7 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> FlatSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<WowGuid128, Dictionary<uint, WowGuid128>> LastAuraCasterOnTarget = new Dictionary<WowGuid128, Dictionary<uint, WowGuid128>>();
+        public TradeSession? CurrentTrade = null;
 
         public uint GetCurrentGroupSize()
         {
