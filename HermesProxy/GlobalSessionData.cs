@@ -41,6 +41,7 @@ namespace HermesProxy
         public bool IsInTaxiFlight;
         public bool IsWaitingForTaxiStart;
         public bool IsWaitingForNewWorld;
+        public bool IsWaitingForWorldPortAck;
         public bool IsFirstEnterWorld;
         public bool IsConnectedToInstance;
         public bool IsInWorld;

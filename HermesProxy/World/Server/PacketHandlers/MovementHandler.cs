@@ -73,6 +73,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_WORLD_PORT_RESPONSE)]
         void HandleWorldPortResponse(WorldPortResponse teleport)
         {
+            GetSession().GameState.IsWaitingForWorldPortAck = false;
             WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_WORLDPORT_ACK);
             SendPacketToServer(packet);
         }

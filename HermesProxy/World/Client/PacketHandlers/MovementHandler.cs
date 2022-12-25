@@ -1,4 +1,5 @@
 ﻿using Framework.GameMath;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -130,6 +131,12 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_TRANSFER_PENDING)]
         void HandleTransferPending(WorldPacket packet)
         {
+            if (GetSession().GameState.IsWaitingForWorldPortAck)
+            {
+                Log.Print(LogType.Error, "Skipping SMSG_TRANSFER_PENDING, client is already being teleported.");
+                return;
+            }
+
             TransferPending transfer = new TransferPending();
             transfer.MapID = GetSession().GameState.PendingTransferMapId = packet.ReadUInt32();
             transfer.OldMapPosition = Vector3.Zero;
@@ -181,6 +188,7 @@ namespace HermesProxy.World.Client
             if (GetSession().GameState.IsWaitingForNewWorld)
             {
                 GetSession().GameState.IsWaitingForNewWorld = false;
+                GetSession().GameState.IsWaitingForWorldPortAck = true;
                 SendPacketToClient(teleport);
                 if (teleport.MapID > 1)
                 {
