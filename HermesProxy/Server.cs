@@ -5,12 +5,13 @@ using HermesProxy.World;
 using HermesProxy.World.Server;
 using System;
 using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Globalization;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +38,25 @@ namespace HermesProxy
             Log.Print(LogType.Server, $"Version {GetVersionInformation()}");
             Log.Start();
 
-            var config = ConfigurationParser.ParseFromFile(args.ConfigFileLocation, args.OverwrittenConfigValues);
+            if (Environment.CurrentDirectory != Path.GetDirectoryName(AppContext.BaseDirectory))
+            {
+                Log.Print(LogType.Storage, "Switching working directory");
+                Log.Print(LogType.Storage, $"Old: {Environment.CurrentDirectory}");
+                Environment.CurrentDirectory = Path.GetDirectoryName(AppContext.BaseDirectory)!;
+                Log.Print(LogType.Storage, $"New: {Environment.CurrentDirectory}");
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+
+            ConfigurationParser config;
+            try
+            {
+                config = ConfigurationParser.ParseFromFile(args.ConfigFileLocation, args.OverwrittenConfigValues);
+            }
+            catch (FileNotFoundException)
+            {
+                Log.Print(LogType.Error, "Config loading failed");
+                return;
+            }
             if (!Settings.LoadAndVerifyFrom(config))
             {
                 Log.Print(LogType.Error, "The verification of the config failed");
@@ -45,6 +64,18 @@ namespace HermesProxy
             }
             Log.DebugLogEnabled = Settings.DebugOutput;
 
+            if (!AesGcm.IsSupported)
+            {
+                Log.Print(LogType.Error, "AesGcm is not supported on your platform");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Log.Print(LogType.Error, "Since you are on MacOS, you can install openssl@3 via homebrew");
+                    Log.Print(LogType.Error, "Run this:      brew install openssl@3");
+                    Log.Print(LogType.Error, "Start Hermes:  DYLD_LIBRARY_PATH=/opt/homebrew/opt/openssl@3/lib ./HermesProxy");
+                }
+                return;
+            }
+            
             GameData.LoadEverything();
 
             var bindIp = NetworkUtils.ResolveOrDirectIp(Settings.ExternalAddress);

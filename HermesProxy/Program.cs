@@ -55,9 +55,9 @@ public class Program
         {
             // If we would exit immediately the console would close and the user cannot read the error
             // The delay is there if for some reason STDIN is already closed
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(3));
 
-            Console.WriteLine("Press any key to close");
+            Console.WriteLine("Press enter to close");
             Console.ReadLine();
         }
 

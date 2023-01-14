@@ -14,11 +14,10 @@
     <!-- Build/Publish config -->
     <!-- we HAVE to set some runtime :(   We overwrite this with 'use-current-runtime' inside build process -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeNativeLibrariesForSelfExtract Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IncludeNativeLibrariesForSelfExtract>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
-    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
