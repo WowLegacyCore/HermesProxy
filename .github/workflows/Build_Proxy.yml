@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: ['windows', 'ubuntu']
+        os: ['windows', 'ubuntu', 'macos']
     runs-on: ${{ matrix.os }}-latest
 
     steps:
@@ -27,14 +27,57 @@ jobs:
         run: dotnet restore
 
       - name: Publish
+        if: matrix.os != 'macos'
         run: dotnet publish --configuration Release --use-current-runtime -p:UsePublishBuildSettings=true
+
+      - name: Publish (MacOS x86_64 and arm64)
+        if: matrix.os == 'macos'
+        run: |
+          dotnet publish --configuration Release --runtime osx-arm64 -p:UsePublishBuildSettings=true
+          dotnet publish --configuration Release --runtime osx-x64 -p:UsePublishBuildSettings=true
+          lipo ./HermesProxy/bin/Release/*/publish/HermesProxy -create -output ./HermesProxy/bin/Release/osx-x64/publish/HermesProxy_universal
+          mv ./HermesProxy/bin/Release/osx-x64/publish/HermesProxy_universal ./HermesProxy/bin/Release/osx-x64/publish/HermesProxy
+          rm -rf ./HermesProxy/bin/Release/osx-arm64
 
       - name: Copy files
         run: cp -r ./HermesProxy/bin/Release/*/publish/ publish
 
-      - name: Upload build artifact
+      - name: Mark as executable
+        if: matrix.os != 'windows'
+        run: chmod a+x publish/HermesProxy
+
+      - name: Make a tar.gz with permissions out of it (for Linux)
+        if: matrix.os == 'ubuntu'
+        run: |
+          mv publish HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}
+          tar -czvf HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}.tar.gz HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}
+
+      - name: Make a zip with permissions out of it (for MacOS)
+        if: matrix.os == 'macos'
+        run: |
+          mv publish HermesProxy-${{ matrix.os }}-universal-${{ github.sha }}
+          zip -vr HermesProxy-${{ matrix.os }}-universal-${{ github.sha }}.zip HermesProxy-${{ matrix.os }}-universal-${{ github.sha }}
+
+      - name: Upload build artifact (Windows)
+        if: matrix.os == 'windows'
         uses: actions/upload-artifact@v3
         with:
           name: HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}
           path: publish
+          if-no-files-found: error
+
+      - name: Upload build artifact (Linux)
+        if: matrix.os == 'ubuntu'
+        uses: actions/upload-artifact@v3
+        with:
+          name: HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: HermesProxy-${{ matrix.os }}-${{ runner.arch }}-${{ github.sha }}.*
+          if-no-files-found: error
+
+      - name: Upload build artifact (MacOS)
+        if: matrix.os == 'macos'
+        uses: actions/upload-artifact@v3
+        with:
+          name: HermesProxy-${{ matrix.os }}-universal-${{ github.sha }}
+          path: HermesProxy-${{ matrix.os }}-universal-${{ github.sha }}.*
           if-no-files-found: error

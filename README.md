@@ -35,6 +35,11 @@ HermesProxy provides some internal chat commands:
 | `!qcomplete <questId>`     | Manually marks a quest as already completed (useful for quest helper addons) |
 | `!quncomplete <questId>`   | Unmarks a quest as completed                                                 |
 
+## Start Arguments
+ - `--config <filename>` to specify a config (default `HermesProxy.config`)
+ - `--set <key>=<value>` to overwrite a specific config value (example `--set ServerAddress=logon.example.com`)
+ - `--no-version-check`  to disable the check for newer versions
+
 ## Acknowledgements
 
 Parts of this poject's code are based on [CypherCore](https://github.com/CypherCore/CypherCore) and [BotFarm](https://github.com/jackpoz/BotFarm). I would like to extend my sincere thanks to these projects, as the creation of this app might have never happened without them. And I would also like to expressly thank [Modox](https://github.com/mdx7) for all his work on reverse engineering the classic clients and all the help he has personally given me. 
