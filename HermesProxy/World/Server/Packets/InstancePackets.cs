@@ -114,7 +114,7 @@ namespace HermesProxy.World.Server.Packets
         }
 
         public uint MapID;
-        public Difficulty DifficultyID;
+        public DifficultyModern DifficultyID;
         public ulong InstanceID;
         public int TimeRemaining;
         public uint CompletedMask = 1;
@@ -166,7 +166,7 @@ namespace HermesProxy.World.Server.Packets
 
         public InstanceResetWarningType Type;
         public uint MapID;
-        public Difficulty DifficultyID;
+        public DifficultyModern DifficultyID;
         public bool Locked;
         public bool Extended;
     }

@@ -355,6 +355,30 @@ namespace HermesProxy.World.Server.Packets
         public uint? InstanceGroupSize;
     }
 
+    public class SetDungeonDifficulty : ClientPacket
+    {
+        public SetDungeonDifficulty(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            DifficultyID = _worldPacket.ReadUInt32();
+        }
+
+        public uint DifficultyID;
+    }
+
+    public class DungeonDifficultySet : ServerPacket
+    {
+        public DungeonDifficultySet() : base(Opcode.SMSG_SET_DUNGEON_DIFFICULTY) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(DifficultyID);
+        }
+
+        public int DifficultyID;
+    }
+
     public class SetAllTaskProgress : ServerPacket
     {
         public SetAllTaskProgress() : base(Opcode.SMSG_SET_ALL_TASK_PROGRESS, ConnectionType.Instance) { }

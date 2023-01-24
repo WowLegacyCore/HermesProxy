@@ -275,5 +275,16 @@ namespace HermesProxy.World.Client
             zone.AreaID = packet.ReadInt32();
             SendPacketToClient(zone);
         }
+
+        [PacketHandler(Opcode.MSG_SET_DUNGEON_DIFFICULTY)]
+        void HandleSetDungeonDifficulty(WorldPacket packet)
+        {
+            DungeonDifficultySet difficulty = new();
+            int difficultyId = packet.ReadInt32();
+            difficulty.DifficultyID = (byte)Enum.Parse(typeof(DifficultyModern), ((DifficultyLegacy)difficultyId).ToString());
+            packet.ReadInt32(); // always 1
+            packet.ReadInt32(); // IsInGroup
+            SendPacketToClient(difficulty);
+        }
     }
 }

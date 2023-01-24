@@ -86,12 +86,12 @@ namespace HermesProxy.World.Client
                     party.PartyFlags |= GroupFlags.Raid;
 
                 party.DifficultySettings = new PartyDifficultySettings();
-                party.DifficultySettings.DungeonDifficultyID = Difficulty.Normal;
+                party.DifficultySettings.DungeonDifficultyID = DifficultyModern.Normal;
 
                 if (ModernVersion.ExpansionVersion > 1)
-                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid25N;
+                    party.DifficultySettings.RaidDifficultyID = DifficultyModern.Raid25N;
                 else
-                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
+                    party.DifficultySettings.RaidDifficultyID = DifficultyModern.Raid40;
 
                 if (party.PartyIndex != 0)
                     party.PartyType = GroupType.PvP;
@@ -216,12 +216,13 @@ namespace HermesProxy.World.Client
                 party.LootSettings.Threshold = packet.ReadUInt8();
 
                 party.DifficultySettings = new PartyDifficultySettings();
-                party.DifficultySettings.DungeonDifficultyID = (Difficulty)packet.ReadUInt8();
+                int difficultyId = packet.ReadUInt8();
+                party.DifficultySettings.DungeonDifficultyID = (DifficultyModern)Enum.Parse(typeof(DifficultyModern), ((DifficultyLegacy)difficultyId).ToString());
 
                 if (ModernVersion.ExpansionVersion > 1)
-                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid25N;
+                    party.DifficultySettings.RaidDifficultyID = DifficultyModern.Raid25N;
                 else
-                    party.DifficultySettings.RaidDifficultyID = Difficulty.Raid40;
+                    party.DifficultySettings.RaidDifficultyID = DifficultyModern.Raid40;
 
                 GetSession().GameState.CurrentGroups[party.PartyIndex] = party;
             }

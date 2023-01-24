@@ -151,6 +151,14 @@ namespace HermesProxy.World.Server
             GetSession().GameState.ShowPlayedTime = played.TriggerScriptEvent;
         }
 
+        [PacketHandler(Opcode.CMSG_SET_TITLE)]
+        void HandleTogglePvP(SetTitle title)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_TITLE);
+            packet.WriteInt32(title.TitleID);
+            SendPacketToServer(packet);
+        }
+
         [PacketHandler(Opcode.CMSG_TOGGLE_PVP)]
         void HandleTogglePvP(TogglePvP pvp)
         {
