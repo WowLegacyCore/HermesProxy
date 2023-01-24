@@ -915,7 +915,13 @@ namespace HermesProxy.World.Server.Packets
             data.WriteInt32(WeeklyBestRating);
             data.WriteInt32(SeasonBestRating);
             data.WriteInt32(PvpTierID);
-            data.WriteInt32(UnkBCC);
+            if (ModernVersion.AddedInVersion(9, 1, 0, 1, 14, 0, 2, 5, 2))
+                data.WriteInt32(WeeklyBestWinPvpTierID);
+            if (ModernVersion.AddedInVersion(9, 1, 5, 1, 14, 1, 2, 5, 3))
+            {
+                data.WriteInt32(Unused1);
+                data.WriteInt32(Unused2);
+            }
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
@@ -929,7 +935,9 @@ namespace HermesProxy.World.Server.Packets
         public int WeeklyBestRating;
         public int SeasonBestRating;
         public int PvpTierID;
-        public int UnkBCC;
+        public int WeeklyBestWinPvpTierID;
+        public int Unused1;
+        public int Unused2;
         public byte Bracket;
         public bool Disqualified;
     }

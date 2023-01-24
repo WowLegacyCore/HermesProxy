@@ -59,4 +59,8 @@
     </Content>
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="World\Enums\V2_5_3_41750\" />
+  </ItemGroup>
+  
 </Project>

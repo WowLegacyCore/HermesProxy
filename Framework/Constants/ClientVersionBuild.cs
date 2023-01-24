@@ -480,6 +480,13 @@ namespace HermesProxy.Enums
         V1_14_1_41794 = 41794, // both live and ptr
         V1_14_1_42032 = 42032, // live
 
+        V1_14_2_41858 = 41858, // ptr
+        V1_14_2_41959 = 41959, // ptr
+        V1_14_2_42065 = 42065, // ptr
+        V1_14_2_42082 = 42082, // ptr
+        V1_14_2_42214 = 42214, // both live and ptr
+        V1_14_2_42597 = 42597, // both live and ptr
+
         // TBC Classic
         V2_5_1_38598 = 38598, // ptr
         V2_5_1_38644 = 38644,
@@ -508,6 +515,14 @@ namespace HermesProxy.Enums
         V2_5_2_40892 = 40892, // both live and ptr
         V2_5_2_41446 = 41446, // live
         V2_5_2_41510 = 41510, // live
+
+        V2_5_3_41402 = 41402, // ptr
+        V2_5_3_41531 = 41531, // ptr
+        V2_5_3_41750 = 41750, // ptr
+        V2_5_3_41812 = 41812, // both live and ptr
+        V2_5_3_42083 = 42083, // both live and ptr
+        V2_5_3_42328 = 42328, // both live and ptr
+        V2_5_3_42598 = 42598, // live
 
         // Battle.net - should probably not mix this but oh well
         BattleNetV37165 = 37165,

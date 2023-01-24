@@ -100,6 +100,17 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet, GetSession().GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
         }
 
+        [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAMES)]
+        void HandleNamesQueryRequest(QueryPlayerNames queryPlayerNames)
+        {
+            foreach (var guid in queryPlayerNames.Players)
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
+                packet.WriteGuid(guid.To64());
+                SendPacketToServer(packet, GetSession().GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+            }
+        }
+
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
         void HandlePlayerLogin(PlayerLogin playerLogin)
         {
@@ -109,6 +120,7 @@ namespace HermesProxy.World.Server
             SendConnectToInstance(ConnectToSerial.WorldAttempt1);
             GetSession().GameState.IsConnectedToInstance = true;
             GetSession().GameState.IsFirstEnterWorld = true;
+            GetSession().GameState.CurrentPlayerGuid = playerLogin.Guid;
 
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());

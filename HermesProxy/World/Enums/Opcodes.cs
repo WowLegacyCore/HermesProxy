@@ -60,6 +60,20 @@ namespace HermesProxy.World.Enums
                 case ClientVersionBuild.V1_14_1_41794:
                 case ClientVersionBuild.V1_14_1_42032:
                     return ClientVersionBuild.V1_14_1_40688;
+                case ClientVersionBuild.V2_5_3_41402:
+                case ClientVersionBuild.V2_5_3_41531:
+                case ClientVersionBuild.V2_5_3_41750:
+                case ClientVersionBuild.V2_5_3_41812:
+                case ClientVersionBuild.V2_5_3_42083:
+                case ClientVersionBuild.V2_5_3_42328:
+                case ClientVersionBuild.V2_5_3_42598:
+                case ClientVersionBuild.V1_14_2_41858:
+                case ClientVersionBuild.V1_14_2_41959:
+                case ClientVersionBuild.V1_14_2_42065:
+                case ClientVersionBuild.V1_14_2_42082:
+                case ClientVersionBuild.V1_14_2_42214:
+                case ClientVersionBuild.V1_14_2_42597:
+                    return ClientVersionBuild.V2_5_3_41750;
             }
             return ClientVersionBuild.Zero;
         }
@@ -76,6 +90,8 @@ namespace HermesProxy.World.Enums
                     return typeof(V3_3_5_12340.Opcode);
                 case ClientVersionBuild.V2_5_2_39570:
                     return typeof(V2_5_2_39570.Opcode);
+                case ClientVersionBuild.V2_5_3_41750:
+                    return typeof(V2_5_3_41750.Opcode);
                 case ClientVersionBuild.V1_14_1_40688:
                     return typeof(V1_14_1_40688.Opcode);
             }
@@ -921,6 +937,7 @@ namespace HermesProxy.World.Enums
         CMSG_MOVE_SET_COLLISION_HEIGHT_ACK,
         CMSG_MOVE_SET_COLLISION_HGT_ACK,
         CMSG_MOVE_SET_FACING,
+        CMSG_MOVE_SET_FACING_HEARTBEAT,
         CMSG_MOVE_SET_FLY,
         CMSG_MOVE_SET_IGNORE_MOVEMENT_FORCES_ACK,
         CMSG_MOVE_SET_MOD_MOVEMENT_FORCE_MAGNITUDE_ACK,
@@ -1046,6 +1063,7 @@ namespace HermesProxy.World.Enums
         CMSG_QUERY_PETITION,
         CMSG_QUERY_PET_NAME,
         CMSG_QUERY_PLAYER_NAME,
+        CMSG_QUERY_PLAYER_NAMES,
         CMSG_QUERY_PLAYER_NAMES_FOR_COMMUNITY,
         CMSG_QUERY_PLAYER_NAME_BY_COMMUNITY_ID,
         CMSG_QUERY_QUESTS_COMPLETED,
@@ -1629,6 +1647,7 @@ namespace HermesProxy.World.Enums
         SMSG_AREA_TRIGGER_RE_SHAPE,
         SMSG_AREA_TRIGGER_SET_VISUAL_ANIM,
         SMSG_AREA_TRIGGER_UNATTACH,
+        SMSG_ARENA_CLEAR_OPPONENTS,
         SMSG_ARENA_CREATE_FAILED,
         SMSG_ARENA_CROWD_CONTROL_SPELL_RESULT,
         SMSG_ARENA_ERROR,
@@ -2786,6 +2805,7 @@ namespace HermesProxy.World.Enums
         SMSG_QUERY_PET_NAME_RESPONSE,
         SMSG_QUERY_PLAYER_NAME_BY_COMMUNITY_ID_RESPONSE,
         SMSG_QUERY_PLAYER_NAME_RESPONSE,
+        SMSG_QUERY_PLAYER_NAMES_RESPONSE,
         SMSG_QUERY_REALM_GUILD_MASTER_INFO_RESPONSE,
         SMSG_QUERY_QUESTS_COMPLETED_RESPONSE,
         SMSG_QUERY_QUEST_INFO_RESPONSE,

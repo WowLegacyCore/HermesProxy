@@ -536,10 +536,13 @@ namespace HermesProxy.World.Server.Packets
         {
             _worldPacket.WriteUInt32(SoundEntryID);
             _worldPacket.WritePackedGuid128(SourceObjectGuid);
+            if (ModernVersion.AddedInVersion(9, 0, 1, 1, 14, 0, 2, 5, 1))
+                _worldPacket.WriteInt32(BroadcastTextId);
         }
 
         public uint SoundEntryID;
         public WowGuid128 SourceObjectGuid;
+        public int BroadcastTextId;
     }
 
     class PlayObjectSound : ServerPacket
@@ -552,7 +555,8 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WritePackedGuid128(SourceObjectGUID);
             _worldPacket.WritePackedGuid128(TargetObjectGUID);
             _worldPacket.WriteVector3(Position);
-            _worldPacket.WriteInt32(BroadcastTextID);
+            if (ModernVersion.AddedInVersion(9, 0, 1, 1, 14, 0, 2, 5, 1))
+                _worldPacket.WriteInt32(BroadcastTextID);
         }
 
         public uint SoundEntryID;
@@ -600,11 +604,14 @@ namespace HermesProxy.World.Server.Packets
         public override void Read()
         {
             SpellVisualKitIDs = new int[_worldPacket.ReadUInt32()];
+            if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                SequenceVariation = _worldPacket.ReadInt32();
             for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
                 SpellVisualKitIDs[i] = _worldPacket.ReadInt32();
         }
 
         public int[] SpellVisualKitIDs;
+        public int SequenceVariation;
     }
 
     class SpecialMountAnim : ServerPacket
@@ -614,13 +621,19 @@ namespace HermesProxy.World.Server.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid128(UnitGUID);
-            _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
-            foreach (var id in SpellVisualKitIDs)
-                _worldPacket.WriteInt32(id);
+            if (ModernVersion.AddedInVersion(9, 0, 5, 1, 14, 0, 2, 5, 1))
+            {
+                _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
+                if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                    _worldPacket.WriteInt32(SequenceVariation);
+                foreach (var id in SpellVisualKitIDs)
+                    _worldPacket.WriteInt32(id);
+            }
         }
 
         public WowGuid128 UnitGUID;
         public List<int> SpellVisualKitIDs = new();
+        public int SequenceVariation;
     }
 
     public class StartMirrorTimer : ServerPacket

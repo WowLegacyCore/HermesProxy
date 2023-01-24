@@ -1033,7 +1033,11 @@ namespace HermesProxy.World.Client
         {
             byte slot = packet.ReadUInt8();
             int duration = packet.ReadInt32();
+
             WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
+            if (guid == null)
+                return;
+
             GetSession().GameState.StoreAuraDurationLeft(guid, slot, duration, (int)packet.GetReceivedTime());
             if (duration <= 0)
                 return;

@@ -452,6 +452,12 @@ namespace HermesProxy
                 case ClientVersionBuild.V1_14_1_41511:
                 case ClientVersionBuild.V1_14_1_41794:
                 case ClientVersionBuild.V1_14_1_42032:
+                case ClientVersionBuild.V1_14_2_41858:
+                case ClientVersionBuild.V1_14_2_41959:
+                case ClientVersionBuild.V1_14_2_42065:
+                case ClientVersionBuild.V1_14_2_42082:
+                case ClientVersionBuild.V1_14_2_42214:
+                case ClientVersionBuild.V1_14_2_42597:
                     return ClientVersionBuild.V1_14_1_40688;
                 case ClientVersionBuild.V2_5_2_39570:
                 case ClientVersionBuild.V2_5_2_39618:
@@ -467,6 +473,14 @@ namespace HermesProxy
                 case ClientVersionBuild.V2_5_2_41446:
                 case ClientVersionBuild.V2_5_2_41510:
                     return ClientVersionBuild.V2_5_2_39570;
+                case ClientVersionBuild.V2_5_3_41402:
+                case ClientVersionBuild.V2_5_3_41531:
+                case ClientVersionBuild.V2_5_3_41750:
+                case ClientVersionBuild.V2_5_3_41812:
+                case ClientVersionBuild.V2_5_3_42083:
+                case ClientVersionBuild.V2_5_3_42328:
+                case ClientVersionBuild.V2_5_3_42598:
+                    return ClientVersionBuild.V2_5_3_41402;
             }
             return ClientVersionBuild.Zero;
         }
@@ -589,6 +603,7 @@ namespace HermesProxy
             {
                 case ClientVersionBuild.V2_5_2_39570:
                     return typeof(World.Enums.V2_5_2_39570.ResponseCodes);
+                case ClientVersionBuild.V2_5_3_41750:
                 case ClientVersionBuild.V1_14_1_40688:
                     return typeof(World.Enums.V1_14_1_40688.ResponseCodes);
             }
@@ -655,6 +670,11 @@ namespace HermesProxy
             return AddedInVersion(retailExpansion, retailMajor, retailMinor);
         }
 
+        public static bool RemovedInVersion(byte retailExpansion, byte retailMajor, byte retailMinor, byte classicEraExpansion, byte classicEraMajor, byte classicEraMinor, byte classicExpansion, byte classicMajor, byte classicMinor)
+        {
+            return !AddedInVersion(retailExpansion, retailMajor, retailMinor, classicEraExpansion, classicEraMajor, classicEraMinor, classicExpansion, classicMajor, classicMinor);
+        }
+
         public static bool AddedInClassicVersion(byte classicEraExpansion, byte classicEraMajor, byte classicEraMinor, byte classicExpansion, byte classicMajor, byte classicMinor)
         {
             if (ExpansionVersion == 1)
@@ -663,6 +683,11 @@ namespace HermesProxy
                 return AddedInVersion(classicExpansion, classicMajor, classicMinor);
 
             return false;
+        }
+
+        public static bool RemovedInClassicVersion(byte classicEraExpansion, byte classicEraMajor, byte classicEraMinor, byte classicExpansion, byte classicMajor, byte classicMinor)
+        {
+            return !AddedInClassicVersion(classicEraExpansion, classicEraMajor, classicEraMinor, classicExpansion, classicMajor, classicMinor);
         }
 
         public static bool IsVersion(byte expansion, byte major, byte minor)
