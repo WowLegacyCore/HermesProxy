@@ -480,7 +480,7 @@ namespace HermesProxy
                 case ClientVersionBuild.V2_5_3_42083:
                 case ClientVersionBuild.V2_5_3_42328:
                 case ClientVersionBuild.V2_5_3_42598:
-                    return ClientVersionBuild.V2_5_3_41402;
+                    return ClientVersionBuild.V2_5_3_41750;
             }
             return ClientVersionBuild.Zero;
         }

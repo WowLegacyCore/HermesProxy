@@ -320,6 +320,12 @@ namespace HermesProxy.World.Server.Packets
                         builder.WriteToPacket(data);
                         break;
                     }
+                    case ClientVersionBuild.V2_5_3_41750:
+                    {
+                        Objects.Version.V2_5_3_41750.ObjectUpdateBuilder builder = new Objects.Version.V2_5_3_41750.ObjectUpdateBuilder(update, _gameState);
+                        builder.WriteToPacket(data);
+                        break;
+                    }
                     default:
                         throw new System.ArgumentOutOfRangeException("No object update builder defined for current build.");
                 }
