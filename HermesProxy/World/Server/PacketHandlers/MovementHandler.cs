@@ -20,6 +20,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_MOVE_JUMP)]
         [PacketHandler(Opcode.CMSG_MOVE_REMOVE_MOVEMENT_FORCES)]
         [PacketHandler(Opcode.CMSG_MOVE_SET_FACING)]
+        [PacketHandler(Opcode.CMSG_MOVE_SET_FACING_HEARTBEAT)]
         [PacketHandler(Opcode.CMSG_MOVE_SET_FLY)]
         [PacketHandler(Opcode.CMSG_MOVE_SET_PITCH)]
         [PacketHandler(Opcode.CMSG_MOVE_SET_RUN_MODE)]
@@ -73,6 +74,7 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_WORLD_PORT_RESPONSE)]
         void HandleWorldPortResponse(WorldPortResponse teleport)
         {
+            GetSession().GameState.IsWaitingForWorldPortAck = false;
             WorldPacket packet = new WorldPacket(Opcode.MSG_MOVE_WORLDPORT_ACK);
             SendPacketToServer(packet);
         }

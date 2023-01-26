@@ -378,7 +378,14 @@ namespace HermesProxy.World.Server.Packets
             BuyoutPrice = _worldPacket.ReadUInt64();
             ExpireTime = _worldPacket.ReadUInt32();
 
-            uint itemCount = _worldPacket.ReadBits<uint>(6);
+            if (_worldPacket.HasBit())
+                TaintedBy = new();
+
+            int itemCountBits = ModernVersion.AddedInClassicVersion(1, 14, 3, 2, 5, 4) ? 6 : 5;
+            uint itemCount = _worldPacket.ReadBits<uint>(itemCountBits);
+
+            if (TaintedBy != null)
+                TaintedBy.Read(_worldPacket);
 
             for (var i = 0; i < itemCount; ++i)
                 Items.Add(new AuctionItemForSale(_worldPacket));
@@ -388,6 +395,7 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 Auctioneer;
         public ulong MinBid;
         public uint ExpireTime;
+        public AddOnInfo TaintedBy;
         public List<AuctionItemForSale> Items = new();
     }
 
@@ -492,10 +500,101 @@ namespace HermesProxy.World.Server.Packets
         public uint AuctionID;                              //< the id of the auction that triggered this notification
         public AuctionHouseAction Command;                  //< the type of action that triggered this notification. Possible values are @ref AuctionAction
         public AuctionHouseError ErrorCode;                 //< the error code that was generated when trying to perform the action. Possible values are @ref AuctionError
-        public InventoryResult BagResult;                   //< the bid error. Possible values are @ref AuctionError
+        public InventoryResult BagResult = InventoryResult.InternalBagError; //< the bid error. Possible values are @ref AuctionError
         public WowGuid128 Guid = WowGuid128.Empty;          //< the GUID of the bidder for this auction.
         public ulong MinIncrement;                          //< the sum of outbid is (1% of current bid) * 5, if the bid is too small, then this value is 1 copper.
         public ulong Money;                                 //< the amount of money that the player bid in copper
         public uint DesiredDelay;
+    }
+
+    public class AuctionOwnerNotification
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(AuctionID);
+            data.WriteUInt64(BidAmount);
+            Item.Write(data);
+        }
+
+        public uint AuctionID;
+        public ulong BidAmount;
+        public ItemInstance Item = new ItemInstance();
+    }
+
+    class AuctionClosedNotification : ServerPacket
+    {
+        public AuctionClosedNotification() : base(Opcode.SMSG_AUCTION_CLOSED_NOTIFICATION) { }
+
+        public override void Write()
+        {
+            Info.Write(_worldPacket);
+            _worldPacket.WriteFloat(ProceedsMailDelay);
+            _worldPacket.WriteBit(Sold);
+            _worldPacket.FlushBits();
+        }
+
+        public AuctionOwnerNotification Info;
+        public float ProceedsMailDelay = 3600;
+        public bool Sold = true;
+    }
+
+    class AuctionOwnerBidNotification : ServerPacket
+    {
+        public AuctionOwnerBidNotification() : base(Opcode.SMSG_AUCTION_OWNER_BID_NOTIFICATION) { }
+
+        public override void Write()
+        {
+            Info.Write(_worldPacket);
+            _worldPacket.WriteUInt64(MinIncrement);
+            _worldPacket.WritePackedGuid128(Bidder);
+        }
+
+        public AuctionOwnerNotification Info;
+        public ulong MinIncrement;
+        public WowGuid128 Bidder;
+    }
+
+    class AuctionBidderNotification
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Command);
+            data.WriteUInt32(AuctionID);
+            data.WritePackedGuid128(Bidder);
+            Item.Write(data);
+        }
+
+        public uint Command = 2;
+        public uint AuctionID;
+        public WowGuid128 Bidder;
+        public ItemInstance Item = new ItemInstance();
+    }
+
+    class AuctionWonNotification : ServerPacket
+    {
+        public AuctionWonNotification() : base(Opcode.SMSG_AUCTION_WON_NOTIFICATION) { }
+
+        public override void Write()
+        {
+            Info.Write(_worldPacket);
+        }
+
+        public AuctionBidderNotification Info;
+    }
+
+    class AuctionOutbidNotification : ServerPacket
+    {
+        public AuctionOutbidNotification() : base(Opcode.SMSG_AUCTION_OUTBID_NOTIFICATION) { }
+
+        public override void Write()
+        {
+            Info.Write(_worldPacket);
+            _worldPacket.WriteUInt64(BidAmount);
+            _worldPacket.WriteUInt64(MinIncrement);
+        }
+
+        public AuctionBidderNotification Info;
+        public ulong BidAmount;
+        public ulong MinIncrement;
     }
 }

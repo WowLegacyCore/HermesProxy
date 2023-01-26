@@ -700,10 +700,10 @@ namespace HermesProxy.World.Server.Packets
             ItemBag = _worldPacket.ReadUInt8();
             ItemSlot = _worldPacket.ReadUInt8();
         }
-        
-        public byte GiftBag { get; set; }
-        public byte GiftSlot { get; set; }
-        public byte ItemBag { get; set; }
-        public byte ItemSlot { get; set; }
+
+        public byte GiftBag;
+        public byte GiftSlot;
+        public byte ItemBag;
+        public byte ItemSlot;
     }
 }

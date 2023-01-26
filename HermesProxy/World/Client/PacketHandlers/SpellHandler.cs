@@ -307,8 +307,8 @@ namespace HermesProxy.World.Client
                 spellVisual = GetSession().GameState.CurrentClientNormalCast.SpellXSpellVisualId;
             }
             else if (GetSession().GameState.CurrentPetGuid == casterUnit &&
-                GetSession().GameState.CurrentClientPetCast != null &&
-                GetSession().GameState.CurrentClientPetCast.SpellId == spellId)
+                     GetSession().GameState.CurrentClientPetCast != null &&
+                     GetSession().GameState.CurrentClientPetCast.SpellId == spellId)
             {
                 castId = GetSession().GameState.CurrentClientPetCast.ServerGUID;
                 spellVisual = GetSession().GameState.CurrentClientPetCast.SpellXSpellVisualId;
@@ -432,6 +432,12 @@ namespace HermesProxy.World.Client
                 spell.Cast.SpellXSpellVisualID = GetSession().GameState.CurrentClientPetCast.SpellXSpellVisualId;
                 GetSession().GameState.CurrentClientPetCast = null;
             }
+            if (!spell.Cast.CasterUnit.IsEmpty() && GameData.AuraSpells.Contains((uint)spell.Cast.SpellID))
+            {
+                foreach (WowGuid128 target in spell.Cast.HitTargets)
+                    GetSession().GameState.StoreLastAuraCasterOnTarget(target, (uint)spell.Cast.SpellID, spell.Cast.CasterUnit);
+            }
+                
             SendPacketToClient(spell);
         }
 
@@ -1033,7 +1039,11 @@ namespace HermesProxy.World.Client
         {
             byte slot = packet.ReadUInt8();
             int duration = packet.ReadInt32();
+
             WowGuid128 guid = GetSession().GameState.CurrentPlayerGuid;
+            if (guid == null)
+                return;
+
             GetSession().GameState.StoreAuraDurationLeft(guid, slot, duration, (int)packet.GetReceivedTime());
             if (duration <= 0)
                 return;
@@ -1091,7 +1101,7 @@ namespace HermesProxy.World.Client
             if (aura.AuraData.SpellID != spellId)
                 return;
 
-            aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, slot);
+            aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, slot, spellId);
             aura.AuraData.Flags |= AuraFlagsModern.Duration;
             aura.AuraData.Duration = durationFull;
             aura.AuraData.Remaining = durationLeft;

@@ -23,11 +23,10 @@ namespace HermesProxy.World.Client
                 PetitionEntry petition = new PetitionEntry();
                 petition.Index = packet.ReadUInt32(); 
                 petition.CharterEntry = packet.ReadUInt32();
+                petition.IsArena = petition.CharterEntry == 5863u ? 0u : 1u;
                 packet.ReadUInt32(); // Charter Display
                 petition.CharterCost = packet.ReadUInt32();
-
-                if (packet.ReadUInt32() != 0)
-                    petition.IsArena = 1;
+                packet.ReadUInt32(); // unk always 1
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
                     petition.RequiredSignatures = packet.ReadUInt32(); // Required signs

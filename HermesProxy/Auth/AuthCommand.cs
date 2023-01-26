@@ -11,6 +11,8 @@ namespace HermesProxy.Auth
     {
         LOGON_CHALLENGE     = 0x00,
         LOGON_PROOF         = 0x01,
+        RECONNECT_CHALLENGE = 0x02,
+        RECONNECT_PROOF     = 0x03,
         REALM_LIST          = 0x10,
         TRANSFER_INITIATE   = 0x30,
         TRANSFER_DATA       = 0x31,

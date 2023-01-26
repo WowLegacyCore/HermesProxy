@@ -31,7 +31,13 @@ namespace HermesProxy.World.Enums
         Expired        = 5
     }
 
-    public enum Difficulty : byte
+    public enum DifficultyLegacy : byte
+    {
+        Normal = 0,
+        Heroic = 1,
+    }
+
+    public enum DifficultyModern : byte
     {
         None = 0,
         Normal = 1,

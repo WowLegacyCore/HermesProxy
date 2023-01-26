@@ -1,0 +1,1 @@
+dotnet publish ..\HermesProxy -p:PublishSingleFile=true -p:DebugType=None -p:DebugSymbols=false -c release -r ubuntu.16.04-x64 --self-contained

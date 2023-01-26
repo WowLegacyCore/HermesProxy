@@ -48,20 +48,46 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteBit(WindowInfo != null);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(CanLandNodes.Count);
-            _worldPacket.WriteInt32(CanUseNodes.Count);
+            List<byte> canLandNodes = new List<byte>(CanLandNodes);
+            CleanupNodes(canLandNodes);
+            _worldPacket.WriteInt32(canLandNodes.Count);
+            List<byte> canUseNodes = new List<byte>(CanUseNodes);
+            CleanupNodes(canUseNodes);
+            _worldPacket.WriteInt32(canUseNodes.Count);
 
             if (WindowInfo != null)
             {
                 _worldPacket.WritePackedGuid128(WindowInfo.UnitGUID);
                 _worldPacket.WriteUInt32(WindowInfo.CurrentNode);
             }
-
-            foreach (var node in CanLandNodes)
+            
+            foreach (var node in canLandNodes)
                 _worldPacket.WriteUInt8(node);
-
-            foreach (var node in CanUseNodes)
+            
+            foreach (var node in canUseNodes)
                 _worldPacket.WriteUInt8(node);
+        }
+
+        // remove extra zeroes after last node
+        private void CleanupNodes(List<byte> nodes)
+        {
+            int lastIndex = -1;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i] != 0)
+                    lastIndex = i;
+            }
+
+            if ((lastIndex + 1) == nodes.Count)
+                return;
+
+            if (lastIndex == -1)
+            {
+                nodes.Clear();
+                return;
+            }
+
+            nodes.RemoveRange(lastIndex + 1, nodes.Count - (lastIndex + 1));
         }
 
         public ShowTaxiNodesWindowInfo WindowInfo;

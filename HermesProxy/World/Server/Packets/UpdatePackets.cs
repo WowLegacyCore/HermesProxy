@@ -165,13 +165,12 @@ namespace HermesProxy.World.Server.Packets
                         CorpseData.ClassId = 1;
                 }
                 if (CorpseData.FactionTemplate == null && CorpseData.Owner != null)
-                {   // We have no idea what race the corpse has, but the ModernClient requires this information for Rezz
-                    // First check if the player's race is in our cache
+                {
                     int ownerFaction = GlobalSession.GameState.GetLegacyFieldValueInt32(CorpseData.Owner, UnitField.UNIT_FIELD_FACTIONTEMPLATE);
                     if (ownerFaction != 0)
                         CorpseData.FactionTemplate = ownerFaction;
                     else if (CorpseData.RaceId != null)
-                        CorpseData.FactionTemplate = GameData.GetFactionByRace((Race) CorpseData.RaceId); // Use the raceId to predict the faction
+                        CorpseData.FactionTemplate = (int)GameData.GetFactionForRace((uint)CorpseData.RaceId);
                 }
             }
             if (UnitData != null)
@@ -318,6 +317,12 @@ namespace HermesProxy.World.Server.Packets
                     case ClientVersionBuild.V2_5_2_39570:
                     {
                         Objects.Version.V2_5_2_39570.ObjectUpdateBuilder builder = new Objects.Version.V2_5_2_39570.ObjectUpdateBuilder(update, _gameState);
+                        builder.WriteToPacket(data);
+                        break;
+                    }
+                    case ClientVersionBuild.V2_5_3_41750:
+                    {
+                        Objects.Version.V2_5_3_41750.ObjectUpdateBuilder builder = new Objects.Version.V2_5_3_41750.ObjectUpdateBuilder(update, _gameState);
                         builder.WriteToPacket(data);
                         break;
                     }

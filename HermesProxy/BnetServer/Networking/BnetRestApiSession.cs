@@ -104,7 +104,7 @@ namespace BNetServer.Networking
             else
             {
                 // Request realmlist now, we probably need it later anyways
-                globalSession.AuthClient.RequestRealmListUpdate();
+                globalSession.AuthClient.SendRealmListUpdateRequest();
 
                 // Ticket creation
                 LogonResult loginResult = new();

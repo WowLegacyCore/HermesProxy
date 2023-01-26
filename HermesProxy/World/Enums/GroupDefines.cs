@@ -109,7 +109,7 @@ namespace HermesProxy.World.Enums
         Full             = 0x0007FFFF,       // all known flags
     }
 
-    enum PartyResultLegacy : uint
+    enum PartyResultVanilla : uint
     {
         Ok = 0,
         BadPlayerName = 1,      // "Cannot find '%s'."

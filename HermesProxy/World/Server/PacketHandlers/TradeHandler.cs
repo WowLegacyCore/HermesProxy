@@ -25,11 +25,11 @@ namespace HermesProxy.World.Server
             var tradeSession = GetSession().GameState.CurrentTrade;
             if (tradeSession == null)
             {
-                Log.Print(LogType.Error, "Got CMSG_SET_TRADE_GOLD without trade session");
+                Log.Print(LogType.Error, $"Got {trade.GetUniversalOpcode()} without trade session");
                 return;
             }
             tradeSession.ClientStateIndex++;
-            
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_TRADE_GOLD);
             packet.WriteInt32((int)trade.Coinage);
             SendPacketToServer(packet);
@@ -60,7 +60,7 @@ namespace HermesProxy.World.Server
             var tradeSession = GetSession().GameState.CurrentTrade;
             if (tradeSession == null)
             {
-                Log.Print(LogType.Error, "Got CMSG_SET_TRADE_GOLD without trade session");
+                Log.Print(LogType.Error, $"Got {trade.GetUniversalOpcode()} without trade session");
                 return;
             }
             tradeSession.ClientStateIndex++;
@@ -76,7 +76,7 @@ namespace HermesProxy.World.Server
             var tradeSession = GetSession().GameState.CurrentTrade;
             if (tradeSession == null)
             {
-                Log.Print(LogType.Error, "Got CMSG_SET_TRADE_GOLD without trade session");
+                Log.Print(LogType.Error, $"Got {trade.GetUniversalOpcode()} without trade session");
                 return;
             }
             tradeSession.ClientStateIndex++;

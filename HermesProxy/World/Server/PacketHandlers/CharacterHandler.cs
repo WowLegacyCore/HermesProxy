@@ -21,6 +21,44 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        [PacketHandler(Opcode.CMSG_GET_ACCOUNT_CHARACTER_LIST)]
+        void HandleGetAccountCharacterList(GetAccountCharacterListRequest request)
+        {
+            GetAccountCharacterListResult response = new();
+            response.Token = request.Token;
+
+            foreach (var ownCharacter in GetSession().GameState.OwnCharacters)
+            {
+                response.CharacterList.Add(new AccountCharacterListEntry
+                {
+                    AccountId = WowGuid128.Create(HighGuidType703.WowAccount, GetSession().GameAccountInfo.Id),
+                    CharacterGuid = ownCharacter.CharacterGuid,
+                    RealmVirtualAddress = GetSession().RealmId.GetAddress(),
+                    RealmName = "", // If empty the realm name will not be displayed
+                    LastLoginUnixSec = ownCharacter.LastLoginUnixSec,
+
+                    Name = ownCharacter.Name,
+                    Race = ownCharacter.RaceId,
+                    Class = ownCharacter.ClassId,
+                    Sex = ownCharacter.SexId,
+                    Level = ownCharacter.Level,
+                });
+            }
+
+            SendPacket(response);
+        }
+
+        [PacketHandler(Opcode.CMSG_GENERATE_RANDOM_CHARACTER_NAME)]
+        void HandleGenerateRandomCharacterNameRequest(GenerateRandomCharacterNameRequest randomCharacterName)
+        {
+            GenerateRandomCharacterNameResult result = new();
+
+            // The client can generate the name itself
+            result.Success = false;
+
+            SendPacket(result);
+        }
+
         [PacketHandler(Opcode.CMSG_CREATE_CHARACTER)]
         void HandleCreateCharacter(CreateCharacter charCreate)
         {
@@ -58,17 +96,20 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAME)]
         void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
-            if (GetSession().GameState.CurrentPlayerGuid == null)
-            {
-                // The first queried player is always us
-                GetSession().GameState.CurrentPlayerGuid = queryPlayerName.Player;
-                GetSession().GameState.CurrentPlayerInfo = GetSession().GameState.OwnCharacters.Single(x => x.CharacterGuid == queryPlayerName.Player);
-                GetSession().GameState.CurrentPlayerStorage.LoadCurrentPlayer();
-            }
-
             WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
             packet.WriteGuid(queryPlayerName.Player.To64());
             SendPacketToServer(packet, GetSession().GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+        }
+
+        [PacketHandler(Opcode.CMSG_QUERY_PLAYER_NAMES)]
+        void HandleNamesQueryRequest(QueryPlayerNames queryPlayerNames)
+        {
+            foreach (var guid in queryPlayerNames.Players)
+            {
+                WorldPacket packet = new WorldPacket(Opcode.CMSG_NAME_QUERY);
+                packet.WriteGuid(guid.To64());
+                SendPacketToServer(packet, GetSession().GameState.IsInWorld ? Opcode.MSG_NULL_ACTION : Opcode.SMSG_LOGIN_VERIFY_WORLD);
+            }
         }
 
         [PacketHandler(Opcode.CMSG_PLAYER_LOGIN)]
@@ -89,12 +130,19 @@ namespace HermesProxy.World.Server
 
             GetSession().AccountMetaDataMgr.SaveLastSelectedCharacter(realm.Name, selectedChar.Name, playerLogin.Guid.Low, Time.UnixTime);
 
+            if (GetSession().AuthClient != null)
+                GetSession().AuthClient.Disconnect();
+
+            SendConnectToInstance(ConnectToSerial.WorldAttempt1);
+            GetSession().GameState.IsConnectedToInstance = true;
             GetSession().GameState.IsFirstEnterWorld = true;
+            GetSession().GameState.CurrentPlayerGuid = playerLogin.Guid;
+            GetSession().GameState.CurrentPlayerInfo = GetSession().GameState.OwnCharacters.Single(x => x.CharacterGuid == playerLogin.Guid);
+            GetSession().GameState.CurrentPlayerStorage.LoadCurrentPlayer();
+
             WorldPacket packet = new WorldPacket(Opcode.CMSG_PLAYER_LOGIN);
             packet.WriteGuid(playerLogin.Guid.To64());
             SendPacketToServer(packet);
-            SendConnectToInstance(ConnectToSerial.WorldAttempt1);
-            GetSession().GameState.IsConnectedToInstance = true;
         }
 
         [PacketHandler(Opcode.CMSG_LOGOUT_REQUEST)]
@@ -119,6 +167,14 @@ namespace HermesProxy.World.Server
                 packet.WriteBool(played.TriggerScriptEvent);
             SendPacketToServer(packet);
             GetSession().GameState.ShowPlayedTime = played.TriggerScriptEvent;
+        }
+
+        [PacketHandler(Opcode.CMSG_SET_TITLE)]
+        void HandleTogglePvP(SetTitle title)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_SET_TITLE);
+            packet.WriteInt32(title.TitleID);
+            SendPacketToServer(packet);
         }
 
         [PacketHandler(Opcode.CMSG_TOGGLE_PVP)]
@@ -214,17 +270,6 @@ namespace HermesProxy.World.Server
             packet.WriteGuid(rename.Guid.To64());
             packet.WriteCString(rename.NewName);
             SendPacketToServer(packet);
-        }
-
-        [PacketHandler(Opcode.CMSG_GENERATE_RANDOM_CHARACTER_NAME)]
-        void HandleGenerateRandomCharacterNameRequest(GenerateRandomCharacterNameRequest randomCharacterName)
-        {
-            GenerateRandomCharacterNameResult result = new();
-
-            // The client can generate the name itself
-            result.Success = false;
-
-            SendPacket(result);
         }
     }
 }

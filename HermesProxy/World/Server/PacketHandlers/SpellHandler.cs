@@ -163,6 +163,7 @@ namespace HermesProxy.World.Server
                         if (GetSession().GameState.CurrentClientNormalCast.Timestamp + 10000 < castRequest.Timestamp)
                         {
                             Log.Print(LogType.Warn, $"Clearing CurrentClientNormalCast because of 10 sec timeout! (oldSpell:{GetSession().GameState.CurrentClientNormalCast.SpellId} newSpell:{castRequest.SpellId})");
+                            Log.Print(LogType.Warn, "Are you playing on a server with another patch?");
                             SendCastRequestFailed(GetSession().GameState.CurrentClientNormalCast, false);
                             GetSession().GameState.CurrentClientNormalCast = null;
                             foreach (var pending in GetSession().GameState.PendingClientCasts)
@@ -338,6 +339,17 @@ namespace HermesProxy.World.Server
             packet.WriteInt32(cast.SpellID);
             SendPacketToServer(packet);
         }
+        [PacketHandler(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL)]
+        void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell spell)
+        {
+            // Artificial lag is needed for spell packets,
+            // or spells will bug out and glow if spammed.
+            if (Settings.ServerSpellDelay > 0)
+                Thread.Sleep(Settings.ServerSpellDelay);
+
+            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
+            SendPacketToServer(packet);
+        }
         [PacketHandler(Opcode.CMSG_CANCEL_AURA)]
         void HandleCancelAura(CancelAura aura)
         {
@@ -374,17 +386,6 @@ namespace HermesProxy.World.Server
                     }
                 }
             }
-        }
-        [PacketHandler(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL)]
-        void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell aura)
-        {
-            // Artificial lag is needed for spell packets,
-            // or spells will bug out and glow if spammed.
-            if (Settings.ServerSpellDelay > 0)
-                Thread.Sleep(Settings.ServerSpellDelay);
-
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_CANCEL_AUTO_REPEAT_SPELL);
-            SendPacketToServer(packet);
         }
         [PacketHandler(Opcode.CMSG_LEARN_TALENT)]
         void HandleLearnTalent(LearnTalent talent)

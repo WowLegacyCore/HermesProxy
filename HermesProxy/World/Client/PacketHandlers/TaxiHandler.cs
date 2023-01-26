@@ -22,6 +22,14 @@ namespace HermesProxy.World.Client
         [PacketHandler(Opcode.SMSG_SHOW_TAXI_NODES)]
         void HandleShowTaxiNodes(WorldPacket packet)
         {
+            uint playerFlags = GetSession().GameState.GetLegacyFieldValueUInt32(GetSession().GameState.CurrentPlayerGuid, PlayerField.PLAYER_FLAGS);
+            if (playerFlags.HasAnyFlag(PlayerFlags.GM))
+            {
+                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.System, "Disable GM mode before talking to taxi master or your game will freeze.");
+                SendPacketToClient(chat);
+                return;
+            }
+
             ShowTaxiNodes taxi = new();
             bool hasWindowInfo = packet.ReadUInt32() != 0;
             if (hasWindowInfo)

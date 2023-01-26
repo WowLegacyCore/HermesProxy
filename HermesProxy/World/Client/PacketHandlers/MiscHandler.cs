@@ -10,6 +10,13 @@ namespace HermesProxy.World.Client
     public partial class WorldClient
     {
         // Handlers for SMSG opcodes coming the legacy world server
+        [PacketHandler(Opcode.SMSG_PONG)]
+        void HandlePingResponse(WorldPacket packet)
+        {
+            uint serial = packet.ReadUInt32();
+            SendPacketToClient(new Pong(serial));
+        }
+
         [PacketHandler(Opcode.SMSG_TUTORIAL_FLAGS)]
         void HandleTutorialFlags(WorldPacket packet)
         {
@@ -156,6 +163,11 @@ namespace HermesProxy.World.Client
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_2_10482))
                     packet.ReadInt32(); // Corpse Low GUID
             }
+            else
+            {
+                corpse.MapID = corpse.ActualMapID = (int)GetSession().GameState.CurrentMapId;
+            }
+
             SendPacketToClient(corpse);
         }
 
@@ -260,19 +272,23 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.CachedPlayers.Remove(invalidate.Guid);
         }
 
-        [PacketHandler(Opcode.SMSG_PONG)]
-        void HandlePingResponse(WorldPacket packet)
-        {
-            uint serial = packet.ReadUInt32();
-            SendPacketToClient(new Pong(serial));
-        }
-
         [PacketHandler(Opcode.SMSG_ZONE_UNDER_ATTACK)]
         void HandleZoneUnderAttack(WorldPacket packet)
         {
             ZoneUnderAttack zone = new();
             zone.AreaID = packet.ReadInt32();
             SendPacketToClient(zone);
+        }
+
+        [PacketHandler(Opcode.MSG_SET_DUNGEON_DIFFICULTY)]
+        void HandleSetDungeonDifficulty(WorldPacket packet)
+        {
+            DungeonDifficultySet difficulty = new();
+            int difficultyId = packet.ReadInt32();
+            difficulty.DifficultyID = (byte)Enum.Parse(typeof(DifficultyModern), ((DifficultyLegacy)difficultyId).ToString());
+            packet.ReadInt32(); // always 1
+            packet.ReadInt32(); // IsInGroup
+            SendPacketToClient(difficulty);
         }
     }
 }

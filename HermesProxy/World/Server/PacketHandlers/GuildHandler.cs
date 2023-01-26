@@ -324,7 +324,10 @@ namespace HermesProxy.World.Server
                 packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
             }
             packet.WriteBool(false); // to char
-            packet.WriteUInt8(0); // splitted amount
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(0); // splitted amount
+            else
+                packet.WriteUInt8(0); // splitted amount
             SendPacketToServer(packet);
         }
 
@@ -351,7 +354,10 @@ namespace HermesProxy.World.Server
                 packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
             }
             packet.WriteBool(false); // to char
-            packet.WriteUInt8((byte)item.StackCount);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(item.StackCount);
+            else
+                packet.WriteUInt8((byte)item.StackCount);
             SendPacketToServer(packet);
         }
 
@@ -366,7 +372,10 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(item.BankSlot);
             packet.WriteUInt32(0); // item id
             packet.WriteBool(true); // auto store
-            packet.WriteUInt8(0); // auto store count
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(0); // auto store count
+            else
+                packet.WriteUInt8(0); // auto store count
             packet.WriteBool(true); // to char
             packet.WriteUInt8(0); // unknown
             SendPacketToServer(packet);
@@ -394,7 +403,10 @@ namespace HermesProxy.World.Server
                 packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
             }
             packet.WriteBool(true); // to char
-            packet.WriteUInt8(0); // splitted amount
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(0); // splitted amount
+            else
+                packet.WriteUInt8(0); // splitted amount
             SendPacketToServer(packet);
         }
 
@@ -421,7 +433,10 @@ namespace HermesProxy.World.Server
                 packet.WriteUInt8(ModernVersion.AdjustInventorySlot(item.ContainerItemSlot));
             }
             packet.WriteBool(true); // to char
-            packet.WriteUInt8((byte)item.StackCount);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(item.StackCount);
+            else
+                packet.WriteUInt8((byte)item.StackCount);
             SendPacketToServer(packet);
         }
 
@@ -439,7 +454,10 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(item.BankSlot1);
             packet.WriteUInt32(0); // item id
             packet.WriteBool(false); // auto store
-            packet.WriteUInt8(0); // splitted amount
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(0); // splitted amount
+            else
+                packet.WriteUInt8(0); // splitted amount
             SendPacketToServer(packet);
         }
 
@@ -458,7 +476,10 @@ namespace HermesProxy.World.Server
             packet.WriteUInt8(item.BankSlot1);
             packet.WriteUInt32(0); // item id
             packet.WriteBool(false); // auto store
-            packet.WriteUInt8((byte)item.StackCount);
+            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+                packet.WriteUInt32(item.StackCount);
+            else
+                packet.WriteUInt8((byte)item.StackCount);
             SendPacketToServer(packet);
         }
     }

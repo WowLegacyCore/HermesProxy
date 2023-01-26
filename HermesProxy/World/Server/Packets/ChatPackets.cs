@@ -410,14 +410,19 @@ namespace HermesProxy.World.Server.Packets
         {
             _worldPacket.WritePackedGuid128(Guid);
             _worldPacket.WriteUInt32(EmoteID);
-            _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
-
-            foreach (var id in SpellVisualKitIDs)
-                _worldPacket.WriteUInt32(id);
+            if (ModernVersion.AddedInVersion(9, 0, 5, 1, 14, 0, 2, 5, 1))
+            {
+                _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
+                if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                    _worldPacket.WriteInt32(SequenceVariation);
+                foreach (var id in SpellVisualKitIDs)
+                    _worldPacket.WriteUInt32(id);
+            }
         }
 
         public WowGuid128 Guid;
         public uint EmoteID;
+        public int SequenceVariation;
         public List<uint> SpellVisualKitIDs = new();
     }
 
@@ -431,14 +436,20 @@ namespace HermesProxy.World.Server.Packets
             EmoteID = _worldPacket.ReadInt32();
             SoundIndex = _worldPacket.ReadInt32();
 
-            SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
-            for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
-                SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
+            if (ModernVersion.AddedInVersion(9, 0, 5, 1, 14, 0, 2, 5, 1))
+            {
+                SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
+                if (ModernVersion.AddedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                    SequenceVariation = _worldPacket.ReadInt32();
+                for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
+                    SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
+            }
         }
 
         public WowGuid128 Target;
         public int EmoteID;
         public int SoundIndex;
+        public int SequenceVariation;
         public uint[] SpellVisualKitIDs;
     }
 

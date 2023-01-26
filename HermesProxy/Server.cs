@@ -63,6 +63,7 @@ namespace HermesProxy
                 return;
             }
             Log.DebugLogEnabled = Settings.DebugOutput;
+            Log.Print(LogType.Debug, "Debug logging enabled");
 
             if (!AesGcm.IsSupported)
             {

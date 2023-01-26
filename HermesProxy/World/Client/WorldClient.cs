@@ -72,6 +72,11 @@ namespace HermesProxy.World.Client
             return (bool)_isSuccessful;
         }
 
+        public bool IsAuthenticated()
+        {
+            return _isSuccessful == true;
+        }
+
         private void InitializeEncryption(byte[] sessionKey)
         {
             switch (Settings.ServerBuild)

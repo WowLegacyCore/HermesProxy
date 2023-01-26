@@ -64,6 +64,11 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt32(TeamRating);
             _worldPacket.WriteUInt32(PlayerRating);
             _worldPacket.WriteInt32(Members.Count);
+            if (ModernVersion.AddedInClassicVersion(1, 14, 2, 2, 5, 3))
+            {
+                _worldPacket.WriteBit(UnkBit);
+                _worldPacket.FlushBits();
+            }
             foreach (var member in Members)
                 member.Write(_worldPacket);
         }
@@ -76,6 +81,7 @@ namespace HermesProxy.World.Server.Packets
         public uint SeasonWins;
         public uint TeamRating;
         public uint PlayerRating;
+        public bool UnkBit;
         public List<ArenaTeamMember> Members = new List<ArenaTeamMember>();
     }
 

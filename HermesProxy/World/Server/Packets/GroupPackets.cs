@@ -287,9 +287,9 @@ namespace HermesProxy.World.Server.Packets
             data.WriteUInt32((uint)LegacyRaidDifficultyID);
         }
 
-        public Difficulty DungeonDifficultyID;
-        public Difficulty RaidDifficultyID;
-        public Difficulty LegacyRaidDifficultyID;
+        public DifficultyModern DungeonDifficultyID;
+        public DifficultyModern RaidDifficultyID;
+        public DifficultyModern LegacyRaidDifficultyID;
     }
 
     class LeaveGroup : ClientPacket

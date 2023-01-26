@@ -954,6 +954,12 @@ namespace HermesProxy.World.Enums
         public const byte Bag4 = 22;
     }
 
+    public struct PlayerHeight
+    {
+        public const float Normal = 2.438083f;
+        public const float Mounted = 3.081099f;
+    }
+
     public enum CharacterUndeleteResult
     {
         Ok = 0,

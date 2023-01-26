@@ -44,8 +44,7 @@ namespace HermesProxy.World.Server.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUint32Enum(Status);
-
+            _worldPacket.WriteUInt32((uint)Status);
             Method.Write(_worldPacket);
 
             _worldPacket.WriteUInt32(Data.GetSize());
@@ -86,7 +85,7 @@ namespace HermesProxy.World.Server.Packets
 
         public uint Token;
         public bool Allow = true;
-        public ByteBuffer Ticket;
+        public ByteBuffer Ticket = new ByteBuffer();
     }
 
     class BattlenetRequest : ClientPacket
@@ -127,7 +126,7 @@ namespace HermesProxy.World.Server.Packets
 
         public void SetServiceHash(uint serviceHash)
         {
-            Type = (Type & 0x00000000_FFFFFFFF) | (((ulong) serviceHash) << 32);
+            Type = (Type & 0x00000000_FFFFFFFF) | (((ulong)serviceHash) << 32);
         }
 
         public void SetMethodId(uint methodId)
