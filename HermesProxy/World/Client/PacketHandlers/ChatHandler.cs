@@ -480,7 +480,7 @@ namespace HermesProxy.World.Client
             uint nameLength = packet.ReadUInt32();
             string targetName = packet.ReadString(nameLength);
             WowGuid128 targetGuid = GetSession().GameState.GetPlayerGuidByName(targetName);
-            emote.TargetGUID = targetGuid != null ? targetGuid : emote.SourceGUID;
+            emote.TargetGUID = targetGuid != null ? targetGuid : WowGuid128.Empty;
             SendPacketToClient(emote);
         }
 
