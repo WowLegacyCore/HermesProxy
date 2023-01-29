@@ -773,6 +773,8 @@ namespace HermesProxy
                 return 1556;
             if (IsVersion(1, 14, 1))
                 return 1618;
+            if (IsVersion(1, 14, 2) || IsVersion(2, 5, 3))
+                return 1672;
             return 0;
         }
 
