@@ -425,7 +425,7 @@ namespace HermesProxy.World.Server.Packets
             _worldPacket.WriteUInt32(SequenceIndex);
             _worldPacket.WriteFloat(Height);
             _worldPacket.WriteFloat(Scale);
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteByteEnum(Reason);
             _worldPacket.WriteUInt32(MountDisplayID);
             _worldPacket.WriteInt32(ScaleDuration);
         }
@@ -434,9 +434,16 @@ namespace HermesProxy.World.Server.Packets
         public uint SequenceIndex = 1;
         public float Height = 1.0f;
         public float Scale = 1.0f;
-        public byte Reason;
+        public UpdateCollisionHeightReason Reason;
         public uint MountDisplayID;
-        public int ScaleDuration = 2000;
+        public int ScaleDuration = 2000; // time it takes for "scale"-animation
+
+        public enum UpdateCollisionHeightReason : byte
+        {
+            Scale = 0,
+            Mount = 1,
+            Force = 2,
+        }
     }
 
     class MoveKnockBack : ServerPacket

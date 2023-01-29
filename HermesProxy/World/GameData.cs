@@ -25,7 +25,8 @@ namespace HermesProxy.World
         public static Dictionary<uint, uint> LearnSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> TotemSpells = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> Gems = new Dictionary<uint, uint>();
-        public static Dictionary<uint, float> UnitDisplayScales = new Dictionary<uint, float>();
+        public static Dictionary<uint, CreatureDisplayInfo> CreatureDisplayInfos = new Dictionary<uint, CreatureDisplayInfo>();
+        public static Dictionary<uint, CreatureModelCollisionHeight> CreatureModelCollisionHeights = new Dictionary<uint, CreatureModelCollisionHeight>();
         public static Dictionary<uint, uint> TransportPeriods = new Dictionary<uint, uint>();
         public static Dictionary<uint, string> AreaNames = new Dictionary<uint, string>();
         public static Dictionary<uint, uint> RaceFaction = new Dictionary<uint, uint>();
@@ -231,12 +232,28 @@ namespace HermesProxy.World
             return 0;
         }
 
-        public static float GetUnitDisplayScale(uint displayId)
+        public static float GetUnitCompleteDisplayScale(uint displayId)
         {
-            float scale;
-            if (UnitDisplayScales.TryGetValue(displayId, out scale))
-                return scale;
-            return 1.0f;
+            var displayData = GetDisplayInfo(displayId);
+            if (displayData.ModelId == 0)
+                return 1.0f;
+
+            var modelData = GetModelData(displayId);
+            return displayData.DisplayScale * modelData.ModelScale;
+        }
+        
+        public static CreatureDisplayInfo GetDisplayInfo(uint displayId)
+        {
+            if (CreatureDisplayInfos.TryGetValue(displayId, out var info))
+                return info;
+            return new CreatureDisplayInfo(0, 1.0f);
+        }
+
+        public static CreatureModelCollisionHeight GetModelData(uint modelId)
+        {
+            if (CreatureModelCollisionHeights.TryGetValue(modelId, out var info))
+                return info;
+            return new CreatureModelCollisionHeight(1.0f, 0, 0);
         }
 
         public static uint GetTransportPeriod(uint entry)
@@ -389,7 +406,8 @@ namespace HermesProxy.World
             LoadLearnSpells();
             LoadTotemSpells();
             LoadGems();
-            LoadUnitDisplayScales();
+            LoadCreatureDisplayInfo();
+            LoadCreatureModelCollisionHeights();
             LoadTransports();
             LoadAreaNames();
             LoadRaceFaction();
@@ -651,12 +669,9 @@ namespace HermesProxy.World
             }
         }
 
-        public static void LoadUnitDisplayScales()
+        public static void LoadCreatureDisplayInfo()
         {
-            if (LegacyVersion.ExpansionVersion > 1)
-                return;
-
-            var path = Path.Combine("CSV", "UnitDisplayScales.csv");
+            var path = Path.Combine("CSV", "CreatureDisplayInfo.csv");
             using (TextFieldParser csvParser = new TextFieldParser(path))
             {
                 csvParser.CommentTokens = new string[] { "#" };
@@ -672,8 +687,35 @@ namespace HermesProxy.World
                     string[] fields = csvParser.ReadFields();
 
                     uint displayId = UInt32.Parse(fields[0]);
-                    float scale = Single.Parse(fields[1]);
-                    UnitDisplayScales.Add(displayId, scale);
+                    uint modelId = UInt32.Parse(fields[1]);
+                    float scale = Single.Parse(fields[2]);
+                    CreatureDisplayInfos.Add(displayId, new CreatureDisplayInfo(modelId, scale));
+                }
+            }
+        }
+
+        public static void LoadCreatureModelCollisionHeights()
+        {
+            var path = Path.Combine("CSV", $"CreatureModelCollisionHeightsModern{LegacyVersion.ExpansionVersion}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                while (!csvParser.EndOfData)
+                {
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint modelId = UInt32.Parse(fields[0]);
+                    float modelScale = Single.Parse(fields[1]);
+                    float collisionHeight = Single.Parse(fields[2]);
+                    float collisionHeightMounted = Single.Parse(fields[3]);
+                    CreatureModelCollisionHeights.Add(modelId, new CreatureModelCollisionHeight(modelScale, collisionHeight, collisionHeightMounted));
                 }
             }
         }
@@ -2369,6 +2411,9 @@ namespace HermesProxy.World
         public ChannelFlags Flags;
         public string Name;
     }
+
+    public record CreatureDisplayInfo(uint ModelId, float DisplayScale);
+    public record CreatureModelCollisionHeight(float ModelScale, float Height, float MountHeight);
 
     // Hotfix structures
     public class AreaTrigger

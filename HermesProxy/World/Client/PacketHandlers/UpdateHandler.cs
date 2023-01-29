@@ -1160,6 +1160,89 @@ namespace HermesProxy.World.Client
 
         public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
         {
+            StoreObjectUpdateInternal(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData);
+            AfterStoreObjectUpdateHook(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData);
+        }
+
+        private void AfterStoreObjectUpdateHook(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
+        {
+            
+            if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
+            {
+                int UNIT_FIELD_NATIVEDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NATIVEDISPLAYID);
+                int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                int OBJECT_FIELD_SCALE_X = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_SCALE_X);
+                if ((UNIT_FIELD_NATIVEDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_NATIVEDISPLAYID)) ||
+                    (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID)) ||
+                    (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X)))
+                {
+                    bool mountingIsReason = false;
+
+                    int nativeDisplayId;
+                    if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_NATIVEDISPLAYID))
+                        nativeDisplayId = updates[UNIT_FIELD_NATIVEDISPLAYID].Int32Value;
+                    else
+                        nativeDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_DISPLAYID);
+
+                    int mountDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                    if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID))
+                    {
+                        var newMountValue = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
+                        if (newMountValue != mountDisplayId && !isCreate)
+                            mountingIsReason = true;
+                        mountDisplayId = newMountValue;
+                    }
+
+                    float rawScaleX;
+                    if (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X))
+                        rawScaleX = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+                    else
+                        rawScaleX = Session.GameState.GetLegacyFieldValueFloat(guid, ObjectField.OBJECT_FIELD_SCALE_X);
+
+                    if (rawScaleX == 0.0f)
+                        return;
+
+                    var regularNativeDisplaySize = GameData.GetUnitCompleteDisplayScale((uint)nativeDisplayId);
+                    var scale = rawScaleX / regularNativeDisplaySize;
+
+                    var ourDisplayInfo = GameData.GetDisplayInfo((uint)nativeDisplayId);
+                    var ourModel = GameData.GetModelData(ourDisplayInfo.ModelId);
+
+                    float calculatedBaseHeight;
+                    if (mountDisplayId != 0 && LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    { // in vanilla there were no mount collisions
+                        var mountDisplayInfo = GameData.GetDisplayInfo((uint)mountDisplayId);
+                        var mountModel = GameData.GetModelData(mountDisplayInfo.ModelId);
+                        calculatedBaseHeight = mountModel.MountHeight * mountDisplayInfo.DisplayScale + (ourModel.Height * ourModel.ModelScale * ourDisplayInfo.DisplayScale * 0.5f);
+                    }
+                    else
+                    {
+                        calculatedBaseHeight = ourDisplayInfo.DisplayScale * ourModel.Height * ourModel.ModelScale;
+                    }
+
+                    if (calculatedBaseHeight == 0)
+                        calculatedBaseHeight = mountDisplayId != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
+
+                    var heightScale = Math.Max(scale, regularNativeDisplaySize); // you HitBox cannot be smaller than displaySize in legacy clients
+                    var scaledHeight = heightScale * calculatedBaseHeight;
+
+                    var displayScale = regularNativeDisplaySize * scale;
+
+                    MoveSetCollisionHeight height = new()
+                    {
+                        MoverGUID = guid,
+                        Height = scaledHeight,
+                        Scale = displayScale,
+                        Reason = mountingIsReason ? MoveSetCollisionHeight.UpdateCollisionHeightReason.Mount : MoveSetCollisionHeight.UpdateCollisionHeightReason.Force,
+                        MountDisplayID = (uint) mountDisplayId,
+                    };
+                    SendPacketToClient(height, Opcode.SMSG_UPDATE_OBJECT);
+                }
+            }
+        }
+        
+        private void StoreObjectUpdateInternal(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
+        {
             // Object Fields
             int OBJECT_FIELD_GUID = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_GUID);
             if (OBJECT_FIELD_GUID >= 0 && updateMaskArray[OBJECT_FIELD_GUID])
@@ -1175,22 +1258,6 @@ namespace HermesProxy.World.Client
             if (OBJECT_FIELD_SCALE_X >= 0 && updateMaskArray[OBJECT_FIELD_SCALE_X])
             {
                 updateData.ObjectData.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                if (guid == GetSession().GameState.CurrentPlayerGuid &&
-                    LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                {
-                    int cachedMountId = 0;
-                    int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
-                    if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID))
-                        cachedMountId = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
-
-                    MoveSetCollisionHeight height = new();
-                    height.MoverGUID = guid;
-                    height.Height = cachedMountId != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
-                    height.Height *= updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                    height.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                    height.Reason = 2; // Force
-                    SendPacketToClient(height);
-                }
             }
 
             // Item Fields
@@ -1628,7 +1695,7 @@ namespace HermesProxy.World.Client
                     // the server sends it by the default scale for this display id in the dbc
                     // this is not the case in 1.12, so we have to adjust the unit scale here
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                        updateData.UnitData.DisplayScale = 1.0f / GameData.GetUnitDisplayScale((uint)updateData.UnitData.DisplayID);
+                        updateData.UnitData.DisplayScale = 1.0f / GameData.GetUnitCompleteDisplayScale((uint)updateData.UnitData.DisplayID);
                 }
                 int UNIT_FIELD_NATIVEDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NATIVEDISPLAYID);
                 if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_NATIVEDISPLAYID])
@@ -1639,27 +1706,6 @@ namespace HermesProxy.World.Client
                 if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_MOUNTDISPLAYID])
                 {
                     updateData.UnitData.MountDisplayID = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
-
-                    if (!isCreate && guid == GetSession().GameState.CurrentPlayerGuid &&
-                        LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    {
-                        MoveSetCollisionHeight height = new();
-                        height.MoverGUID = guid;
-                        height.Height = updateData.UnitData.MountDisplayID != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
-                        height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
-
-                        float cachedScale = 0;
-                        if (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X))
-                            cachedScale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-
-                        if (cachedScale != 0)
-                        {
-                            height.Scale = cachedScale;
-                            height.Height *= height.Scale;
-                        }
-                        height.Reason = 1; // Mount
-                        SendPacketToClient(height);
-                    }
                 }
                 int UNIT_FIELD_MINDAMAGE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MINDAMAGE);
                 if (UNIT_FIELD_MINDAMAGE >= 0 && updateMaskArray[UNIT_FIELD_MINDAMAGE])
