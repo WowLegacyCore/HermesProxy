@@ -1,9 +1,6 @@
-﻿using Framework.Constants;
-using Framework.Logging;
+﻿using Framework.Logging;
 using HermesProxy.Enums;
-using HermesProxy.World;
 using HermesProxy.World.Enums;
-using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
 using System.Collections.Generic;
@@ -84,28 +81,40 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_AFK)]
         void HandleChatMessageAFK(ChatMessageAFK afk)
         {
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(afk.Text);
+            if (toBeSentTextParts.Count < 1)
+                return;
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Afk, 0, afk.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Afk, 0, toBeSentTextParts[0], "", "");
             else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Afk, 0, afk.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Afk, 0, toBeSentTextParts[0], "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_DND)]
         void HandleChatMessageDND(ChatMessageDND dnd)
         {
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(dnd.Text);
+            if (toBeSentTextParts.Count < 1)
+                return;
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, dnd.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Dnd, 0, toBeSentTextParts[0], "", "");
             else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, dnd.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Dnd, 0, toBeSentTextParts[0], "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_CHANNEL)]
         void HandleChatMessageChannel(ChatMessageChannel channel)
         {
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, channel.Text, channel.Target, "");
-            else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, channel.Text, channel.Target, "");
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(channel.Text);
+            foreach (string text in toBeSentTextParts)
+            {
+                if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Channel, channel.Language, text, channel.Target, "");
+                else
+                    GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Channel, channel.Language, text, channel.Target, "");
+            }
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_WHISPER)]
@@ -124,10 +133,14 @@ namespace HermesProxy.World.Server
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_EMOTE)]
         void HandleChatMessageEmote(ChatMessageEmote emote)
         {
+            var toBeSentTextParts = ConvertTextMessageIntoMaxLengthParts(emote.Text);
+            if (toBeSentTextParts.Count < 1)
+                return;
+
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Emote, 0, emote.Text, "", "");
+                GetSession().WorldClient.SendMessageChatWotLK(ChatMessageTypeWotLK.Emote, 0, toBeSentTextParts[0], "", "");
             else
-                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Emote, 0, emote.Text, "", "");
+                GetSession().WorldClient.SendMessageChatVanilla(ChatMessageTypeVanilla.Emote, 0, toBeSentTextParts[0], "", "");
         }
 
         [PacketHandler(Opcode.CMSG_CHAT_MESSAGE_GUILD)]

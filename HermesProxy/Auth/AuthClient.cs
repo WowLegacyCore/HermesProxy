@@ -31,6 +31,7 @@ namespace HermesProxy.Auth
         Socket _clientSocket;
         TaskCompletionSource<AuthResult> _response;
         TaskCompletionSource _hasRealmlist;
+        bool _realmlistRequestIsPending;
         byte[] _passwordHash;
         BigInteger _key;
         byte[] _m2; 
@@ -54,6 +55,7 @@ namespace HermesProxy.Auth
 
             _response = new ();
             _hasRealmlist = new();
+            _realmlistRequestIsPending = false;
 
             string authstring = $"{_username}:{password}";
             _passwordHash = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(authstring.ToUpper()));
@@ -82,11 +84,12 @@ namespace HermesProxy.Auth
         {
             _response = new ();
             _hasRealmlist = new();
+            _realmlistRequestIsPending = false;
 
             try
             {
                 var serverIpAddress = NetworkUtils.ResolveOrDirectIp(Settings.ServerAddress); 
-                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort}) (resolved as: {serverIpAddress}:{Settings.ServerPort})");
+                Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Reconnecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort}) (resolved as: {serverIpAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
                 var endPoint = new IPEndPoint(serverIpAddress, Settings.ServerPort);
@@ -135,7 +138,24 @@ namespace HermesProxy.Auth
                 _clientSocket.ReceiveBufferSize = 65535;
                 byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
                 _clientSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveCallback, buffer);
-                SendLogonChallenge();
+                SendLogonChallenge(false);
+            }
+            catch (Exception ex)
+            {
+                Log.Print(LogType.Error, $"Connect Error: {ex.Message}");
+                SetAuthResponse(AuthResult.FAIL_INTERNAL_ERROR);
+            }
+        }
+
+        private void ReconnectCallback(IAsyncResult AR)
+        {
+            try
+            {
+                _clientSocket.EndConnect(AR);
+                _clientSocket.ReceiveBufferSize = 65535;
+                byte[] buffer = new byte[_clientSocket.ReceiveBufferSize];
+                _clientSocket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, ReceiveCallback, buffer);
+                SendLogonChallenge(true);
             }
             catch (Exception ex)
             {
@@ -217,6 +237,12 @@ namespace HermesProxy.Auth
                 case AuthCommand.LOGON_PROOF:
                     HandleLogonProof(packet);
                     break;
+                case AuthCommand.RECONNECT_CHALLENGE:
+                    HandleReconnectChallenge(packet);
+                    break;
+                case AuthCommand.RECONNECT_PROOF:
+                    HandleReconnectProof(packet);
+                    break;
                 case AuthCommand.REALM_LIST:
                     HandleRealmList(packet);
                     break;
@@ -227,10 +253,10 @@ namespace HermesProxy.Auth
             }
         }
 
-        private void SendLogonChallenge()
+        private void SendLogonChallenge(bool reconnect)
         {
             ByteBuffer buffer = new ByteBuffer();
-            buffer.WriteUInt8((byte)AuthCommand.LOGON_CHALLENGE);
+            buffer.WriteUInt8((byte)(reconnect ? AuthCommand.RECONNECT_CHALLENGE : AuthCommand.LOGON_CHALLENGE));
             buffer.WriteUInt8((byte)(LegacyVersion.ExpansionVersion > 1 ? 8 : 3));
             buffer.WriteUInt16((UInt16)(_username.Length + 30));
             buffer.WriteBytes(Encoding.ASCII.GetBytes("WoW"));
@@ -244,10 +270,10 @@ namespace HermesProxy.Auth
             buffer.WriteBytes(Encoding.ASCII.GetBytes(Settings.ReportedOS.Reverse()));
             buffer.WriteUInt8(0);
             buffer.WriteBytes(Encoding.ASCII.GetBytes(_locale.Reverse()));
-            buffer.WriteUInt32((uint)0x3c);
-            buffer.WriteUInt32(16777343); // IP (127.0.0.1)
+            buffer.WriteUInt32(0x3C); // timezone_bias
+            buffer.WriteUInt32(0x01_00_00_7F); // IP (127.0.0.1)
             buffer.WriteUInt8((byte)_username.Length);
-            buffer.WriteBytes(Encoding.ASCII.GetBytes(_username.ToUpper()));
+            buffer.WriteBytes(Encoding.ASCII.GetBytes(_username));
             SendPacket(buffer);
         }
 
@@ -471,12 +497,53 @@ namespace HermesProxy.Auth
             }
         }
 
-        public void RequestRealmListUpdate()
+        public void HandleReconnectChallenge(ByteBuffer packet)
         {
+            packet.ReadUInt8(); // always 0
+            byte[] reconnectProof = packet.ReadBytes(16);
+            packet.ReadBytes(16); // version challenge
+
+            var rand = System.Security.Cryptography.RandomNumberGenerator.Create();
+            byte[] R1 = new byte[16];
+            rand.GetBytes(R1);
+            byte[] R2 = HashAlgorithm.SHA1.Hash(Encoding.ASCII.GetBytes(_username), R1, reconnectProof, GetSessionKey());
+            byte[] R3 = HashAlgorithm.SHA1.Hash(R1, new byte[20]); // version challenge not actually used on reconnect
+
+            SendReconnectProof(R1, R2, R3);
+        }
+
+        private void SendReconnectProof(byte[] R1, byte[] R2, byte[] R3)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            buffer.WriteUInt8((byte)AuthCommand.RECONNECT_PROOF);
+            buffer.WriteBytes(R1); // size 16
+            buffer.WriteBytes(R2); // size 20
+            buffer.WriteBytes(R3); // size 20
+            buffer.WriteUInt8(0);
+            SendPacket(buffer);
+        }
+
+        public void HandleReconnectProof(ByteBuffer packet)
+        {
+            AuthResult error = (AuthResult)packet.ReadUInt8();
+            if (error != AuthResult.SUCCESS)
+            {
+                Log.Print(LogType.Error, $"Reconnect failed. Reason: {error}");
+                SetAuthResponse(error);
+                return;
+            }
+
+            SetAuthResponse(AuthResult.SUCCESS);
+        }
+
+        public void SendRealmListUpdateRequest()
+        {
+            Log.Print(LogType.Server, $"Requesting RealmList update for {_username}");
             ByteBuffer buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)AuthCommand.REALM_LIST);
             for (int i = 0; i < 4; i++)
                 buffer.WriteUInt8(0);
+            _realmlistRequestIsPending = true;
             SendPacket(buffer);
         }
 
@@ -517,7 +584,7 @@ namespace HermesProxy.Auth
                 realmInfo.Name = packet.ReadCString();
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
-                realmInfo.Address = Dns.GetHostAddresses(strArr[0]).First().ToString();
+                realmInfo.Address = Dns.GetHostAddresses(strArr[0].Trim()).First().ToString();
                 realmInfo.Port = UInt16.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();
@@ -538,8 +605,10 @@ namespace HermesProxy.Auth
             _hasRealmlist.SetResult();
         }
 
-        public void WaitForRealmlist()
+        public void WaitOrRequestRealmList()
         {
+            if (!_realmlistRequestIsPending || !_hasRealmlist.Task.Wait(TimeSpan.FromSeconds(2)))
+                SendRealmListUpdateRequest();
             _hasRealmlist.Task.Wait();
         }
     }

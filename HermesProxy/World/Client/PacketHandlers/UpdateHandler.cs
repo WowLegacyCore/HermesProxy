@@ -25,6 +25,7 @@ namespace HermesProxy.World.Client
             GetSession().GameState.ObjectCacheLegacy.Remove(guid);
             GetSession().GameState.ObjectCacheModern.Remove(guid);
             GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+            GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
 
             UpdateObject updateObject = new UpdateObject(GetSession().GameState);
             updateObject.DestroyedGuids.Add(guid);
@@ -312,6 +313,7 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.ObjectCacheLegacy.Remove(guid);
                 GetSession().GameState.ObjectCacheModern.Remove(guid);
                 GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+                GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
                 updateObject.OutOfRangeGuids.Add(guid);
             }
         }
@@ -1173,12 +1175,17 @@ namespace HermesProxy.World.Client
             if (OBJECT_FIELD_SCALE_X >= 0 && updateMaskArray[OBJECT_FIELD_SCALE_X])
             {
                 updateData.ObjectData.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                if (guid == GetSession().GameState.CurrentPlayerGuid)
+                if (guid == GetSession().GameState.CurrentPlayerGuid &&
+                    LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
                 {
-                    var cachedMountId = GetSession().GameState.GetLegacyFieldValueFloat(guid, UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                    int cachedMountId = 0;
+                    int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                    if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID))
+                        cachedMountId = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
+
                     MoveSetCollisionHeight height = new();
                     height.MoverGUID = guid;
-                    height.Height = cachedMountId != 0 ? 3.081099f : 2.438083f;
+                    height.Height = cachedMountId != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
                     height.Height *= updates[OBJECT_FIELD_SCALE_X].FloatValue;
                     height.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
                     height.Reason = 2; // Force
@@ -1638,9 +1645,13 @@ namespace HermesProxy.World.Client
                     {
                         MoveSetCollisionHeight height = new();
                         height.MoverGUID = guid;
-                        height.Height = updateData.UnitData.MountDisplayID != 0 ? 3.081099f : 2.438083f;
+                        height.Height = updateData.UnitData.MountDisplayID != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
                         height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
-                        var cachedScale = GetSession().GameState.GetLegacyFieldValueFloat(GetSession().GameState.CurrentPlayerGuid, ObjectField.OBJECT_FIELD_SCALE_X);
+
+                        float cachedScale = 0;
+                        if (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X))
+                            cachedScale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
+
                         if (cachedScale != 0)
                         {
                             height.Scale = cachedScale;
@@ -1938,7 +1949,7 @@ namespace HermesProxy.World.Client
                                     aura.AuraData.Duration = durationFull;
                                     aura.AuraData.Remaining = durationLeft;
                                 }
-                                aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, i);
+                                aura.AuraData.CastUnit = GetSession().GameState.GetAuraCaster(guid, i, aura.AuraData.SpellID);
                             }
                             else if (updateMaskArray[UNIT_FIELD_AURA + i])
                             {
@@ -2737,28 +2748,43 @@ namespace HermesProxy.World.Client
                     // Fix for invalid movement of Deeprun Tram, some carts were going through the wall (in the opposite direction)
                     // Entry IDs of Trams:
                     const int tramSouthEastmost = 176080;
-                    const int tramNorthMiddle =   176081;
-                    const int tramSouthMiddle =   176082;
+                    const int tramNorthMiddle = 176081;
+                    const int tramSouthMiddle = 176082;
                     const int tramSouthWestmost = 176083;
                     const int tramNorthWestmost = 176084;
                     const int tramNorthEastmost = 176085;
-
-                    if (updateData.ObjectData.EntryID is tramSouthEastmost or tramNorthWestmost or tramNorthEastmost)
-                    {
-                        var rot = updateData.CreateData.MoveInfo.Rotation.AsEulerAngles();
-                        rot.Yaw *= -1; // Rotate the cart content by 180°, so players who stand on the left side of the cart are actually on the left side
-                        updateData.CreateData.MoveInfo.Rotation = rot.AsQuaternion();
-                    }
-                    if (updateData.ObjectData.EntryID is tramNorthMiddle or tramSouthMiddle or tramSouthWestmost or tramNorthEastmost)
-                    {   // Quaternion to rotate the pivot point of the transport movement by 180°
-                        updateData.GameObjectData.ParentRotation = new float?[] { -4.371139E-08f, 0,  1, 0 };
-                    }
-
-                    // Fix for Zangarmarsh Elevator
                     const int zangarmarshElevator = 183177;
-                    if (updateData.ObjectData.EntryID is zangarmarshElevator)
-                    {   // Super weird angle -88°
-                        updateData.GameObjectData.ParentRotation = new float?[] { 0, 0, -0.69465846f, 0.7193397f };
+
+                    switch (updateData.ObjectData.EntryID)
+                    {
+                        case tramSouthEastmost:
+                        case tramNorthWestmost:
+                        case tramNorthEastmost:
+                        {
+                            var rot = updateData.CreateData.MoveInfo.Rotation.AsEulerAngles();
+                            rot.Yaw *= -1; // Rotate the cart content by 180°, so players who stand on the left side of the cart are actually on the left side
+                            updateData.CreateData.MoveInfo.Rotation = rot.AsQuaternion();
+                            break;
+                        }
+                    }
+
+                    switch (updateData.ObjectData.EntryID)
+                    {
+                        case tramNorthMiddle:
+                        case tramSouthMiddle:
+                        case tramSouthWestmost:
+                        case tramNorthEastmost:
+                        {
+                            // Quaternion to rotate the pivot point of the transport movement by 180°
+                            updateData.GameObjectData.ParentRotation = new float?[] { -4.371139E-08f, 0, 1, 0 };
+                            break;
+                        }
+                        case zangarmarshElevator:
+                        {
+                            // Super weird angle -88°
+                            updateData.GameObjectData.ParentRotation = new float?[] { 0, 0, -0.69465846f, 0.7193397f };
+                            break;
+                        }
                     }
                 }
                 int GAMEOBJECT_STATE = LegacyVersion.GetUpdateField(GameObjectField.GAMEOBJECT_STATE);

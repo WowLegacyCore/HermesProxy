@@ -262,8 +262,10 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_PING:
                     Ping ping = new(packet);
                     ping.Read();
-                    if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
+                    if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null && GetSession().WorldClient.IsConnected() && GetSession().WorldClient.IsAuthenticated())
                         GetSession().WorldClient.SendPing(ping.Serial, ping.Latency);
+                    else
+                        HandlePing(ping);
                     break;
                 case Opcode.CMSG_AUTH_SESSION:
                     AuthSession authSession = new(packet);
@@ -280,12 +282,13 @@ namespace HermesProxy.World.Server
                 case Opcode.CMSG_LOG_DISCONNECT:
                     uint reason = packet.ReadUInt32();
                     Log.Print(LogType.Server, $"Client disconnected with reason {reason}.");
-
-                    if (_connectType == ConnectionType.Realm && GetSession().WorldClient != null)
+                    if (_connectType == ConnectionType.Realm)
                     {
-                        GetSession().WorldClient.Disconnect();
-                    }
-
+                        if (GetSession().AuthClient != null)
+                            GetSession().AuthClient.Disconnect();
+                        if (GetSession().WorldClient != null)
+                            GetSession().WorldClient.Disconnect();
+                    } 
                     if (GetSession().ModernSniff != null)
                     {
                         GetSession().ModernSniff.CloseFile();
@@ -1009,6 +1012,11 @@ namespace HermesProxy.World.Server
             SendPacket(response);
         }
 
+        void HandlePing(Ping ping)
+        {
+            SendPacket(new Pong(ping.Serial));
+        }
+
         public void SendAccountDataTimes()
         {
             System.Diagnostics.Trace.Assert(_connectType == ConnectionType.Realm);
@@ -1026,6 +1034,30 @@ namespace HermesProxy.World.Server
                 accountData.AccountTimes[i] = GetSession().AccountDataMgr.Data[i] != null ? GetSession().AccountDataMgr.Data[i].Timestamp : 0;
 
             SendPacket(accountData);
+        }
+
+        public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)
+        {
+            var methodInfo = new MethodCall();
+            methodInfo.SetServiceHash((uint)service);
+            methodInfo.SetMethodId(methodId);
+            methodInfo.Token = token;
+            methodInfo.ObjectId = serviceId;
+
+            byte[] bytes = message == null ? Array.Empty<byte>() : message.ToByteArray();
+            BattlenetResponse response = new()
+            {
+                Method = methodInfo,
+                Status = status,
+                Data   = new ByteBuffer(bytes),
+            };
+
+            SendPacket(response);
+        }
+
+        public IPEndPoint GetRemoteIpEndPoint()
+        {
+            return GetRemoteIpAddress();
         }
 
         public void InitializePacketHandlers()
@@ -1095,30 +1127,6 @@ namespace HermesProxy.World.Server
 
             Action<WorldSocket, ClientPacket> methodCaller;
             Type packetType;
-        }
-
-        public void SendRpcMessage(uint serviceId, OriginalHash service, uint methodId, uint token, BattlenetRpcErrorCode status, IMessage? message)
-        {
-            var methodInfo = new MethodCall();
-            methodInfo.SetServiceHash((uint)service);
-            methodInfo.SetMethodId(methodId);
-            methodInfo.Token = token;
-            methodInfo.ObjectId = serviceId;
-
-            byte[] bytes = message == null ? Array.Empty<byte>() : message.ToByteArray();
-            BattlenetResponse response = new()
-            {
-                Method = methodInfo,
-                Status = status,
-                Data   = new ByteBuffer(bytes),
-            };
-
-            SendPacket(response);
-        }
-
-        public IPEndPoint GetRemoteIpEndPoint()
-        {
-            return GetRemoteIpAddress();
         }
     }
 

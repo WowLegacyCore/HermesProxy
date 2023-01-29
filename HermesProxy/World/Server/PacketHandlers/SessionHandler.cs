@@ -23,14 +23,15 @@ namespace HermesProxy.World.Server
         {
             ChangeRealmTicketResponse response = new();
             response.Token = request.Token;
-            
-            if (GetSession().AuthClient.Reconnect() != AuthResult.SUCCESS)
+
+            if (!GetSession().AuthClient.IsConnected() && GetSession().AuthClient.Reconnect() != AuthResult.SUCCESS)
             {
+                Log.Print(LogType.Error, "Failed to reconnect to auth server.");
                 response.Allow = false;
                 SendPacket(response);
                 return;
             }
-            GetSession().AuthClient.RequestRealmListUpdate();
+            // GetSession().AuthClient.SendRealmListUpdateRequest();
 
             _bnetRpc.SetClientSecret(request.Secret);
 

@@ -106,6 +106,16 @@ namespace HermesProxy.World
             return false;
         }
 
+        public static WowGuid64 ConvertUniqGuid(WowGuid128 guid)
+        {
+            switch ((UniqGuid)guid.GetLowValue())
+            {
+                case UniqGuid.SpellTargetTradeItem:
+                    return new WowGuid64((ulong)TradeSlots.NonTraded);
+            }
+            return WowGuid64.Empty;
+        }
+
         public static bool operator ==(WowGuid first, WowGuid other)
         {
             if (ReferenceEquals(first, other))
@@ -361,6 +371,8 @@ namespace HermesProxy.World
         {
             switch (guid.GetHighType())
             {
+                case HighGuidType.Uniq:
+                    return ConvertUniqGuid(guid);
                 case HighGuidType.Player:
                     return new WowGuid64(HighGuidTypeLegacy.Player, (uint)guid.GetCounter());
                 case HighGuidType.Item:

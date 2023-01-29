@@ -68,7 +68,7 @@ namespace BNetServer.Services
         {
             if (request.AttributeKey == $"Command_RealmListRequest_v1_{GetCommandEndingForVersion()}")
             {
-                GetSession().AuthClient.WaitForRealmlist();
+                GetSession().AuthClient.WaitOrRequestRealmList();
 
                 GetSession().RealmManager.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;
@@ -125,7 +125,7 @@ namespace BNetServer.Services
                 return BattlenetRpcErrorCode.Ok;
             var lastPlayedChar = rawLastPlayedChar.Value;
 
-            GetSession().AuthClient.WaitForRealmlist();
+            GetSession().AuthClient.WaitOrRequestRealmList();
 
             var realm = GetSession().RealmManager.GetRealms().FirstOrDefault(r => r.Name == lastPlayedChar.realmName);
             if (realm == null)
@@ -155,8 +155,6 @@ namespace BNetServer.Services
             Variant subRegion = Params.LookupByKey($"Command_RealmListRequest_v1_{GetCommandEndingForVersion()}");
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
-
-            GetSession().AuthClient.WaitForRealmlist();
 
             var compressedRealmList = GetSession().RealmManager.GetRealmList(GetSession().Build, subRegionId);
             if (compressedRealmList.Length == 0)

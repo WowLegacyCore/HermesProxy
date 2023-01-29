@@ -64,7 +64,8 @@ namespace HermesProxy.World.Server.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid128(GuildGUID);
-            _worldPacket.WritePackedGuid128(PlayerGuid);
+            if (ModernVersion.RemovedInVersion(9, 2, 0, 1, 14, 2, 2, 5, 3))
+                _worldPacket.WritePackedGuid128(PlayerGuid);
             _worldPacket.WriteBit(HasGuildInfo);
             _worldPacket.FlushBits();
 

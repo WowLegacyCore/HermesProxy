@@ -54,13 +54,13 @@ namespace HermesProxy.World.Client
                 instance.MapID = packet.ReadUInt32();
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    instance.DifficultyID = (Difficulty)packet.ReadUInt32();
+                    instance.DifficultyID = (DifficultyModern)packet.ReadUInt32();
                 else
                 {
                     if (ModernVersion.ExpansionVersion == 1)
-                        instance.DifficultyID = Difficulty.Raid40;
+                        instance.DifficultyID = DifficultyModern.Raid40;
                     else
-                        instance.DifficultyID = Difficulty.Raid25N;
+                        instance.DifficultyID = DifficultyModern.Raid25N;
                 }
 
                 if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
@@ -108,13 +108,13 @@ namespace HermesProxy.World.Client
             instance.MapID = packet.ReadUInt32();
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                instance.DifficultyID = (Difficulty)packet.ReadUInt32();
+                instance.DifficultyID = (DifficultyModern)packet.ReadUInt32();
             else
             {
                 if (ModernVersion.ExpansionVersion == 1)
-                    instance.DifficultyID = Difficulty.Raid40;
+                    instance.DifficultyID = DifficultyModern.Raid40;
                 else
-                    instance.DifficultyID = Difficulty.Raid25N;
+                    instance.DifficultyID = DifficultyModern.Raid25N;
             }
 
             packet.ReadUInt32(); // time

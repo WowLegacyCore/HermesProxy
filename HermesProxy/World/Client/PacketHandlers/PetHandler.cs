@@ -81,6 +81,16 @@ namespace HermesProxy.World.Client
             SendPacketToClient(notify);
         }
 
+        [PacketHandler(Opcode.SMSG_PET_UNLEARN_CONFIRM)]
+        void HandlePetUnlearnConfirm(WorldPacket packet)
+        {
+            RespecWipeConfirm respec = new RespecWipeConfirm();
+            respec.TrainerGUID = packet.ReadGuid().To128(GetSession().GameState);
+            respec.Cost = packet.ReadUInt32();
+            respec.RespecType = SpecResetType.PetTalents;
+            SendPacketToClient(respec);
+        }
+
         [PacketHandler(Opcode.MSG_LIST_STABLED_PETS)]
         void HandleListStabledPets(WorldPacket packet)
         {

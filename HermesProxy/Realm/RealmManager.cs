@@ -22,7 +22,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Timers;
 using System.Collections.Concurrent;
 using System.Text;
 using Framework.Realm;
@@ -34,8 +33,16 @@ using HermesProxy.Auth;
 
 public class RealmManager
 {
-    public RealmManager() {
+    const int placeholderRegion = 1;
+    const int placeholderBattlegroup = 1;
+
+    public RealmManager()
+    {
         LoadBuildInfo();
+
+        var subRegion = new RealmId(placeholderRegion, placeholderBattlegroup, 0).GetAddressString();
+        if (!_subRegions.Contains(subRegion))
+            _subRegions.Add(subRegion);
     }
 
     void LoadBuildInfo()
@@ -57,11 +64,6 @@ public class RealmManager
         _builds.Add(build);
     }
 
-    public void Close()
-    {
-        
-    }
-
     void UpdateRealm(Realm realm)
     {
         var oldRealm = _realms.LookupByKey(realm.Id);
@@ -71,8 +73,7 @@ public class RealmManager
         _realms[realm.Id] = realm;
     }
 
-    public void AddRealm(uint id, string name, string externalAddress, ushort port, RealmType type, RealmFlags flags,
-        byte characterCount, byte timezone, float populationLevel)
+    public void AddRealm(uint id, string name, string externalAddress, ushort port, RealmType type, RealmFlags flags, byte characterCount, byte timezone, float populationLevel)
     {
         Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
         foreach (var p in _realms)
@@ -95,16 +96,9 @@ public class RealmManager
         realm.Timezone = timezone;
         realm.PopulationLevel = populationLevel;
         realm.Build = (uint)Framework.Settings.ClientBuild;
-        byte region = 1;
-        byte battlegroup = 1;
 
-        realm.Id = new RealmId(region, battlegroup, id);
-
+        realm.Id = new RealmId(placeholderRegion, placeholderBattlegroup, id);
         UpdateRealm(realm);
-
-        var subRegion = new RealmId(region, battlegroup, 0).GetAddressString();
-        if (!_subRegions.Contains(subRegion))
-            _subRegions.Add(subRegion);
 
         if (!existingRealms.ContainsKey(realm.Id))
             Log.Print(LogType.Server, $"Added realm \"{realm.Name}\" at {realm.ExternalAddress}:{realm.Port}");

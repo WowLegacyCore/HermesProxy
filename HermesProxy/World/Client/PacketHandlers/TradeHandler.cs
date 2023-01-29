@@ -1,4 +1,5 @@
 ﻿using Framework;
+using Framework.Logging;
 using HermesProxy.Enums;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -19,17 +20,25 @@ namespace HermesProxy.World.Client
             trade.Status = (TradeStatus)packet.ReadUInt32();
 
             TradeSession tradeSession = GetSession().GameState.CurrentTrade;
-            if (tradeSession == null && (trade.Status is TradeStatus.Initiated or TradeStatus.Proposed))
+            if (tradeSession == null)
             {
-                tradeSession = new TradeSession();
-                GetSession().GameState.CurrentTrade = tradeSession;
-            }
-            else if (tradeSession == null)
-            {
-                Log.Print(LogType.Error, $"Got SMSG_TRADE_STATUS without trade session (status: {trade.Status})");
-                SendPacketToClient(new TradeStatusPkt{Status = TradeStatus.Cancelled});
-                return;
-            }
+                switch (trade.Status)
+                {
+                    case TradeStatus.Initiated:
+                    case TradeStatus.Proposed:
+                    {
+                        tradeSession = new TradeSession();
+                        GetSession().GameState.CurrentTrade = tradeSession;
+                        break;
+                    }
+                    default:
+                    {
+                        Log.Print(LogType.Error, $"Got SMSG_TRADE_STATUS without trade session (status: {trade.Status})");
+                        SendPacketToClient(new TradeStatusPkt { Status = TradeStatus.Cancelled });
+                        return;
+                    }
+                }
+            } 
 
             switch (trade.Status)
             {
@@ -86,8 +95,10 @@ namespace HermesProxy.World.Client
             }
             trade.Id = tradeSession.TradeId;
 
-            var unkUnused1 = packet.ReadUInt32();
-            var unkUnused2 = packet.ReadUInt32();
+            // these might be the client/current state indexes
+            // but mangos sends TRADE_SLOT_COUNT here
+            _ = packet.ReadUInt32();
+            _ = packet.ReadUInt32();
 
             trade.ClientStateIndex = tradeSession.ClientStateIndex;
             trade.CurrentStateIndex = tradeSession.ServerStateIndex;

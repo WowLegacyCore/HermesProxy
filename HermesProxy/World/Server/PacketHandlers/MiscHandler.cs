@@ -5,6 +5,7 @@ using HermesProxy.World;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
+using System;
 
 namespace HermesProxy.World.Server
 {
@@ -241,6 +242,20 @@ namespace HermesProxy.World.Server
         void HandleObjectUpdateFailed(ObjectUpdateFailed fail)
         {
             Log.Print(LogType.Error, $"Object update failed for {fail.ObjectGuid}.");
+        }
+
+        [PacketHandler(Opcode.CMSG_SET_DUNGEON_DIFFICULTY)]
+        void HandleSetDungeonDifficulty(SetDungeonDifficulty difficulty)
+        {
+            WorldPacket packet = new WorldPacket(Opcode.MSG_SET_DUNGEON_DIFFICULTY);
+            uint dificultyId = (byte)Enum.Parse(typeof(DifficultyLegacy), ((DifficultyModern)difficulty.DifficultyID).ToString());
+            packet.WriteUInt32(dificultyId);
+            SendPacketToServer(packet);
+
+            // 2.4.3 server does not send response to same client on difficulty change
+            DungeonDifficultySet difficultySet = new();
+            difficultySet.DifficultyID = (int)difficulty.DifficultyID;
+            SendPacket(difficultySet);
         }
     }
 }
