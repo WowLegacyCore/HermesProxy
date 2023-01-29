@@ -7,6 +7,7 @@ using HermesProxy.World.Server;
 using System.Collections.Generic;
 using System.Linq;
 using Framework.Realm;
+using HermesProxy.World.Server.Packets;
 using ArenaTeamInspectData = HermesProxy.World.Server.Packets.ArenaTeamInspectData;
 
 namespace HermesProxy
@@ -892,6 +893,16 @@ namespace HermesProxy
             }
 
             GameState = GameSessionData.CreateNewGameSessionData(this);
+        }
+
+        public void SendSystemTextMessage(string message)
+        {
+            var socket = InstanceSocket;
+            if (socket != null)
+            {
+                var chatPkt = new ChatPkt(this, ChatMessageTypeModern.System, message);
+                socket.SendPacket(chatPkt);
+            }
         }
     }
 }

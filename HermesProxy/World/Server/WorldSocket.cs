@@ -98,6 +98,8 @@ namespace HermesProxy.World.Server
             return _globalSession;
         }
 
+        public GlobalSessionData Session => _globalSession;
+
         public override void Accept()
         {
             string ip_address = GetRemoteIpAddress().ToString();
