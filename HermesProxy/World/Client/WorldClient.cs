@@ -42,6 +42,8 @@ namespace HermesProxy.World.Client
             return _globalSession;
         }
 
+        public GlobalSessionData Session => _globalSession;
+
         public bool ConnectToWorldServer(Realm realm, GlobalSessionData globalSession)
         {
             _worldCrypt = null;
