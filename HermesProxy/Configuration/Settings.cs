@@ -6,6 +6,7 @@ using System.Text;
 using System.Net;
 using Framework.Logging;
 using Framework.Networking;
+using HermesProxy;
 using HermesProxy.Configuration;
 
 namespace Framework
@@ -33,7 +34,11 @@ namespace Framework
         {
             ClientSeed = config.GetByteArray("ClientSeed", "179D3DC3235629D07113A9B3867F97A7".ParseAsByteArray());
             ClientBuild = config.GetEnum("ClientBuild", ClientVersionBuild.V2_5_2_40892);
-            ServerBuild = config.GetEnum("ServerBuild", ClientVersionBuild.V2_4_3_8606);
+            var serverBuildStr = config.GetString("ServerBuild", "auto");
+            if (serverBuildStr == "auto")
+                ServerBuild = VersionChecker.GetBestLegacyVersion(ClientBuild);
+            else
+                ServerBuild = config.GetEnum("ServerBuild", ClientVersionBuild.Zero);
             ServerAddress = config.GetString("ServerAddress", "127.0.0.1");
             ServerPort = config.GetInt("ServerPort", 3724);
             ReportedOS = config.GetString("ReportedOS", "OSX");
@@ -53,13 +58,24 @@ namespace Framework
         
         private static bool VerifyConfig()
         {
-            
             if (ClientSeed.Length != 16)
             {
                 Log.Print(LogType.Server, "ClientSeed must have byte length of 16 (32 characters)");
                 return false;
             }
-            
+
+            if (!VersionChecker.IsSupportedModernVersion(ClientBuild))
+            {
+                Log.Print(LogType.Server, $"Unsupported ClientBuild '{ClientBuild}'");
+                return false;
+            }
+
+            if (!VersionChecker.IsSupportedLegacyVersion(ServerBuild))
+            {
+                Log.Print(LogType.Server, $"Unsupported ServerBuild '{ServerBuild}', use 'auto' to select best");
+                return false;
+            }
+
             if (!IsValidPortNumber(RestPort))
             {
                 Log.Print(LogType.Server, $"Specified battle.net port ({RestPort}) out of allowed range (1-65535)");
