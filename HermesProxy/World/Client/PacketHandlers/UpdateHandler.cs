@@ -329,8 +329,8 @@ namespace HermesProxy.World.Client
         public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid128 guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             BitArray updateMaskArray = null;
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray, out var actuallyChangedValuesMaskArray);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData, actuallyChangedValuesMaskArray);
             GetSession().GameState.ObjectCacheMutex.WaitOne();
             if (!GetSession().GameState.ObjectCacheLegacy.ContainsKey(guid))
                 GetSession().GameState.ObjectCacheLegacy.Add(guid, updates);
@@ -343,8 +343,8 @@ namespace HermesProxy.World.Client
         {
             BitArray updateMaskArray = null;
             ObjectType type = GetSession().GameState.GetOriginalObjectType(guid);
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, GetSession().GameState.GetCachedObjectFieldsLegacy(guid), out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, GetSession().GameState.GetCachedObjectFieldsLegacy(guid), out updateMaskArray, out var actuallyChangedValuesMaskArray);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData, actuallyChangedValuesMaskArray);
         }
 
         private string GetIndexString(params object[] values)
@@ -374,9 +374,8 @@ namespace HermesProxy.World.Client
             return obj;
         }
 
-        private Dictionary<int, UpdateField> ReadValuesUpdateBlock(WorldPacket packet, ref ObjectType type, object index, bool isCreating, Dictionary<int, UpdateField> oldValues, out BitArray outUpdateMaskArray)
+        private Dictionary<int, UpdateField> ReadValuesUpdateBlock(WorldPacket packet, ref ObjectType type, object index, bool isCreating, Dictionary<int, UpdateField>? oldValues, out BitArray outUpdateMaskArray, out BitArray outActuallyChangedValuesMaskArray)
         {
-            bool skipDictionary = false;
             bool missingCreateObject = !isCreating && oldValues == null;
             var maskSize = packet.ReadUInt8();
 
@@ -386,7 +385,8 @@ namespace HermesProxy.World.Client
 
             var mask = new BitArray(updateMask);
             outUpdateMaskArray = mask;
-            var dict = oldValues != null ? oldValues : new Dictionary<int, UpdateField>();
+            outActuallyChangedValuesMaskArray = new BitArray(new int[maskSize]);
+            var dict = oldValues ?? new Dictionary<int, UpdateField>();
 
             if (missingCreateObject)
             {
@@ -737,16 +737,20 @@ namespace HermesProxy.World.Client
                         break;
                 }
 
-                if (!skipDictionary)
+                for (int k = 0; k < fieldData.Count; ++k)
                 {
-                    for (int k = 0; k < fieldData.Count; ++k)
+                    if (!dict.ContainsKey(start + k))
                     {
-                        if (!dict.ContainsKey(start + k))
-                            dict.Add(start + k, fieldData[k]);
-                        else
-                            dict[start + k] = fieldData[k];
+                        outActuallyChangedValuesMaskArray.Set(start + k, true);
+                        dict.Add(start + k, fieldData[k]);
                     }
-                }  
+                    else
+                    {
+                        if (dict[start + k] != fieldData[k])
+                            outActuallyChangedValuesMaskArray.Set(start + k, true);
+                        dict[start + k] = fieldData[k];
+                    }
+                }
             }
 
             return dict;
@@ -1158,46 +1162,27 @@ namespace HermesProxy.World.Client
             return flags;
         }
 
-        public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
+        public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData, BitArray actuallyChangedValuesMaskArray)
         {
             StoreObjectUpdateInternal(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData);
-            AfterStoreObjectUpdateHook(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData);
+            AfterStoreObjectUpdateHook(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData, actuallyChangedValuesMaskArray);
         }
 
-        private void AfterStoreObjectUpdateHook(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
+        private void AfterStoreObjectUpdateHook(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData, BitArray changedValuesMask)
         {
-            
             if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
             {
                 int UNIT_FIELD_NATIVEDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NATIVEDISPLAYID);
                 int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
                 int OBJECT_FIELD_SCALE_X = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_SCALE_X);
-                if ((UNIT_FIELD_NATIVEDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_NATIVEDISPLAYID)) ||
-                    (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID)) ||
-                    (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X)))
+                if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && UNIT_FIELD_MOUNTDISPLAYID >= 0 && OBJECT_FIELD_SCALE_X >= 0)
                 {
-                    bool mountingIsReason = false;
+                    if (!changedValuesMask.Get(UNIT_FIELD_NATIVEDISPLAYID) && !changedValuesMask.Get(UNIT_FIELD_MOUNTDISPLAYID) && !changedValuesMask.Get(OBJECT_FIELD_SCALE_X))
+                        return; // No need for an update
 
-                    int nativeDisplayId;
-                    if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_NATIVEDISPLAYID))
-                        nativeDisplayId = updates[UNIT_FIELD_NATIVEDISPLAYID].Int32Value;
-                    else
-                        nativeDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_DISPLAYID);
-
+                    int nativeDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_DISPLAYID);
                     int mountDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_MOUNTDISPLAYID);
-                    if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID))
-                    {
-                        var newMountValue = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
-                        if (newMountValue != mountDisplayId && !isCreate)
-                            mountingIsReason = true;
-                        mountDisplayId = newMountValue;
-                    }
-
-                    float rawScaleX;
-                    if (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X))
-                        rawScaleX = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                    else
-                        rawScaleX = Session.GameState.GetLegacyFieldValueFloat(guid, ObjectField.OBJECT_FIELD_SCALE_X);
+                    float rawScaleX = Session.GameState.GetLegacyFieldValueFloat(guid, ObjectField.OBJECT_FIELD_SCALE_X);
 
                     if (rawScaleX == 0.0f)
                         return;
@@ -1228,12 +1213,16 @@ namespace HermesProxy.World.Client
 
                     var displayScale = regularNativeDisplaySize * scale;
 
+                    var reason = changedValuesMask.Get(UNIT_FIELD_MOUNTDISPLAYID)
+                        ? MoveSetCollisionHeight.UpdateCollisionHeightReason.Mount
+                        : MoveSetCollisionHeight.UpdateCollisionHeightReason.Force;
+
                     MoveSetCollisionHeight height = new()
                     {
                         MoverGUID = guid,
                         Height = scaledHeight,
                         Scale = displayScale,
-                        Reason = mountingIsReason ? MoveSetCollisionHeight.UpdateCollisionHeightReason.Mount : MoveSetCollisionHeight.UpdateCollisionHeightReason.Force,
+                        Reason = reason,
                         MountDisplayID = (uint) mountDisplayId,
                     };
                     SendPacketToClient(height, Opcode.SMSG_UPDATE_OBJECT);
