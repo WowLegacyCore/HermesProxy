@@ -158,6 +158,9 @@ namespace HermesProxy.World
 
     public class WowGuid128 : WowGuid
     {
+        private const ulong UNKNOWN_TMP_GUID_START = 10_000_000_000;
+        private static ulong _nextUnknownTmpGuid = UNKNOWN_TMP_GUID_START;
+
         public static WowGuid128 Empty = new WowGuid128();
 
         public WowGuid128()
@@ -244,6 +247,16 @@ namespace HermesProxy.World
         public static WowGuid128 CreateLootGuid(HighGuidTypeLegacy type, uint entry, ulong counter)
         {
             return MapSpecificCreate(HighGuidType703.LootObject, 0, 0, (uint)type, entry, counter);
+        }
+
+        public static WowGuid128 CreateUnknownPlayerGuid()
+        {
+            return Create(HighGuidType703.Player, _nextUnknownTmpGuid++);
+        }
+
+        public static bool IsUnknownPlayerGuid(WowGuid128 playerGuid)
+        {
+            return playerGuid.IsPlayer() && playerGuid.GetCounter() >= UNKNOWN_TMP_GUID_START;
         }
 
         static WowGuid128 GlobalCreate(HighGuidType703 type, ulong counter)

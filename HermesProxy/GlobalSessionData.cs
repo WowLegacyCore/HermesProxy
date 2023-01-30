@@ -14,11 +14,11 @@ namespace HermesProxy
 {
     public class PlayerCache
     {
-        public string Name;
-        public Race RaceId;
-        public Class ClassId;
-        public Gender SexId;
-        public byte Level;
+        public string? Name;
+        public Race RaceId = Race.None;
+        public Class ClassId = Class.None;
+        public Gender SexId = Gender.None;
+        public byte Level = 0;
     }
 
     public class OwnCharacterInfo : PlayerCache
@@ -629,12 +629,12 @@ namespace HermesProxy
             return "";
         }
 
-        public WowGuid128 GetPlayerGuidByName(string name)
+        public WowGuid128? GetPlayerGuidByName(string name)
         {
             name = name.Trim().Replace("\0", "");
             foreach (var player in CachedPlayers)
             {
-                if (player.Value.Name == name)
+                if (player.Value.Name == name && !WowGuid128.IsUnknownPlayerGuid(player.Key))
                     return player.Key;
             }
             return null;

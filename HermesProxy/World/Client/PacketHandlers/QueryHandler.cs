@@ -704,7 +704,7 @@ namespace HermesProxy.World.Client
 
                 player.PlayerData.GuidActual = GetSession().GameState.GetPlayerGuidByName(player.PlayerData.Name);
                 if (player.PlayerData.GuidActual == null)
-                    player.PlayerData.GuidActual = WowGuid128.Create(HighGuidType703.Player, 20000 + count);
+                    player.PlayerData.GuidActual = WowGuid128.CreateUnknownPlayerGuid();
                 player.PlayerData.AccountID = GetSession().GetGameAccountGuidForPlayer(player.PlayerData.GuidActual);
                 player.PlayerData.BnetAccountID = GetSession().GetBnetAccountGuidForPlayer(player.PlayerData.GuidActual);
                 player.PlayerData.VirtualRealmAddress = GetSession().RealmId.GetAddress();
