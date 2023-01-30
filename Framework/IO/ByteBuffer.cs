@@ -162,6 +162,16 @@ namespace Framework.IO
             return (uint)Time.GetUnixTimeFromPackedTime(ReadUInt32());
         }
 
+        public DateTime ReadTime()
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(ReadUInt32()).DateTime;
+        }
+
+        public DateTime ReadTime64()
+        {
+            return DateTimeOffset.FromUnixTimeSeconds((int)ReadUInt64()).DateTime;
+        }
+
         public Vector2 ReadVector2()
         {
             return new Vector2(ReadFloat(), ReadFloat());
@@ -198,7 +208,7 @@ namespace Framework.IO
         }
 
         //BitPacking
-        public byte ReadBit()
+        public bool ReadBit()
         {
             if (_bitPosition == 8)
             {
@@ -207,10 +217,10 @@ namespace Framework.IO
             }
 
             int returnValue = BitValue;
-            BitValue = (byte)(2 * returnValue);
+            BitValue = (byte)(2 * returnValue); // BitValue <<= 1;
             ++_bitPosition;
 
-            return (byte)(returnValue >> 7);
+            return (returnValue >> 7) != 0;
         }
 
         public bool HasBit()
