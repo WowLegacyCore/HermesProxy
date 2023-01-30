@@ -715,6 +715,14 @@ namespace HermesProxy.World.Client
                     player.GuildVirtualRealmAddress = player.PlayerData.VirtualRealmAddress;
                 }
                 response.Players.Add(player);
+                Session.GameState.UpdatePlayerCache(player.PlayerData.GuidActual, new PlayerCache
+                {
+                    Name = player.PlayerData.Name,
+                    RaceId = player.PlayerData.RaceID,
+                    ClassId = player.PlayerData.ClassID,
+                    SexId = player.PlayerData.Sex,
+                    Level = player.PlayerData.Level,
+                });
             }
             SendPacketToClient(response);
         }
