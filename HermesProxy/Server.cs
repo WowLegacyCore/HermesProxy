@@ -76,13 +76,17 @@ namespace HermesProxy
                 }
                 return;
             }
-            
+
+            Log.Print(LogType.Server, $"Modern (Client) Build: {Settings.ClientBuild}");
+            Log.Print(LogType.Server, $"Legacy (Server) Build: {Settings.ServerBuild}");
+
             GameData.LoadEverything();
 
             var bindIp = NetworkUtils.ResolveOrDirectIp(Settings.ExternalAddress);
             if (!IPAddress.IsLoopback(bindIp))
                 bindIp = IPAddress.Any; // If we are not listening on localhost we have to expose our services
 
+            Log.Print(LogType.Network, $"External IP: {Settings.ExternalAddress}");
             // LoginServiceManager holds our external IPs so that other player can connect to our Hermes instance
             LoginServiceManager.Instance.Initialize();
 
