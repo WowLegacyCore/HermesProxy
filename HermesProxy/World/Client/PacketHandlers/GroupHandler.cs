@@ -125,6 +125,12 @@ namespace HermesProxy.World.Client
                         party.PlayerList.Add(member);
                         uniqueMembers.Add(member.GUID);
                     }
+
+                    Session.GameState.UpdatePlayerCache(member.GUID, new PlayerCache
+                    { // it is not guaranteed that the client will invoke a QUERY_PLAYER_NAME. Client caches in between logins
+                        Name = member.Name,
+                        ClassId = member.ClassId,
+                    });
                 }
 
                 if (allAssist)
@@ -208,6 +214,12 @@ namespace HermesProxy.World.Client
                         party.PlayerList.Add(member);
                         uniqueMembers.Add(member.GUID);
                     }
+
+                    Session.GameState.UpdatePlayerCache(member.GUID, new PlayerCache
+                    { // it is not guaranteed that the client will invoke a QUERY_PLAYER_NAME. Client caches in between logins
+                        Name = member.Name,
+                        ClassId = member.ClassId,
+                    });
                 }
 
                 if (allAssist)
