@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <StartupObject>HermesProxy.Program</StartupObject>
     <ApplicationIcon>Hermes.ico</ApplicationIcon>
-    <Copyright>Copyright © WowLegacyCore 2022</Copyright>
+    <Copyright>Copyright © WowLegacyCore 2023</Copyright>
     <Authors>WowLegacyCore</Authors>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
