@@ -4,6 +4,7 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Collections.Generic;
 
 namespace HermesProxy.World.Client
 {
@@ -45,6 +46,7 @@ namespace HermesProxy.World.Client
             contacts.Flags = SocialFlag.Ignored;
             var count = packet.ReadUInt8();
 
+            var ignoredPlayers = new HashSet<WowGuid128>();
             for (var i = 0; i < count; i++)
             {
                 ContactInfo contact = new ContactInfo();
@@ -54,7 +56,9 @@ namespace HermesProxy.World.Client
                 contact.NativeRealmAddr = GetSession().RealmId.GetAddress();
                 contact.VirtualRealmAddr = GetSession().RealmId.GetAddress();
                 contacts.Contacts.Add(contact);
+                ignoredPlayers.Add(contact.Guid);
             }
+            Session.GameState.IgnoredPlayers = ignoredPlayers;
 
             SendPacketToClient(contacts);
         }
@@ -127,6 +131,11 @@ namespace HermesProxy.World.Client
                 }
             }
             SendPacketToClient(friend);
+
+            if (friend.FriendResult == FriendsResult.IgnoreAdded)
+                Session.GameState.IgnoredPlayers.Add(friend.Guid);
+            else if (friend.FriendResult == FriendsResult.IgnoreRemoved)
+                Session.GameState.IgnoredPlayers.Remove(friend.Guid);
         }
     }
 }
