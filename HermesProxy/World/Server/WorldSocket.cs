@@ -538,6 +538,7 @@ namespace HermesProxy.World.Server
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadServer);
                 Log.Print(LogType.Error, "The WorldClient failed to connect to the selected world server!");
+                Session.AccountMetaDataMgr.InvalidateLastSelectedCharacter();
                 CloseSocket();
                 GetSession().OnDisconnect();
                 return;

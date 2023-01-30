@@ -70,6 +70,18 @@ namespace HermesProxy.World.Server
             Log.Print(LogType.Debug, $"Saved last selected char in '{path}'");
         }
 
+        public void InvalidateLastSelectedCharacter()
+        {
+            var dir = GetAccountMetaDataDirectory();
+            var path = Path.Combine(dir, LAST_CHARACTER_FILE);
+
+            if (!File.Exists(path))
+                return;
+
+            File.WriteAllText(path, "");
+            Log.Print(LogType.Debug, $"Invalidated last selected character entry in '{path}'");
+        }
+
         public List<uint> GetAllCompletedQuests(string realmName, string charName)
         {
             var dir = GetAccountCharacterMetaDataDirectory(realmName, charName);

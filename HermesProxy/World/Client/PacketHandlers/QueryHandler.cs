@@ -704,7 +704,7 @@ namespace HermesProxy.World.Client
 
                 player.PlayerData.GuidActual = GetSession().GameState.GetPlayerGuidByName(player.PlayerData.Name);
                 if (player.PlayerData.GuidActual == null)
-                    player.PlayerData.GuidActual = WowGuid128.Create(HighGuidType703.Player, 20000 + count);
+                    player.PlayerData.GuidActual = WowGuid128.CreateUnknownPlayerGuid();
                 player.PlayerData.AccountID = GetSession().GetGameAccountGuidForPlayer(player.PlayerData.GuidActual);
                 player.PlayerData.BnetAccountID = GetSession().GetBnetAccountGuidForPlayer(player.PlayerData.GuidActual);
                 player.PlayerData.VirtualRealmAddress = GetSession().RealmId.GetAddress();
@@ -715,6 +715,14 @@ namespace HermesProxy.World.Client
                     player.GuildVirtualRealmAddress = player.PlayerData.VirtualRealmAddress;
                 }
                 response.Players.Add(player);
+                Session.GameState.UpdatePlayerCache(player.PlayerData.GuidActual, new PlayerCache
+                {
+                    Name = player.PlayerData.Name,
+                    RaceId = player.PlayerData.RaceID,
+                    ClassId = player.PlayerData.ClassID,
+                    SexId = player.PlayerData.Sex,
+                    Level = player.PlayerData.Level,
+                });
             }
             SendPacketToClient(response);
         }

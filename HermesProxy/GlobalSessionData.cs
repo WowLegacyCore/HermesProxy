@@ -6,6 +6,7 @@ using HermesProxy.World.Objects;
 using HermesProxy.World.Server;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Framework.Realm;
 using HermesProxy.World.Server.Packets;
 using ArenaTeamInspectData = HermesProxy.World.Server.Packets.ArenaTeamInspectData;
@@ -14,11 +15,11 @@ namespace HermesProxy
 {
     public class PlayerCache
     {
-        public string Name;
-        public Race RaceId;
-        public Class ClassId;
-        public Gender SexId;
-        public byte Level;
+        public string? Name;
+        public Race RaceId = Race.None;
+        public Class ClassId = Class.None;
+        public Gender SexId = Gender.None;
+        public byte Level = 0;
     }
 
     public class OwnCharacterInfo : PlayerCache
@@ -629,12 +630,12 @@ namespace HermesProxy
             return "";
         }
 
-        public WowGuid128 GetPlayerGuidByName(string name)
+        public WowGuid128? GetPlayerGuidByName(string name)
         {
             name = name.Trim().Replace("\0", "");
             foreach (var player in CachedPlayers)
             {
-                if (player.Value.Name == name)
+                if (player.Value.Name == name && !WowGuid128.IsUnknownPlayerGuid(player.Key))
                     return player.Key;
             }
             return null;
@@ -896,12 +897,18 @@ namespace HermesProxy
             GameState = GameSessionData.CreateNewGameSessionData(this);
         }
 
-        public void SendSystemTextMessage(string message)
+        public void SendHermesTextMessage(string message, bool isError = false)
         {
             var socket = InstanceSocket;
             if (socket != null)
             {
-                var chatPkt = new ChatPkt(this, ChatMessageTypeModern.System, message);
+                var wholeMessage = new StringBuilder();
+                wholeMessage.Append("|cFF111111[|r|cFF33DD22HermesProxy|r|cFF111111]|r ");
+                if (isError)
+                    wholeMessage.Append("|cFFFF0000");
+                wholeMessage.Append(message);
+                
+                var chatPkt = new ChatPkt(this, ChatMessageTypeModern.System, wholeMessage.ToString());
                 socket.SendPacket(chatPkt);
             }
         }

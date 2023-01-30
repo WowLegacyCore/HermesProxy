@@ -11,12 +11,22 @@ namespace HermesProxy.World.Server
         void HandleSupportTicketSubmitComplaint(SupportTicketSubmitComplaint complaint)
         {
             var targetPlayerName = Session.GameState.GetPlayerName(complaint.TargetCharacterGuid);
-
-            string ticketText = $"I would like to report player '{targetPlayerName}' (id: {complaint.TargetCharacterGuid.GetCounter()}).";
-            if (complaint.SelectedMailInfo != null)
+            if (string.IsNullOrWhiteSpace(targetPlayerName))
             {
-                ticketText += "\r\n" + $"Mail in question (id: {complaint.SelectedMailInfo.MailId}) with subject '{complaint.SelectedMailInfo.MailSubject}'";
+                Session.SendHermesTextMessage("Unable to report player because CharacterName was not resolved (can be fixed by restarting the client)", isError: true);
+                return;
             }
+
+            var ticketText = $"I would like to report player '{targetPlayerName}'";
+
+            if (!WowGuid128.IsUnknownPlayerGuid(complaint.TargetCharacterGuid))
+                ticketText += $"  (id: {complaint.TargetCharacterGuid.GetCounter()})";
+
+            if (complaint.ComplaintType != GmTicketComplaintType.Unknown)
+                ticketText += $" for {complaint.ComplaintType}";
+
+            if (complaint.SelectedMailInfo != null)
+                ticketText += "\r\n" + $"Mail in question (id: {complaint.SelectedMailInfo.MailId}) with subject '{complaint.SelectedMailInfo.MailSubject}'";
 
             if (!complaint.TextNote.IsEmpty())
             {

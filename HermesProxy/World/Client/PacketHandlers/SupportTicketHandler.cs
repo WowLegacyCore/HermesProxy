@@ -8,16 +8,8 @@ namespace HermesProxy.World.Client
         void HandleGmTicketCreate(WorldPacket packet)
         {
             var response = (LegacyGmTicketResponse) packet.ReadUInt32();
-            switch (response)
-            {
-                case LegacyGmTicketResponse.CreateSuccess:
-                case LegacyGmTicketResponse.UpdateSuccess:
-                    Session.SendSystemTextMessage($"GM Ticket Status: |cFF00FF00{response}|r");
-                    break;
-                default:
-                    Session.SendSystemTextMessage($"GM Ticket Status: |cFFFF0000{response}|r");
-                    break;
-            }
+            bool isError = !(response is LegacyGmTicketResponse.CreateSuccess or LegacyGmTicketResponse.UpdateSuccess);
+            Session.SendHermesTextMessage($"GM Ticket Status: {response}", isError);
         }
     }
 }
