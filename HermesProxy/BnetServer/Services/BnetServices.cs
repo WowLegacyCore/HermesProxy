@@ -40,6 +40,8 @@ namespace BNetServer.Services
             return _globalSession;
         }
 
+        public GlobalSessionData Session => _globalSession;
+
         private void SendRequest(OriginalHash service, uint methodId, IMessage? data)
         {
             _serverInvokedRequestToken++;

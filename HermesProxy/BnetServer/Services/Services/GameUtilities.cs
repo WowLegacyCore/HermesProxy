@@ -127,7 +127,7 @@ namespace BNetServer.Services
 
             GetSession().AuthClient.WaitOrRequestRealmList();
 
-            var realm = GetSession().RealmManager.GetRealms().FirstOrDefault(r => r.Name == lastPlayedChar.realmName);
+            var realm = GetSession().RealmManager.GetRealms().FirstOrDefault(r => r.Name == lastPlayedChar.realmName && !r.Flags.HasFlag(RealmFlags.Offline));
             if (realm == null)
                 return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
