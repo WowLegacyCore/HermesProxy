@@ -329,8 +329,8 @@ namespace HermesProxy.World.Client
         public void ReadValuesUpdateBlockOnCreate(WorldPacket packet, WowGuid128 guid, ObjectType type, ObjectUpdate updateData, AuraUpdate auraUpdate, object index)
         {
             BitArray updateMaskArray = null;
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, true, null, out updateMaskArray, out var actuallyChangedValuesMaskArray);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, null, true, updateData, actuallyChangedValuesMaskArray);
             GetSession().GameState.ObjectCacheMutex.WaitOne();
             if (!GetSession().GameState.ObjectCacheLegacy.ContainsKey(guid))
                 GetSession().GameState.ObjectCacheLegacy.Add(guid, updates);
@@ -343,8 +343,8 @@ namespace HermesProxy.World.Client
         {
             BitArray updateMaskArray = null;
             ObjectType type = GetSession().GameState.GetOriginalObjectType(guid);
-            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, GetSession().GameState.GetCachedObjectFieldsLegacy(guid), out updateMaskArray);
-            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData);
+            var updates = ReadValuesUpdateBlock(packet, ref type, index, false, GetSession().GameState.GetCachedObjectFieldsLegacy(guid), out updateMaskArray, out var actuallyChangedValuesMaskArray);
+            StoreObjectUpdate(guid, type, updateMaskArray, updates, auraUpdate, powerUpdate, false, updateData, actuallyChangedValuesMaskArray);
         }
 
         private string GetIndexString(params object[] values)
@@ -374,9 +374,8 @@ namespace HermesProxy.World.Client
             return obj;
         }
 
-        private Dictionary<int, UpdateField> ReadValuesUpdateBlock(WorldPacket packet, ref ObjectType type, object index, bool isCreating, Dictionary<int, UpdateField> oldValues, out BitArray outUpdateMaskArray)
+        private Dictionary<int, UpdateField> ReadValuesUpdateBlock(WorldPacket packet, ref ObjectType type, object index, bool isCreating, Dictionary<int, UpdateField>? oldValues, out BitArray outUpdateMaskArray, out BitArray outActuallyChangedValuesMaskArray)
         {
-            bool skipDictionary = false;
             bool missingCreateObject = !isCreating && oldValues == null;
             var maskSize = packet.ReadUInt8();
 
@@ -386,7 +385,8 @@ namespace HermesProxy.World.Client
 
             var mask = new BitArray(updateMask);
             outUpdateMaskArray = mask;
-            var dict = oldValues != null ? oldValues : new Dictionary<int, UpdateField>();
+            outActuallyChangedValuesMaskArray = new BitArray(new int[maskSize]);
+            var dict = oldValues ?? new Dictionary<int, UpdateField>();
 
             if (missingCreateObject)
             {
@@ -737,16 +737,20 @@ namespace HermesProxy.World.Client
                         break;
                 }
 
-                if (!skipDictionary)
+                for (int k = 0; k < fieldData.Count; ++k)
                 {
-                    for (int k = 0; k < fieldData.Count; ++k)
+                    if (!dict.ContainsKey(start + k))
                     {
-                        if (!dict.ContainsKey(start + k))
-                            dict.Add(start + k, fieldData[k]);
-                        else
-                            dict[start + k] = fieldData[k];
+                        outActuallyChangedValuesMaskArray.Set(start + k, true);
+                        dict.Add(start + k, fieldData[k]);
                     }
-                }  
+                    else
+                    {
+                        if (dict[start + k] != fieldData[k])
+                            outActuallyChangedValuesMaskArray.Set(start + k, true);
+                        dict[start + k] = fieldData[k];
+                    }
+                }
             }
 
             return dict;
@@ -1158,7 +1162,75 @@ namespace HermesProxy.World.Client
             return flags;
         }
 
-        public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
+        public void StoreObjectUpdate(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData, BitArray actuallyChangedValuesMaskArray)
+        {
+            StoreObjectUpdateInternal(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData);
+            AfterStoreObjectUpdateHook(guid, objectType, updateMaskArray, updates, auraUpdate, powerUpdate, isCreate, updateData, actuallyChangedValuesMaskArray);
+        }
+
+        private void AfterStoreObjectUpdateHook(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData, BitArray changedValuesMask)
+        {
+            if (objectType == ObjectType.Player || objectType == ObjectType.ActivePlayer)
+            {
+                int UNIT_FIELD_NATIVEDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NATIVEDISPLAYID);
+                int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                int OBJECT_FIELD_SCALE_X = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_SCALE_X);
+                if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && UNIT_FIELD_MOUNTDISPLAYID >= 0 && OBJECT_FIELD_SCALE_X >= 0)
+                {
+                    if (!changedValuesMask.Get(UNIT_FIELD_NATIVEDISPLAYID) && !changedValuesMask.Get(UNIT_FIELD_MOUNTDISPLAYID) && !changedValuesMask.Get(OBJECT_FIELD_SCALE_X))
+                        return; // No need for an update
+
+                    int nativeDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_DISPLAYID);
+                    int mountDisplayId = Session.GameState.GetLegacyFieldValueInt32(guid, UnitField.UNIT_FIELD_MOUNTDISPLAYID);
+                    float rawScaleX = Session.GameState.GetLegacyFieldValueFloat(guid, ObjectField.OBJECT_FIELD_SCALE_X);
+
+                    if (rawScaleX == 0.0f)
+                        return;
+
+                    var regularNativeDisplaySize = GameData.GetUnitCompleteDisplayScale((uint)nativeDisplayId);
+                    var scale = rawScaleX / regularNativeDisplaySize;
+
+                    var ourDisplayInfo = GameData.GetDisplayInfo((uint)nativeDisplayId);
+                    var ourModel = GameData.GetModelData(ourDisplayInfo.ModelId);
+
+                    float calculatedBaseHeight;
+                    if (mountDisplayId != 0 && LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
+                    { // in vanilla there were no mount collisions
+                        var mountDisplayInfo = GameData.GetDisplayInfo((uint)mountDisplayId);
+                        var mountModel = GameData.GetModelData(mountDisplayInfo.ModelId);
+                        calculatedBaseHeight = mountModel.MountHeight * mountDisplayInfo.DisplayScale + (ourModel.Height * ourModel.ModelScale * ourDisplayInfo.DisplayScale * 0.5f);
+                    }
+                    else
+                    {
+                        calculatedBaseHeight = ourDisplayInfo.DisplayScale * ourModel.Height * ourModel.ModelScale;
+                    }
+
+                    if (calculatedBaseHeight == 0)
+                        calculatedBaseHeight = mountDisplayId != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
+
+                    var heightScale = Math.Max(scale, regularNativeDisplaySize); // you HitBox cannot be smaller than displaySize in legacy clients
+                    var scaledHeight = heightScale * calculatedBaseHeight;
+
+                    var displayScale = regularNativeDisplaySize * scale;
+
+                    var reason = changedValuesMask.Get(UNIT_FIELD_MOUNTDISPLAYID)
+                        ? MoveSetCollisionHeight.UpdateCollisionHeightReason.Mount
+                        : MoveSetCollisionHeight.UpdateCollisionHeightReason.Force;
+
+                    MoveSetCollisionHeight height = new()
+                    {
+                        MoverGUID = guid,
+                        Height = scaledHeight,
+                        Scale = displayScale,
+                        Reason = reason,
+                        MountDisplayID = (uint) mountDisplayId,
+                    };
+                    SendPacketToClient(height, Opcode.SMSG_UPDATE_OBJECT);
+                }
+            }
+        }
+        
+        private void StoreObjectUpdateInternal(WowGuid128 guid, ObjectType objectType, BitArray updateMaskArray, Dictionary<int, UpdateField> updates, AuraUpdate auraUpdate, PowerUpdate powerUpdate, bool isCreate, ObjectUpdate updateData)
         {
             // Object Fields
             int OBJECT_FIELD_GUID = LegacyVersion.GetUpdateField(ObjectField.OBJECT_FIELD_GUID);
@@ -1175,22 +1247,6 @@ namespace HermesProxy.World.Client
             if (OBJECT_FIELD_SCALE_X >= 0 && updateMaskArray[OBJECT_FIELD_SCALE_X])
             {
                 updateData.ObjectData.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                if (guid == GetSession().GameState.CurrentPlayerGuid &&
-                    LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                {
-                    int cachedMountId = 0;
-                    int UNIT_FIELD_MOUNTDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MOUNTDISPLAYID);
-                    if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updates.ContainsKey(UNIT_FIELD_MOUNTDISPLAYID))
-                        cachedMountId = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
-
-                    MoveSetCollisionHeight height = new();
-                    height.MoverGUID = guid;
-                    height.Height = cachedMountId != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
-                    height.Height *= updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                    height.Scale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-                    height.Reason = 2; // Force
-                    SendPacketToClient(height);
-                }
             }
 
             // Item Fields
@@ -1628,7 +1684,7 @@ namespace HermesProxy.World.Client
                     // the server sends it by the default scale for this display id in the dbc
                     // this is not the case in 1.12, so we have to adjust the unit scale here
                     if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                        updateData.UnitData.DisplayScale = 1.0f / GameData.GetUnitDisplayScale((uint)updateData.UnitData.DisplayID);
+                        updateData.UnitData.DisplayScale = 1.0f / GameData.GetUnitCompleteDisplayScale((uint)updateData.UnitData.DisplayID);
                 }
                 int UNIT_FIELD_NATIVEDISPLAYID = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_NATIVEDISPLAYID);
                 if (UNIT_FIELD_NATIVEDISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_NATIVEDISPLAYID])
@@ -1639,27 +1695,6 @@ namespace HermesProxy.World.Client
                 if (UNIT_FIELD_MOUNTDISPLAYID >= 0 && updateMaskArray[UNIT_FIELD_MOUNTDISPLAYID])
                 {
                     updateData.UnitData.MountDisplayID = updates[UNIT_FIELD_MOUNTDISPLAYID].Int32Value;
-
-                    if (!isCreate && guid == GetSession().GameState.CurrentPlayerGuid &&
-                        LegacyVersion.RemovedInVersion(ClientVersionBuild.V3_0_2_9056))
-                    {
-                        MoveSetCollisionHeight height = new();
-                        height.MoverGUID = guid;
-                        height.Height = updateData.UnitData.MountDisplayID != 0 ? PlayerHeight.Mounted : PlayerHeight.Normal;
-                        height.MountDisplayID = (uint)updateData.UnitData.MountDisplayID;
-
-                        float cachedScale = 0;
-                        if (OBJECT_FIELD_SCALE_X >= 0 && updates.ContainsKey(OBJECT_FIELD_SCALE_X))
-                            cachedScale = updates[OBJECT_FIELD_SCALE_X].FloatValue;
-
-                        if (cachedScale != 0)
-                        {
-                            height.Scale = cachedScale;
-                            height.Height *= height.Scale;
-                        }
-                        height.Reason = 1; // Mount
-                        SendPacketToClient(height);
-                    }
                 }
                 int UNIT_FIELD_MINDAMAGE = LegacyVersion.GetUpdateField(UnitField.UNIT_FIELD_MINDAMAGE);
                 if (UNIT_FIELD_MINDAMAGE >= 0 && updateMaskArray[UNIT_FIELD_MINDAMAGE])
