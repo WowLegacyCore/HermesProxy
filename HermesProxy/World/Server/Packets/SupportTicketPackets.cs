@@ -18,32 +18,32 @@ namespace HermesProxy.World.Server.Packets
 
             ComplaintType = (GmTicketComplaintType)_worldPacket.ReadBits<uint>(5);
 
-            var noteLength = _worldPacket.ReadBits<uint>(10); // this is somehow set to 120 when reporting mail spam(?)
+            var noteLength = _worldPacket.ReadBits<uint>(10);
 
-            var unk0 = _worldPacket.ReadBit(); // Always false?
-            var unk1 = _worldPacket.ReadBit(); // Always false?
-            var unk2 = _worldPacket.ReadBit(); // Always false?
-            var unk3 = _worldPacket.ReadBit(); // Always false?
-            var unk4 = _worldPacket.ReadBit(); // Always false?
-            var unk5 = _worldPacket.ReadBit(); // Always false?
-            var rightClickedMenu = _worldPacket.ReadBit();
             var hasMailInfo = _worldPacket.ReadBit();
+            var unk2 = _worldPacket.ReadBit();
+            var unk3 = _worldPacket.ReadBit();
+            var hasGuildInfo = _worldPacket.ReadBit();
+            var unk5 = _worldPacket.ReadBit();
+            var unk6 = _worldPacket.ReadBit();
+            var hasClubMessage = _worldPacket.ReadBit();
+            var unk8 = _worldPacket.ReadBit();
+            var unk9 = _worldPacket.ReadBit();
 
             _worldPacket.ResetBitPos();
 
-            var unkZero1 = _worldPacket.ReadUInt8(); // Always 0?
-            var unkZero2 = _worldPacket.ReadUInt32(); // Always 0?
+            if (hasClubMessage)
+            {
+                bool isUsingVoice = _worldPacket.ReadBit();
+                _worldPacket.ResetBitPos();
+            }
 
-            if (unk0 || unk1 || unk2 || unk3 || unk4 || unk5 || unkZero1 != 0 || unkZero2 != 0)
+            var unkAlwaysZero = _worldPacket.ReadUInt32();
+            if  (unkAlwaysZero != 0)
             {
                 Log.Print(LogType.Error, "You reported something that we do not handle (?)");
                 Log.Print(LogType.Error, "Please create a new issue on GitHub and tell us what you did");
                 return;
-            }
-
-            if (rightClickedMenu)
-            {
-                // No data?
             }
 
             if (hasMailInfo)
@@ -81,7 +81,9 @@ namespace HermesProxy.World.Server.Packets
             public void Read(WorldPacket worldPacket)
             {
                 var chatLogLineCount = worldPacket.ReadUInt32();
-                var hasReportedLineIndex = worldPacket.ReadBit();
+
+                var hasReportedLineIndex = worldPacket.ReadBool();
+
                 for (var i = 0; i < chatLogLineCount; i++)
                 {
                     var time = worldPacket.ReadTime64(); 
