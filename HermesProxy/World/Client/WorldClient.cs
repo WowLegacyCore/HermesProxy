@@ -13,6 +13,7 @@ using Framework.Logging;
 using HermesProxy.World.Enums;
 using System.Reflection;
 using System.Threading.Tasks;
+using Framework.Networking;
 using HermesProxy.World.Server;
 
 namespace HermesProxy.World.Client
@@ -54,12 +55,14 @@ namespace HermesProxy.World.Client
             _delayedPacketsToServer = new Dictionary<Opcode, List<WorldPacket>>();
             _delayedPacketsToClient = new Dictionary<Opcode, List<ServerPacket>>();
 
+            Log.Print(LogType.Network, "Connecting to world server...");
             try
             {
-                Log.Print(LogType.Network, "Connecting to world server...");
+                var ip = NetworkUtils.ResolveOrDirectIPv4(realm.ExternalAddress);
+                Log.Print(LogType.Network, $"World Server address {realm.ExternalAddress}:{realm.Port} resolved as {ip}:{realm.Port}");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
-                var endPoint = new IPEndPoint(realm.ExternalAddress, realm.Port);
+                var endPoint = new IPEndPoint(ip, realm.Port);
                 _clientSocket.BeginConnect(endPoint, ConnectCallback, null);
             }
             catch (Exception ex)

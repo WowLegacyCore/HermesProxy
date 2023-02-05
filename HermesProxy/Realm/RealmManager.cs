@@ -81,7 +81,7 @@ public class RealmManager
 
         var realm = new Realm();
         realm.Name = name;
-        realm.ExternalAddress = IPAddress.Parse(externalAddress);
+        realm.ExternalAddress = externalAddress;
 
         realm.Port = port;
         RealmType realmType = type;

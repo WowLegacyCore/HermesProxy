@@ -62,7 +62,7 @@ namespace HermesProxy.Auth
 
             try
             {
-                var serverIpAddress = NetworkUtils.ResolveOrDirectIp(Settings.ServerAddress); 
+                var serverIpAddress = NetworkUtils.ResolveOrDirectIPv4(Settings.ServerAddress); 
                 Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Connecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort}) (resolved as: {serverIpAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
@@ -88,7 +88,7 @@ namespace HermesProxy.Auth
 
             try
             {
-                var serverIpAddress = NetworkUtils.ResolveOrDirectIp(Settings.ServerAddress); 
+                var serverIpAddress = NetworkUtils.ResolveOrDirectIPv4(Settings.ServerAddress); 
                 Log.PrintNet(LogType.Network, LogNetDir.P2S, $"Reconnecting to auth server... (realmlist addr: {Settings.ServerAddress}:{Settings.ServerPort}) (resolved as: {serverIpAddress}:{Settings.ServerPort})");
                 _clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 // Connect to the specified host.
@@ -584,7 +584,7 @@ namespace HermesProxy.Auth
                 realmInfo.Name = packet.ReadCString();
                 string addressAndPort = packet.ReadCString();
                 string[] strArr = addressAndPort.Split(':');
-                realmInfo.Address = Dns.GetHostAddresses(strArr[0].Trim()).First().ToString();
+                realmInfo.Address = strArr[0].Trim();
                 realmInfo.Port = UInt16.Parse(strArr[1]);
                 realmInfo.Population = packet.ReadFloat();
                 realmInfo.CharacterCount = packet.ReadUInt8();

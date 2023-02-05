@@ -78,7 +78,7 @@ public class Realm : IEquatable<Realm>
 
     public RealmId Id;
     public uint Build;
-    public IPAddress ExternalAddress;
+    public string ExternalAddress;
     public ushort Port;
     public string Name;
     public string NormalizedName;
