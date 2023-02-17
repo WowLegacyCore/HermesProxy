@@ -291,7 +291,7 @@ namespace HermesProxy.World.Server.Packets
             WaitInfo.Write(_worldPacket);
         }
 
-        public AuthWaitInfo WaitInfo;
+        public AuthWaitInfo WaitInfo = new AuthWaitInfo();
     }
 
     class WaitQueueFinish : ServerPacket
