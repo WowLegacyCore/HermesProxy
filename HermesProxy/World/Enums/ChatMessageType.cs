@@ -33,6 +33,7 @@ namespace HermesProxy.World.Enums
         Ignored = 22,
         Skill = 23,
         Loot = 24,
+        CombatMiscInfo = 25,
         MonsterWhisper = 26,
         MonsterParty = 48,
         BattlegroundNeutral = 82,
