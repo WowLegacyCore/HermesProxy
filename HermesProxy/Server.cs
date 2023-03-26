@@ -82,7 +82,7 @@ namespace HermesProxy
 
             GameData.LoadEverything();
 
-            var bindIp = NetworkUtils.ResolveOrDirectIp(Settings.ExternalAddress);
+            var bindIp = NetworkUtils.ResolveOrDirectIPv64(Settings.ExternalAddress);
             if (!IPAddress.IsLoopback(bindIp))
                 bindIp = IPAddress.Any; // If we are not listening on localhost we have to expose our services
 
