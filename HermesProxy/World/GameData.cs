@@ -1170,6 +1170,7 @@ namespace HermesProxy.World
         public const uint HotfixCreatureDisplayInfoExtraBegin = 230000;
         public const uint HotfixCreatureDisplayInfoOptionBegin = 240000;
         public const uint HotfixItemEffectBegin = 250000;
+        public const uint HotfixItemBegin = 260000;
         public static Dictionary<uint, HotfixRecord> Hotfixes = new Dictionary<uint, HotfixRecord>();
         public static void LoadHotfixes()
         {
@@ -1185,6 +1186,7 @@ namespace HermesProxy.World
             LoadSpellEffectHotfixes();
             LoadSpellXSpellVisualHotfixes();
             LoadItemSparseHotfixes();
+            LoadItemHotfixes();
             LoadCreatureDisplayInfoHotfixes();
             LoadCreatureDisplayInfoExtraHotfixes();
             LoadCreatureDisplayInfoOptionHotfixes();
@@ -2120,6 +2122,112 @@ namespace HermesProxy.World
                     record.HotfixContent.WriteInt8(statValue9);
                     record.HotfixContent.WriteInt8(statValue10);
                     record.HotfixContent.WriteInt8(requiredLevel);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+            }
+        }
+        public static void LoadItemHotfixes()
+        {
+            var path = Path.Combine("CSV", "Hotfix", $"Item{ModernVersion.ExpansionVersion}.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = false;
+
+                // Skip the row with the column names
+                csvParser.ReadLine();
+
+                uint counter = 0;
+                while (!csvParser.EndOfData)
+                {
+                    counter++;
+
+                    // Read current line fields, pointer moves to the next line.
+                    string[] fields = csvParser.ReadFields();
+
+                    uint id = UInt32.Parse(fields[0]);
+                    byte ClassID = Byte.Parse(fields[1]);
+                    byte SubclassID = Byte.Parse(fields[2]);
+                    byte Material = Byte.Parse(fields[3]);
+                    sbyte InventoryType = SByte.Parse(fields[4]);
+                    uint RequiredLevel = UInt32.Parse(fields[5]);
+                    byte SheatheType = Byte.Parse(fields[6]);
+                    ushort RandomSelect = UInt16.Parse(fields[7]);
+                    ushort ItemRandomSuffixGroupID = UInt16.Parse(fields[8]);
+                    sbyte Sound_override_subclassID = SByte.Parse(fields[9]);
+                    ushort ScalingStatDistributionID = UInt16.Parse(fields[10]);
+                    int IconFileDataID = Int32.Parse(fields[11]);
+                    byte ItemGroupSoundsID = Byte.Parse(fields[12]);
+                    int ContentTuningID = Int32.Parse(fields[13]);
+                    uint MaxDurability = UInt32.Parse(fields[14]);
+                    byte AmmunitionType = Byte.Parse(fields[15]);
+                    byte DamageType1 = Byte.Parse(fields[16]);
+                    byte DamageType2 = Byte.Parse(fields[17]);
+                    byte DamageType3 = Byte.Parse(fields[18]);
+                    byte DamageType4 = Byte.Parse(fields[19]);
+                    byte DamageType5 = Byte.Parse(fields[20]);
+                    short Resistances1 = Int16.Parse(fields[21]);
+                    short Resistances2 = Int16.Parse(fields[22]);
+                    short Resistances3 = Int16.Parse(fields[23]);
+                    short Resistances4 = Int16.Parse(fields[24]);
+                    short Resistances5 = Int16.Parse(fields[25]);
+                    short Resistances6 = Int16.Parse(fields[26]);
+                    short Resistances7 = Int16.Parse(fields[27]);
+                    ushort MinDamage1 = UInt16.Parse(fields[28]);
+                    ushort MinDamage2 = UInt16.Parse(fields[29]);
+                    ushort MinDamage3 = UInt16.Parse(fields[30]);
+                    ushort MinDamage4 = UInt16.Parse(fields[31]);
+                    ushort MinDamage5 = UInt16.Parse(fields[32]);
+                    ushort MaxDamage1 = UInt16.Parse(fields[33]);
+                    ushort MaxDamage2 = UInt16.Parse(fields[34]);
+                    ushort MaxDamage3 = UInt16.Parse(fields[35]);
+                    ushort MaxDamage4 = UInt16.Parse(fields[36]);
+                    ushort MaxDamage5 = UInt16.Parse(fields[37]);
+
+                    HotfixRecord record = new HotfixRecord();
+                    record.Status = HotfixStatus.Valid;
+                    record.TableHash = DB2Hash.Item;
+                    record.HotfixId = HotfixItemBegin + counter;
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = id;
+                    record.HotfixContent.WriteUInt8(ClassID);
+                    record.HotfixContent.WriteUInt8(SubclassID);
+                    record.HotfixContent.WriteUInt8(Material);
+                    record.HotfixContent.WriteInt8(InventoryType);
+                    record.HotfixContent.WriteUInt32(RequiredLevel);
+                    record.HotfixContent.WriteUInt8(SheatheType);
+                    record.HotfixContent.WriteUInt16(RandomSelect);
+                    record.HotfixContent.WriteUInt16(ItemRandomSuffixGroupID);
+                    record.HotfixContent.WriteInt8(Sound_override_subclassID);
+                    record.HotfixContent.WriteUInt16(ScalingStatDistributionID);
+                    record.HotfixContent.WriteInt32(IconFileDataID);
+                    record.HotfixContent.WriteUInt8(ItemGroupSoundsID);
+                    record.HotfixContent.WriteInt32(ContentTuningID);
+                    record.HotfixContent.WriteUInt32(MaxDurability);
+                    record.HotfixContent.WriteUInt8(AmmunitionType);
+                    record.HotfixContent.WriteUInt8(DamageType1);
+                    record.HotfixContent.WriteUInt8(DamageType2);
+                    record.HotfixContent.WriteUInt8(DamageType3);
+                    record.HotfixContent.WriteUInt8(DamageType4);
+                    record.HotfixContent.WriteUInt8(DamageType5);
+                    record.HotfixContent.WriteInt16(Resistances1);
+                    record.HotfixContent.WriteInt16(Resistances2);
+                    record.HotfixContent.WriteInt16(Resistances3);
+                    record.HotfixContent.WriteInt16(Resistances4);
+                    record.HotfixContent.WriteInt16(Resistances5);
+                    record.HotfixContent.WriteInt16(Resistances6);
+                    record.HotfixContent.WriteInt16(Resistances7);
+                    record.HotfixContent.WriteUInt16(MinDamage1);
+                    record.HotfixContent.WriteUInt16(MinDamage2);
+                    record.HotfixContent.WriteUInt16(MinDamage3);
+                    record.HotfixContent.WriteUInt16(MinDamage4);
+                    record.HotfixContent.WriteUInt16(MinDamage5);
+                    record.HotfixContent.WriteUInt16(MaxDamage1);
+                    record.HotfixContent.WriteUInt16(MaxDamage2);
+                    record.HotfixContent.WriteUInt16(MaxDamage3);
+                    record.HotfixContent.WriteUInt16(MaxDamage4);
+                    record.HotfixContent.WriteUInt16(MaxDamage5);
                     Hotfixes.Add(record.HotfixId, record);
                 }
             }
