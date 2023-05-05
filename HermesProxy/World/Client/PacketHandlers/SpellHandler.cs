@@ -334,6 +334,15 @@ namespace HermesProxy.World.Client
             spell2.SpellXSpellVisualID = spellVisual;
             spell2.Reason = reason;
             SendPacketToClient(spell2);
+            
+            string? guidString = casterUnit.ToUnitGUID();
+            if (guidString != null)
+            {
+                uint language = (uint)Language.AddonBfA;
+                WowGuid128 playerGuid = GetSession().GameState.CurrentPlayerGuid;
+                ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.Addon, $"SMSG_SPELL_FAILED_OTHER-{guidString}", language, playerGuid, "", playerGuid, "", "", ChatFlags.None, "HermesProxySMSG");
+                SendPacketToClient(chat);
+            }
         }
 
         [PacketHandler(Opcode.SMSG_SPELL_START)]
