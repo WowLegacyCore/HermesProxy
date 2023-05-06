@@ -443,8 +443,19 @@ namespace HermesProxy.World.Client
             }
             if (!spell.Cast.CasterUnit.IsEmpty() && GameData.AuraSpells.Contains((uint)spell.Cast.SpellID))
             {
+                string? casterUnitGUID = spell.Cast.CasterUnit.ToUnitGUID();
                 foreach (WowGuid128 target in spell.Cast.HitTargets)
+                {
                     GetSession().GameState.StoreLastAuraCasterOnTarget(target, (uint)spell.Cast.SpellID, spell.Cast.CasterUnit);
+                    string? targetUnitGUID = target.ToUnitGUID();
+                    if (casterUnitGUID != null && targetUnitGUID != null)
+                    {
+                        uint language = (uint)Language.AddonBfA;
+                        WowGuid128 playerGuid = GetSession().GameState.CurrentPlayerGuid;
+                        ChatPkt chat = new ChatPkt(GetSession(), ChatMessageTypeModern.Addon, $"SMSG_SPELL_GO_AURA:{casterUnitGUID},{targetUnitGUID},{spell.Cast.SpellID}", language, playerGuid, "", playerGuid, "", "", ChatFlags.None, "HermesProxySMSG");
+                        SendPacketToClient(chat);
+                    }
+                }
             }
                 
             SendPacketToClient(spell);
