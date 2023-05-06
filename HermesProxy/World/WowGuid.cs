@@ -334,12 +334,14 @@ namespace HermesProxy.World
         public string? ToUnitGUID()
         {
             string lowHex = Low.ToString("X16");
-            switch (GetHighType())
+            HighGuidType highType = GetHighType();
+            switch (highType)
             {
                 case HighGuidType.Player:
-                    return $"Player-{GetRealmId()}-{lowHex.Substring(lowHex.Length - 8)}";
+                    return $"{highType}-{GetRealmId()}-{lowHex.Substring(lowHex.Length - 8)}";
                 case HighGuidType.Creature:
-                    return $"Creature-{GetSubType()}-{GetRealmId()}-{GetServerId()}-{GetMapId()}-{GetEntry()}-{lowHex.Substring(lowHex.Length - 10)}";
+                case HighGuidType.Pet:
+                    return $"{highType}-{GetSubType()}-{GetRealmId()}-{GetServerId()}-{GetMapId()}-{GetEntry()}-{lowHex.Substring(lowHex.Length - 10)}";
                 default:
                     Log.Print(LogType.Warn, "unsupported GUID type: ({GetHighType()})");
                     return null;
