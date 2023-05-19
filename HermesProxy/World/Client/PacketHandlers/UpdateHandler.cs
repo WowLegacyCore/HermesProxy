@@ -31,7 +31,7 @@ namespace HermesProxy.World.Client
             updateObject.DestroyedGuids.Add(guid);
             SendPacketToClient(updateObject);
         }
-
+        
         [PacketHandler(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT)]
         void HandleCompressedUpdateObject(WorldPacket packet)
         {
@@ -65,7 +65,7 @@ namespace HermesProxy.World.Client
                     {
                         var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
-
+                        
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, false);
                         PowerUpdate powerUpdate = new PowerUpdate(guid);
@@ -308,13 +308,23 @@ namespace HermesProxy.World.Client
             for (var j = 0; j < objCount; j++)
             {
                 var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
-                PrintString($"Guid = {objCount}", index, j);
-                GetSession().GameState.ObjectCacheMutex.WaitOne();
-                GetSession().GameState.ObjectCacheLegacy.Remove(guid);
-                GetSession().GameState.ObjectCacheModern.Remove(guid);
-                GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
-                GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
-                updateObject.OutOfRangeGuids.Add(guid);
+
+                // workaround for freeze issue after hunter  'Eyes of the Beast' 
+                if(guid == GetSession().GameState.CurrentPlayerGuid && GetSession().GameState.IsInFarSight) {
+                    UpdateObject updateObject2 = new UpdateObject(GetSession().GameState);
+                    ObjectUpdate updateData2 = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
+                    updateObject2.ObjectUpdates.Add(updateData2);
+                    SendPacketToClient(updateObject2);
+                } else {
+                    PrintString($"Guid = {objCount}", index, j);
+                    GetSession().GameState.ObjectCacheMutex.WaitOne();
+                    GetSession().GameState.ObjectCacheLegacy.Remove(guid);
+                    GetSession().GameState.ObjectCacheModern.Remove(guid);
+                    GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
+                    GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
+                    updateObject.OutOfRangeGuids.Add(guid);
+                }
+                
             }
         }
 
