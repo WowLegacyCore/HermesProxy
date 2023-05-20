@@ -1,4 +1,4 @@
-﻿//#define DEBUG_UPDATES
+﻿﻿//#define DEBUG_UPDATES
 
 using Framework.GameMath;
 using Framework.Logging;
@@ -31,7 +31,7 @@ namespace HermesProxy.World.Client
             updateObject.DestroyedGuids.Add(guid);
             SendPacketToClient(updateObject);
         }
-        
+
         [PacketHandler(Opcode.SMSG_COMPRESSED_UPDATE_OBJECT)]
         void HandleCompressedUpdateObject(WorldPacket packet)
         {
@@ -65,7 +65,7 @@ namespace HermesProxy.World.Client
                     {
                         var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
                         PrintString($"Guid = {guid.ToString()}", i);
-                        
+
                         ObjectUpdate updateData = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
                         AuraUpdate auraUpdate = new AuraUpdate(guid, false);
                         PowerUpdate powerUpdate = new PowerUpdate(guid);
