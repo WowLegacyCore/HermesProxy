@@ -1,4 +1,4 @@
-﻿﻿//#define DEBUG_UPDATES
+//#define DEBUG_UPDATES
 
 using Framework.GameMath;
 using Framework.Logging;
@@ -292,7 +292,6 @@ namespace HermesProxy.World.Client
 
         public void ReadNearObjectsBlock(WorldPacket packet, object index)
         {
-            
             var objCount = packet.ReadInt32();
             PrintString($"NearObjectsCount = {objCount}", index);
             for (var j = 0; j < objCount; j++)
