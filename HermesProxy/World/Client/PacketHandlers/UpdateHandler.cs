@@ -1,4 +1,4 @@
-﻿//#define DEBUG_UPDATES
+//#define DEBUG_UPDATES
 
 using Framework.GameMath;
 using Framework.Logging;
@@ -308,6 +308,9 @@ namespace HermesProxy.World.Client
             for (var j = 0; j < objCount; j++)
             {
                 var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
+                // Temporary fix freeze issue after hunter 'Eyes of the Beast' exclude current player guid when update OutOfRangeGuids.
+                if(guid == GetSession().GameState.CurrentPlayerGuid)
+                    continue;
                 PrintString($"Guid = {objCount}", index, j);
                 GetSession().GameState.ObjectCacheMutex.WaitOne();
                 GetSession().GameState.ObjectCacheLegacy.Remove(guid);
