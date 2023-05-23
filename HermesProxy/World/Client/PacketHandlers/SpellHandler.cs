@@ -421,7 +421,6 @@ namespace HermesProxy.World.Client
             {
                 spell.Cast.CastID = GetSession().GameState.CurrentClientSpecialCast.ServerGUID;
                 spell.Cast.SpellXSpellVisualID = GetSession().GameState.CurrentClientSpecialCast.SpellXSpellVisualId;
-                GetSession().GameState.CurrentClientSpecialCast = null;
 
             }
             else if (GetSession().GameState.CurrentPetGuid == spell.Cast.CasterUnit &&
