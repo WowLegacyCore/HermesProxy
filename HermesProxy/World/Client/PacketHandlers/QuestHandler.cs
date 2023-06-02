@@ -321,6 +321,20 @@ namespace HermesProxy.World.Client
             }
 
             quest.ItemReward.ItemID = itemId;
+
+            QuestTemplate questTemplate = GameData.GetQuestTemplate((uint)quest.QuestID);
+            if (questTemplate != null && questTemplate.RewardNextQuest == 0)
+            {
+                quest.LaunchQuest = false;
+
+                if (GetSession().GameState.CurrentInteractedWithNPC != null)
+                {
+                    uint npcFlags = GetSession().GameState.GetLegacyFieldValueUInt32(GetSession().GameState.CurrentInteractedWithNPC, UnitField.UNIT_NPC_FLAGS);
+                    if (npcFlags.HasAnyFlag(NPCFlags.Gossip))
+                        quest.LaunchGossip = true;
+                }
+            }
+            
             SendPacketToClient(quest);
 
             DisplayToast toast = new();
