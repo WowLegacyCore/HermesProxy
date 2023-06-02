@@ -29,8 +29,8 @@ namespace HermesProxy.World.Enums
         Incomplete           = 3,
         RewardRep            = 4,
         Available            = 5,
-        Reward               = 6,
-        Reward2              = 7,
+        Reward2              = 6,
+        Reward               = 7,
     }
 
     public enum QuestGiverStatusTBC : uint
