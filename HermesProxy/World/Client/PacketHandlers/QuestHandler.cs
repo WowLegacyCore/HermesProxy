@@ -291,7 +291,7 @@ namespace HermesProxy.World.Client
                 packet.ReadUInt32(); // mangos sends always 3
 
             quest.XPReward = packet.ReadUInt32();
-            quest.MoneyReward = packet.ReadUInt32();
+            quest.MoneyReward = packet.ReadInt32();
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_3_0_7561))
                 packet.ReadInt32(); // Honor
