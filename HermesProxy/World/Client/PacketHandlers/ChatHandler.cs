@@ -417,7 +417,7 @@ namespace HermesProxy.World.Client
                 var questIdStr = msg.Remove(0, "!qcomplete".Length);
                 if (!uint.TryParse(questIdStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out var questId))
                 {
-                    Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
+                    GetSession().SendHermesTextMessage($"Chat command invalid questId format '{questIdStr}'");
                     return true;
                 }
                 GetSession().GameState.CurrentPlayerStorage.CompletedQuests.MarkQuestAsCompleted(questId);
@@ -431,7 +431,7 @@ namespace HermesProxy.World.Client
                 var questIdStr = msg.Remove(0, "!quncomplete".Length);
                 if (!uint.TryParse(questIdStr, NumberStyles.Integer, NumberFormatInfo.InvariantInfo, out var questId))
                 {
-                    Log.Print(LogType.Error, $"Chatcommand Invalid questId '{questIdStr}'");
+                    GetSession().SendHermesTextMessage($"Chat command invalid questId format '{questIdStr}'");
                     return true;
                 }
                 GetSession().GameState.CurrentPlayerStorage.CompletedQuests.MarkQuestAsNotCompleted(questId);

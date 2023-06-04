@@ -88,7 +88,6 @@ public class PlayerSettings
 public class CompletedQuestTracker
 {
     private Dictionary<int, ulong> _cachedQuestCompleted = new();
-    public bool NeedsToBeForceSent { get; set; } = true;
 
     public GlobalSessionData Session { get; }
 
