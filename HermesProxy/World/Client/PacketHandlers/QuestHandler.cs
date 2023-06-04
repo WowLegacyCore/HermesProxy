@@ -291,7 +291,7 @@ namespace HermesProxy.World.Client
                 packet.ReadUInt32(); // mangos sends always 3
 
             quest.XPReward = packet.ReadUInt32();
-            quest.MoneyReward = packet.ReadUInt32();
+            quest.MoneyReward = packet.ReadInt32();
 
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_3_0_7561))
                 packet.ReadInt32(); // Honor
@@ -321,6 +321,20 @@ namespace HermesProxy.World.Client
             }
 
             quest.ItemReward.ItemID = itemId;
+
+            QuestTemplate questTemplate = GameData.GetQuestTemplate((uint)quest.QuestID);
+            if (questTemplate != null && questTemplate.RewardNextQuest == 0)
+            {
+                quest.LaunchQuest = false;
+
+                if (GetSession().GameState.CurrentInteractedWithNPC != null)
+                {
+                    uint npcFlags = GetSession().GameState.GetLegacyFieldValueUInt32(GetSession().GameState.CurrentInteractedWithNPC, UnitField.UNIT_NPC_FLAGS);
+                    if (npcFlags.HasAnyFlag(NPCFlags.Gossip))
+                        quest.LaunchGossip = true;
+                }
+            }
+            
             SendPacketToClient(quest);
 
             DisplayToast toast = new();
