@@ -120,13 +120,7 @@ namespace HermesProxy.World.Client
                         ReadCreateObjectBlock(packet, guid, updateData, auraUpdate, i);
 
                         if (updateData.Guid == GetSession().GameState.CurrentPlayerGuid)
-                        {
-                            if (GetSession().GameState.CurrentPlayerStorage.CompletedQuests.NeedsToBeForceSent)
-                            {
-                                GetSession().GameState.CurrentPlayerStorage.CompletedQuests.WriteAllCompletedIntoArray(updateData.ActivePlayerData.QuestCompleted);
-                                GetSession().GameState.CurrentPlayerStorage.CompletedQuests.NeedsToBeForceSent = false;
-                            }
-                        }
+                            GetSession().GameState.CurrentPlayerStorage.CompletedQuests.WriteAllCompletedIntoArray(updateData.ActivePlayerData.QuestCompleted);
 
                         if (guid.IsItem() && updateData.ObjectData.EntryID != null &&
                            !GameData.ItemTemplates.ContainsKey((uint)updateData.ObjectData.EntryID))
