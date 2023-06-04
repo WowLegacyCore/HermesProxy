@@ -308,6 +308,11 @@ namespace HermesProxy.World.Client
             for (var j = 0; j < objCount; j++)
             {
                 var guid = packet.ReadPackedGuid().To128(GetSession().GameState);
+                // Temporary fix for freeze issue after hunter 'Eyes of the Beast' exclude current player guid when update OutOfRangeGuids.
+                // It was fixed in vmangos but some cores might not have been updated yet
+                // See: https://github.com/vmangos/core/commit/14b2598d8d9f0910cb1a492b81502296d272dad3
+                if (guid == GetSession().GameState.CurrentPlayerGuid)
+                    continue;
                 PrintString($"Guid = {objCount}", index, j);
                 GetSession().GameState.ObjectCacheMutex.WaitOne();
                 GetSession().GameState.ObjectCacheLegacy.Remove(guid);
