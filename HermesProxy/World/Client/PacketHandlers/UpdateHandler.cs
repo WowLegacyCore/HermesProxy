@@ -313,6 +313,16 @@ namespace HermesProxy.World.Client
                 GetSession().GameState.ObjectCacheModern.Remove(guid);
                 GetSession().GameState.ObjectCacheMutex.ReleaseMutex();
                 GetSession().GameState.LastAuraCasterOnTarget.Remove(guid);
+
+                // If the pet is too far away, sends a SMSG_UPDATE_OBJECT protocol
+                if (GetSession().GameState.CurrentPetGuid == guid)
+                {
+                    UpdateObject updateObject2 = new UpdateObject(GetSession().GameState);
+                    ObjectUpdate updateData2 = new ObjectUpdate(guid, UpdateTypeModern.Values, GetSession());
+                    updateObject2.ObjectUpdates.Add(updateData2);
+                    SendPacketToClient(updateObject2);
+
+                }
                 updateObject.OutOfRangeGuids.Add(guid);
             }
         }
