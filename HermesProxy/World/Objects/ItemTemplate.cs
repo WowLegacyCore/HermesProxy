@@ -21,8 +21,8 @@ namespace HermesProxy.World.Objects
         public uint BuyPrice;
         public uint SellPrice;
         public int InventoryType;
-        public uint AllowedClasses;
-        public uint AllowedRaces;
+        public int AllowedClasses;
+        public int AllowedRaces;
         public uint ItemLevel;
         public uint RequiredLevel;
         public uint RequiredSkillId;

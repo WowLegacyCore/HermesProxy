@@ -144,9 +144,9 @@ namespace HermesProxy.World.Client
                 choiceItem.ItemID = packet.ReadUInt32();
                 choiceItem.Quantity = packet.ReadUInt32();
 
-                ItemDisplayData item = GameData.GetItemDisplayData(choiceItem.ItemID);
-                if (item != null)
-                    choiceItem.DisplayID = item.DisplayId;
+                uint displayId = GameData.GetItemDisplayId(choiceItem.ItemID);
+                if (displayId != 0)
+                    choiceItem.DisplayID = displayId;
 
                 quest.UnfilteredChoiceItems[i] = choiceItem;
             }
@@ -446,7 +446,7 @@ namespace HermesProxy.World.Client
                 const string placeholderGossip = "Greetings $N";
 
                 if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText) ||
-                    maleText == placeholderGossip && femaleText == placeholderGossip && i != 0)
+                    maleText.Equals(placeholderGossip) && femaleText.Equals(placeholderGossip) && i != 0)
                     response.BroadcastTextID[i] = 0;
                 else
                     response.BroadcastTextID[i] = GameData.GetBroadcastTextId(maleText, femaleText, language, emoteDelays, emotes);
@@ -459,7 +459,27 @@ namespace HermesProxy.World.Client
         {
             var entry = packet.ReadEntry();
             if (entry.Value)
+            {
+                if (GetSession().GameState.RequestedItemHotfixes.Contains((uint)entry.Key))
+                {
+                    DBReply reply = new();
+                    reply.RecordID = (uint)entry.Key;
+                    reply.TableHash = DB2Hash.Item;
+                    reply.Status = HotfixStatus.Invalid;
+                    reply.Timestamp = (uint)Time.UnixTime;
+                    SendPacketToClient(reply);
+                }
+                if (GetSession().GameState.RequestedItemSparseHotfixes.Contains((uint)entry.Key))
+                {
+                    DBReply reply2 = new();
+                    reply2.RecordID = (uint)entry.Key;
+                    reply2.TableHash = DB2Hash.ItemSparse;
+                    reply2.Status = HotfixStatus.Invalid;
+                    reply2.Timestamp = (uint)Time.UnixTime;
+                    SendPacketToClient(reply2);
+                }
                 return;
+            }
 
             ItemTemplate item = new ItemTemplate
             {
@@ -489,9 +509,9 @@ namespace HermesProxy.World.Client
 
             item.InventoryType = packet.ReadInt32();
 
-            item.AllowedClasses = packet.ReadUInt32();
+            item.AllowedClasses = packet.ReadInt32();
 
-            item.AllowedRaces = packet.ReadUInt32();
+            item.AllowedRaces = packet.ReadInt32();
 
             item.ItemLevel = packet.ReadUInt32();
 
@@ -586,6 +606,11 @@ namespace HermesProxy.World.Client
 
             item.Material = packet.ReadInt32();
 
+            // in modern client files, there are no items with material -1 instead of 0
+            // change it so we dont need to send hotfix for this
+            if (item.Material < 0)
+                item.Material = 0;
+
             item.SheathType = packet.ReadInt32();
 
             item.RandomProperty = packet.ReadInt32();
@@ -634,9 +659,39 @@ namespace HermesProxy.World.Client
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
                 item.HolidayID = packet.ReadInt32();
 
+            SendItemUpdatesIfNeeded(item);
             GameData.StoreItemTemplate((uint)entry.Key, item);
         }
         [PacketHandler(Opcode.SMSG_QUERY_PET_NAME_RESPONSE)]
+
+        void SendItemUpdatesIfNeeded(ItemTemplate item)
+        {
+            DBReply reply = GameData.GenerateItemUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
+
+            reply = GameData.GenerateItemSparseUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
+
+            for (byte i = 0; i < 5; i++)
+            {
+                reply = GameData.GenerateItemEffectUpdateIfNeeded(item, i);
+                if (reply != null)
+                    SendPacketToClient(reply);
+            }
+
+            if (!GameData.ItemCanHaveModel(item))
+                return;
+
+            reply = GameData.GenerateItemAppearanceUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
+
+            reply = GameData.GenerateItemModifiedAppearanceUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
+        }
         void HandleQueryPetNameResponse(WorldPacket packet)
         {
             uint petNumber = packet.ReadUInt32();
