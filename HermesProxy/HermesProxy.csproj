@@ -47,6 +47,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="BNetServer.pfx" />
+    <EmbeddedResource Include="*.CSV.HotfixDb.*.bin" />
   </ItemGroup>
 
   <ItemGroup>

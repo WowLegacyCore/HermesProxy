@@ -1018,5 +1018,10 @@ namespace HermesProxy
             byte modernValue = (byte)Enum.Parse(GetResponseCodesEnum(), legacyName);
             return modernValue;
         }
+
+        public static byte ConvertSocketColor(byte legacyValue)
+        {
+            return (byte)Enum.Parse(typeof(SocketColorModern), ((SocketColorLegacy)legacyValue).ToString());
+        }
     }
 }

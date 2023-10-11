@@ -144,9 +144,9 @@ namespace HermesProxy.World.Client
                 choiceItem.ItemID = packet.ReadUInt32();
                 choiceItem.Quantity = packet.ReadUInt32();
 
-                ItemDisplayData item = GameData.GetItemDisplayData(choiceItem.ItemID);
-                if (item != null)
-                    choiceItem.DisplayID = item.DisplayId;
+                uint displayId = GameData.GetItemDisplayId(choiceItem.ItemID);
+                if (displayId != 0)
+                    choiceItem.DisplayID = displayId;
 
                 quest.UnfilteredChoiceItems[i] = choiceItem;
             }
@@ -446,7 +446,7 @@ namespace HermesProxy.World.Client
                 const string placeholderGossip = "Greetings $N";
 
                 if (String.IsNullOrEmpty(maleText) && String.IsNullOrEmpty(femaleText) ||
-                    maleText == placeholderGossip && femaleText == placeholderGossip && i != 0)
+                    maleText.Equals(placeholderGossip) && femaleText.Equals(placeholderGossip) && i != 0)
                     response.BroadcastTextID[i] = 0;
                 else
                     response.BroadcastTextID[i] = GameData.GetBroadcastTextId(maleText, femaleText, language, emoteDelays, emotes);
@@ -454,188 +454,85 @@ namespace HermesProxy.World.Client
 
             SendPacketToClient(response);
         }
+
         [PacketHandler(Opcode.SMSG_ITEM_QUERY_SINGLE_RESPONSE)]
         void HandleItemQueryResponse(WorldPacket packet)
         {
             var entry = packet.ReadEntry();
             if (entry.Value)
+            {
+                if (GetSession().GameState.RequestedItemHotfixes.Contains((uint)entry.Key))
+                {
+                    DBReply reply = new();
+                    reply.RecordID = (uint)entry.Key;
+                    reply.TableHash = DB2Hash.Item;
+                    reply.Status = HotfixStatus.Invalid;
+                    reply.Timestamp = (uint)Time.UnixTime;
+                    SendPacketToClient(reply);
+                }
+                if (GetSession().GameState.RequestedItemSparseHotfixes.Contains((uint)entry.Key))
+                {
+                    DBReply reply2 = new();
+                    reply2.RecordID = (uint)entry.Key;
+                    reply2.TableHash = DB2Hash.ItemSparse;
+                    reply2.Status = HotfixStatus.Invalid;
+                    reply2.Timestamp = (uint)Time.UnixTime;
+                    SendPacketToClient(reply2);
+                }
                 return;
-
-            ItemTemplate item = new ItemTemplate
-            {
-                Entry = (uint)entry.Key,
-                Class = packet.ReadInt32(),
-                SubClass = packet.ReadUInt32()
-            };
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_3_6299))
-                item.SoundOverrideSubclass = packet.ReadInt32();
-
-            for (int i = 0; i < 4; i++)
-                item.Name[i] = packet.ReadCString();
-
-            item.DisplayID = packet.ReadUInt32();
-
-            item.Quality = packet.ReadInt32();
-
-            item.Flags = packet.ReadUInt32();
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
-                item.FlagsExtra = packet.ReadUInt32();
-
-            item.BuyPrice = packet.ReadUInt32();
-
-            item.SellPrice = packet.ReadUInt32();
-
-            item.InventoryType = packet.ReadInt32();
-
-            item.AllowedClasses = packet.ReadUInt32();
-
-            item.AllowedRaces = packet.ReadUInt32();
-
-            item.ItemLevel = packet.ReadUInt32();
-
-            item.RequiredLevel = packet.ReadUInt32();
-
-            item.RequiredSkillId = packet.ReadUInt32();
-
-            item.RequiredSkillLevel = packet.ReadUInt32();
-
-            item.RequiredSpell = packet.ReadUInt32();
-
-            item.RequiredHonorRank = packet.ReadUInt32();
-
-            item.RequiredCityRank = packet.ReadUInt32();
-
-            item.RequiredRepFaction = packet.ReadUInt32();
-
-            item.RequiredRepValue = packet.ReadUInt32();
-
-            item.MaxCount = packet.ReadInt32();
-
-            item.MaxStackSize = packet.ReadInt32();
-
-            item.ContainerSlots = packet.ReadUInt32();
-
-            item.StatsCount = LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056) ? packet.ReadUInt32() : 10;
-            if (item.StatsCount > 10)
-            {
-                item.StatTypes = new int[item.StatsCount];
-                item.StatValues = new int[item.StatsCount];
-            }
-            for (int i = 0; i < item.StatsCount; i++)
-            {
-                item.StatTypes[i] = packet.ReadInt32();
-                item.StatValues[i] = packet.ReadInt32();
             }
 
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
+            ItemTemplate item = new ItemTemplate();
+            item.ReadFromLegacyPacket((uint)entry.Key, packet);
+
+            SendItemUpdatesIfNeeded(item);
+            GameData.StoreItemTemplate((uint)entry.Key, item);
+        }
+
+        void SendItemUpdatesIfNeeded(ItemTemplate item)
+        {
+            Server.Packets.HotFixMessage? reply;
+
+            reply = GameData.GenerateItemUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
+
+            reply = GameData.GenerateItemSparseUpdateIfNeeded(item);
+            if (reply != null)
             {
-                item.ScalingStatDistribution = packet.ReadInt32();
-                item.ScalingStatValue = packet.ReadUInt32();
+                // TODO!!! Something might be wrong here.
+                // TODO: When I send the ItemSpare entry with HotFixMessage it does not work
+
+                SendPacketToClient(reply); // TODO: <-- Optional??
+
+                Server.Packets.DBReply replyA = new();
+                replyA.Status = HotfixStatus.Valid;
+                replyA.Timestamp = (uint)Time.UnixTime;
+                replyA.RecordID = reply.Hotfixes[0].RecordId;
+                replyA.TableHash = reply.Hotfixes[0].TableHash;
+                replyA.Data = reply.Hotfixes[0].HotfixContent;
+                SendPacketToClient(replyA);
             }
-
-            int dmgCount = LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767) ? 2 : 5;
-            for (int i = 0; i < dmgCount; i++)
-            {
-                item.DamageMins[i] = packet.ReadFloat();
-                item.DamageMaxs[i] = packet.ReadFloat();
-                item.DamageTypes[i] = packet.ReadInt32();
-            }
-
-            item.Armor = packet.ReadUInt32();
-            item.HolyResistance = packet.ReadUInt32();
-            item.FireResistance = packet.ReadUInt32();
-            item.NatureResistance = packet.ReadUInt32();
-            item.FrostResistance = packet.ReadUInt32();
-            item.ShadowResistance = packet.ReadUInt32();
-            item.ArcaneResistance = packet.ReadUInt32();
-
-            item.Delay = packet.ReadUInt32();
-
-            item.AmmoType = packet.ReadInt32();
-
-            item.RangedMod = packet.ReadFloat();
 
             for (byte i = 0; i < 5; i++)
             {
-                item.TriggeredSpellIds[i] = packet.ReadInt32();
-                item.TriggeredSpellTypes[i] = packet.ReadInt32();
-                item.TriggeredSpellCharges[i] = packet.ReadInt32();
-                item.TriggeredSpellCooldowns[i] = packet.ReadInt32();
-                item.TriggeredSpellCategories[i] = packet.ReadUInt32();
-                item.TriggeredSpellCategoryCooldowns[i] = packet.ReadInt32();
-
-                if (item.TriggeredSpellIds[i] != 0)
-                    GameData.SaveItemEffectSlot(item.Entry, (uint)item.TriggeredSpellIds[i], i);
+                reply = GameData.GenerateItemEffectUpdateIfNeeded(item, i);
+                if (reply != null)
+                    SendPacketToClient(reply);
             }
 
-            item.Bonding = packet.ReadInt32();
+            if (!GameData.ItemCanHaveModel(item))
+                return;
 
-            item.Description = packet.ReadCString();
+            reply = GameData.GenerateItemAppearanceUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
 
-            item.PageText = packet.ReadUInt32();
-
-            item.Language = packet.ReadInt32();
-
-            item.PageMaterial = packet.ReadInt32();
-
-            item.StartQuestId = packet.ReadUInt32();
-
-            item.LockId = packet.ReadUInt32();
-
-            item.Material = packet.ReadInt32();
-
-            item.SheathType = packet.ReadInt32();
-
-            item.RandomProperty = packet.ReadInt32();
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-                item.RandomSuffix = packet.ReadUInt32();
-
-            item.Block = packet.ReadUInt32();
-
-            item.ItemSet = packet.ReadUInt32();
-
-            item.MaxDurability = packet.ReadUInt32();
-
-            item.AreaID = packet.ReadUInt32();
-
-            // In this single (?) case, map 0 means no map
-            item.MapID = packet.ReadInt32();
-
-            item.BagFamily = packet.ReadUInt32();
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_0_1_6180))
-            {
-                item.TotemCategory = packet.ReadInt32();
-
-                for (int i = 0; i < 3; i++)
-                {
-                    item.ItemSocketColors[i] = packet.ReadInt32();
-                    item.SocketContent[i] = packet.ReadUInt32();
-                }
-
-                item.SocketBonus = packet.ReadInt32();
-
-                item.GemProperties = packet.ReadInt32();
-
-                item.RequiredDisenchantSkill = packet.ReadInt32();
-
-                item.ArmorDamageModifier = packet.ReadFloat();
-            }
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V2_4_2_8209))
-                item.Duration = packet.ReadUInt32();
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_0_2_9056))
-                item.ItemLimitCategory = packet.ReadInt32();
-
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_1_0_9767))
-                item.HolidayID = packet.ReadInt32();
-
-            GameData.StoreItemTemplate((uint)entry.Key, item);
+            reply = GameData.GenerateItemModifiedAppearanceUpdateIfNeeded(item);
+            if (reply != null)
+                SendPacketToClient(reply);
         }
+
         [PacketHandler(Opcode.SMSG_QUERY_PET_NAME_RESPONSE)]
         void HandleQueryPetNameResponse(WorldPacket packet)
         {

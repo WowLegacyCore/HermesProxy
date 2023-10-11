@@ -122,6 +122,8 @@ namespace HermesProxy
         public Dictionary<byte, Dictionary<byte, int>> PctSpellMods = new Dictionary<byte, Dictionary<byte, int>>();
         public Dictionary<WowGuid128, Dictionary<uint, WowGuid128>> LastAuraCasterOnTarget = new Dictionary<WowGuid128, Dictionary<uint, WowGuid128>>();
         public TradeSession? CurrentTrade = null;
+        public HashSet<uint> RequestedItemHotfixes = new HashSet<uint>();
+        public HashSet<uint> RequestedItemSparseHotfixes = new HashSet<uint>();
 
         private GameSessionData()
         {
