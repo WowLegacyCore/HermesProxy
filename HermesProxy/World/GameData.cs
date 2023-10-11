@@ -12,7 +12,7 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace HermesProxy.World
 {
-    public static class GameData
+    public static partial class GameData
     {
         // From CSV
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
