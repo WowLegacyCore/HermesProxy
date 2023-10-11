@@ -112,7 +112,31 @@ namespace HermesProxy.World.Server.Packets
             foreach (HotfixRecord hotfix in Hotfixes)
             {
                 totalDataSize += hotfix.HotfixContent.GetSize();
-                hotfix.WriteConnect(_worldPacket);
+                hotfix.WriteHotFixMessageContent(_worldPacket);
+            }
+
+            _worldPacket.WriteUInt32(totalDataSize);
+            foreach(HotfixRecord hotfix in Hotfixes)
+            {
+                _worldPacket.WriteBytes(hotfix.HotfixContent);
+            }
+        }
+
+        public List<HotfixRecord> Hotfixes = new();
+    }
+
+    public class HotFixMessage : ServerPacket
+    {
+        public HotFixMessage() : base(Opcode.SMSG_HOTFIX_MESSAGE) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Hotfixes.Count);
+            uint totalDataSize = 0;
+            foreach (HotfixRecord hotfix in Hotfixes)
+            {
+                totalDataSize += hotfix.HotfixContent.GetSize();
+                hotfix.WriteHotFixMessageContent(_worldPacket);
             }
 
             _worldPacket.WriteUInt32(totalDataSize);

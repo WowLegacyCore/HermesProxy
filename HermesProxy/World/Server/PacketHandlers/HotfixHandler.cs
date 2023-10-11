@@ -62,8 +62,6 @@ namespace HermesProxy.World.Server
                         //Log.PrintNet(LogType.Debug, LogNetDir.P2C, $"Sending custom ({DB2Hash.Item}) #{id}");
                         reply.Status = HotfixStatus.Valid;
                         GameData.WriteItemHotfix(item, reply.Data);
-
-                        GetSession().SendHermesTextMessage($"New item #{item.Entry} added, full relog required to see all item stats!");
                     }
                     else if (!GetSession().GameState.RequestedItemHotfixes.Contains(id) &&
                               GetSession().WorldClient != null && GetSession().WorldClient.IsConnected())
@@ -86,8 +84,6 @@ namespace HermesProxy.World.Server
                         //Log.PrintNet(LogType.Debug, LogNetDir.P2C, $"Sending custom ({DB2Hash.ItemSparse}) #{id}");
                         reply.Status = HotfixStatus.Valid;
                         GameData.WriteItemSparseHotfix(item, reply.Data);
-
-                        GetSession().SendHermesTextMessage($"New item #{item.Entry} added, full relog required to see it!");
                     }
                     else if (!GetSession().GameState.RequestedItemSparseHotfixes.Contains(id) &&
                               GetSession().WorldClient != null && GetSession().WorldClient.IsConnected())

@@ -23,7 +23,7 @@ namespace HermesProxy.World.Objects
             data.WriteUInt32(HotfixId);
             data.WriteUInt32((uint)TableHash);
         }
-        public void WriteConnect(WorldPacket data)
+        public void WriteHotFixMessageContent(WorldPacket data)
         {
             data.WriteUInt32(HotfixId);
             data.WriteUInt32(UniqueId);

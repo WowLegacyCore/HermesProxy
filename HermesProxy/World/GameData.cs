@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Framework;
+using Framework.IO;
 using Framework.Logging;
 using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
@@ -3087,149 +3088,74 @@ namespace HermesProxy.World
             buffer.WriteInt32(effect.ParentItemID);
         }
 
-        public static HotfixRecord FindHotfixByRecordId(uint id, uint startId = 0)
+        public static List<HotfixRecord> FindHotfixesByRecordIdAndTable(uint id, DB2Hash table, uint startId = 0)
         {
-            foreach (var record in Hotfixes)
-            {
-                if (startId > 0 && record.Value.HotfixId < startId)
-                    continue;
-
-                if (record.Value.RecordId == id)
-                    return record.Value;
-            }
-            return null;
+            return Hotfixes.Values.Where(hotfix => hotfix.HotfixId >= startId && hotfix.TableHash == table && hotfix.RecordId == id).ToList();
         }
 
         public static void UpdateHotfix(object obj, bool remove = false)
         {
+            void DoStuff(uint recordId, DB2Hash table, Action<ByteBuffer> writer)
+            {
+                List<HotfixRecord> oldRecords = FindHotfixesByRecordIdAndTable(recordId, table, HotfixItemBegin);
+                if (oldRecords.Count == 0)
+                {
+                    // We have a new entry
+                    HotfixRecord record = new HotfixRecord();
+                    record.Status = HotfixStatus.Valid;
+                    record.TableHash = table;
+                    record.HotfixId = GetFirstFreeId(Hotfixes, HotfixItemBegin);
+                    record.UniqueId = record.HotfixId;
+                    record.RecordId = recordId;
+                    writer(record.HotfixContent);
+                    Hotfixes.Add(record.HotfixId, record);
+                }
+                else
+                {
+                    IEnumerable<HotfixRecord> oldRecordsToBeInvalided = oldRecords.SkipLast(1);
+                    foreach (var record in oldRecordsToBeInvalided) // TODO maybe just delete these?
+                    {
+                        record.Status = HotfixStatus.Invalid;
+                        record.HotfixContent = new();
+                        Log.Print(LogType.Storage, $"Got duplicate record for record {record.RecordId} in {record.TableHash}");
+                    }
+
+                    HotfixRecord recordToOverwrite = oldRecords.Last();
+                    recordToOverwrite.HotfixContent = new();
+                    writer(recordToOverwrite.HotfixContent);
+                    Hotfixes[recordToOverwrite.HotfixId] = recordToOverwrite;
+                }
+            }
+            
             if (obj is ItemRecord)
             {
                 ItemRecord item = (ItemRecord)obj;
-                HotfixRecord oldRecord = FindHotfixByRecordId((uint)item.Id, HotfixItemBegin);
-                if (oldRecord == null || oldRecord.TableHash != DB2Hash.Item)
-                {
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.Item;
-                    record.HotfixId = GetFirstFreeId(Hotfixes, HotfixItemBegin);
-                    record.UniqueId = record.HotfixId;
-                    record.RecordId = (uint)item.Id;
-                    WriteItemHotfix(item, record.HotfixContent);
-                    Hotfixes.Add(record.HotfixId, record);
-                }
-                else
-                {
-                    oldRecord.HotfixContent = new();
-                    WriteItemHotfix(item, oldRecord.HotfixContent);
-                    Hotfixes[oldRecord.HotfixId] = oldRecord;
-                }
+                DoStuff((uint)item.Id, DB2Hash.Item, writer: (hotfixContentTargetBuffer) => WriteItemHotfix(item, hotfixContentTargetBuffer));
+                
             }
             if (obj is ItemSparseRecord)
             {
-                ItemSparseRecord item = (ItemSparseRecord)obj;
-                HotfixRecord oldRecord = FindHotfixByRecordId((uint)item.Id, HotfixItemSparseBegin);
-                if (oldRecord == null || oldRecord.TableHash != DB2Hash.ItemSparse)
-                {
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.ItemSparse;
-                    record.HotfixId = GetFirstFreeId(Hotfixes, HotfixItemSparseBegin);
-                    record.UniqueId = record.HotfixId;
-                    record.RecordId = (uint)item.Id;
-                    WriteItemSparseHotfix(item, record.HotfixContent);
-                    Hotfixes.Add(record.HotfixId, record);
-                }
-                else
-                {
-                    oldRecord.HotfixContent = new();
-                    WriteItemSparseHotfix(item, oldRecord.HotfixContent);
-                    Hotfixes[oldRecord.HotfixId] = oldRecord;
-                }
+                ItemSparseRecord itemSparse = (ItemSparseRecord)obj;
+                DoStuff((uint)itemSparse.Id, DB2Hash.ItemSparse, writer: (hotfixContentTargetBuffer) => WriteItemSparseHotfix(itemSparse, hotfixContentTargetBuffer));
             }
             if (obj is ItemEffect)
             {
                 ItemEffect effect = (ItemEffect)obj;
-                HotfixRecord oldRecord = FindHotfixByRecordId((uint)effect.Id, HotfixItemEffectBegin);
-                if (oldRecord != null && remove && oldRecord.TableHash == DB2Hash.ItemEffect)
-                {
-                    Hotfixes.Remove(oldRecord.HotfixId);
-                    return;
-                }
-                if (oldRecord == null || oldRecord.TableHash != DB2Hash.ItemEffect)
-                {
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.ItemEffect;
-                    record.HotfixId = GetFirstFreeId(Hotfixes, HotfixItemEffectBegin);
-                    record.UniqueId = record.HotfixId;
-                    record.RecordId = (uint)effect.Id;
-                    WriteItemEffectHotfix(effect, record.HotfixContent);
-                    Hotfixes.Add(record.HotfixId, record);
-                }
-                else
-                {
-                    oldRecord.HotfixContent = new();
-                    WriteItemEffectHotfix(effect, oldRecord.HotfixContent);
-                    Hotfixes[oldRecord.HotfixId] = oldRecord;
-                }
+                DoStuff((uint)effect.Id, DB2Hash.ItemEffect, writer: (hotfixContentTargetBuffer) => WriteItemEffectHotfix(effect, hotfixContentTargetBuffer));
             }
             if (obj is ItemAppearance)
             {
                 ItemAppearance appearance = (ItemAppearance)obj;
-                HotfixRecord oldRecord = FindHotfixByRecordId((uint)appearance.Id, HotfixItemAppearanceBegin);
-                if (oldRecord != null && remove && oldRecord.TableHash == DB2Hash.ItemAppearance)
-                {
-                    Hotfixes.Remove(oldRecord.HotfixId);
-                    return;
-                }
-                if (oldRecord == null || oldRecord.TableHash != DB2Hash.ItemAppearance)
-                {
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.ItemAppearance;
-                    record.HotfixId = GetFirstFreeId(Hotfixes, HotfixItemAppearanceBegin);
-                    record.UniqueId = record.HotfixId;
-                    record.RecordId = (uint)appearance.Id;
-                    WriteItemAppearanceHotfix(appearance, record.HotfixContent);
-                    Hotfixes.Add(record.HotfixId, record);
-                }
-                else
-                {
-                    oldRecord.HotfixContent = new();
-                    WriteItemAppearanceHotfix(appearance, oldRecord.HotfixContent);
-                    Hotfixes[oldRecord.HotfixId] = oldRecord;
-                }
+                DoStuff((uint)appearance.Id, DB2Hash.ItemAppearance, writer: (hotfixContentTargetBuffer) => WriteItemAppearanceHotfix(appearance, hotfixContentTargetBuffer));
             }
             if (obj is ItemModifiedAppearance)
             {
                 ItemModifiedAppearance modAppearance = (ItemModifiedAppearance)obj;
-                HotfixRecord oldRecord = FindHotfixByRecordId((uint)modAppearance.Id, HotfixItemModifiedAppearanceBegin);
-                if (oldRecord != null && remove && oldRecord.TableHash == DB2Hash.ItemModifiedAppearance)
-                {
-                    Hotfixes.Remove(oldRecord.HotfixId);
-                    return;
-                }
-                if (oldRecord == null || oldRecord.TableHash != DB2Hash.ItemModifiedAppearance)
-                {
-                    HotfixRecord record = new HotfixRecord();
-                    record.Status = HotfixStatus.Valid;
-                    record.TableHash = DB2Hash.ItemModifiedAppearance;
-                    record.HotfixId = GetFirstFreeId(Hotfixes, HotfixItemModifiedAppearanceBegin);
-                    record.UniqueId = record.HotfixId;
-                    record.RecordId = (uint)modAppearance.Id;
-                    WriteItemModifiedAppearanceHotfix(modAppearance, record.HotfixContent);
-                    Hotfixes.Add(record.HotfixId, record);
-                }
-                else
-                {
-                    oldRecord.HotfixContent = new();
-                    WriteItemModifiedAppearanceHotfix(modAppearance, oldRecord.HotfixContent);
-                    Hotfixes[oldRecord.HotfixId] = oldRecord;
-                }
+                DoStuff((uint)modAppearance.Id, DB2Hash.ItemModifiedAppearance, writer: (hotfixContentTargetBuffer) => WriteItemModifiedAppearanceHotfix(modAppearance, hotfixContentTargetBuffer));
             }
         }
 
-        public static Server.Packets.DBReply GenerateItemUpdateIfNeeded(ItemTemplate item)
+        public static Server.Packets.HotFixMessage? GenerateItemUpdateIfNeeded(ItemTemplate item)
         {
             ItemRecord row;
             ItemRecordsStore.TryGetValue(item.Entry, out row);
@@ -3316,7 +3242,7 @@ namespace HermesProxy.World
                     // something is different so update current data
                     UpdateItemRecord(row, item);
                     UpdateHotfix(row);                    
-                    return GenerateDbReply(row);
+                    return GenerateHotFixMessage(row);
                 }
             }
             else
@@ -3328,12 +3254,12 @@ namespace HermesProxy.World
                     return null;
 
                 UpdateHotfix(row);
-                return GenerateDbReply(row);
+                return GenerateHotFixMessage(row);
             }
             return null;
         }
 
-        public static Server.Packets.DBReply GenerateItemSparseUpdateIfNeeded(ItemTemplate item)
+        public static Server.Packets.HotFixMessage? GenerateItemSparseUpdateIfNeeded(ItemTemplate item)
         {
             ItemSparseRecord row;
             ItemSparseRecordsStore.TryGetValue(item.Entry, out row);
@@ -3568,12 +3494,12 @@ namespace HermesProxy.World
                     return null;
 
                 UpdateHotfix(row);
-                return GenerateDbReply(row);
+                return GenerateHotFixMessage(row);
             }
             return null;
         }
 
-        public static Server.Packets.DBReply GenerateItemEffectUpdateIfNeeded(ItemTemplate item, byte slot)
+        public static Server.Packets.HotFixMessage? GenerateItemEffectUpdateIfNeeded(ItemTemplate item, byte slot)
         {
             ItemEffect effect = GetItemEffectByItemId(item.Entry, slot);
             if (effect != null)
@@ -3633,7 +3559,7 @@ namespace HermesProxy.World
                         // there is a spell so update current data
                         UpdateItemEffectRecord(effect, item);
                         UpdateHotfix(effect);
-                        return GenerateDbReply(effect);
+                        return GenerateHotFixMessage(effect);
                     }
                     else
                     {
@@ -3641,7 +3567,7 @@ namespace HermesProxy.World
                         //Log.Print(LogType.Storage, $"ItemEffect for item #{item.Entry} slot #{slot} needs to be deleted.");
                         RemoveItemEffectRecord(effect);
                         UpdateHotfix(effect, true);
-                        return GenerateDbReply(effect, true);
+                        return GenerateHotFixMessage(effect, true);
                     }
                 }
             }
@@ -3654,12 +3580,12 @@ namespace HermesProxy.World
                     return null;
 
                 UpdateHotfix(effect);
-                return GenerateDbReply(effect);
+                return GenerateHotFixMessage(effect);
             }
             return null;
         }
 
-        public static Server.Packets.DBReply GenerateItemAppearanceUpdateIfNeeded(ItemTemplate item)
+        public static Server.Packets.HotFixMessage? GenerateItemAppearanceUpdateIfNeeded(ItemTemplate item)
         {
             ItemAppearance appearance = GetItemAppearanceByDisplayId(item.DisplayID);
             if (appearance != null)
@@ -3686,12 +3612,12 @@ namespace HermesProxy.World
                     return null;
 
                 UpdateHotfix(appearance);
-                return GenerateDbReply(appearance);
+                return GenerateHotFixMessage(appearance);
             }
             return null;
         }
 
-        public static Server.Packets.DBReply GenerateItemModifiedAppearanceUpdateIfNeeded(ItemTemplate item)
+        public static Server.Packets.HotFixMessage? GenerateItemModifiedAppearanceUpdateIfNeeded(ItemTemplate item)
         {
             ItemModifiedAppearance modAppearance = GetItemModifiedAppearanceByItemId(item.Entry);
             if (modAppearance != null)
@@ -3710,7 +3636,7 @@ namespace HermesProxy.World
                     // something is different so update current data
                     UpdateItemModifiedAppearanceRecord(modAppearance, item);
                     UpdateHotfix(modAppearance);
-                    return GenerateDbReply(modAppearance);
+                    return GenerateHotFixMessage(modAppearance);
                 }
             }
             else
@@ -3722,16 +3648,15 @@ namespace HermesProxy.World
                     return null;
 
                 UpdateHotfix(modAppearance);
-                return GenerateDbReply(modAppearance);
+                return GenerateHotFixMessage(modAppearance);
             }
             return null;
         }
 
-        public static Server.Packets.DBReply GenerateDbReply(object obj, bool remove = false)
+        public static Server.Packets.HotFixMessage? GenerateHotFixMessage(object obj, bool remove = false)
         {
-            Server.Packets.DBReply reply = new();
-            reply.Status = remove ? HotfixStatus.RecordRemoved : HotfixStatus.Valid;
-            reply.Timestamp = (uint)Time.UnixTime;
+            Server.Packets.HotFixMessage reply = new();
+
             if (obj == null)
             {
                 Log.Print(LogType.Error, $"DBReply for NULL object requested!");
@@ -3741,33 +3666,28 @@ namespace HermesProxy.World
             //Log.Print(LogType.Storage, $"DBReply generating for {type}");
             if (obj is ItemRecord)
             {
-                reply.RecordID = (uint)((ItemRecord)obj).Id;
-                reply.TableHash = DB2Hash.Item;
-                WriteItemHotfix((ItemRecord)obj, reply.Data);
+                var records = FindHotfixesByRecordIdAndTable((uint)((ItemRecord)obj).Id, DB2Hash.Item);
+                reply.Hotfixes.AddRange(records);
             }
             else if (obj is ItemSparseRecord)
             {
-                reply.RecordID = (uint)((ItemSparseRecord)obj).Id;
-                reply.TableHash = DB2Hash.ItemSparse;
-                WriteItemSparseHotfix((ItemSparseRecord)obj, reply.Data);
+                var records = FindHotfixesByRecordIdAndTable((uint)((ItemSparseRecord)obj).Id, DB2Hash.ItemSparse);
+                reply.Hotfixes.AddRange(records);
             }
             else if (obj is ItemEffect)
             {
-                reply.RecordID = (uint)((ItemEffect)obj).Id;
-                reply.TableHash = DB2Hash.ItemEffect;
-                WriteItemEffectHotfix((ItemEffect)obj, reply.Data);
+                var records = FindHotfixesByRecordIdAndTable((uint)((ItemEffect)obj).Id, DB2Hash.ItemEffect);
+                reply.Hotfixes.AddRange(records);
             }
             else if (obj is ItemAppearance)
             {
-                reply.RecordID = (uint)((ItemAppearance)obj).Id;
-                reply.TableHash = DB2Hash.ItemAppearance;
-                WriteItemAppearanceHotfix((ItemAppearance)obj, reply.Data);
+                var records = FindHotfixesByRecordIdAndTable((uint)((ItemAppearance)obj).Id, DB2Hash.ItemAppearance);
+                reply.Hotfixes.AddRange(records);
             }
             else if (obj is ItemModifiedAppearance)
             {
-                reply.RecordID = (uint)((ItemModifiedAppearance)obj).Id;
-                reply.TableHash = DB2Hash.ItemModifiedAppearance;
-                WriteItemModifiedAppearanceHotfix((ItemModifiedAppearance)obj, reply.Data);
+                var records = FindHotfixesByRecordIdAndTable((uint)((ItemModifiedAppearance)obj).Id, DB2Hash.ItemModifiedAppearance);
+                reply.Hotfixes.AddRange(records);
             }
             else
             {
