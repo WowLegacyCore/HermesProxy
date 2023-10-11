@@ -361,4 +361,14 @@ namespace HermesProxy.World.Server.Packets
         public WowGuid128 PetGUID;
         public uint SpellID;
     }
+
+    class PetInfoRequest : ClientPacket
+    {
+        public PetInfoRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+        }
+
+    }
 }
