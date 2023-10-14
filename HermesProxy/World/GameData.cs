@@ -16,6 +16,7 @@ namespace HermesProxy.World
     public static partial class GameData
     {
         // From CSV
+        public static Dictionary<uint/*Build*/, Dictionary<string /*Platform*/, byte[] /*seed*/>> BuildAuthSeeds = new Dictionary<uint, Dictionary<string, byte[]>>();
         public static SortedDictionary<uint, BroadcastText> BroadcastTextStore = new SortedDictionary<uint, BroadcastText>();
         public static Dictionary<uint, uint> ItemDisplayIdStore = new Dictionary<uint, uint>();
         public static Dictionary<uint, uint> ItemDisplayIdToFileDataIdStore = new Dictionary<uint, uint>();
@@ -490,6 +491,7 @@ namespace HermesProxy.World
         public static void LoadEverything()
         {
             Log.Print(LogType.Storage, "Loading data files...");
+            LoadBuildAuthSeeds();
             LoadBroadcastTexts();
             LoadItemDisplayIds();
             LoadItemRecords();
@@ -523,6 +525,35 @@ namespace HermesProxy.World
             LoadQuestBits();
             LoadHotfixes();
             Log.Print(LogType.Storage, "Finished loading data.");
+        }
+
+        public static void LoadBuildAuthSeeds()
+        {
+            var path = Path.Combine("CSV", $"BuildAuthSeeds.csv");
+            using (TextFieldParser csvParser = new TextFieldParser(path))
+            {
+                csvParser.CommentTokens = new string[] { "#" };
+                csvParser.SetDelimiters(new string[] { "," });
+                csvParser.HasFieldsEnclosedInQuotes = true;
+
+                csvParser.ReadLine(); // Skip the row with the column names
+
+                while (!csvParser.EndOfData)
+                {
+                    string[] fields = csvParser.ReadFields();
+
+                    uint build = uint.Parse(fields[0]);
+                    string platform = fields[1];
+                    byte[] seed = fields[2].ParseAsByteArray();
+
+                    if (!BuildAuthSeeds.TryGetValue(build, out var seeds))
+                    {
+                        seeds = new Dictionary<string, byte[]>();
+                        BuildAuthSeeds.Add(build, seeds);
+                    }
+                    seeds.Add(platform, seed);
+                }
+            }
         }
 
         public static void LoadBroadcastTexts()
