@@ -494,7 +494,7 @@ namespace HermesProxy.World.Server
                 return hmac.Digest.Compare(authSession.Digest);
             }
 
-            if (GetSession().OS != "Wn64" && GetSession().OS != "Mc64" /*TODO what is windows arm? macos ARM?*/)
+            if (GetSession().OS != "Wn64" && GetSession().OS != "Mc64" && GetSession().OS != "MacA" /*TODO what is windows arm?*/)
             {
                 Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Unknown OS for account: {GetSession().GameAccountInfo.Id} ('{authSession.RealmJoinTicket}') address: {address}");
                 CloseSocket();
