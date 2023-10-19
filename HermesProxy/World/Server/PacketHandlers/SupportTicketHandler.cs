@@ -17,7 +17,7 @@ namespace HermesProxy.World.Server
                 return;
             }
 
-            var ticketText = $"I would like to report player '{targetPlayerName}'";
+            var ticketText = $"[REPORTED VIA QUICKMENU]\r\nI would like to report player '{targetPlayerName}'";
 
             if (!WowGuid128.IsUnknownPlayerGuid(complaint.TargetCharacterGuid))
                 ticketText += $"  (id: {complaint.TargetCharacterGuid.GetCounter()})";
