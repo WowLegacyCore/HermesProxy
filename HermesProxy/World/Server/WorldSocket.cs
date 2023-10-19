@@ -480,32 +480,39 @@ namespace HermesProxy.World.Server
             // For hook purposes, we get Remoteaddress at this point.
             var address = GetRemoteIpAddress();
 
-            Sha256 digestKeyHash = new();
-            digestKeyHash.Process(GetSession().SessionKey, GetSession().SessionKey.Length);
-            if (GetSession().OS == "Wn64")
-                digestKeyHash.Finish(buildInfo.Win64AuthSeed);
-            else if (GetSession().OS == "Mc64")
-                digestKeyHash.Finish(buildInfo.Mac64AuthSeed);
-            else
+            bool TrySeed(byte[] seed)
+            {
+                Sha256 digestKeyHash = new();
+                digestKeyHash.Process(GetSession().SessionKey, GetSession().SessionKey.Length);
+                digestKeyHash.Finish(seed);
+                HmacSha256 hmac = new(digestKeyHash.Digest);
+                hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
+                hmac.Process(_serverChallenge, 16);
+                hmac.Finish(AuthCheckSeed, 16);
+
+                // Check that Key and account name are the same on client and server
+                return hmac.Digest.Compare(authSession.Digest);
+            }
+
+            if (GetSession().OS != "Wn64" && GetSession().OS != "Mc64" && GetSession().OS != "MacA" /*TODO what is windows arm?*/)
             {
                 Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Unknown OS for account: {GetSession().GameAccountInfo.Id} ('{authSession.RealmJoinTicket}') address: {address}");
                 CloseSocket();
                 GetSession().OnDisconnect();
                 return;
             }
-
-            HmacSha256 hmac = new(digestKeyHash.Digest);
-            hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
-            hmac.Process(_serverChallenge, 16);
-            hmac.Finish(AuthCheckSeed, 16);
-
-            // Check that Key and account name are the same on client and server
-            if (!hmac.Digest.Compare(authSession.Digest))
+            
+            byte[]? platformSeed = buildInfo.BuildSeeds.GetValueOrDefault(GetSession().OS);
+            if (platformSeed == null || !TrySeed(platformSeed))
             {
-                Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Authentication failed for account: {GetSession().GameAccountInfo.Id} ('{authSession.RealmJoinTicket}') address: {address}");
-                CloseSocket();
-                GetSession().OnDisconnect();
-                return;
+                Log.Print(LogType.Debug, $"WorldSocket.HandleAuthSession: Fallback to static seed");
+                if (!TrySeed(buildInfo.FallbackStaticSeed))
+                {
+                    Log.Print(LogType.Error, $"WorldSocket.HandleAuthSession: Authentication failed for account: {GetSession().GameAccountInfo.Id} ('{authSession.RealmJoinTicket}') address: {address}");
+                    CloseSocket();
+                    GetSession().OnDisconnect();
+                    return;
+                }
             }
 
             Sha256 keyData = new();
