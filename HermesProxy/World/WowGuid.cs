@@ -331,6 +331,23 @@ namespace HermesProxy.World
                 return Low & 0xFFFFFFFFFF; // CreationBits
         }
 
+        public string? ToUnitGUID()
+        {
+            string lowHex = Low.ToString("X16");
+            HighGuidType highType = GetHighType();
+            switch (highType)
+            {
+                case HighGuidType.Player:
+                    return $"{highType}-{GetRealmId()}-{lowHex.Substring(lowHex.Length - 8)}";
+                case HighGuidType.Creature:
+                case HighGuidType.Pet:
+                    return $"{highType}-{GetSubType()}-{GetRealmId()}-{GetServerId()}-{GetMapId()}-{GetEntry()}-{lowHex.Substring(lowHex.Length - 10)}";
+                default:
+                    Log.Print(LogType.Warn, "unsupported GUID type: ({GetHighType()})");
+                    return null;
+            }
+        }
+
         public override string ToString()
         {
             if (Low == 0 && High == 0)
