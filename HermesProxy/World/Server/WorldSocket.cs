@@ -70,6 +70,9 @@ namespace HermesProxy.World.Server
 
         private BnetServices.ServiceManager _bnetRpc;
 
+        private MoveSplineDone splineDoneWaiting = null;
+        static object moveSplineDoneLock = new object();
+
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;

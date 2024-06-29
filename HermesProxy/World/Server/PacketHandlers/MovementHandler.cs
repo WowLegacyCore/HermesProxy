@@ -6,6 +6,8 @@ using HermesProxy.World.Enums;
 using HermesProxy.World.Objects;
 using HermesProxy.World.Server.Packets;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HermesProxy.World.Server
 {
@@ -55,6 +57,12 @@ namespace HermesProxy.World.Server
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movement.Guid.To64());
             movement.MoveInfo.WriteMovementInfoLegacy(packet);
+
+            if ((movement.GetUniversalOpcode() == Opcode.CMSG_MOVE_FALL_LAND) && moveSplineDoneTask != null && !moveSplineDoneTask.IsCompleted)
+            {
+                moveSplineDoneCTS.Cancel();
+                SendMoveSplineDone(splineDoneWaiting, movement.MoveInfo.Flags);
+            }
             SendPacketToServer(packet);
         }
 
@@ -173,17 +181,45 @@ namespace HermesProxy.World.Server
             SendPacketToServer(packet);
         }
 
+        private CancellationTokenSource moveSplineDoneCTS = new();
+        private Task moveSplineDoneTask;
+        private void SendMoveSplineDone(MoveSplineDone movement, uint? newMoveFlags = null)
+        {
+            lock (moveSplineDoneLock)
+            {
+                if (splineDoneWaiting != null)
+                {
+                    WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_SPLINE_DONE);
+                    if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
+                        packet.WritePackedGuid(movement.Guid.To64());
+                    if (newMoveFlags.HasValue)
+                    {
+                        movement.MoveInfo.Flags = newMoveFlags.Value;
+                    }
+                    movement.MoveInfo.WriteMovementInfoLegacy(packet);
+                    packet.WriteInt32(movement.SplineID);
+                    if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                        packet.WriteFloat(0); // Spline Type
+                    SendPacketToServer(packet);
+                    splineDoneWaiting = null;
+                }
+            }
+        }
+
         [PacketHandler(Opcode.CMSG_MOVE_SPLINE_DONE)]
         void HandleMoveSplineDone(MoveSplineDone movement)
         {
-            WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_SPLINE_DONE);
-            if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
-                packet.WritePackedGuid(movement.Guid.To64());
-            movement.MoveInfo.WriteMovementInfoLegacy(packet);
-            packet.WriteInt32(movement.SplineID);
-            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
-                packet.WriteFloat(0); // Spline Type
-            SendPacketToServer(packet);
+            if (moveSplineDoneTask != null && !moveSplineDoneTask.IsCompleted)
+            {
+                moveSplineDoneCTS.Cancel();
+                SendMoveSplineDone(splineDoneWaiting);
+            }
+
+            splineDoneWaiting = movement;
+            moveSplineDoneTask = Task.Delay(100).ContinueWith(_ =>
+            {
+                SendMoveSplineDone(movement);
+            }, moveSplineDoneCTS.Token);
         }
 
         [PacketHandler(Opcode.CMSG_MOVE_TIME_SKIPPED)]
