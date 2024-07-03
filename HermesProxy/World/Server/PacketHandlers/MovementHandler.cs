@@ -179,6 +179,10 @@ namespace HermesProxy.World.Server
             WorldPacket packet = new WorldPacket(Opcode.CMSG_MOVE_SPLINE_DONE);
             if (LegacyVersion.AddedInVersion(ClientVersionBuild.V3_2_0_10192))
                 packet.WritePackedGuid(movement.Guid.To64());
+            // The modern client sends the falling flag in every spline done packet, while the 1.12 client never sends it.
+            // Sending the falling flag when the player is rooted triggers the vmangos anticheat.
+            if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
+                movement.MoveInfo.Flags &= ~(uint)MovementFlagModern.Falling;
             movement.MoveInfo.WriteMovementInfoLegacy(packet);
             packet.WriteInt32(movement.SplineID);
             if (LegacyVersion.RemovedInVersion(ClientVersionBuild.V2_0_1_6180))
